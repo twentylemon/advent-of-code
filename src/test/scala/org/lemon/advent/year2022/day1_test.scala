@@ -24,22 +24,22 @@ def getSexiestElf =
 class Day1Test extends AnyFunSuite with Matchers {
     test("day 1 example") {
         val exampleInput = """
-            1000
-            2000
-            3000
+            |1000
+            |2000
+            |3000
+            |
+            |4000
+            |
+            |5000
+            |6000
+            |
+            |7000
+            |8000
+            |9000
+            |
+            |10000
+            """.stripMargin.stripLeading
 
-            4000
-
-            5000
-            6000
-
-            7000
-            8000
-            9000
-
-            10000
-            """.stripIndent.stripLeading
-        
         getSexiestElf(exampleInput) shouldBe 24000
     }
 
