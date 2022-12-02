@@ -3,6 +3,8 @@ package org.lemon.advent.year2022
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 import scala.io.Source
+import org.lemon.UnitTest
+import scala.util.Using
 
 
 private def read(input: String) = Source.fromString(input).getLines.toSeq
@@ -21,7 +23,7 @@ private def getMax(elves: Seq[Int]) = elves.max
 def getSexiestElf =
     read andThen groupByElf andThen parseCarry andThen getMax
 
-class Day01Test extends AnyFunSuite with Matchers {
+class Day01Test extends UnitTest {
     test("day 1 example") {
         val exampleInput = """
             |1000
@@ -44,12 +46,13 @@ class Day01Test extends AnyFunSuite with Matchers {
     }
 
     test("day 1 part 1") {
-        getSexiestElf(Source.fromResource("year2022/day01.txt").mkString) shouldBe 69795
+        Using.resource(Source.fromResource("year2022/day01.txt"))(source => getSexiestElf(source.mkString) shouldBe 69795)
     }
 
     test("day 1 part 2") {
-        val in = Source.fromResource("year2022/day01.txt").mkString
-        val carry = (read andThen groupByElf andThen parseCarry)(in)
-        carry.sorted.takeRight(3).sum shouldBe 208437
+        Using.resource(Source.fromResource("year2022/day01.txt"))(source => {
+            val carry = (read andThen groupByElf andThen parseCarry)(source.mkString)
+            carry.sorted.takeRight(3).sum shouldBe 208437
+        })
     }
 }
