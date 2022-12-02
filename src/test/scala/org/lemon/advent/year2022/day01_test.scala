@@ -21,7 +21,7 @@ private def getMax(elves: Seq[Int]) = elves.max
 def getSexiestElf =
     read andThen groupByElf andThen parseCarry andThen getMax
 
-class Day1Test extends AnyFunSuite with Matchers {
+class Day01Test extends AnyFunSuite with Matchers {
     test("day 1 example") {
         val exampleInput = """
             |1000
@@ -44,11 +44,11 @@ class Day1Test extends AnyFunSuite with Matchers {
     }
 
     test("day 1 part 1") {
-        getSexiestElf(Source.fromResource("year2022/day1.txt").mkString) shouldBe 69795
+        getSexiestElf(Source.fromResource("year2022/day01.txt").mkString) shouldBe 69795
     }
 
     test("day 1 part 2") {
-        val in = Source.fromResource("year2022/day1.txt").mkString
+        val in = Source.fromResource("year2022/day01.txt").mkString
         val carry = (read andThen groupByElf andThen parseCarry)(in)
         carry.sorted.takeRight(3).sum shouldBe 208437
     }
