@@ -11,10 +11,8 @@ class Day03Test extends UnitTest {
     def compartmentsOf(sack: String): Seq[Seq[Char]] =
         sack
             .splitAt(sack.length / 2)
-            .productIterator
-            .map(_.asInstanceOf[String])
+            .toList
             .map(_.toCharArray.toSeq)
-            .toSeq
 
     def getPriorityOfCommon(compartments: Seq[Seq[Char]]) = compartments
         .map(_.toSet)
