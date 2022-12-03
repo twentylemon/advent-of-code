@@ -6,62 +6,61 @@ import scala.io.Source
 import org.scalatest.Outcome
 import scala.Conversion
 
-private sealed trait Toss
-private case object Rock extends Toss
-private case object Paper extends Toss
-private case object Scissors extends Toss
+class Day02Test extends UnitTest {
+    sealed trait Toss
+    case object Rock extends Toss
+    case object Paper extends Toss
+    case object Scissors extends Toss
 
-private case class Game(me: Toss, them: Toss)
+    case class Game(me: Toss, them: Toss)
 
-private def parseToss(c: Char) = c match
-    case 'A' | 'X' => Rock
-    case 'B' | 'Y' => Paper
-    case 'C' | 'Z' => Scissors
+    def parseToss(c: Char) = c match
+        case 'A' | 'X' => Rock
+        case 'B' | 'Y' => Paper
+        case 'C' | 'Z' => Scissors
 
-private def parseGame(s: String) =
-    val row = s.split(" ").map(_.head).map(parseToss)
-    Game(them = row(0), me = row(1))
+    def parseGame(s: String) =
+        val row = s.split(" ").map(_.head).map(parseToss)
+        Game(them = row(0), me = row(1))
 
-private def score(game: Game) = scoreToss(game) + scoreWin(game)
+    def score(game: Game) = scoreToss(game) + scoreWin(game)
 
-private def scoreToss(game: Game) = game match
-    case Game(Rock, _) => 1
-    case Game(Paper, _) => 2
-    case Game(Scissors, _) => 3
+    def scoreToss(game: Game) = game match
+        case Game(Rock, _) => 1
+        case Game(Paper, _) => 2
+        case Game(Scissors, _) => 3
 
-private def scoreWin(game: Game) = game match
-    case Game(x, y) if x == y => 3
-    case Game(Rock, Scissors) | Game(Paper, Rock) | Game(Scissors, Paper) => 6
-    case _ => 0
+    def scoreWin(game: Game) = game match
+        case Game(x, y) if x == y => 3
+        case Game(Rock, Scissors) | Game(Paper, Rock) | Game(Scissors, Paper) => 6
+        case _ => 0
 
-private def totalScore(input: String) = input.linesIterator.map(parseGame).map(score).sum
+    def totalScore(input: String) = input.linesIterator.map(parseGame).map(score).sum
 
 
-private sealed trait Outcome
-private case object Win extends Outcome
-private case object Lose extends Outcome
-private case object Draw extends Outcome
+    sealed trait Outcome
+    case object Win extends Outcome
+    case object Lose extends Outcome
+    case object Draw extends Outcome
 
-private def parseOutcome(c: Char) = c match
-    case 'X' => Lose
-    case 'Y' => Draw
-    case 'Z' => Win
+    def parseOutcome(c: Char) = c match
+        case 'X' => Lose
+        case 'Y' => Draw
+        case 'Z' => Win
 
-private case class Strat(them: Toss, outcome: Outcome)
+    case class Strat(them: Toss, outcome: Outcome)
 
-given Conversion[Strat, Game] with
-    def apply(strat: Strat): Game = strat match
+    given Conversion[Strat, Game] = _ match
         case Strat(x, Draw) => Game(x, x)
         case Strat(x, Lose) => Game(them=x, me=Seq(Rock, Paper, Scissors).find(t => scoreWin(Game(me=t, them=x)) == 0).get)
         case Strat(x, Win) => Game(them=x, me=Seq(Rock, Paper, Scissors).find(t => scoreWin(Game(me=t, them=x)) == 6).get)
 
-private def parseStrat(s: String) =
-    val row = s.split(" ").map(_.head)
-    Strat(them = parseToss(row(0)), outcome = parseOutcome(row(1)))
+    def parseStrat(s: String) =
+        val row = s.split(" ").map(_.head)
+        Strat(them = parseToss(row(0)), outcome = parseOutcome(row(1)))
 
-private def totalScoreStrat(input: String) = input.linesIterator.map(parseStrat).map(x => score(x)).sum
+    def totalScoreStrat(input: String) = input.linesIterator.map(parseStrat).map(x => score(x)).sum
 
-class Day02Test extends UnitTest {
 
     test("part 1 example") {
         val input = """

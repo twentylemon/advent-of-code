@@ -6,24 +6,23 @@ import scala.io.Source
 import org.lemon.UnitTest
 import scala.util.Using
 
-
-private def read(input: String) = Source.fromString(input).getLines.toSeq
-
-private def groupByElf(input: Seq[String]): Seq[Seq[String]] =
-    input match
-        case Seq() => Seq.empty[Seq[String]]
-        case seq => Seq(seq.takeWhile(!_.isBlank())) ++
-            groupByElf(seq.dropWhile(!_.isBlank()).dropWhile(_.isBlank()))
-
-private def parseCarry(elves: Seq[Seq[String]]): Seq[Int] =
-    elves.map(_.map(_.toInt).sum)
-
-private def getMax(elves: Seq[Int]) = elves.max
-
-def getSexiestElf =
-    read andThen groupByElf andThen parseCarry andThen getMax
-
 class Day01Test extends UnitTest {
+    def read(input: String) = Source.fromString(input).getLines.toSeq
+
+    def groupByElf(input: Seq[String]): Seq[Seq[String]] =
+        input match
+            case Seq() => Seq.empty[Seq[String]]
+            case seq => Seq(seq.takeWhile(!_.isBlank())) ++
+                groupByElf(seq.dropWhile(!_.isBlank()).dropWhile(_.isBlank()))
+
+    def parseCarry(elves: Seq[Seq[String]]): Seq[Int] =
+        elves.map(_.map(_.toInt).sum)
+
+    def getMax(elves: Seq[Int]) = elves.max
+
+    def getSexiestElf =
+        read andThen groupByElf andThen parseCarry andThen getMax
+
     test("day 1 example") {
         val exampleInput = """
             |1000
