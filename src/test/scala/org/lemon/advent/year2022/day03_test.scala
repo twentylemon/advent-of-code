@@ -8,8 +8,6 @@ class Day03Test extends UnitTest {
 
     def priority(ch: Char) = if ch.isUpper then ch.toInt - 'A'.toInt + 27 else ch.toInt - 'a'.toInt + 1
 
-    def intersection[T](lhs: Set[T], rhs: Set[T]) = lhs.intersect(rhs)
-
     def compartmentsOf(sack: String): Seq[Seq[Char]] =
         sack
             .splitAt(sack.length / 2)
