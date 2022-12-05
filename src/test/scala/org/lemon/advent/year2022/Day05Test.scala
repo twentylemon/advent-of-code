@@ -42,7 +42,7 @@ class Day05Test extends UnitTest {
         val in = """|     [D]    
                     | [N] [C]    
                     | [Z] [M] [P]
-                    | 1   2   3 
+                    |  1   2   3 
                     |
                     |move 1 from 2 to 1
                     |move 3 from 1 to 3
@@ -62,7 +62,7 @@ class Day05Test extends UnitTest {
         val in = """|     [D]    
                     | [N] [C]    
                     | [Z] [M] [P]
-                    | 1   2   3 
+                    |  1   2   3 
                     |
                     |move 1 from 2 to 1
                     |move 3 from 1 to 3
