@@ -12,10 +12,7 @@ class Day09Test extends UnitTest {
     def x = coord._1
     def y = coord._2
 
-  type BigRope = Seq[Coord]
-  extension (rope: BigRope)
-    def headKnot = rope.head
-    def tailKnot = rope.last
+  type Rope = Seq[Coord]
 
   def drag(head: Coord, tail: Coord): Coord = (head, tail) match
     case ((hx, hy), (tx, ty)) if (hx-tx).abs == 2 && hy == ty => ((hx+tx)/2, ty)
@@ -25,10 +22,8 @@ class Day09Test extends UnitTest {
     case ((hx, hy), (tx, ty)) if (hx-tx).abs == 2 && (hy-ty).abs == 2 => ((hx+tx)/2, (hy+ty)/2)
     case _ => tail
 
-  def update(rope: BigRope, step: (Coord => Coord), n: Int, tailPos: mutable.Map[Coord, Int]): BigRope =
-    var head = rope.headKnot
-    var tail = rope.tailKnot
-    var newRope = mutable.Seq(rope: _*)
+  def update(rope: Rope, step: (Coord => Coord), n: Int, tailPos: mutable.Map[Coord, Int]): Rope =
+    val newRope = mutable.Seq(rope: _*)
     for _ <- 1 to n
     do
       newRope(0) = step(newRope(0))
@@ -36,23 +31,21 @@ class Day09Test extends UnitTest {
       tailPos(newRope.last) += 1
     newRope.toSeq
 
-  def move(move: String, rope: BigRope, tailPos: mutable.Map[Coord, Int]) = move match
+  def move(move: String, rope: Rope, tailPos: mutable.Map[Coord, Int]) = move match
     case s"L $n" => update(rope, h => (h.x - 1, h.y), n.toInt, tailPos)
     case s"R $n" => update(rope, h => (h.x + 1, h.y), n.toInt, tailPos)
     case s"U $n" => update(rope, h => (h.x, h.y + 1), n.toInt, tailPos)
     case s"D $n" => update(rope, h => (h.x, h.y - 1), n.toInt, tailPos)
 
-  def part1(in: String) =
+  def trackTail(in: String, numberOfKnots: Int) =
     val tailPos = mutable.Map.empty[Coord, Int].withDefaultValue(0)
-    var rope = Seq((0, 0), (0, 0))
-    in.linesIterator.foreach(m => rope = move(m, rope, tailPos))
-    tailPos.size
+    var rope = Seq.fill(numberOfKnots)((0, 0))
+    in.linesIterator.foldLeft(rope)((r, m) => move(m, r, tailPos))
+    tailPos
 
-  def part2(in: String) =
-    val tailPos = mutable.Map.empty[Coord, Int].withDefaultValue(0)
-    var rope = Seq.fill(10)((0, 0))
-    in.linesIterator.foreach(m => rope = move(m, rope, tailPos))
-    tailPos.size
+  def part1(in: String) = trackTail(in, 2).size
+
+  def part2(in: String) = trackTail(in, 10).size
 
   test("part 1 example") {
     val in = """|R 4
