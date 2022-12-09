@@ -14,20 +14,20 @@ class Day09Test extends UnitTest {
 
   type Rope = Seq[Coord]
 
-  def drag(head: Coord, tail: Coord): Coord = (head, tail) match
-    case ((hx, hy), (tx, ty)) if (hx-tx).abs == 2 && hy == ty => ((hx+tx)/2, ty)
-    case ((hx, hy), (tx, ty)) if (hy-ty).abs == 2 && hx == tx => (tx, (hy+ty)/2)
-    case ((hx, hy), (tx, ty)) if (hx-tx).abs == 1 && (hy-ty).abs == 2 => (hx, (hy+ty)/2)
-    case ((hx, hy), (tx, ty)) if (hx-tx).abs == 2 && (hy-ty).abs == 1 => ((hx+tx)/2, hy)
-    case ((hx, hy), (tx, ty)) if (hx-tx).abs == 2 && (hy-ty).abs == 2 => ((hx+tx)/2, (hy+ty)/2)
-    case _ => tail
+  def drag(head: Coord, tail: Coord): Coord =
+    (head, tail) match
+      case ((hx, hy), (tx, ty)) if (hx - tx).abs == 2 && hy == ty => ((hx + tx) / 2, ty)
+      case ((hx, hy), (tx, ty)) if hx == tx && (hy - ty).abs == 2 => (tx, (hy + ty) / 2)
+      case ((hx, hy), (tx, ty)) if (hx - tx).abs == 1 && (hy - ty).abs == 2 => (hx, (hy + ty) / 2)
+      case ((hx, hy), (tx, ty)) if (hx - tx).abs == 2 && (hy - ty).abs == 1 => ((hx + tx) / 2, hy)
+      case ((hx, hy), (tx, ty)) if (hx - tx).abs == 2 && (hy - ty).abs == 2 => ((hx + tx) / 2, (hy + ty) / 2)
+      case _ => tail
 
   def update(rope: Rope, step: (Coord => Coord), n: Int, tailPos: mutable.Map[Coord, Int]): Rope =
     val newRope = mutable.Seq(rope: _*)
-    for _ <- 1 to n
-    do
+    for _ <- 1 to n do
       newRope(0) = step(newRope(0))
-      for i <- 1 to rope.size - 1 do newRope(i) = drag(newRope(i-1), newRope(i))
+      for i <- 1 to rope.size - 1 do newRope(i) = drag(newRope(i - 1), newRope(i))
       tailPos(newRope.last) += 1
     newRope.toSeq
 
@@ -92,7 +92,7 @@ class Day09Test extends UnitTest {
     part2(in) shouldBe 36
   }
 
-  test("part 2" ) {
+  test("part 2") {
     Using.resource(Source.fromResource("year2022/day09.txt"))(source =>
       part2(source.mkString) shouldBe 2724
     )
