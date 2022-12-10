@@ -1,13 +1,10 @@
 package org.lemon.advent.year2022
 
-import org.scalatest.funsuite.AnyFunSuite
-import org.scalatest.matchers.should.Matchers
 import scala.io.Source
-import org.lemon.UnitTest
-import scala.util.Using
+import org.lemon.advent._
 
 class Day01Test extends UnitTest {
-  def read(input: String) = Source.fromString(input).getLines.toSeq
+  def parse(input: String) = Source.fromString(input).getLines.toSeq
 
   def groupByElf(input: Seq[String]): Seq[Seq[String]] = input match
     case Seq() => Seq.empty[Seq[String]]
@@ -18,7 +15,7 @@ class Day01Test extends UnitTest {
 
   def getMax(elves: Seq[Int]) = elves.max
 
-  def getSexiestElf = read andThen groupByElf andThen parseCarry andThen getMax
+  def getSexiestElf = parse andThen groupByElf andThen parseCarry andThen getMax
 
   test("day 1 example") {
     val exampleInput = """
@@ -42,13 +39,11 @@ class Day01Test extends UnitTest {
   }
 
   test("day 1 part 1") {
-    Using.resource(Source.fromResource("year2022/day01.txt"))(source => getSexiestElf(source.mkString) shouldBe 69795)
+    getSexiestElf(read(file(2022)(1))) shouldBe 69795
   }
 
   test("day 1 part 2") {
-    Using.resource(Source.fromResource("year2022/day01.txt"))(source => {
-      val carry = (read andThen groupByElf andThen parseCarry)(source.mkString)
-      carry.sorted.takeRight(3).sum shouldBe 208437
-    })
+    val carry = (parse andThen groupByElf andThen parseCarry)(read(file(2022)(1)))
+    carry.sorted.takeRight(3).sum shouldBe 208437
   }
 }

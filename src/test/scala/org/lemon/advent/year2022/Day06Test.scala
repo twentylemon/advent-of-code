@@ -1,8 +1,6 @@
 package org.lemon.advent.year2022
 
-import org.lemon.UnitTest
-import scala.util.Using
-import scala.io.Source
+import org.lemon.advent._
 
 class Day06Test extends UnitTest {
 
@@ -21,9 +19,7 @@ class Day06Test extends UnitTest {
   }
 
   test("part 1") {
-    Using.resource(Source.fromResource("year2022/day06.txt"))(source =>
-      firstDistinctGroup(source.mkString, 4) shouldBe 1892
-    )
+    firstDistinctGroup(read(file(2022)(6)), 4) shouldBe 1892
   }
 
   test("part 2 example") {
@@ -35,8 +31,6 @@ class Day06Test extends UnitTest {
   }
 
   test("part 2") {
-    Using.resource(Source.fromResource("year2022/day06.txt"))(source =>
-      firstDistinctGroup(source.mkString, 14) shouldBe 2313
-    )
+    firstDistinctGroup(read(file(2022)(6)), 14) shouldBe 2313
   }
 }

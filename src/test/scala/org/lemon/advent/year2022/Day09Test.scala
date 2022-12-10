@@ -1,9 +1,7 @@
 package org.lemon.advent.year2022
 
 import scala.collection.mutable
-import org.lemon.UnitTest
-import scala.util.Using
-import scala.io.Source
+import org.lemon.advent._
 
 class Day09Test extends UnitTest {
 
@@ -61,9 +59,7 @@ class Day09Test extends UnitTest {
   }
 
   test("part 1") {
-    Using.resource(Source.fromResource("year2022/day09.txt"))(source =>
-      part1(source.mkString) shouldBe 6503
-    )
+    part1(read(file(2022)(9))) shouldBe 6503
   }
 
   test("part 2 example 1") {
@@ -93,8 +89,6 @@ class Day09Test extends UnitTest {
   }
 
   test("part 2") {
-    Using.resource(Source.fromResource("year2022/day09.txt"))(source =>
-      part2(source.mkString) shouldBe 2724
-    )
+    part2(read(file(2022)(9))) shouldBe 2724
   }
 }

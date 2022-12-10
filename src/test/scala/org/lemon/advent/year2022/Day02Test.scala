@@ -1,10 +1,7 @@
 package org.lemon.advent.year2022
 
-import org.lemon.UnitTest
-import scala.util.Using
-import scala.io.Source
-import org.scalatest.Outcome
 import scala.Conversion
+import org.lemon.advent._
 
 class Day02Test extends UnitTest {
   sealed trait Toss
@@ -77,7 +74,7 @@ class Day02Test extends UnitTest {
   }
 
   test("part 1") {
-    Using.resource(Source.fromResource("year2022/day02.txt"))(source => totalScore(source.mkString) shouldBe 10718)
+    totalScore(read(file(2022)(2))) shouldBe 10718
   }
 
   test("part 2 example") {
@@ -91,6 +88,6 @@ class Day02Test extends UnitTest {
   }
 
   test("part 2") {
-    Using.resource(Source.fromResource("year2022/day02.txt"))(source => totalScoreStrat(source.mkString) shouldBe 14652)
+    totalScoreStrat(read(file(2022)(2))) shouldBe 14652
   }
 }
