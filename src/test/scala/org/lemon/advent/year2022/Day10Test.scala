@@ -39,9 +39,10 @@ class Day10Test extends UnitTest {
     .map(parse)
     .foldLeft(Seq.fill(1)(State(Map("x" -> 1))))((state, instruction) => state ++ instruction(state.last))
     .zipWithIndex
-    .map((state, cycle) => cycle match
-      case x if (state.registers("x") - cycle % 40).abs < 2 => "#"
-      case _ => "."
+    .map((state, cycle) =>
+      cycle match
+        case x if (state.registers("x") - cycle % 40).abs < 2 => "#"
+        case _ => "."
     )
     .dropRight(1)
     .grouped(40)
