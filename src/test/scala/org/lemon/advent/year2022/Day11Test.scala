@@ -44,9 +44,7 @@ class Day11Test extends UnitTest {
     val toQueue = monkey.items
       .map(worry => monkey.inspect(worry))
       .map(relax)
-      .map(worry => (worry, monkey.target(worry)))
-      .groupBy(_._2)
-      .mapValues(_.map(_._1))
+      .groupBy(monkey.target)
       .map((i, queue) => monkeys(i).copy(items = monkeys(i).items ++ queue))
       .map(m => m.id -> m)
       .toMap
