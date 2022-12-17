@@ -28,6 +28,7 @@ class Day13Test extends UnitTest {
               val comp = compare(x, y)
               if comp != 0 then comp else compare(xs.asJson, ys.asJson)
             case (Seq(xs*), Seq(ys*)) => xs.size - ys.size
+        case _ => throw AssertionError()
 
   def part1(in: String) = in.split("\n\n")
     .map(_.linesIterator.toSeq)
