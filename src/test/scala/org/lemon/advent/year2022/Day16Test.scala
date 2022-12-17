@@ -22,7 +22,7 @@ class Day16Test extends UnitTest {
       flowValves: Seq[Valve],
       memory: mutable.Map[String, Int] = mutable.Map()
   ): Int =
-    val key = s"$turn#$currentValve#$time#${openFlowValves.toBitMask(0)}"
+    val key = s"$turn#$currentValve#$time#${openFlowValves.word(0)}"
 
     memory.get(key) match
       case Some(memorized) => memorized
