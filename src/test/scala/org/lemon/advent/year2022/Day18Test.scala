@@ -32,9 +32,9 @@ class Day18Test extends UnitTest {
     (cube.x, cube.y, cube.z - 0.5)
   )
 
-  def faces(cubes: Set[Coord]): Map[Face, Int] = cubes.toSeq.flatMap(faces).groupBy(x => x).mapValues(_.size).toMap
+  def faces(cubes: Iterable[Coord]): Map[Face, Int] = cubes.view.flatMap(faces).groupBy(x => x).mapValues(_.size).toMap
 
-  def part1(in: Seq[String]) = faces(in.map(parseCube).toSet).values.count(_ == 1)
+  def part1(in: Seq[String]) = faces(in.map(parseCube)).values.count(_ == 1)
 
   def part2(in: Seq[String]) =
     val cubes = in.map(parseCube).toSet
@@ -53,7 +53,7 @@ class Day18Test extends UnitTest {
       air ++= adjacentAir
       queue ++= adjacentAir
 
-    (faces(air.toSet).keySet & faces(cubes).keySet).size
+    (faces(air).keySet & faces(cubes).keySet).size
 
   test("part 1 combined cubes") {
     part1(Seq("1,1,1", "2,1,1")) shouldBe 10
