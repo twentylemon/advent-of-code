@@ -50,7 +50,7 @@ class Day17Test extends UnitTest {
 
   def part2(wind: String) =
     val cycleLength = rocks.size * wind.size // could be shorter, but the real cycle should go evenly into this
-    val heights = rocksFallEveryoneDies(wind).drop(1).map(_.maxHeight).take(2 * cycleLength).toSeq
+    val heights = rocksFallEveryoneDies(wind).map(_.maxHeight).take(2 * cycleLength).toSeq
     val heightChanges = heights.sliding(2).map(x => x(1) - x(0)).toSeq
 
     val cycleOfHeights = heightChanges.takeRight(cycleLength)
@@ -58,7 +58,7 @@ class Day17Test extends UnitTest {
     val cycleHeightChange = heights(heightChanges.size - cycleLength) - heights(cycleStart)
     val cycleNumRocks = heightChanges.size - cycleLength - cycleStart
 
-    val lastCycleStart = 1000000000000L - cycleStart - 1
+    val lastCycleStart = 1000000000000L - cycleStart
     val (numCycles, remaining) = (lastCycleStart / cycleNumRocks, lastCycleStart % cycleNumRocks)
     numCycles * cycleHeightChange + heights(cycleStart + remaining.toInt)
 
