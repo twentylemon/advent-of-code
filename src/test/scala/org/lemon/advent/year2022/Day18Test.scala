@@ -34,7 +34,7 @@ class Day18Test extends UnitTest {
 
   def faces(cubes: Set[Coord]): Map[Face, Int] = cubes.toSeq.flatMap(faces).groupBy(x => x).mapValues(_.size).toMap
 
-  def part1(in: Seq[String]) = faces(in.map(parseCube).toSet).values.filter(_ == 1).size
+  def part1(in: Seq[String]) = faces(in.map(parseCube).toSet).values.count(_ == 1)
 
   def part2(in: Seq[String]) =
     val cubes = in.map(parseCube).toSet
