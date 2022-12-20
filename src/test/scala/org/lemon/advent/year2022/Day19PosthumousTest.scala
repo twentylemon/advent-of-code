@@ -49,7 +49,7 @@ class Day19PosthumousTest extends UnitTest {
     def tick(time: Int) = copy(time = this.time - time, bank = bank + robots * time)
 
     def tickUntil(predicate: State => Boolean, minTime: Int) =
-      Iterator.iterate(this)(_.tick(1)).dropWhile(s => s.time >= minTime && !predicate(s)).nextOption
+      Iterator.iterate(this)(_.tick(1)).dropWhile(s => s.time >= minTime && !predicate(s)).next
 
   def isBetterThan(lhs: State, rhs: State) =
     lhs.bank.geode > rhs.bank.geode && lhs.robots.geode > rhs.robots.geode && lhs.robots.obsidian > rhs.robots.obsidian
@@ -68,20 +68,20 @@ class Day19PosthumousTest extends UnitTest {
 
         val buildOre = Option.when(state.robots.ore < blueprint.maxOreRobots && !canBuildGeode)(
           state.tickUntil(_.canAfford(blueprint.ore), 2 + 2)
-        ).flatten.map(_.tick(1).addRobot(Resources(ore = 1), blueprint.ore))
+        ).map(_.tick(1).addRobot(Resources(ore = 1), blueprint.ore))
 
         val buildClay = Option.when(state.robots.clay < blueprint.maxClayRobots && !canBuildGeode)(
           state.tickUntil(_.canAfford(blueprint.clay), 2 + 2 + 2)
-        ).flatten.map(_.tick(1).addRobot(Resources(clay = 1), blueprint.clay))
+        ).map(_.tick(1).addRobot(Resources(clay = 1), blueprint.clay))
 
         val buildObsidian =
           Option.when(state.robots.clay > 0 && state.robots.obsidian < blueprint.maxObsidianRobots && !canBuildGeode)(
             state.tickUntil(_.canAfford(blueprint.obsidian), 2 + 2)
-          ).flatten.map(_.tick(1).addRobot(Resources(obsidian = 1), blueprint.obsidian))
+          ).map(_.tick(1).addRobot(Resources(obsidian = 1), blueprint.obsidian))
 
         val buildGeode = Option.when(state.robots.obsidian > 0)(
           state.tickUntil(_.canAfford(blueprint.geode), 2)
-        ).flatten.map(_.tick(1).addRobot(Resources(geode = 1), blueprint.geode))
+        ).map(_.tick(1).addRobot(Resources(geode = 1), blueprint.geode))
 
         val branches = Seq(buildGeode, buildObsidian, buildClay, buildOre).flatten
         queue.enqueue(branches: _*)
