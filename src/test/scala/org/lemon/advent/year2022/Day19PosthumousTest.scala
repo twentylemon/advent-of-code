@@ -48,13 +48,14 @@ class Day19PosthumousTest extends UnitTest {
 
     def tick(time: Int) = copy(time = this.time - time, bank = bank + robots * time)
 
-    def tickUntil(predicate: State => Boolean, minTime: Int) = Iterator.iterate(this)(_.tick(1)).dropWhile(s => s.time >= minTime && !predicate(s)).nextOption
+    def tickUntil(predicate: State => Boolean, minTime: Int) =
+      Iterator.iterate(this)(_.tick(1)).dropWhile(s => s.time >= minTime && !predicate(s)).nextOption
 
   def isBetterThan(lhs: State, rhs: State) =
     lhs.bank.geode > rhs.bank.geode && lhs.robots.geode > rhs.robots.geode && lhs.robots.obsidian > rhs.robots.obsidian
 
   def solve(blueprint: Blueprint, time: Int): Int =
-    val initialState = State(robots=Resources(ore=1), bank=Resources(), time=time)
+    val initialState = State(robots = Resources(ore = 1), bank = Resources(), time = time)
     val best = Map.empty[Int, State].withDefaultValue(initialState)
     val queue = mutable.PriorityQueue(initialState)(Ordering.by(state => (state.time, state.bank.geode)))
 
@@ -66,16 +67,17 @@ class Day19PosthumousTest extends UnitTest {
         val canBuildGeode = state.canAfford(blueprint.geode)
 
         val buildOre = Option.when(state.robots.ore < blueprint.maxOreRobots && !canBuildGeode)(
-          state.tickUntil(_.canAfford(blueprint.ore), 3)
+          state.tickUntil(_.canAfford(blueprint.ore), 2 + 2)
         ).flatten.map(_.tick(1).addRobot(Resources(ore = 1), blueprint.ore))
 
         val buildClay = Option.when(state.robots.clay < blueprint.maxClayRobots && !canBuildGeode)(
-          state.tickUntil(_.canAfford(blueprint.clay), 3)
+          state.tickUntil(_.canAfford(blueprint.clay), 2 + 2 + 2)
         ).flatten.map(_.tick(1).addRobot(Resources(clay = 1), blueprint.clay))
 
-        val buildObsidian = Option.when(state.robots.clay > 0 && state.robots.obsidian < blueprint.maxObsidianRobots && !canBuildGeode)(
-          state.tickUntil(_.canAfford(blueprint.obsidian), 3)
-        ).flatten.map(_.tick(1).addRobot(Resources(obsidian = 1), blueprint.obsidian))
+        val buildObsidian =
+          Option.when(state.robots.clay > 0 && state.robots.obsidian < blueprint.maxObsidianRobots && !canBuildGeode)(
+            state.tickUntil(_.canAfford(blueprint.obsidian), 2 + 2)
+          ).flatten.map(_.tick(1).addRobot(Resources(obsidian = 1), blueprint.obsidian))
 
         val buildGeode = Option.when(state.robots.obsidian > 0)(
           state.tickUntil(_.canAfford(blueprint.geode), 2)
@@ -84,9 +86,8 @@ class Day19PosthumousTest extends UnitTest {
         val branches = Seq(buildGeode, buildObsidian, buildClay, buildOre).flatten
         queue.enqueue(branches: _*)
         iterate(queue, best + (state.time -> state))
-    
-    iterate(queue, best)
 
+    iterate(queue, best)
 
   def part1(in: Seq[String]) = in.map(parseBlueprint).map(blueprint => blueprint.id * solve(blueprint, 24)).sum
 
@@ -115,8 +116,7 @@ class Day19PosthumousTest extends UnitTest {
     part1(readLines(file(2022)(19))) shouldBe 2160
   }
 
-  // is quite a slow boy -- slower than the real deal. /shrug
-  ignore("part 2 example") {
+  test("part 2 example") {
     val in = """|Blueprint 1: Each ore robot costs 4 ore. Each clay robot costs 2 ore. Each obsidian robot costs 3 ore and 14 clay. Each geode robot costs 2 ore and 7 obsidian.
                 |Blueprint 2: Each ore robot costs 2 ore. Each clay robot costs 3 ore. Each obsidian robot costs 3 ore and 8 clay. Each geode robot costs 3 ore and 12 obsidian.""".stripMargin
 
