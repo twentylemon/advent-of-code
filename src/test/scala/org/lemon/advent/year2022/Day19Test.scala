@@ -37,7 +37,7 @@ class Day19Test extends UnitTest {
     for t <- 0 until time do
       // whether we build a robit at time t
       val oreBuild = MPBinaryVar(s"ore_$t")
-      val clayBuild =MPBinaryVar(s"clay_$t")
+      val clayBuild = MPBinaryVar(s"clay_$t")
       val obsidianBuild = MPBinaryVar(s"obsidian_$t")
       val geodeBuild = MPBinaryVar(s"geode_$t")
       subjectTo(oreBuild + clayBuild + obsidianBuild + geodeBuild <:= 1)
