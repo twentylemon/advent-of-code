@@ -14,7 +14,6 @@ class Day20Test extends UnitTest {
 
   def mix(seq: Seq[Long], times: Int = 1): Seq[Long] =
     val normalToMix = seq.indices.map(i => (i -> i)).to(mutable.Map)
-    val mixToNormal = seq.indices.map(i => (i -> i)).to(mutable.Map)
 
     def shift(range: Range, amount: Int) =
       normalToMix
