@@ -12,3 +12,9 @@ jobs:
         distribution: corretto # dog food me
         java-version: 17
     - run: sbt -v +test
+    - uses: actions/setup-python@v4
+      with:
+        python-version: 3.8
+        cache: pip
+    - run: pip install -r requirements.txt
+    - run: pytest

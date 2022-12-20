@@ -59,18 +59,21 @@ def optimize(blueprint, time):
     return model.objective_value
 
 
-with open("../../../../../../main/resources/year2022/day19.txt") as file:
+with open("src/main/resources/year2022/day19.txt") as file:
     lines = file.readlines()
 
-score = []
-for l in lines:
-    blueprint = parse(l)
-    score.append(optimize(blueprint, 24) * blueprint["id"])
 
-geodes = []
-for l in lines[:3]:
-    blueprint = parse(l)
-    geodes.append(optimize(blueprint, 32))
+def test_part1():
+    score = []
+    for l in lines:
+        blueprint = parse(l)
+        score.append(optimize(blueprint, 24) * blueprint["id"])
+    assert sum(score) == 2160
 
-print(f"part 1 = {sum(score)}")
-print(f"part 2 = {geodes[0] * geodes[1] * geodes[2]}")
+
+def test_part2():
+    geodes = []
+    for l in lines[:3]:
+        blueprint = parse(l)
+        geodes.append(optimize(blueprint, 32))
+    assert (geodes[0] * geodes[1] * geodes[2]) == 13340
