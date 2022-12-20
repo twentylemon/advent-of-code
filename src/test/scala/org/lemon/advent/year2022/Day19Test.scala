@@ -32,7 +32,7 @@ class Day19Test extends UnitTest {
 
   def optimize(blueprint: Blueprint, time: Int) =
     given model: MPModel = MPModel(SolverLib.oJSolver)
-    val variables = mutable.Map.empty[String, MPVar]
+    val expr = mutable.Map.empty[String, Expression].withDefaultValue(Zero)
 
     for t <- 0 until time do
       // whether we build a robit at time t
@@ -41,41 +41,73 @@ class Day19Test extends UnitTest {
       val obsidianBuild = MPBinaryVar(s"obsidian_$t")
       val geodeBuild = MPBinaryVar(s"geode_$t")
       subjectTo(oreBuild + clayBuild + obsidianBuild + geodeBuild <:= 1)
-      variables ++= Seq(oreBuild, clayBuild, obsidianBuild, geodeBuild).map(v => (v.symbol, v)).toMap
+      expr ++= Seq(oreBuild, clayBuild, obsidianBuild, geodeBuild).map(v => (v.symbol, v)).toMap
+
+      // val oreCost = blueprint.ore.cost.ore * oreBuild
+      //   + blueprint.clay.cost.ore * clayBuild
+      //   + blueprint.obsidian.cost.ore * obsidianBuild
+      //   + blueprint.geode.cost.ore * geodeBuild
+      // val clayCost = blueprint.obsidian.cost.clay * obsidianBuild
+      // val obsidianCost = blueprint.geode.cost.obsidian * geodeBuild
+
+      // val oreIncome = (0 until t).map(u => expr(s"ore_$u")).reduceOption(_ + _).getOrElse(Zero) + 1
+      // val clayIncome = (0 until t).map(u => expr(s"clay_$u")).reduceOption(_ + _).getOrElse(Zero)
+      // val obsidianIncome = (0 until t).map(u => expr(s"obsidian_$u")).reduceOption(_ + _).getOrElse(Zero)
+      // val geodeIncome = (0 until t).map(u => expr(s"geode_$u")).reduceOption(_ + _).getOrElse(Zero)
+
+      // // we can only build this turn if we had the sources as of the end of last turn
+      // subjectTo(expr(s"oreBank_${t-1}") - oreCost >:= 0)
+      // subjectTo(expr(s"clayBank_${t-1}") - clayCost >:= 0)
+      // subjectTo(expr(s"obsidianBank_${t-1}") - obsidianCost >:= 0)
+
+      // val oreBank = expr(s"oreBank_${t-1}") + oreIncome - oreCost
+      // val clayBank = expr(s"clayBank_${t-1}") + clayIncome - clayCost
+      // val obsidianBank = expr(s"obsidianBank_${t-1}") + obsidianIncome - obsidianCost
+      // val geodeBank = expr(s"geodeBank_${t-1}") + geodeIncome
+      // expr ++= Map(s"oreBank_$t" -> oreBank, s"clayBank_$t" -> clayBank, s"obsidianBank_$t" -> obsidianBank, s"geodeBank_$t" -> geodeBank)
 
       // keep track of our resource bank
-      val banks =
-        for u <- 0 until t yield
-          val oreFromBuild = (t - u - 1) * variables(s"ore_$u")
-          val oreFromOreCost = -blueprint.ore.cost.ore * variables(s"ore_$u")
-          val oreFromClayCost = -blueprint.clay.cost.ore * variables(s"clay_$u")
-          val oreFromObsidianCost = -blueprint.obsidian.cost.ore * variables(s"obsidian_$u")
-          val oreFromGeodeCost = -blueprint.geode.cost.ore * variables(s"geode_$u")
-          val oreBank = oreFromBuild + oreFromOreCost + oreFromClayCost + oreFromObsidianCost + oreFromGeodeCost
+      // val banks =
+      //   for u <- 0 until t yield
+      //     val oreFromBuild = (t - u - 1) * expr(s"ore_$u")
+      //     val oreFromOreCost = -blueprint.ore.cost.ore * expr(s"ore_$u")
+      //     val oreFromClayCost = -blueprint.clay.cost.ore * expr(s"clay_$u")
+      //     val oreFromObsidianCost = -blueprint.obsidian.cost.ore * expr(s"obsidian_$u")
+      //     val oreFromGeodeCost = -blueprint.geode.cost.ore * expr(s"geode_$u")
+      //     val oreBank = oreFromBuild + oreFromOreCost + oreFromClayCost + oreFromObsidianCost + oreFromGeodeCost
 
-          val clayFromBuild = (t - u - 1) * variables(s"clay_$u")
-          val clayFromObsidianCost = -blueprint.obsidian.cost.clay * variables(s"obsidian_$u")
-          val clayBank = clayFromBuild + clayFromObsidianCost
+      //     val clayFromBuild = (t - u - 1) * expr(s"clay_$u")
+      //     val clayFromObsidianCost = -blueprint.obsidian.cost.clay * expr(s"obsidian_$u")
+      //     val clayBank = clayFromBuild + clayFromObsidianCost
 
-          val obsidianFromBuild = (t - u - 1) * variables(s"obsidian_$u")
-          val obsidianFromGeodeCost = -blueprint.geode.cost.obsidian * variables(s"geode_$u")
-          val obsidianBank = obsidianFromBuild + obsidianFromGeodeCost
+      //     val obsidianFromBuild = (t - u - 1) * expr(s"obsidian_$u")
+      //     val obsidianFromGeodeCost = -blueprint.geode.cost.obsidian * expr(s"geode_$u")
+      //     val obsidianBank = obsidianFromBuild + obsidianFromGeodeCost
 
-          (oreBank, clayBank, obsidianBank)
+      //     (oreBank, clayBank, obsidianBank)
 
-      val oreBank = banks.map(_._1).reduceOption(_ + _).getOrElse(Zero) + t
-      val clayBank = banks.map(_._2).reduceOption(_ + _).getOrElse(Zero)
-      val obsidianBank = banks.map(_._3).reduceOption(_ + _).getOrElse(Zero)
+      // val oreBank = banks.map(_._1).reduceOption(_ + _).getOrElse(Zero) + t
+      // val clayBank = banks.map(_._2).reduceOption(_ + _).getOrElse(Zero)
+      // val obsidianBank = banks.map(_._3).reduceOption(_ + _).getOrElse(Zero)
 
-      // only buy robits if we can afford them
-      subjectTo(
-        blueprint.ore.cost.ore * oreBuild + blueprint.clay.cost.ore * clayBuild + blueprint.obsidian.cost.ore * obsidianBuild + blueprint.geode.cost.ore * geodeBuild <:= oreBank
-      )
-      subjectTo(blueprint.obsidian.cost.clay * obsidianBuild <:= clayBank)
-      subjectTo(blueprint.geode.cost.obsidian * geodeBuild <:= obsidianBank)
+      // // only buy robits if we can afford them
+      // subjectTo(
+      //   blueprint.ore.cost.ore * oreBuild + blueprint.clay.cost.ore * clayBuild + blueprint.obsidian.cost.ore * obsidianBuild + blueprint.geode.cost.ore * geodeBuild <:= oreBank
+      // )
+      // subjectTo(blueprint.obsidian.cost.clay * obsidianBuild <:= clayBank)
+      // subjectTo(blueprint.geode.cost.obsidian * geodeBuild <:= obsidianBank)
 
     // objective is to maximize the geode bank at the end
-    maximize((0 until time).map(t => (time - t - 1) * variables(s"geode_$t")).reduce(_ + _))
+    // maximize((0 until time).map(t => (time - t - 1) * expr(s"geode_$t")).reduce(_ + _))
+
+    // we can only build one robot per turn, don't bother to have more income than that
+    val maxOre = blueprint.ore.cost.ore.max(blueprint.clay.cost.ore).max(blueprint.obsidian.cost.ore).max(blueprint.geode.cost.ore)
+    subjectTo((0 until time).map(t => expr(s"ore_$t")).reduce(_ + _) <:= maxOre)
+    subjectTo((0 until time).map(t => expr(s"clay_$t")).reduce(_ + _) <:= blueprint.obsidian.cost.clay)
+    subjectTo((0 until time).map(t => expr(s"obsidian_$t")).reduce(_ + _) <:= blueprint.geode.cost.obsidian)
+
+    // objective is to maximize the geode bank at the end
+    maximize(expr(s"geodeBank_${time - 1}"))
     start()
     val max = objectiveValue
     release()
