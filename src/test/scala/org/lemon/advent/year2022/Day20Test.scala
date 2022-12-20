@@ -2,8 +2,6 @@ package org.lemon.advent.year2022
 
 import org.lemon.advent._
 import scala.collection.mutable
-import scala.annotation.newMain
-import scala.collection.SortedMap
 
 class Day20Test extends UnitTest {
 
