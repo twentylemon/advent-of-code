@@ -81,9 +81,7 @@ class Day19PosthumousTest extends UnitTest {
           state.tickUntil(_.canAfford(blueprint.geode), 2)
         ).flatten.map(_.tick(1).addRobot(Resources(geode = 1), blueprint.geode))
 
-        val chill = Option.when(Seq(buildOre, buildClay, buildObsidian, buildGeode).forall(_.isEmpty))(state.tick(state.time))
-
-        val branches = Seq(buildGeode, buildObsidian, buildClay, buildOre, chill).flatten
+        val branches = Seq(buildGeode, buildObsidian, buildClay, buildOre).flatten
         queue.enqueue(branches: _*)
         iterate(queue, best + (state.time -> state))
     
@@ -118,7 +116,7 @@ class Day19PosthumousTest extends UnitTest {
   }
 
   // is quite a slow boy -- slower than the real deal. /shrug
-  ignore("part 2 example") {
+  test("part 2 example") {
     val in = """|Blueprint 1: Each ore robot costs 4 ore. Each clay robot costs 2 ore. Each obsidian robot costs 3 ore and 14 clay. Each geode robot costs 2 ore and 7 obsidian.
                 |Blueprint 2: Each ore robot costs 2 ore. Each clay robot costs 3 ore. Each obsidian robot costs 3 ore and 8 clay. Each geode robot costs 3 ore and 12 obsidian.""".stripMargin
 
