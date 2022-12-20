@@ -1,13 +1,14 @@
 import mip
 
+
 def parse(input):
     split = input.split(" ")
     return {
         "id": int(split[1][:-1]),
-        "ore": { "ore": int(split[6]) },
-        "clay": { "ore": int(split[12]) },
-        "obsidian": { "ore": int(split[18]), "clay": int(split[21]) },
-        "geode": { "ore": int(split[27]), "obsidian": int(split[30]) },
+        "ore": {"ore": int(split[6])},
+        "clay": {"ore": int(split[12])},
+        "obsidian": {"ore": int(split[18]), "clay": int(split[21])},
+        "geode": {"ore": int(split[27]), "obsidian": int(split[30])},
     }
 
 
@@ -40,7 +41,14 @@ def optimize(blueprint, time):
             obsidianBank.add_var(variables[f"obsidian_{u}"], t - u - 1)
             obsidianBank.add_var(variables[f"geode_{u}"], -blueprint["geode"]["obsidian"])
 
-        model.add_constr(blueprint["ore"]["ore"] * oreBuild + blueprint["clay"]["ore"] * clayBuild + blueprint["obsidian"]["ore"] * obsidianBuild + blueprint["geode"]["ore"] * geodeBuild <= oreBank, name=f"oreBank_{t}")
+        model.add_constr(
+            blueprint["ore"]["ore"] * oreBuild
+            + blueprint["clay"]["ore"] * clayBuild
+            + blueprint["obsidian"]["ore"] * obsidianBuild
+            + blueprint["geode"]["ore"] * geodeBuild
+            <= oreBank,
+            name=f"oreBank_{t}",
+        )
         model.add_constr(blueprint["obsidian"]["clay"] * obsidianBuild <= clayBank, name=f"clayBank_{t}")
         model.add_constr(blueprint["geode"]["obsidian"] * geodeBuild <= obsidianBank, name=f"obsidianBank_{t}")
 
@@ -49,6 +57,7 @@ def optimize(blueprint, time):
     model.objective = objective
     model.optimize()
     return model.objective_value
+
 
 with open("../../../../../../main/resources/year2022/day19.txt") as file:
     lines = file.readlines()

@@ -34,18 +34,12 @@ class Day19Test extends UnitTest {
     given model: MPModel = MPModel(SolverLib.oJSolver)
     val variables = mutable.Map.empty[String, MPVar]
 
-    val earliestOre = blueprint.ore.cost.ore - 1
-    val earliestClay = blueprint.clay.cost.ore - 1
-    val earliestObsidian = (blueprint.obsidian.cost.ore - 1).max(earliestClay)
-    val earliestGeode = (blueprint.geode.cost.ore - 1).max(earliestObsidian)
-
     for t <- 0 until time do
       // whether we build a robit at time t
-      val oreBuild = if t >= earliestOre then MPBinaryVar(s"ore_$t") else MPIntVar(s"ore_$t", 0 to 0)
-      val clayBuild = if t >= earliestClay then MPBinaryVar(s"clay_$t") else MPIntVar(s"clay_$t", 0 to 0)
-      val obsidianBuild =
-        if t >= earliestObsidian then MPBinaryVar(s"obsidian_$t") else MPIntVar(s"obsidian_$t", 0 to 0)
-      val geodeBuild = if t >= earliestGeode then MPBinaryVar(s"geode_$t") else MPIntVar(s"geode_$t", 0 to 0)
+      val oreBuild = MPBinaryVar(s"ore_$t")
+      val clayBuild =MPBinaryVar(s"clay_$t")
+      val obsidianBuild = MPBinaryVar(s"obsidian_$t")
+      val geodeBuild = MPBinaryVar(s"geode_$t")
       subjectTo(oreBuild + clayBuild + obsidianBuild + geodeBuild <:= 1)
       variables ++= Seq(oreBuild, clayBuild, obsidianBuild, geodeBuild).map(v => (v.symbol, v)).toMap
 
