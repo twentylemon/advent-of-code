@@ -5,17 +5,19 @@ import scala.collection.mutable
 
 class Day21Test extends UnitTest {
 
+  case class ExpressionContext(expressions: Map[String, Expression])
+
   sealed trait Expression:
-    def resolve(context: ExpressionContext): Option[Long]
-    def simplify(context: ExpressionContext): Expression
+    def resolve(using context: ExpressionContext): Option[Long]
+    def simplify(using context: ExpressionContext): Expression
 
   case class Literal(n: Long) extends Expression:
-    override def resolve(context: ExpressionContext) = Some(n)
-    override def simplify(context: ExpressionContext) = this
+    override def resolve(using context: ExpressionContext) = Some(n)
+    override def simplify(using context: ExpressionContext) = this
 
   case class Reference(name: String) extends Expression:
-    override def resolve(context: ExpressionContext) = context.evaluate(context.expressions(name))
-    override def simplify(context: ExpressionContext) = context.expressions(name).simplify(context)
+    override def resolve(using context: ExpressionContext) = context.expressions(name).resolve
+    override def simplify(using context: ExpressionContext) = context.expressions(name).simplify
 
   sealed trait BinaryOperation extends Expression:
     def lhs: Expression
@@ -23,12 +25,11 @@ class Day21Test extends UnitTest {
     def op(x: Long, y: Long): Long
     def copy(lhs: Expression, rhs: Expression): BinaryOperation
 
-    override def resolve(context: ExpressionContext) =
-      for x <- context.evaluate(lhs); y <- context.evaluate(rhs) yield op(x, y)
+    override def resolve(using context: ExpressionContext) = for x <- lhs.resolve; y <- rhs.resolve yield op(x, y)
 
-    override def simplify(context: ExpressionContext) = resolve(context) match
+    override def simplify(using context: ExpressionContext) = resolve match
       case Some(value) => Literal(value)
-      case None => copy(lhs = lhs.simplify(context), rhs = rhs.simplify(context))
+      case None => copy(lhs = lhs.simplify, rhs = rhs.simplify)
 
   case class Add(lhs: Expression, rhs: Expression) extends BinaryOperation:
     override def op(x: Long, y: Long) = x + y
@@ -43,19 +44,8 @@ class Day21Test extends UnitTest {
     override def op(x: Long, y: Long) = x / y
 
   case object Unknown extends Expression:
-    override def resolve(context: ExpressionContext) = None
-    override def simplify(context: ExpressionContext) = this
-
-  class ExpressionContext(val expressions: Map[String, Expression]):
-    private val memory = mutable.Map.empty[Expression, Option[Long]]
-
-    def evaluate(expression: Expression): Option[Long] =
-      memory.get(expression) match
-        case Some(value) => value
-        case None =>
-          val result = expression.resolve(this)
-          memory += (expression -> result)
-          result
+    override def resolve(using context: ExpressionContext) = None
+    override def simplify(using context: ExpressionContext) = this
 
   def parseExpression(line: String): (String, Expression) = line match
     case s"$v: $lhs $op $rhs" => (
@@ -70,7 +60,8 @@ class Day21Test extends UnitTest {
 
   def part1(in: Seq[String]) =
     val monkeys = in.map(parseExpression).toMap
-    ExpressionContext(monkeys).evaluate(monkeys("root")).get
+    given ExpressionContext = ExpressionContext(monkeys)
+    monkeys("root").resolve.get
 
   def solve(simplifiedExpression: Expression, knownValue: Long): Long =
     simplifiedExpression match
@@ -90,15 +81,14 @@ class Day21Test extends UnitTest {
       case _ => ???
 
   def part2(in: Seq[String]) =
-    val monkeys = in.map(parseExpression).toMap + ("humn" -> Unknown)
+    val monkeys = in.map(parseExpression).toMap
+    given ExpressionContext = ExpressionContext(monkeys + ("humn" -> Unknown))
 
-    val context = ExpressionContext(monkeys)
     val root = monkeys("root").asInstanceOf[BinaryOperation]
-    val lhs = context.evaluate(root.lhs)
-    val rhs = context.evaluate(root.rhs)
+    val lhs = root.lhs.resolve
+    val rhs = root.rhs.resolve
 
-    if lhs.isDefined then solve(root.rhs.simplify(context), lhs.get)
-    else solve(root.lhs.simplify(context), rhs.get)
+    lhs.map(solve(root.rhs.simplify, _)).orElse(rhs.map(solve(root.lhs.simplify, _))).get
 
   test("part 1 example") {
     val in = """|root: pppw + sjmn
