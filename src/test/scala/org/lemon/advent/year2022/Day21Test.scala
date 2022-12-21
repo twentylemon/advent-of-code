@@ -2,7 +2,6 @@ package org.lemon.advent.year2022
 
 import org.lemon.advent._
 import scala.collection.mutable
-import optimus.algebra.Var
 
 class Day21Test extends UnitTest {
 
