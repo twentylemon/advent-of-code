@@ -81,13 +81,13 @@ class Day21Test extends UnitTest {
       case Add(lhs, Literal(n)) => solve(lhs, knownValue - n)
 
       case Subtract(Literal(n), rhs) => solve(rhs, n - knownValue)
-      case Subtract(lhs, Literal(n)) => solve(lhs, knownValue + n)
+      case Subtract(lhs, Literal(n)) => solve(lhs, n - -knownValue)
 
       case Multiply(Literal(n), rhs) => solve(rhs, knownValue / n)
       case Multiply(lhs, Literal(n)) => solve(lhs, knownValue / n)
 
       case Divide(Literal(n), rhs) => solve(rhs, n / knownValue)
-      case Divide(lhs, Literal(n)) => solve(lhs, knownValue * n)
+      case Divide(lhs, Literal(n)) => solve(lhs, n * knownValue)
       case _ => ???
 
   def part2(in: Seq[String]) =
