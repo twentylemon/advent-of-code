@@ -19,7 +19,7 @@ class Day24Test extends UnitTest {
 
   case class Blizzard(at: Coord, direction: Coord)
 
-  case class Maze(xBounds: Range, yBounds: Range, blizzards: Map[Int, Set[Coord]], start: Coord, end: Coord):
+  case class Maze(xBounds: Range, yBounds: Range, blizzards: Seq[Set[Coord]], start: Coord, end: Coord):
     def inBounds(coord: Coord) = coord match
       case c if c == start || c == end => true
       case c => xBounds.contains(c.x) && yBounds.contains(c.y)
@@ -53,14 +53,11 @@ class Day24Test extends UnitTest {
 
     def gcd(a: Int, b: Int): Int = if b == 0 then a else gcd(b, a % b)
     def lcm(a: Int, b: Int) = a * b / gcd(a, b)
-    def tick(blizzards: Set[Blizzard]) = blizzards.map(move(_, xBounds, yBounds))
-    val allBlizzards = Iterator.iterate(initialBlizzards.toSet)(tick)
-      .take(xBounds.size * yBounds.size)
+    def tick(blizzards: Seq[Blizzard]) = blizzards.map(move(_, xBounds, yBounds))
+    val allBlizzards = Iterator.iterate(initialBlizzards)(tick)
       .take(lcm(xBounds.size, yBounds.size))
-      .map(_.map(_.at))
-      .zipWithIndex
-      .map(_.swap)
-      .toMap
+      .map(_.map(_.at).toSet)
+      .toIndexedSeq
 
     Maze(xBounds, yBounds, allBlizzards, start, end)
 
