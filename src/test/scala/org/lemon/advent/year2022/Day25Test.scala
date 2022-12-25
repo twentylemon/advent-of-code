@@ -15,20 +15,15 @@ class Day25Test extends UnitTest {
     extension (snafu: Snafu)
       def toString: String = snafu
       def +(rhs: Snafu): Snafu =
-        val left = snafu.reverse.padTo(rhs.size, '0')
-        val right = rhs.reverse.padTo(snafu.size, '0')
-
-        var result = ""
-        var carry = 0
-        for i <- left.indices do
-          val (digit, cry) = addDigit(left(i), right(i))
-          val (afterCarry, moreCarry) = addDigit(digit, Snafu.decToDigit(carry))
-          result += afterCarry
-          carry = cry + moreCarry
-
-        if carry == 1 then (result + '1').reverse
-        else if result.forall(_ == '0') then "0"
-        else result.reverse.dropWhile(_ == '0')
+        val result = snafu.reverse.zipAll(rhs.reverse, '0', '0')
+          .foldLeft(("", 0))((accum, digits) =>
+            val (digit, thisCarry) = addDigit(digits._1, digits._2)
+            val (digitAfterCarry, carryAfterCarry) = addDigit(digit, Snafu.decToDigit(accum._2))
+            (accum._1 + digitAfterCarry, thisCarry + carryAfterCarry)
+          )
+        if result._2 == 1 then (result._1 + '1').reverse
+        else if result._1.forall(_ == '0') then "0"
+        else result._1.reverse.dropWhile(_ == '0')
 
       private def addDigit(lhs: Char, rhs: Char): (Char, Int) =
         Snafu.digitToDec(lhs) + Snafu.digitToDec(rhs) match
