@@ -1,6 +1,5 @@
 package org.lemon.advent.year2022
 
-import scala.Conversion
 import org.lemon.advent._
 
 class Day02Test extends UnitTest {

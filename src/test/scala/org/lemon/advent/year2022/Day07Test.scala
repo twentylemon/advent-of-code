@@ -5,13 +5,12 @@ import org.lemon.advent._
 
 class Day07Test extends UnitTest {
 
-  sealed trait File {
+  sealed trait File:
     def size: Int
     def name: String
-  }
-  case class Directory(name: String, parent: Directory, contents: mutable.Set[File] = mutable.Set()) extends File {
+
+  case class Directory(name: String, parent: Directory, contents: mutable.Set[File] = mutable.Set()) extends File:
     def size = contents.map(_.size).sum
-  }
   case class Obj(name: String, size: Int) extends File
 
   def buildTree(lines: Iterator[String]) =

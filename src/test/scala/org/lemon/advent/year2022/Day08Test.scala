@@ -1,6 +1,5 @@
 package org.lemon.advent.year2022
 
-import scala.collection.mutable
 import org.lemon.advent._
 
 class Day08Test extends UnitTest {
@@ -44,10 +43,11 @@ class Day08Test extends UnitTest {
   def part2(in: String): Int =
     val heights = parse(in)
     val transposed = heights.transpose
-    val scores = for
-      y <- heights.indices.drop(1).dropRight(1)
-      x <- heights(y).indices.drop(1).dropRight(1)
-    yield scenicScore(heights, transposed, x, y)
+    val scores =
+      for
+        y <- heights.indices.drop(1).dropRight(1)
+        x <- heights(y).indices.drop(1).dropRight(1)
+      yield scenicScore(heights, transposed, x, y)
     scores.max
 
   test("part 1 example") {
