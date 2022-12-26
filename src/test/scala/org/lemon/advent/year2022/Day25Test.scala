@@ -17,16 +17,15 @@ class Day25Test extends UnitTest {
       def +(rhs: Snafu): Snafu =
         val result = snafu.reverse.zipAll(rhs.reverse, '0', '0')
           .foldLeft(("", 0))((accum, digits) =>
-            val (digit, thisCarry) = addDigit(digits._1, digits._2)
-            val (digitAfterCarry, carryAfterCarry) = addDigit(digit, Snafu.decToDigit(accum._2))
-            (accum._1 + digitAfterCarry, thisCarry + carryAfterCarry)
+            val (digit, carry) = addDigit(digits._1, digits._2, accum._2)
+            (accum._1 + digit, carry)
           )
-        if result._2 == 1 then (result._1 + '1').reverse
+        if result._2 != 0 then (result._1 + Snafu.decToDigit(result._2)).reverse
         else if result._1.forall(_ == '0') then "0"
         else result._1.reverse.dropWhile(_ == '0')
 
-      private def addDigit(lhs: Char, rhs: Char): (Char, Int) =
-        Snafu.digitToDec(lhs) + Snafu.digitToDec(rhs) match
+      private def addDigit(lhs: Char, rhs: Char, carry: Int): (Char, Int) =
+        Snafu.digitToDec(lhs) + Snafu.digitToDec(rhs) + carry match
           case x if x > 2 => (Snafu.decToDigit(x - 5), 1)
           case x if x < -2 => (Snafu.decToDigit(x + 5), -1)
           case x => (Snafu.decToDigit(x), 0)
@@ -40,6 +39,8 @@ class Day25Test extends UnitTest {
       ("1", "1", "2"), // 1 + 1 = 2
       ("2", "2", "1-"), // 2 + 2 = 4
       ("-", "-", "="), // -1 + -1 = -2
+      ("=", "=", "-1"), // -2 + -2 = -4
+      ("=", "==", "-21"), // -2 + -12 = -14
       ("2", "22", "1=-"), // 2 + 12 = 14
       ("1=", "1=", "11"), // 3 + 3 = 6
       ("1=", "=", "1"), // 3 + -2 = 1
