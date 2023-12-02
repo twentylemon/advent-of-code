@@ -8,14 +8,15 @@ private object Day02:
   def parsePulls(pulls: String): Seq[Seq[Dice]] = pulls.split(";")
     .map(_.split(","))
     .map(_.map(x => x.strip))
-    .map(_.map(dice => dice match
-      case s"$num $colour" => Dice(num.toInt, colour)
+    .map(_.map(dice =>
+      dice match
+        case s"$num $colour" => Dice(num.toInt, colour)
     ))
     .map(_.toSeq)
     .toSeq
 
   def parse(input: String): Seq[Game] = input.linesIterator
-    .map(line => line match
+    .map(_ match
       case s"Game $id: $games" => Game(id.toInt, parsePulls(games))
     )
     .toSeq
@@ -40,4 +41,3 @@ private object Day02:
     .map(_.values)
     .map(_.product)
     .sum
-  
