@@ -3,7 +3,7 @@ package org.lemon.advent.year2023
 private object Day04:
 
   case class Card(id: Int, winning: Seq[Int], pulls: Seq[Int]):
-    lazy val matches = winning intersect pulls
+    val matches = (winning intersect pulls).length
 
   def parseCard(line: String) =
     def asIntSeq(nums: String) = nums.split("\\s+").map(_.trim).filter(_.nonEmpty).map(_.toInt)
@@ -14,7 +14,7 @@ private object Day04:
     .map(parseCard)
 
   def score(card: Card) =
-    if card.matches.isEmpty then 0 else math.pow(2, card.matches.length - 1).toInt
+    if card.matches == 0 then 0 else math.pow(2, card.matches - 1).toInt
 
   def part1(input: String) = parse(input)
     .map(score)
@@ -22,8 +22,8 @@ private object Day04:
 
   def winMe(pool: Iterable[Card], draws: Iterable[Card], depth: Int = 0): Int =
     def copyWinnings(from: Card) = pool
-      .filter(_.id > from.id)
-      .filter(_.id <= from.id + from.matches.length)
+      .drop(from.id)
+      .take(from.matches)
 
     val winnings = draws.flatMap(copyWinnings)
     if winnings.isEmpty then 0 else winnings.size + winMe(pool, winnings, depth + 1)
