@@ -1,16 +1,16 @@
 package org.lemon.advent.year2023
 
 import scala.collection.immutable.NumericRange
+import scala.collection.parallel.CollectionConverters._
 
 private object Day05:
 
-  case class RangeMap(destStart: Long, srcRange: NumericRange[Long])
+  type Range = NumericRange[Long]
 
-  case class Mapping(from: String, to: String, ranges: Seq[(NumericRange[Long], NumericRange[Long])]):
-    def translate(src: Long) = ranges
-      .find((s, _) => s.contains(src))
-      .map((s, d) => d.start + src - s.start)
-      .getOrElse(src)
+  case class RangeMap(src: Range, dest: Range):
+    def translate(src: Long) = dest.start + src - this.src.start
+
+  case class Mapping(from: String, to: String, ranges: Seq[RangeMap])
 
   def parseMapping(block: String) =
     val lines = block.split("\n")
@@ -21,7 +21,7 @@ private object Day05:
       .map(_.split(" "))
       .map(_.map(x => x.toLong))
       .map { case Array(destStart, srcStart, length) =>
-        (srcStart until srcStart + length, destStart until destStart + length)
+        RangeMap(srcStart until srcStart + length, destStart until destStart + length)
       }
 
     Mapping(from, to, ranges)
@@ -34,20 +34,35 @@ private object Day05:
 
     (seeds.toSeq, chunks.tail.map(parseMapping))
 
-  def walk(seed: Long, mappings: Iterable[Mapping]) =
-    mappings.foldLeft(seed)((id, mapping) => mapping.translate(id))
+  def walk(seed: Long, mappings: Iterable[Mapping]): (Long, Long) =
+    mappings.foldLeft((seed, Long.MaxValue)) {
+      case ((almanacNum, safeToSkip), mapping) =>
+        mapping.ranges
+          .find(_.src.contains(almanacNum))
+          .map(rng => (rng.translate(almanacNum), math.min(rng.src.end - almanacNum, safeToSkip)))
+          .getOrElse((
+            almanacNum,
+            mapping.ranges
+              .filter(_.src.start > almanacNum)
+              .map(_.src.start - almanacNum)
+              .minOption.getOrElse(safeToSkip)
+          ))
+    }
+
+  def run(seeds: Seq[Range], mappings: Iterable[Mapping]) =
+    Iterator.unfold((seeds, seeds.head.start))((seeds, currentSeed) =>
+      if seeds.isEmpty then None
+      else if seeds.head.contains(currentSeed) then
+        val (loc, safeToSkip) = walk(currentSeed, mappings)
+        Some((loc, (seeds, currentSeed + safeToSkip)))
+      else if seeds.tail.isEmpty then None
+      else Some((Long.MaxValue, (seeds.tail, seeds.tail.head.start)))
+    )
 
   def part1(input: String) =
     val (seeds, mappings) = parse(input)
-    seeds
-      .map(walk(_, mappings))
-      .min
+    run(seeds.map(s => s until s + 1), mappings).min
 
   def part2(input: String) =
     val (seeds, mappings) = parse(input)
-    // val min = seeds
-    //   .grouped(2)
-    //   .flatMap { case Seq(start, length) => (start until start + length) }
-    //   .minBy(walk(_, mappings))
-    // walk(min, mappings)
-    0
+    run(seeds.grouped(2).map { case Seq(start, length) => (start until start + length) }.toSeq, mappings).min

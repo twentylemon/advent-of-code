@@ -1,6 +1,7 @@
 lazy val advent = (project in file("."))
   .settings(
     scalaVersion := "3.3.1",
+    libraryDependencies += "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4",
     libraryDependencies ++= Seq(
       "org.typelevel" %% "cats-core" % "2.9.0",
       "org.typelevel" %% "cats-collections-core" % "0.9.5"

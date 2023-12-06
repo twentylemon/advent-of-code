@@ -48,9 +48,9 @@ class Day05Test extends UnitTest:
   }
 
   test("part 2 example") {
-    part2(in) shouldBe 0
+    part2(in) shouldBe 46
   }
 
   test("part 2") {
-    part2(read(file(2023)(5))) shouldBe 0
+    part2(read(file(2023)(5))) shouldBe 27992443
   }
