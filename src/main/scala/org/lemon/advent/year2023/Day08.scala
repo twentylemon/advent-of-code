@@ -35,3 +35,22 @@ private object Day08:
       .map(_.next._2.toLong)
 
     cycle.fold(1L)(lcm)
+
+  def cycleGraph(directions: String, graph: Map[String, (String, String)]) = graph.keySet
+    .map(loc => (loc, directions.foldLeft(loc)((p, d) => move(p, d, graph))))
+    .toMap
+
+  def cyclesUntilEnd(cycle: Map[String, String], start: String) =
+    Iterator.iterate(start)(loc => cycle(loc))
+      .zipWithIndex
+      .dropWhile(!_._1.endsWith("Z"))
+      .next._2.toLong
+
+  def part2_alternate(input: String) =
+    val (directions, graph) = parse(input)
+    val cycle = cycleGraph(directions, graph)
+    val loop = graph.keySet.toSeq
+      .filter(_.endsWith("A"))
+      .map(cyclesUntilEnd(cycle, _))
+
+    loop.fold(1L)(lcm) * directions.length
