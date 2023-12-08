@@ -31,7 +31,7 @@ class Day08Test extends UnitTest:
     part1(read(file(2023)(8))) shouldBe 19199
   }
 
-  test("part 2") {
+  test("part 2 example") {
     val in = """|LR
                 |
                 |11A = (11B, XXX)
@@ -45,6 +45,6 @@ class Day08Test extends UnitTest:
     part2(in) shouldBe 6
   }
 
-  test("part 2 ") {
+  test("part 2") {
     part2(read(file(2023)(8))) shouldBe 13663968099527L
   }

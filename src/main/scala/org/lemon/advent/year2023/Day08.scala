@@ -25,7 +25,7 @@ private object Day08:
       .dropWhile(_._1 != "ZZZ")
       .next._2
 
-  def part2(input: String) = 
+  def part2(input: String) =
     val (directions, graph) = parse(input)
 
     val cycle = graph.keySet.toSeq
@@ -35,4 +35,3 @@ private object Day08:
       .map(_.next._2.toLong)
 
     cycle.fold(1L)(lcm)
-  
