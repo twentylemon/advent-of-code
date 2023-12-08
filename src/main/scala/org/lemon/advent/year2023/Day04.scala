@@ -21,7 +21,7 @@ private object Day04:
     .sum
 
   def winMe(pool: Iterable[Card], draws: Iterable[Card], depth: Int = 0): Int =
-    def copyWinnings(from: Card) = pool
+    def copyWinnings(from: Card) = pool.view
       .drop(from.id)
       .take(from.matches)
 
