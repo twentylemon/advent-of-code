@@ -6,7 +6,7 @@ private object Day09:
     .map(_.split(" ").map(_.trim).map(_.toLong).toSeq)
 
   def nextSequenceValue(seq: Seq[Long]) =
-    Iterator.iterate(seq)(_.sliding(2).map { case Seq(l, r) => r - l }.toSeq)
+    Iterator.iterate(seq)(s => s.zip(s.tail).map((l, r) => r - l))
       .takeWhile(_.size >= 2)
       .map(_.last)
       .sum
