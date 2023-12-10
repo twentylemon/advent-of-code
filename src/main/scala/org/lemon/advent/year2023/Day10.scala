@@ -29,8 +29,7 @@ private object Day10:
 
   def pathFind(start: Coord, grid: Map[Coord, Pipe]): Map[Pipe, Int] =
     val stepsTaken = mutable.Map(start -> 0)
-    val queue =
-      mutable.PriorityQueue[Coord]()(Ordering[Int].on((c: Coord) => c.manhattan(start) + stepsTaken(c)).reverse)
+    val queue = mutable.Queue.empty[Coord]
 
     queue += start
     while !queue.isEmpty && queue.size < 10 * grid.size do
