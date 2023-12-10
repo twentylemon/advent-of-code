@@ -1,25 +1,8 @@
 package org.lemon.advent.year2023
 
-private object Day03:
+import org.lemon.advent.Coord2._
 
-  type Coord = (Int, Int)
-  extension (coord: Coord)
-    def row = coord._1
-    def col = coord._2
-    def up = (coord.row - 1, coord.col)
-    def down = (coord.row + 1, coord.col)
-    def left = (coord.row, coord.col - 1)
-    def right = (coord.row, coord.col + 1)
-    def surrounding = Seq(
-      coord.up,
-      coord.down,
-      coord.left,
-      coord.right,
-      coord.up.left,
-      coord.up.right,
-      coord.down.left,
-      coord.down.right
-    )
+private object Day03:
 
   case class Part(num: Int, row: Int, bound: Range)
   case class Sym(sym: Char, coord: Coord)
@@ -32,7 +15,7 @@ private object Day03:
       if num.isEmpty then None
       else
         val idx = i + dots.length
-        val part = Part(num=num.toInt, row, bound=idx until (idx + num.length))
+        val part = Part(num = num.toInt, row, bound = idx until (idx + num.length))
         Some((part, (tailtail, part.bound.end)))
     )
 
@@ -48,7 +31,7 @@ private object Day03:
       line
         .zipWithIndex
         .filter((c, _) => isSymbol(c))
-        .map((c, col) => Sym(sym=c, coord=(row, col)))
+        .map((c, col) => Sym(sym = c, coord = (col, row)))
     )
 
   def findSurroundingParts(coord: Coord, parts: Iterable[Part]) =
@@ -73,4 +56,3 @@ private object Day03:
       .filter(_.size == 2)
       .map(_.map(part => part.num).product)
       .sum
-  
