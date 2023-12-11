@@ -1,6 +1,7 @@
 package org.lemon.advent.year2023
 
 import org.lemon.advent.Coord2._
+import org.lemon.advent.pairs
 
 private object Day11:
 
@@ -23,18 +24,9 @@ private object Day11:
 
   def parse(input: String) = (parseGalaxies(input), parseDarkEnergy(input))
 
-  def pairs[T](xs: Iterable[T]) =
-    for
-      (x, ix) <- xs.zipWithIndex
-      (y, iy) <- xs.zipWithIndex
-      if ix < iy
-    yield (x, y)
-
-  def range(x: Int, y: Int) = math.min(x, y) to math.max(x, y)
-
   def spaceDistance(lhs: Coord, rhs: Coord, energy: DarkEnergy, energyMult: Long): Long =
     val dist = lhs.manhattan(rhs)
-    val (xRange, yRange) = (range(lhs.x, rhs.x), range(lhs.y, rhs.y))
+    val (xRange, yRange) = (lhs.xRange(rhs), lhs.yRange(rhs))
     dist + (energyMult - 1) * (energy.xs.count(xRange.contains) + energy.ys.count(yRange.contains))
 
   def part1(input: String) =

@@ -2,7 +2,21 @@ name: CI
 on:
   push:
 jobs:
-  test-scala:
+  lib-scala:
+    strategy:
+      matrix:
+        tag: [Lib]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: coursier/cache-action@v6
+    - uses: actions/setup-java@v3
+      with:
+        distribution: corretto
+        java-version: 17
+    - run: sbt -v "+test:testOnly -- -n ${{ matrix.tag }}"
+
+  aoc-scala:
     strategy:
       matrix:
         year: [2022, 2023]
@@ -16,7 +30,7 @@ jobs:
         java-version: 17
     - run: sbt -v "+test:testOnly *${{ matrix.year }}*"
 
-  test-python:
+  aoc-python:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3

@@ -5,14 +5,14 @@ object Coord2:
   type Coord = (Int, Int)
 
   extension (coord: Coord)
-    def x = coord._1
-    def y = coord._2
-    def row = coord._2
-    def col = coord._1
-    def up = (coord.x, coord.y - 1)
-    def down = (coord.x, coord.y + 1)
-    def left = (coord.x - 1, coord.y)
-    def right = (coord.x + 1, coord.y)
+    inline def x = coord._1
+    inline def y = coord._2
+    inline def row = coord._2
+    inline def col = coord._1
+    inline def up = (coord.x, coord.y - 1)
+    inline def down = (coord.x, coord.y + 1)
+    inline def left = (coord.x - 1, coord.y)
+    inline def right = (coord.x + 1, coord.y)
 
     def adjacent = Seq(coord.up, coord.down, coord.left, coord.right)
 
@@ -28,3 +28,6 @@ object Coord2:
     )
 
     def manhattan(rhs: Coord) = (coord.x - rhs.x).abs + (coord.y - rhs.y).abs
+
+    def xRange(rhs: Coord) = math.min(coord.x, rhs.x) until math.max(coord.x, rhs.x)
+    def yRange(rhs: Coord) = math.min(coord.y, rhs.y) until math.max(coord.y, rhs.y)
