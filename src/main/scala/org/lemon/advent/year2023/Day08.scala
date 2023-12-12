@@ -1,6 +1,6 @@
 package org.lemon.advent.year2023
 
-import org.lemon.advent.lcm
+import org.lemon.advent.lib.lcm
 
 private object Day08:
 

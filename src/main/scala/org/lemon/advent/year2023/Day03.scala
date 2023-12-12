@@ -1,6 +1,6 @@
 package org.lemon.advent.year2023
 
-import org.lemon.advent.Coord2._
+import org.lemon.advent.lib.Coord2._
 
 private object Day03:
 

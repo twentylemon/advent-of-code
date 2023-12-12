@@ -1,4 +1,4 @@
-package org.lemon.advent
+package org.lemon.advent.lib
 
 import scala.annotation.tailrec
 
