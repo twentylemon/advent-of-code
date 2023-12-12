@@ -2,7 +2,6 @@ package org.lemon.advent.lib
 
 import scala.annotation.tailrec
 
-@tailrec
-def gcd(a: Long, b: Long): Long = if b == 0 then a else gcd(b, a % b)
+def gcd(a: Long, b: Long): Long = BigInt(a).gcd(BigInt(b)).toLong
 
 def lcm(a: Long, b: Long) = a * b / gcd(a, b)
