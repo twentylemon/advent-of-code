@@ -1,0 +1,1 @@
+src/*/resources/**/day??.txt filter=git-crypt diff=git-crypt

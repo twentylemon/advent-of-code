@@ -14,6 +14,9 @@ jobs:
       with:
         distribution: corretto
         java-version: 17
+    - uses: sliteteam/github-action-git-crypt-unlock@1.2.0
+      env:
+        GIT_CRYPT_KEY: ${{ secrets.GIT_CRYPT_KEY }}
     - run: sbt -v "+test:testOnly org.lemon.advent.${{ matrix.package }}.*"
 
   python:
@@ -24,5 +27,8 @@ jobs:
       with:
         python-version: '3.10'
         cache: pip
+    - uses: sliteteam/github-action-git-crypt-unlock@1.2.0
+      env:
+        GIT_CRYPT_KEY: ${{ secrets.GIT_CRYPT_KEY }}
     - run: pip install -r requirements.txt
     - run: pytest
