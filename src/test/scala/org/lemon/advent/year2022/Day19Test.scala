@@ -71,36 +71,36 @@ class Day19Test extends UnitTest {
         s"geodeBank_$t" -> geodeBank
       )
 
-      // // keep track of our resource bank
-      // val banks =
-      //   for u <- 0 until t yield
-      //     val oreFromBuild = (t - u - 1) * expr(s"ore_$u")
-      //     val oreFromOreCost = -blueprint.ore.cost.ore * expr(s"ore_$u")
-      //     val oreFromClayCost = -blueprint.clay.cost.ore * expr(s"clay_$u")
-      //     val oreFromObsidianCost = -blueprint.obsidian.cost.ore * expr(s"obsidian_$u")
-      //     val oreFromGeodeCost = -blueprint.geode.cost.ore * expr(s"geode_$u")
-      //     val oreBank = oreFromBuild + oreFromOreCost + oreFromClayCost + oreFromObsidianCost + oreFromGeodeCost
+    // // keep track of our resource bank
+    // val banks =
+    //   for u <- 0 until t yield
+    //     val oreFromBuild = (t - u - 1) * expr(s"ore_$u")
+    //     val oreFromOreCost = -blueprint.ore.cost.ore * expr(s"ore_$u")
+    //     val oreFromClayCost = -blueprint.clay.cost.ore * expr(s"clay_$u")
+    //     val oreFromObsidianCost = -blueprint.obsidian.cost.ore * expr(s"obsidian_$u")
+    //     val oreFromGeodeCost = -blueprint.geode.cost.ore * expr(s"geode_$u")
+    //     val oreBank = oreFromBuild + oreFromOreCost + oreFromClayCost + oreFromObsidianCost + oreFromGeodeCost
 
-      //     val clayFromBuild = (t - u - 1) * expr(s"clay_$u")
-      //     val clayFromObsidianCost = -blueprint.obsidian.cost.clay * expr(s"obsidian_$u")
-      //     val clayBank = clayFromBuild + clayFromObsidianCost
+    //     val clayFromBuild = (t - u - 1) * expr(s"clay_$u")
+    //     val clayFromObsidianCost = -blueprint.obsidian.cost.clay * expr(s"obsidian_$u")
+    //     val clayBank = clayFromBuild + clayFromObsidianCost
 
-      //     val obsidianFromBuild = (t - u - 1) * expr(s"obsidian_$u")
-      //     val obsidianFromGeodeCost = -blueprint.geode.cost.obsidian * expr(s"geode_$u")
-      //     val obsidianBank = obsidianFromBuild + obsidianFromGeodeCost
+    //     val obsidianFromBuild = (t - u - 1) * expr(s"obsidian_$u")
+    //     val obsidianFromGeodeCost = -blueprint.geode.cost.obsidian * expr(s"geode_$u")
+    //     val obsidianBank = obsidianFromBuild + obsidianFromGeodeCost
 
-      //     (oreBank, clayBank, obsidianBank)
+    //     (oreBank, clayBank, obsidianBank)
 
-      // val oreBank = banks.map(_._1).reduceOption(_ + _).getOrElse(Zero) + t
-      // val clayBank = banks.map(_._2).reduceOption(_ + _).getOrElse(Zero)
-      // val obsidianBank = banks.map(_._3).reduceOption(_ + _).getOrElse(Zero)
+    // val oreBank = banks.map(_._1).reduceOption(_ + _).getOrElse(Zero) + t
+    // val clayBank = banks.map(_._2).reduceOption(_ + _).getOrElse(Zero)
+    // val obsidianBank = banks.map(_._3).reduceOption(_ + _).getOrElse(Zero)
 
-      // // only buy robits if we can afford them
-      // subjectTo(
-      //   blueprint.ore.cost.ore * oreBuild + blueprint.clay.cost.ore * clayBuild + blueprint.obsidian.cost.ore * obsidianBuild + blueprint.geode.cost.ore * geodeBuild <:= oreBank
-      // )
-      // subjectTo(blueprint.obsidian.cost.clay * obsidianBuild <:= clayBank)
-      // subjectTo(blueprint.geode.cost.obsidian * geodeBuild <:= obsidianBank)
+    // // only buy robits if we can afford them
+    // subjectTo(
+    //   blueprint.ore.cost.ore * oreBuild + blueprint.clay.cost.ore * clayBuild + blueprint.obsidian.cost.ore * obsidianBuild + blueprint.geode.cost.ore * geodeBuild <:= oreBank
+    // )
+    // subjectTo(blueprint.obsidian.cost.clay * obsidianBuild <:= clayBank)
+    // subjectTo(blueprint.geode.cost.obsidian * geodeBuild <:= obsidianBank)
 
     // we can only build one robot per turn, don't bother to have more income than that
     val maxOre =

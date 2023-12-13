@@ -1,7 +1,6 @@
 package org.lemon.advent.lib
 
 extension [T](xs: Iterable[T])
-
   def pairs: Iterator[(T, T)] =
     for
       (x, i) <- xs.iterator.zipWithIndex

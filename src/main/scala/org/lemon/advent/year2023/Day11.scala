@@ -35,7 +35,7 @@ private object Day11:
       .map(spaceDistance(_, _, energy, 2))
       .sum
 
-  def part2(input: String, energyMult: Long) = 
+  def part2(input: String, energyMult: Long) =
     val (galaxies, energy) = parse(input)
     pairs(galaxies)
       .map(spaceDistance(_, _, energy, energyMult))

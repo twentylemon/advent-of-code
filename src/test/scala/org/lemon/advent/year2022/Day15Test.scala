@@ -24,7 +24,8 @@ class Day15Test extends UnitTest {
 
   def coverage(sensor: Sensor, row: Int) =
     val diff = (sensor.sensor.y - row).abs
-    if diff <= sensor.distance then (sensor.sensor.x - sensor.distance + diff) toIncl (sensor.sensor.x + sensor.distance - diff)
+    if diff <= sensor.distance then
+      (sensor.sensor.x - sensor.distance + diff) toIncl (sensor.sensor.x + sensor.distance - diff)
     else 0 toExcl 0
 
   def coverageTree(sensors: Seq[Sensor], row: Int) =
@@ -37,7 +38,8 @@ class Day15Test extends UnitTest {
 
   def part2(in: Seq[String], range: Range[Int]): Long =
     val sensors = in.map(parseSensor)
-    val (diet, row) = range.toIterator.map(coverageTree(sensors, _)).zipWithIndex.dropWhile(_._1.containsRange(range)).next
+    val (diet, row) =
+      range.toIterator.map(coverageTree(sensors, _)).zipWithIndex.dropWhile(_._1.containsRange(range)).next
     (diet.toIterator.next.end + 1) * 4000000L + row
 
   test("part 1 example") {
