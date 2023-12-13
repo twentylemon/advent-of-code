@@ -1,4 +1,4 @@
-name: Launch Scala Steward
+name: Scala Steward
 on:
   workflow_dispatch:
   schedule:
