@@ -1,6 +1,5 @@
 package org.lemon.advent.year2023
 
-import scala.annotation.tailrec
 import scala.collection.mutable
 
 private object Day12:
