@@ -22,6 +22,6 @@ private object Day13:
     .map((col, row) => if row >= 0 then row else col * 100)
     .sum
 
-  def part1(input: String) = run(input, 0)
+  def part1 = run(_, 0)
 
-  def part2(input: String) = run(input, 1)
+  def part2 = run(_, 1)
