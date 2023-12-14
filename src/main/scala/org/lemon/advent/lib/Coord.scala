@@ -14,6 +14,11 @@ object Coord2:
     inline def left = (coord.x - 1, coord.y)
     inline def right = (coord.x + 1, coord.y)
 
+    inline def shiftUp(n: Int) = (coord.x, coord.y - n)
+    inline def shiftDown(n: Int) = (coord.x, coord.y + n)
+    inline def shiftLeft(n: Int) = (coord.x - n, coord.y)
+    inline def shiftRight(n: Int) = (coord.x + n, coord.y)
+
     def adjacent = Seq(coord.up, coord.down, coord.left, coord.right)
 
     def surrounding = Seq(
@@ -31,3 +36,6 @@ object Coord2:
 
     def xRange(rhs: Coord) = math.min(coord.x, rhs.x) until math.max(coord.x, rhs.x)
     def yRange(rhs: Coord) = math.min(coord.y, rhs.y) until math.max(coord.y, rhs.y)
+
+    inline def +(rhs: Coord) = (coord.x + rhs.x, coord.y + rhs.y)
+    inline def -(rhs: Coord) = (coord.x - rhs.x, coord.y - rhs.y)
