@@ -16,10 +16,9 @@ class Day15Test extends UnitTest:
   }
 
   test("part 2 example") {
-    part2(in).foreach(println)
-    // part2(in) shouldBe 0
+    part2(in) shouldBe 145
   }
 
   test("part 2") {
-    // part2(read(file(2023)(15))) shouldBe 0
+    part2(read(file(2023)(15))) shouldBe 279470
   }
