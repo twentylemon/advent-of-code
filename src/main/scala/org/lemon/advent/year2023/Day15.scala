@@ -16,11 +16,11 @@ private object Day15:
     .foldLeft(Seq.fill(256)(Seq.empty[(String, Int)])) {
       case (boxes, (label, hsh, -1)) =>
         boxes.updated(hsh, boxes(hsh).filterNot(_._1 == label))
-      case (boxes, (label, hsh, lens)) if boxes(hsh).indexWhere(_._1 == label) >= 0 =>
+      case (boxes, (label, hsh, lens)) if boxes(hsh).exists(_._1 == label) =>
         boxes.updated(hsh, boxes(hsh).updated(boxes(hsh).indexWhere(_._1 == label), (label, lens)))
       case (boxes, (label, hsh, lens)) =>
         boxes.updated(hsh, boxes(hsh) :+ (label, lens))
     }
     .zipWithIndex
-    .map((seq, i) => (i + 1) * seq.zipWithIndex.map { case ((_, lens), j) => (j + 1) * lens }.sum)
+    .flatMap((seq, i) => seq.zipWithIndex.map { case ((_, lens), j) => (i + 1) * (j + 1) * lens })
     .sum
