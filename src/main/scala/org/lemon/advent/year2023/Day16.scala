@@ -1,6 +1,7 @@
 package org.lemon.advent.year2023
 
 import org.lemon.advent.lib.Coord2._
+import org.lemon.advent.lib.Area
 import scala.collection.parallel.CollectionConverters._
 import scala.collection.mutable
 
@@ -11,7 +12,7 @@ private object Day16:
 
   def parse(input: String) = input.linesIterator
     .zipWithIndex
-    .flatMap((line, row) => line.zipWithIndex.map((ch, col) => ((col, row) -> ch)))
+    .flatMap((line, row) => line.zipWithIndex.map((ch, col) => (Coord(col, row) -> ch)))
     .toMap
 
   def interact(cell: Char, photon: Photon) = cell match
@@ -54,13 +55,13 @@ private object Day16:
 
   def part2(input: String) =
     val grid = parse(input)
-    val (xMax, yMax) = (grid.keys.map(_.x).max, grid.keys.map(_.y).max)
-    val startingPhotons = (0 to xMax).flatMap(x =>
-      Seq(Photon(position = (x, 0), velocity = unitDown), Photon(position = (x, yMax), velocity = unitUp))
-    ) ++ (0 to yMax).flatMap(y =>
-      Seq(Photon(position = (0, y), velocity = unitRight), Photon(position = (xMax, y), velocity = unitLeft))
-    )
+    val area = Area(grid)
 
-    startingPhotons.par
+    val photons = area.topRow.map(c => Photon(position = c, velocity = unitDown)) ++
+      area.bottomRow.map(c => Photon(position = c, velocity = unitUp)) ++
+      area.leftCol.map(c => Photon(position = c, velocity = unitRight)) ++
+      area.rightCol.map(c => Photon(position = c, velocity = unitLeft))
+
+    photons.toSeq.par
       .map(countEnergized(grid, _))
       .max

@@ -9,6 +9,8 @@ import org.lemon.advent.lib.Coord2._
 
 class Coord2Test extends UnitTest:
 
+  given Arbitrary[Coord] = Arbitrary(Gen.resultOf(Coord.apply))
+
   test("left and right are opposites") {
     check((coord: Coord) => coord == coord.left.right)
   }
