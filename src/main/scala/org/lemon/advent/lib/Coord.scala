@@ -27,8 +27,11 @@ object Coord2:
     def xRange(rhs: Coord): Range = math.min(x, rhs.x) until math.max(x, rhs.x)
     def yRange(rhs: Coord): Range = math.min(y, rhs.y) until math.max(y, rhs.y)
 
+    inline def flip: Coord = Coord(x = y, y = x)
+
     inline def +(rhs: Coord): Coord = (x + rhs.x, y + rhs.y)
     inline def -(rhs: Coord): Coord = (x - rhs.x, y - rhs.y)
+    inline def *(n: Int): Coord = (x * n, y * n)
 
   val unitUp: Coord = (0, -1)
   val unitDown: Coord = (0, 1)

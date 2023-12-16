@@ -20,22 +20,12 @@ private object Day16:
       Seq(Photon(photon.position.left, unitLeft), Photon(photon.position.right, unitRight))
     case '|' if photon.velocity.x != 0 =>
       Seq(Photon(photon.position.up, unitUp), Photon(photon.position.down, unitDown))
-    case '/' if photon.velocity.x > 0 =>
-      Seq(Photon(photon.position.up, unitUp))
-    case '/' if photon.velocity.x < 0 =>
-      Seq(Photon(photon.position.down, unitDown))
-    case '/' if photon.velocity.y > 0 =>
-      Seq(Photon(photon.position.left, unitLeft))
-    case '/' if photon.velocity.y < 0 =>
-      Seq(Photon(photon.position.right, unitRight))
-    case '\\' if photon.velocity.x > 0 =>
-      Seq(Photon(photon.position.down, unitDown))
-    case '\\' if photon.velocity.x < 0 =>
-      Seq(Photon(photon.position.up, unitUp))
-    case '\\' if photon.velocity.y > 0 =>
-      Seq(Photon(photon.position.right, unitRight))
-    case '\\' if photon.velocity.y < 0 =>
-      Seq(Photon(photon.position.left, unitLeft))
+    case '/' =>
+      val v = photon.velocity.flip * -1
+      Seq(Photon(photon.position + v, v))
+    case '\\' =>
+      val v = photon.velocity.flip
+      Seq(Photon(photon.position + v, v))
     case _ =>
       Seq(photon.copy(position = photon.position + photon.velocity))
 
