@@ -25,6 +25,38 @@ class Coord2Test extends UnitTest:
     check((coord: Coord, n: Int) => coord == coord.shiftUp(n).shiftDown(n))
   }
 
+  test("+ unitUp is up") {
+    check((coord: Coord) => coord + unitUp == coord.up)
+  }
+
+  test("+ unitDown is down") {
+    check((coord: Coord) => coord + unitDown == coord.down)
+  }
+
+  test("+ unitLeft is left") {
+    check((coord: Coord) => coord + unitLeft == coord.left)
+  }
+
+  test("+ unitRight is right") {
+    check((coord: Coord) => coord + unitRight == coord.right)
+  }
+
+  test("- unitUp is down") {
+    check((coord: Coord) => coord - unitUp == coord.down)
+  }
+
+  test("- unitDown is up") {
+    check((coord: Coord) => coord - unitDown == coord.up)
+  }
+
+  test("- unitLeft is right") {
+    check((coord: Coord) => coord - unitLeft == coord.right)
+  }
+
+  test("- unitRight is left") {
+    check((coord: Coord) => coord - unitRight == coord.left)
+  }
+
   test("manhattan distance of adjacent is 1") {
     check((coord: Coord) => coord.adjacent.forall(_.manhattan(coord) == 1))
   }

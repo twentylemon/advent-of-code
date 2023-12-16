@@ -39,9 +39,8 @@ object Coord2:
 
     def manhattan(rhs: Coord) = (coord.x - rhs.x).abs + (coord.y - rhs.y).abs
 
-    def xRange(rhs: Coord) = math.min(coord.x, rhs.x) until math.max(coord.x, rhs.x)
-    def yRange(rhs: Coord) = math.min(coord.y, rhs.y) until math.max(coord.y, rhs.y)
+    def xRange(rhs: Coord): Range = math.min(coord.x, rhs.x) until math.max(coord.x, rhs.x)
+    def yRange(rhs: Coord): Range = math.min(coord.y, rhs.y) until math.max(coord.y, rhs.y)
 
     inline def +(rhs: Coord): Coord = (coord.x + rhs.x, coord.y + rhs.y)
     inline def -(rhs: Coord): Coord = (coord.x - rhs.x, coord.y - rhs.y)
-  
