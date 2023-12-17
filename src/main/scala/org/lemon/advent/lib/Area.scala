@@ -48,3 +48,6 @@ case class Area(xRange: Range, yRange: Range):
 
   def topRow: Iterator[Coord] = row(top)
   def bottomRow: Iterator[Coord] = row(bottom)
+
+  def encloses(area: Area): Boolean =
+    left <= area.left && right >= area.right && top <= area.top && bottom >= area.bottom

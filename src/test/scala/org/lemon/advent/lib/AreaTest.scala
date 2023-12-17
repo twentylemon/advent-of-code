@@ -53,3 +53,22 @@ class AreaTest extends UnitTest:
       Area(grid).toSet == grid.keySet
     )
   }
+
+  test("area encloses itself") {
+    check((area: Area) => area encloses area)
+  }
+
+  test("area enclosed by larger area") {
+    check((area: Area) => Area(area.left - 1 to area.right + 1, area.top - 1 to area.bottom + 1).encloses(area))
+  }
+
+  test("area not enclosed by smaller area") {
+    check((area: Area) =>
+      (area.width > 2 && area.height > 2) ==>
+        !Area(area.left + 1 to area.right - 1, area.top + 1 to area.bottom - 1).encloses(area)
+    )
+  }
+
+  test("area not enclosed by disjoint area") {
+    check((area: Area) => !area.encloses(Area(area.right + 1 to area.right + 2, area.top - 2 to area.top - 1)))
+  }
