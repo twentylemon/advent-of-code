@@ -1,15 +1,11 @@
 package org.lemon.advent.lib
 
-import org.scalacheck._
 import org.lemon.advent._
-import org.scalacheck.Prop._
-import org.scalacheck.Gen
-import org.scalacheck.Arbitrary
 import org.lemon.advent.lib.Coord2._
+import org.scalacheck.Prop._
+import org.scalacheck._
 
 class Coord2Test extends UnitTest:
-
-  given Arbitrary[Coord] = Arbitrary(Gen.resultOf(Coord.apply))
 
   test("left and right are opposites") {
     check((coord: Coord) => coord == coord.left.right)
@@ -69,4 +65,12 @@ class Coord2Test extends UnitTest:
 
   test("surrounding contains all adjacent") {
     check((coord: Coord) => coord.adjacent.toSet.subsetOf(coord.surrounding.toSet))
+  }
+
+  test("bounding box defines opposing corners") {
+    check((c1: Coord, c2: Coord) =>
+      val area = c1.bounding(c2)
+      val coords = Set(c1, c2)
+      coords == Set(area.topLeft, area.bottomRight) || coords == Set(area.topRight, area.bottomLeft)
+    )
   }

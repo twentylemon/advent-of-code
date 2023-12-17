@@ -19,13 +19,13 @@ object Coord2:
     def shiftRight(n: Int): Coord = copy(x = x + n)
 
     def adjacent: Seq[Coord] = Seq(up, down, left, right)
-
     def surrounding: Seq[Coord] = Seq(up, down, left, right, up.left, up.right, down.left, down.right)
 
     def manhattan(rhs: Coord) = (x - rhs.x).abs + (y - rhs.y).abs
 
     def xRange(rhs: Coord): Range = math.min(x, rhs.x) to math.max(x, rhs.x)
     def yRange(rhs: Coord): Range = math.min(y, rhs.y) to math.max(y, rhs.y)
+    def bounding(rhs: Coord): Area = Area(xRange = xRange(rhs), yRange = yRange(rhs))
 
     def flip: Coord = Coord(x = y, y = x)
 
@@ -40,3 +40,6 @@ object Coord2:
 
   extension [T](seq: Seq[Seq[T]])
     def apply(coord: Coord): T = seq(coord.row)(coord.col)
+
+    def hasCoord(coord: Coord): Boolean =
+      seq.indices.contains(coord.row) && seq(coord.row).indices.contains(coord.col)

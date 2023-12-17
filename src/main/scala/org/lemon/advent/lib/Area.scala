@@ -23,7 +23,9 @@ case class Area(xRange: Range, yRange: Range):
   def bottom = yRange.max
 
   def topLeft: Coord = (left, top)
-  def bottomRight: Coord = (bottom, right)
+  def bottomRight: Coord = (right, bottom)
+  def topRight: Coord = (right, top)
+  def bottomLeft: Coord = (left, bottom)
 
   def width = xRange.size
   def height = yRange.size
