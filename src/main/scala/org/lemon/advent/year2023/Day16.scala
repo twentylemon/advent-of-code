@@ -1,9 +1,10 @@
 package org.lemon.advent.year2023
 
-import org.lemon.advent.lib.Coord2._
-import org.lemon.advent.lib.Area
-import scala.collection.parallel.CollectionConverters._
+import org.lemon.advent.lib.`2d`.Coord._
+import org.lemon.advent.lib.`2d`._
+
 import scala.collection.mutable
+import scala.collection.parallel.CollectionConverters._
 
 private object Day16:
 

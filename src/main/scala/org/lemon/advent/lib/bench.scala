@@ -1,7 +1,7 @@
 package org.lemon.advent.lib
 
 import org.lemon.advent._
-import org.lemon.advent.lib._
+import org.lemon.advent.lib.`2d`._
 import org.openjdk.jmh.annotations.Benchmark
 
 class Bench:

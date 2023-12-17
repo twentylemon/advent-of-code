@@ -1,6 +1,4 @@
-package org.lemon.advent.lib
-
-import Coord2._
+package org.lemon.advent.lib.`2d`
 
 object Area:
 

@@ -1,8 +1,7 @@
 package org.lemon.advent.year2023
 
-import org.lemon.advent.lib.Coord2._
-import org.lemon.advent.lib.Direction
-import org.lemon.advent.lib.Area
+import org.lemon.advent.lib.`2d`.Coord._
+import org.lemon.advent.lib.`2d`._
 
 import scala.collection.mutable
 

@@ -1,6 +1,6 @@
-package org.lemon.advent.lib
+package org.lemon.advent.lib.`2d`
 
-import org.lemon.advent.lib.Coord2._
+import Coord._
 
 enum Direction(val unitVector: Coord):
   case Up extends Direction(unitUp)

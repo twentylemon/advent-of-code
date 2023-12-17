@@ -1,7 +1,7 @@
-package org.lemon.advent.lib
+package org.lemon.advent.lib.`2d`
 
 import org.lemon.advent._
-import org.lemon.advent.lib.Coord2._
+import org.lemon.advent.lib.`2d`._
 import org.scalacheck.Prop._
 import org.scalacheck._
 

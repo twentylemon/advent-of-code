@@ -1,10 +1,11 @@
-package org.lemon.advent.lib
+package org.lemon.advent.lib.`2d`
 
+import org.lemon.advent.lib.`2d`._
+import org.scalacheck.Arbitrary
 import org.scalacheck.Gen
 import org.scalacheck.Gen.Choose
-import org.scalacheck.Arbitrary
 
-given Arbitrary[Coord2.Coord] = Arbitrary(Gen.resultOf(Coord2.Coord.apply))
+given Arbitrary[Coord] = Arbitrary(Gen.resultOf(Coord.apply))
 
 given Arbitrary[Range] = Arbitrary(
   for
