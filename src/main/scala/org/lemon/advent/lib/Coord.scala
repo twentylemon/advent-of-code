@@ -8,15 +8,18 @@ object Coord2:
   case class Coord(x: Int, y: Int):
     def row = y
     def col = x
+
     def up: Coord = copy(y = y - 1)
     def down: Coord = copy(y = y + 1)
     def left: Coord = copy(x = x - 1)
     def right: Coord = copy(x = x + 1)
+    def move(direction: Direction): Coord = this + direction.unitVector
 
     def shiftUp(n: Int): Coord = copy(y = y - n)
     def shiftDown(n: Int): Coord = copy(y = y + n)
     def shiftLeft(n: Int): Coord = copy(x = x - n)
     def shiftRight(n: Int): Coord = copy(x = x + n)
+    def shift(n: Int, direction: Direction): Coord = this + (direction.unitVector * n)
 
     def adjacent: Seq[Coord] = Seq(up, down, left, right)
     def surrounding: Seq[Coord] = Seq(up, down, left, right, up.left, up.right, down.left, down.right)
@@ -33,6 +36,9 @@ object Coord2:
     def -(rhs: Coord): Coord = (x - rhs.x, y - rhs.y)
     def *(n: Int): Coord = (x * n, y * n)
 
+  given Ordering[Coord] = Ordering.by[Coord, Int](_.x).orElseBy(_.y)
+
+  val origin: Coord = (0, 0)
   val unitUp: Coord = (0, -1)
   val unitDown: Coord = (0, 1)
   val unitLeft: Coord = (-1, 0)
