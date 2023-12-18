@@ -47,5 +47,6 @@ case class Coord(x: Int, y: Int):
   def flip: Coord = Coord(x = y, y = x)
 
   def +(rhs: Coord): Coord = (x + rhs.x, y + rhs.y)
+  def +(direction: Direction): Coord = move(direction)
   def -(rhs: Coord): Coord = (x - rhs.x, y - rhs.y)
   def *(n: Int): Coord = (x * n, y * n)

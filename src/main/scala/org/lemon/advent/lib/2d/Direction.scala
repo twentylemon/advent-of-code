@@ -6,6 +6,13 @@ object Direction:
 
   given Ordering[Direction] = Ordering.by(_.ordinal)
 
+  def apply(ch: String | Char): Direction = ch match
+    case "U" | 'U' | "u" | 'u' => Up
+    case "D" | 'D' | "d" | 'd' => Down
+    case "L" | 'L' | "l" | 'l' => Left
+    case "R" | 'R' | "r" | 'r' => Right
+    case _ => throw AssertionError(s"unknown direction character:  $ch")
+
 enum Direction(val unitVector: Coord):
   case Up extends Direction(unitUp)
   case Left extends Direction(unitLeft)
