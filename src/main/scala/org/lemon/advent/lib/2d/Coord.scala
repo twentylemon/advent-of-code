@@ -1,7 +1,7 @@
 package org.lemon.advent.lib.`2d`
 
 object Coord:
-  
+
   given Conversion[(Int, Int), Coord] with
     def apply(coord: (Int, Int)): Coord = Coord(x = coord._1, y = coord._2)
 
@@ -33,7 +33,7 @@ case class Coord(x: Int, y: Int):
   def shiftDown(n: Int): Coord = copy(y = y + n)
   def shiftLeft(n: Int): Coord = copy(x = x - n)
   def shiftRight(n: Int): Coord = copy(x = x + n)
-  def shift(n: Int, direction: Direction): Coord = this + (direction.unitVector * n)
+  def shift(direction: Direction, n: Int): Coord = this + (direction.unitVector * n)
 
   def adjacent: Seq[Coord] = Seq(up, down, left, right)
   def surrounding: Seq[Coord] = Seq(up, down, left, right, up.left, up.right, down.left, down.right)

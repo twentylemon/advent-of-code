@@ -56,6 +56,38 @@ class CoordTest extends UnitTest:
     check((coord: Coord) => coord - unitRight == coord.left)
   }
 
+  test("move(Up) is up") {
+    check((coord: Coord) => coord.move(Direction.Up) == coord.up)
+  }
+
+  test("move(Down) is down") {
+    check((coord: Coord) => coord.move(Direction.Down) == coord.down)
+  }
+
+  test("move(Left) is left") {
+    check((coord: Coord) => coord.move(Direction.Left) == coord.left)
+  }
+
+  test("move(Right) is right") {
+    check((coord: Coord) => coord.move(Direction.Right) == coord.right)
+  }
+
+  test("shift(Up, n) is shiftUp(n)") {
+    check((coord: Coord, n: Int) => coord.shift(Direction.Up, n) == coord.shiftUp(n))
+  }
+
+  test("shift(Down, n) is shiftUp(n)") {
+    check((coord: Coord, n: Int) => coord.shift(Direction.Down, n) == coord.shiftDown(n))
+  }
+
+  test("shift(Left, n) is shiftUp(n)") {
+    check((coord: Coord, n: Int) => coord.shift(Direction.Left, n) == coord.shiftLeft(n))
+  }
+
+  test("shift(Right, n) is shiftUp(n)") {
+    check((coord: Coord, n: Int) => coord.shift(Direction.Right, n) == coord.shiftRight(n))
+  }
+
   test("manhattan distance of adjacent is 1") {
     check((coord: Coord) => coord.adjacent.forall(_.manhattan(coord) == 1))
   }
