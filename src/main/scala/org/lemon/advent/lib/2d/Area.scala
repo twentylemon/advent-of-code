@@ -1,5 +1,7 @@
 package org.lemon.advent.lib.`2d`
 
+import scala.collection.immutable.WrappedString
+
 object Area:
 
   def apply(grid: Map[Coord, _]): Area = apply(grid.keySet)
@@ -10,6 +12,11 @@ object Area:
     Area(xRange = xs.min to xs.max, yRange = ys.min to ys.max)
 
   def apply(grid: Seq[Seq[_]]): Area = Area(yRange = grid.indices, xRange = grid.head.indices)
+
+  def apply(lines: Seq[String])(using String => WrappedString): Area =
+    Area(yRange = lines.indices, xRange = lines.head.indices)
+
+  def apply(left: Int, right: Int, top: Int, bottom: Int): Area = Area(left to right, top to bottom)
 
   given Conversion[Area, Iterator[Coord]] with
     def apply(area: Area): Iterator[Coord] = for y <- area.yRange.iterator; x <- area.xRange.iterator yield (x, y)
@@ -49,3 +56,12 @@ case class Area(xRange: Range, yRange: Range):
 
   def encloses(area: Area): Boolean =
     left <= area.left && right >= area.right && top <= area.top && bottom >= area.bottom
+
+  def show(coord2Char: Coord => Char): String =
+    import scala.collection.mutable
+    val builder = mutable.StringBuilder(size + height)
+    this.foreach(coord =>
+      builder.append(coord2Char(coord))
+      if coord.col == right then builder.append('\n')
+    )
+    builder.toString

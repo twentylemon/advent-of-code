@@ -2,6 +2,10 @@ package org.lemon.advent.lib.`2d`
 
 import Coord._
 
+object Direction:
+
+  given Ordering[Direction] = Ordering.by(_.ordinal)
+
 enum Direction(val unitVector: Coord):
   case Up extends Direction(unitUp)
   case Left extends Direction(unitLeft)
