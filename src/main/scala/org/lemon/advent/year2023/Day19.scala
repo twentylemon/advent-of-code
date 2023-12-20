@@ -38,8 +38,7 @@ private object Day19:
     if at == "R" then false
     else if at == "A" then true
     else
-      val flows = workflows(at)
-      flows.find { case Flow(v, op, lit, _) => compare(gear, v, op, lit) }
+      workflows(at).find { case Flow(v, op, lit, _) => compare(gear, v, op, lit) }
         .map(f => accepted(gear, workflows, f.dest))
         .get
 
