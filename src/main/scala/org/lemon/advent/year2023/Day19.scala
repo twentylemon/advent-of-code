@@ -48,13 +48,10 @@ private object Day19:
 
   def part1(input: String) =
     val (flows, gears) = parse(input)
-
     gears
       .filter(accepted(_, flows, "in"))
       .flatMap(_.values)
       .sum
-
-  def totalSize(ranges: Map[Char, Range]) = ranges.values.map(_.size.toLong).product
 
   def countAccepted(flow: Seq[Flow], ranges: Map[Char, Range], workflows: Map[String, Seq[Flow]]): Long =
     val Flow(v, op, lit, dest) = flow.head
@@ -71,7 +68,7 @@ private object Day19:
       if good.isEmpty then 0
       else
         dest match
-          case "A" => totalSize(ranges.updated(v, good))
+          case "A" => ranges.updated(v, good).values.map(_.size.toLong).product
           case "R" => 0
           case dest => countAccepted(workflows(dest), ranges.updated(v, good), workflows)
 
