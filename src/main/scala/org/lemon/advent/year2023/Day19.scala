@@ -1,7 +1,5 @@
 package org.lemon.advent.year2023
 
-import scala.collection.mutable
-
 private object Day19:
 
   type Gear = Map[Char, Int]
