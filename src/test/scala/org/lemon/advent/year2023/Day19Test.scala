@@ -25,30 +25,17 @@ class Day19Test extends UnitTest:
               |""".stripMargin
 
   test("part 1 example") {
-    // part1(in) shouldBe 0
-
-    simplify(parseFlows(
-      """|px{a<2006:qkq,m>2090:A,rfg}
-         |pv{a>1716:R,A}
-         |lnx{m>1548:A,A}
-         |rfg{s<537:gd,x>2440:R,A}
-         |qs{s>3448:A,lnx}
-         |qkq{x<1416:A,crn}
-         |crn{x>2662:A,R}
-         |in{s<1351:px,qqz}
-         |qqz{s>2770:qs,m<1801:hdj,R}
-         |gd{a>3333:R,R}
-         |hdj{m>838:A,pv}""".stripMargin))
+    part1(in) shouldBe 19114
   }
 
   test("part 1") {
-    // part1(read(file(2023)(19))) shouldBe 0
+    part1(read(file(2023)(19))) shouldBe 280909
   }
 
   test("part 2 example") {
-    // part2(in) shouldBe 0
+    part2(in) shouldBe 167409079868000L
   }
 
   test("part 2") {
-    // part2(read(file(2023)(19))) shouldBe 0
+    part2(read(file(2023)(19))) shouldBe 116138474394508L
   }

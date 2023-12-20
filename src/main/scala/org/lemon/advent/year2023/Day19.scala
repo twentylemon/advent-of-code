@@ -1,26 +1,19 @@
 package org.lemon.advent.year2023
 
-import cats._
-import cats.implicits._
-import cats.collections._
-import cats.collections.syntax.all._
 import scala.collection.mutable
 
 private object Day19:
 
-  case class Gear(x: Int, m: Int, a: Int, s: Int)
+  type Gear = Map[Char, Int]
 
   sealed trait Flow:
     def dest: String
   case class Switch(v: Char, op: Char, lit: Int, dest: String) extends Flow
   case class Otherwise(dest: String) extends Flow
 
-  case object Approved
-  case object Rejected
-
   def parseGears(input: String) = input.linesIterator
     .map(_ match
-      case s"{x=$x,m=$m,a=$a,s=$s}" => Gear(x = x.toInt, m = m.toInt, a = a.toInt, s = s.toInt)
+      case s"{x=$x,m=$m,a=$a,s=$s}" => Map('x' -> x.toInt, 'm' -> m.toInt, 'a' -> a.toInt, 's' -> s.toInt)
     )
     .toSeq
 
@@ -42,50 +35,56 @@ private object Day19:
     val Array(flows, gears) = input.split("\n\n")
     (parseFlows(flows), parseGears(gears))
 
-  def isApproved(dest: String) = dest == "A"
-  def isRejected(dest: String) = dest == "R"
-  def isFinal(flow: Flow) = isApproved(flow.dest) || isRejected(flow.dest)
+  def compare(gear: Gear, v: Char, op: Char, lit: Int) =
+    op match
+      case '>' => gear(v) > lit
+      case '<' => gear(v) < lit
 
-  val full: Diet[Int] = Diet.fromRange(Int.MinValue toIncl Int.MaxValue)
-  case class Tree(x: Diet[Int], m: Diet[Int], a: Diet[Int], s: Diet[Int])
-
-  def simplify(flows: Map[String, Seq[Flow]]) =
-    given Ordering[Seq[Flow]] = Ordering.by[Seq[Flow], Int](_.size).orElseBy(s => -s.count(isFinal))
-    val ordered = flows.toSeq.sortBy(_._2)
-
-    ordered.foreach(println)
-
-    val reduced = mutable.Map.empty[String, Tree]
-    val evalQueue = mutable.Queue.from(flows.toSeq.sortBy(_._2))
-
-    println()
-
-    def reduce(name: String, flows: Seq[Flow]) =
-      flows.foldLeft(Tree(full, full, full, full))((tree, flow) =>
-        flow match
-          case Otherwise("A") => tree
-
-          case Switch(_, _, _, "A") => tree
-        
-          case Switch(v, op, lit, "R") => tree
+  def accepted(gear: Gear, workflows: Map[String, Seq[Flow]], at: String): Boolean =
+    if at == "R" then false
+    else if at == "A" then true
+    else
+      val flows = workflows(at)
+      val next = flows.init.find(_ match
+        case Switch(v, op, lit, _) => compare(gear, v, op, lit)
       )
-
-    while !evalQueue.isEmpty do
-      val (name, flows) = evalQueue.dequeue
-      println(s"checking  $name = $flows")
-      if reduced.contains(name) || flows.forall(isFinal) then
-        println(s"  evaluating  $name = $flows")
-        
-      else
-        println(s"  deferring   $name = $flows")
-    0
+      next.map(f => accepted(gear, workflows, f.dest)).getOrElse(accepted(gear, workflows, flows.last.dest))
 
   def part1(input: String) =
     val (flows, gears) = parse(input)
 
-    flows.foreach(println)
-    gears.foreach(println)
+    gears
+      .filter(accepted(_, flows, "in"))
+      .flatMap(_.values)
+      .sum
 
-    0
+  def totalSize(ranges: Map[Char, Range]) = ranges.values.map(_.size.toLong).product
 
-  def part2(input: String) = 0
+  def countAccepted(flow: Seq[Flow], ranges: Map[Char, Range], workflows: Map[String, Seq[Flow]]): Long =
+    flow.head match
+      case Otherwise("R") => 0
+      case Otherwise("A") => totalSize(ranges)
+      case Otherwise(dest) => countAccepted(workflows(dest), ranges, workflows)
+      case Switch(v, op, lit, dest) =>
+        val (good, bad) = op match
+          case '>' =>
+            val (g, b) = ranges(v).reverse.span(_ > lit)
+            (g.reverse, b.reverse)
+          case '<' => ranges(v).span(_ < lit)
+
+        val badCount =
+          if flow.tail.isEmpty || bad.isEmpty then 0L else countAccepted(flow.tail, ranges.updated(v, bad), workflows)
+
+        val goodCount =
+          if good.isEmpty then 0
+          else
+            dest match
+              case "A" => totalSize(ranges.updated(v, good))
+              case "R" => 0
+              case dest => countAccepted(workflows(dest), ranges.updated(v, good), workflows)
+
+        goodCount + badCount
+
+  def part2(input: String) =
+    val (flows, _) = parse(input)
+    countAccepted(flows("in"), "xmas".map(_ -> (1 to 4000)).toMap, flows)
