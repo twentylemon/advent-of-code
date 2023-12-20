@@ -5,11 +5,7 @@ import scala.collection.mutable
 private object Day19:
 
   type Gear = Map[Char, Int]
-
-  sealed trait Flow:
-    def dest: String
-  case class Switch(v: Char, op: Char, lit: Int, dest: String) extends Flow
-  case class Otherwise(dest: String) extends Flow
+  case class Flow(v: Char, op: Char, lit: Int, dest: String)
 
   def parseGears(input: String) = input.linesIterator
     .map(_ match
@@ -19,9 +15,9 @@ private object Day19:
 
   def parseFlow(flow: String) = flow.split(",")
     .map(_ match
-      case s"$v>$n:$dest" => Switch(v = v.head, op = '>', lit = n.toInt, dest = dest)
-      case s"$v<$n:$dest" => Switch(v = v.head, op = '<', lit = n.toInt, dest = dest)
-      case otherwise => Otherwise(dest = otherwise)
+      case s"$v>$n:$dest" => Flow(v = v.head, op = '>', lit = n.toInt, dest = dest)
+      case s"$v<$n:$dest" => Flow(v = v.head, op = '<', lit = n.toInt, dest = dest)
+      case otherwise => Flow(v = 'x', op = '>', lit = -1, dest = otherwise)
     )
     .toSeq
 
@@ -46,8 +42,7 @@ private object Day19:
     else
       val flows = workflows(at)
       val next = flows.init.find(_ match
-        case Switch(v, op, lit, _) => compare(gear, v, op, lit)
-        case Otherwise(dest) => throw AssertionError(s"unexpected otherwise  $dest")
+        case Flow(v, op, lit, _) => compare(gear, v, op, lit)
       )
       next.map(f => accepted(gear, workflows, f.dest)).getOrElse(accepted(gear, workflows, flows.last.dest))
 
@@ -62,29 +57,25 @@ private object Day19:
   def totalSize(ranges: Map[Char, Range]) = ranges.values.map(_.size.toLong).product
 
   def countAccepted(flow: Seq[Flow], ranges: Map[Char, Range], workflows: Map[String, Seq[Flow]]): Long =
-    flow.head match
-      case Otherwise("R") => 0
-      case Otherwise("A") => totalSize(ranges)
-      case Otherwise(dest) => countAccepted(workflows(dest), ranges, workflows)
-      case Switch(v, op, lit, dest) =>
-        val (good, bad) = op match
-          case '>' =>
-            val (g, b) = ranges(v).reverse.span(_ > lit)
-            (g.reverse, b.reverse)
-          case '<' => ranges(v).span(_ < lit)
+    val Flow(v, op, lit, dest) = flow.head
+    val (good, bad) = op match
+      case '>' =>
+        val (g, b) = ranges(v).reverse.span(_ > lit)
+        (g.reverse, b.reverse)
+      case '<' => ranges(v).span(_ < lit)
 
-        val badCount =
-          if flow.tail.isEmpty || bad.isEmpty then 0L else countAccepted(flow.tail, ranges.updated(v, bad), workflows)
+    val badCount =
+      if flow.tail.isEmpty || bad.isEmpty then 0L else countAccepted(flow.tail, ranges.updated(v, bad), workflows)
 
-        val goodCount =
-          if good.isEmpty then 0
-          else
-            dest match
-              case "A" => totalSize(ranges.updated(v, good))
-              case "R" => 0
-              case dest => countAccepted(workflows(dest), ranges.updated(v, good), workflows)
+    val goodCount =
+      if good.isEmpty then 0
+      else
+        dest match
+          case "A" => totalSize(ranges.updated(v, good))
+          case "R" => 0
+          case dest => countAccepted(workflows(dest), ranges.updated(v, good), workflows)
 
-        goodCount + badCount
+    goodCount + badCount
 
   def part2(input: String) =
     val (flows, _) = parse(input)
