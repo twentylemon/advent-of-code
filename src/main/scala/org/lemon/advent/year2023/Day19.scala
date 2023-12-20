@@ -47,6 +47,7 @@ private object Day19:
       val flows = workflows(at)
       val next = flows.init.find(_ match
         case Switch(v, op, lit, _) => compare(gear, v, op, lit)
+        case Otherwise(dest) => throw AssertionError(s"unexpected otherwise  $dest")
       )
       next.map(f => accepted(gear, workflows, f.dest)).getOrElse(accepted(gear, workflows, flows.last.dest))
 
