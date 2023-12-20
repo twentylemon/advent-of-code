@@ -39,10 +39,9 @@ private object Day19:
     else if at == "A" then true
     else
       val flows = workflows(at)
-      val next = flows.init.find(_ match
-        case Flow(v, op, lit, _) => compare(gear, v, op, lit)
-      )
-      next.map(f => accepted(gear, workflows, f.dest)).getOrElse(accepted(gear, workflows, flows.last.dest))
+      flows.init.find { case Flow(v, op, lit, _) => compare(gear, v, op, lit) }
+        .map(f => accepted(gear, workflows, f.dest))
+        .getOrElse(accepted(gear, workflows, flows.last.dest))
 
   def part1(input: String) =
     val (flows, gears) = parse(input)
