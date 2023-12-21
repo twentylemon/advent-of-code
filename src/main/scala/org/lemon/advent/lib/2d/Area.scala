@@ -1,6 +1,7 @@
 package org.lemon.advent.lib.`2d`
 
 import scala.collection.immutable.WrappedString
+import org.lemon.advent.lib._
 
 object Area:
 
@@ -56,6 +57,8 @@ case class Area(xRange: Range, yRange: Range):
 
   def encloses(area: Area): Boolean =
     left <= area.left && right >= area.right && top <= area.top && bottom >= area.bottom
+
+  def clamp(coord: Coord): Coord = Coord(x = coord.x +% width + left, y = coord.y +% height + top)
 
   def show(coord2Char: Coord => Char): String =
     import scala.collection.mutable

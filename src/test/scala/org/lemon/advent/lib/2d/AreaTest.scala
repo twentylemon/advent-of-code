@@ -72,3 +72,7 @@ class AreaTest extends UnitTest:
   test("area not enclosed by disjoint area") {
     check((area: Area) => !area.encloses(Area(area.right + 1 to area.right + 2, area.top - 2 to area.top - 1)))
   }
+
+  test("clamp returns a coord in the area") {
+    check((area: Area, coord: Coord) => area.contains(area.clamp(coord)))
+  }

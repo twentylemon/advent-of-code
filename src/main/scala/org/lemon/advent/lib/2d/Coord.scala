@@ -19,6 +19,11 @@ object Coord:
     def hasCoord(coord: Coord): Boolean =
       seq.indices.contains(coord.row) && seq(coord.row).indices.contains(coord.col)
 
+  def gridToMap(input: String): Map[Coord, Char] = input.linesIterator
+    .zipWithIndex
+    .flatMap((line, y) => line.zipWithIndex.map((c, x) => (Coord(x, y), c)))
+    .toMap
+
 case class Coord(x: Int, y: Int):
   def row = y
   def col = x
