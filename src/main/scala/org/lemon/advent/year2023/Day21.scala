@@ -9,14 +9,6 @@ private object Day21:
 
   def start(grid: Map[Coord, Char]) = grid.find(_._2 == 'S').map(_._1).get
 
-  def multistep(grid: Map[Coord, Char], start: Coord) =
-    val area = Area(grid)
-    LazyList.unfold(Set(start))(positions =>
-      val next = positions.flatMap(_.adjacent).filter(coord => grid.getOrElse(area.clamp(coord), '#') != '#')
-      if next.isEmpty then None
-      else Some((positions, next))
-    )
-
   def count(grid: Map[Coord, Char], start: Coord)(depth: Int): Long =
     val goochie = mutable.Set.empty[Coord]
     val seen = mutable.Set(start)
