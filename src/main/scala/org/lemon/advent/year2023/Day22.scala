@@ -6,7 +6,7 @@ import scala.collection.mutable
 import scala.annotation.tailrec
 import scala.collection.parallel.CollectionConverters._
 
-object Day22:
+private object Day22:
 
   case class Brick(x: Range, y: Range, z: Range)
 
