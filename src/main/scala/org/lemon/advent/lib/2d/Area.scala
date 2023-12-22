@@ -1,7 +1,8 @@
 package org.lemon.advent.lib.`2d`
 
+import org.lemon.advent.lib.+%
+
 import scala.collection.immutable.WrappedString
-import org.lemon.advent.lib._
 
 object Area:
 
