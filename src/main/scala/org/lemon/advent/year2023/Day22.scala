@@ -1,10 +1,8 @@
 package org.lemon.advent.year2023
 
 import org.lemon.advent.lib.intersects
-import scala.collection.mutable
 
-import scala.annotation.tailrec
-import scala.collection.parallel.CollectionConverters._
+import scala.collection.mutable
 
 private object Day22:
 
