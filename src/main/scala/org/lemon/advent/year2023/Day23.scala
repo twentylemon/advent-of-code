@@ -3,7 +3,6 @@ package org.lemon.advent.year2023
 import org.lemon.advent.lib.`2d`._
 
 import scala.collection.mutable
-import scala.collection.parallel.CollectionConverters._
 
 private object Day23:
 
