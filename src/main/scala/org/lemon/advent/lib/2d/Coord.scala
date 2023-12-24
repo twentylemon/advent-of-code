@@ -4,8 +4,7 @@ import org.lemon.advent.lib.graph.UnitGraph
 
 object Coord:
 
-  given Conversion[(Int, Int), Coord] with
-    def apply(coord: (Int, Int)): Coord = Coord(x = coord._1, y = coord._2)
+  given Conversion[(Int, Int), Coord] = (coord: (Int, Int)) => Coord(x = coord._1, y = coord._2)
 
   given Ordering[Coord] = Ordering.by[Coord, Int](_.x).orElseBy(_.y)
 

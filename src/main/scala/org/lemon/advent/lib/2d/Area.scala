@@ -20,8 +20,8 @@ object Area:
 
   def apply(left: Int, right: Int, top: Int, bottom: Int): Area = Area(left to right, top to bottom)
 
-  given Conversion[Area, Iterator[Coord]] with
-    def apply(area: Area): Iterator[Coord] = for y <- area.yRange.iterator; x <- area.xRange.iterator yield (x, y)
+  given Conversion[Area, Iterator[Coord]] =
+    (area: Area) => for y <- area.yRange.iterator; x <- area.xRange.iterator yield (x, y)
 
 case class Area(xRange: Range, yRange: Range):
   def left = xRange.min
