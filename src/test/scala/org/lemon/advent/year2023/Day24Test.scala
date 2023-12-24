@@ -21,9 +21,9 @@ class Day24Test extends UnitTest:
   }
 
   test("part 2 example") {
-    // part2(in) shouldBe 0
+    part2(in, 2) shouldBe 24 + 13 + 10
   }
 
   test("part 2") {
-    // part2(read(file(2023)(24))) shouldBe 0
+    part2(read(file(2023)(24))) shouldBe 331109811422259L + 312547020340291L + 118035075297081L
   }
