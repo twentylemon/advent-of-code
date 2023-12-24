@@ -1,5 +1,7 @@
 package org.lemon.advent.lib.`2d`
 
+import org.lemon.advent.lib.graph.UnitGraph
+
 object Coord:
 
   given Conversion[(Int, Int), Coord] with
@@ -18,6 +20,10 @@ object Coord:
 
     def hasCoord(coord: Coord): Boolean =
       seq.indices.contains(coord.row) && seq(coord.row).indices.contains(coord.col)
+  
+  extension [V](grid: Map[Coord, V])
+    def toGridAdjacencyList: UnitGraph[Coord] =
+      grid.map((coord, _) => (coord, coord.adjacent.filter(grid.contains)))
 
   def gridToMap(input: String): Map[Coord, Char] = input.linesIterator
     .zipWithIndex

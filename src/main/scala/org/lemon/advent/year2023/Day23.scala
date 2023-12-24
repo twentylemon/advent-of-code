@@ -58,12 +58,18 @@ private object Day23:
 
     def pairs[T](xs: Iterable[T]) =
       for (x, i) <- xs.iterator.zipWithIndex; (y, j) <- xs.iterator.zipWithIndex; if i != j yield (x, y)
+  
+    import org.lemon.advent.lib.graph.pathFind
+    def adjacent(end: Coord)(coord: Coord) = possibleSteps(coord).filter(c => c == end || !nodes.contains(c))
 
     pairs(nodes)
-      .map((lhs, rhs) => (lhs, rhs, fill(lhs, rhs)))
-      .filter(_._3 != -1)
+      // .map((lhs, rhs) => (lhs, rhs, fill(lhs, rhs)))
+      // .filter(_._3 != -1)
+      .map((lhs, rhs) => (lhs, rhs, pathFind(adjacent(rhs), lhs, rhs)))
+      .filter(_._3.isDefined)
       .toSeq.groupBy(_._1)
-      .mapValues(edges => edges.map(_.tail))
+      // .mapValues(edges => edges.map(_.tail))
+      .mapValues(edges => edges.map(t => (t._2, t._3.get)))
       .toMap
 
   def part2(input: String) =
