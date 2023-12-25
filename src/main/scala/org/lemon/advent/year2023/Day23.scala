@@ -65,7 +65,7 @@ private object Day23:
     pairs(nodes)
       // .map((lhs, rhs) => (lhs, rhs, fill(lhs, rhs)))
       // .filter(_._3 != -1)
-      .map((lhs, rhs) => (lhs, rhs, pathFind(adjacent(rhs), lhs, rhs)))
+      .map((lhs, rhs) => (lhs, rhs, pathFind(adjacent(rhs), lhs, rhs).map(_.distance)))
       .filter(_._3.isDefined)
       .toSeq.groupBy(_._1)
       // .mapValues(edges => edges.map(_.tail))

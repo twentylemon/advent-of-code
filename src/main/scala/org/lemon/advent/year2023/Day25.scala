@@ -36,15 +36,13 @@ private object Day25:
 
     @tailrec
     def count(usedEdges: Set[(T, T)], foundSoFar: Int): Int =
-      if foundSoFar >= 4 then 4 // bail early
-      else
-        pathFind(usedEdges) match
-          case None => foundSoFar
-          case Some(edges) => count(usedEdges ++ edges, foundSoFar + 1)
+      pathFind(usedEdges) match
+        case None => foundSoFar
+        case Some(edges) => count(usedEdges ++ edges, foundSoFar + 1)
 
     count(Set.empty[(T, T)], 0)
 
-  def size[T](graph: Map[T, Seq[T]]): Int =
+  def size[T](graph: Map[T, Seq[T]]) =
     val start = graph.head._1
     val nodes = mutable.Set(start)
     val queue = mutable.Queue(start)
@@ -57,7 +55,7 @@ private object Day25:
     val graph = parse(input)
     val edges = graph.toSeq.flatMap((from, tos) => tos.map(to => sorted((from, to)))).toSet
 
-    val threeCut = edges.par.filter((from, to) => totalPaths(graph, from, to) == 3)
+    val threeCut = edges.par.filter((from, to) => totalPaths(graph, from, to) == 3).take(3)
     val cutGraph = threeCut.foldLeft(graph) { case (graph, (from, to)) =>
       graph.updated(from, graph(from).filter(_ != to)).updated(to, graph(to).filter(_ != from))
     }
