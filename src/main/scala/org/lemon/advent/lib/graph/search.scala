@@ -6,13 +6,13 @@ import scala.math.Numeric.Implicits.infixNumericOps
 case class Path[N, D](path: Seq[N], at: N, distance: D)
 
 /** Performs a dijkstra's search of the graph from `start` to `end`, returning
-  * the length of the shortest path between them.
+  * the shortest path between them.
   *
   * @param start the start node
   * @param end the end node
   * @param adjacency function to return edges for a given node
   * @param numeric contextual math ops for the distance
-  * @return length of the shortest path between `start` and `end`, or empty if no path exists
+  * @return the shortest path between `start` and `end`, or empty if no path exists
   * @tparam N the node type
   * @tparam D the distance type
   */
@@ -30,13 +30,12 @@ def pathFind[N, D](adjacency: N => Seq[(N, D)], start: N, end: N)(using numeric:
   queue.headOption
 
 /** Performs a dijkstra's search of the graph from `start` to `end`, returning
-  * the length of the shortest path between them. The distance between each node
-  * is assumed to be one.
+  * the shortest path between them. The distance between each node is assumed to be one.
   *
+  * @param adjacency function to return edges for a given node, all with distance one
   * @param start the start node
   * @param end the end node
-  * @param adjacency function to return edges for a given node, all with distance one
-  * @return length of the shortest path between `start` and `end`, or empty if no path exists
+  * @return the shortest path between `start` and `end`, or empty if no path exists
   * @tparam N the node type
   */
 def pathFind[N](adjacency: N => Seq[N], start: N, end: N): Option[Path[N, Int]] =
@@ -50,10 +49,12 @@ def pathFind[N](adjacency: N => Seq[N], start: N, end: N): Option[Path[N, Int]] 
 type WeightedGraph[N, D] = Map[N, Seq[(N, D)]]
 
 /** Performs a dijkstra's search of the graph from `start` to `end`, returning
-  * the length of the shortest path between them.
+  * the shortest path between them.
   *
   * @param graph the graph to search in
-  * @return length of the shortest path between `start` and `end`, or empty if no path exists
+  * @param start the start node
+  * @param end the end node
+  * @return the shortest path between `start` and `end`, or empty if no path exists
   * @tparam N the node type
   * @tparam D the distance type
   */
@@ -67,12 +68,12 @@ def pathFind[N, D](graph: WeightedGraph[N, D], start: N, end: N)(using numeric: 
 type UnitGraph[N] = Map[N, Seq[N]]
 
 /** Performs a dijkstra's search of the graph from `start` to `end`, returning
-  * the length of the shortest path between them.
+  * the shortest path between them. The distance between each node is assumed to be one.
   *
+  * @param graph the graph to search in
   * @param start the start node
   * @param end the end node
-  * @param graph the graph to search in
-  * @return length of the shortest path between `start` and `end`, or empty if no path exists
+  * @return the shortest path between `start` and `end`, or empty if no path exists
   * @tparam N the node type
   */
 def pathFind[N](graph: UnitGraph[N], start: N, end: N): Option[Path[N, Int]] =
