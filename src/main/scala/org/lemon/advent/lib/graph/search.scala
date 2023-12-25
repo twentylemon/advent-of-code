@@ -16,7 +16,7 @@ import scala.math.Numeric.Implicits.infixNumericOps
   */
 def pathFind[N, D](adjacency: N => Seq[(N, D)], start: N, end: N)(using numeric: Numeric[D]): Option[D] =
   type Item = (Set[N], N, D) // (path-so-far, current-location, total-distance)
-  given Ordering[Item] = Ordering.by(_._3)
+  given Ordering[Item] = Ordering.by[Item, D](_._3).reverse
   val queue = mutable.PriorityQueue((Set(start), start, numeric.zero))
 
   while !queue.isEmpty && queue.head._2 != end do
