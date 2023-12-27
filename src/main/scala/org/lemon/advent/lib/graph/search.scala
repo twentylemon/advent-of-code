@@ -17,7 +17,7 @@ case class Path[N, D](path: Seq[N], at: N, distance: D)
   * @tparam D the distance type
   */
 def pathFind[N, D](adjacency: N => Seq[(N, D)], start: N, end: N)(using numeric: Numeric[D]): Option[Path[N, D]] =
-  given Ordering[Path[N, D]] = Ordering.by[Path[N, D], D](_.distance)
+  given Ordering[Path[N, D]] = Ordering.by[Path[N, D], D](_.distance).reverse
   val queue = mutable.PriorityQueue(Path(path = Seq(start), at = start, distance = numeric.zero))
   val visited = mutable.Set(start)
 
