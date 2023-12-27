@@ -2,6 +2,7 @@ package org.lemon.advent.year2023
 
 import org.lemon.advent.lib.graph.Path
 import org.lemon.advent.lib.graph.pathFind
+import org.lemon.advent.lib.graph.fill
 
 import scala.annotation.tailrec
 import scala.collection.mutable
@@ -36,14 +37,7 @@ private object Day25:
           Some((pathFlow, nextFlows))
     ).sum
 
-  def size[T](graph: Map[T, Seq[T]]) =
-    val start = graph.head._1
-    val nodes = mutable.Set(start)
-    val queue = mutable.Queue(start)
-    while !queue.isEmpty do
-      val node = queue.dequeue
-      queue ++= graph(node).filter(nodes.add)
-    nodes.size
+  def size[T](graph: Map[T, Seq[T]]) = fill(graph, graph.head._1).size
 
   def part1(input: String) =
     val graph = parse(input)
