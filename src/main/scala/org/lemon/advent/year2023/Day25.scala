@@ -1,10 +1,16 @@
 package org.lemon.advent.year2023
 
+import org.lemon.advent.lib.graph.Path
+import org.lemon.advent.lib.graph.pathFind
+
 import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.collection.parallel.CollectionConverters._
 
 private object Day25:
+
+  extension (pair: (String, String))
+    def sorted = if pair._1 < pair._2 then pair else pair.swap
 
   def parse(input: String) = input.linesIterator
     .map(_ match
@@ -14,33 +20,21 @@ private object Day25:
     .toSeq
     .groupMap(_._1)(_._2)
 
-  def sorted(edge: (String, String)) = if edge._1 < edge._2 then edge else edge.swap
-
-  def totalPaths(graph: Map[String, Seq[String]], start: String, end: String) =
-    type T = String
-    def pathFind(usedEdges: Set[(T, T)]) =
-      type Item = (Set[(T, T)], T, T, Int) // unusable-edges, from, to, distance
-      given Ordering[Item] = Ordering.by[Item, Int](_._4).reverse
-      val visited = mutable.Set.empty[T]
-      val queue = mutable.PriorityQueue[Item]((usedEdges, null.asInstanceOf[T], start, 0))
-
-      while !queue.isEmpty && queue.head._3 != end do
-        val (unusable, from, at, distance) = queue.dequeue
-        visited += at
-        queue ++= graph(at)
-          .filterNot(visited)
-          .filter(next => !unusable(sorted((at, next))))
-          .map(next => (unusable + sorted((at, next)), at, next, distance + 1))
-
-      queue.headOption.map(item => item._1 + sorted((item._2, item._3)))
-
-    @tailrec
-    def count(usedEdges: Set[(T, T)], foundSoFar: Int): Int =
-      pathFind(usedEdges) match
-        case None => foundSoFar
-        case Some(edges) => count(usedEdges ++ edges, foundSoFar + 1)
-
-    count(Set.empty[(T, T)], 0)
+  def maxFlow[T](graph: Map[T, Seq[T]], edgeWeights: Map[(T, T), Int], source: T, sink: T) =
+    Iterator.unfold(edgeWeights)(flowByEdge =>
+      def adjacency(node: T) = graph(node).filter(next => flowByEdge((node, next)) > 0)
+      pathFind(adjacency, source, sink) match
+        case None => None
+        case Some(Path(path, _, _)) =>
+          val route = path.zip(path.tail).map(_.swap)
+          val pathFlow = route.map(flowByEdge).min
+          val nextFlows = route.foldLeft(flowByEdge) { case (flow, (from, to)) =>
+            flow
+              .updatedWith((from, to))(_.map(x => x - pathFlow))
+              .updatedWith((to, from))(_.map(x => +pathFlow))
+          }
+          Some((pathFlow, nextFlows))
+    ).sum
 
   def size[T](graph: Map[T, Seq[T]]) =
     val start = graph.head._1
@@ -53,9 +47,11 @@ private object Day25:
 
   def part1(input: String) =
     val graph = parse(input)
-    val edges = graph.toSeq.flatMap((from, tos) => tos.map(to => sorted((from, to)))).toSet
+    val edges = graph.toSeq.flatMap((from, tos) => tos.map(to => (from, to).sorted)).toSet
+    val flowByEdge =
+      graph.toSeq.flatMap((from, tos) => tos.flatMap(to => Seq((from, to), (to, from)))).map((_, 1)).toMap
 
-    val threeCut = edges.par.filter((from, to) => totalPaths(graph, from, to) == 3).take(3)
+    val threeCut = edges.par.filter(maxFlow(graph, flowByEdge, _, _) == 3)
     val cutGraph = threeCut.foldLeft(graph) { case (graph, (from, to)) =>
       graph.updated(from, graph(from).filter(_ != to)).updated(to, graph(to).filter(_ != from))
     }
