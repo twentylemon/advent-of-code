@@ -30,8 +30,8 @@ private object Day25:
           val pathFlow = route.map(flowByEdge).min
           val nextFlows = route.foldLeft(flowByEdge) { case (flow, (from, to)) =>
             flow
-              .updatedWith((from, to))(_.map(x => x - pathFlow))
-              .updatedWith((to, from))(_.map(x => +pathFlow))
+              .updatedWith((from, to))(_.map(w => w - pathFlow))
+              .updatedWith((to, from))(_.map(w => w + pathFlow))
           }
           Some((pathFlow, nextFlows))
     ).sum
