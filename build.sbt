@@ -13,8 +13,8 @@ lazy val advent = (project in file("."))
       "io.circe" %% "circe-parser" % "0.14.6"
     ),
     libraryDependencies ++= Seq(
-      "com.github.vagmcs" %% "optimus" % "3.4.3",
-      "com.github.vagmcs" %% "optimus-solver-oj" % "3.4.3"
+      "com.github.vagmcs" %% "optimus" % "3.4.4",
+      "com.github.vagmcs" %% "optimus-solver-oj" % "3.4.4"
     ),
     libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.17.0" % Test,
     libraryDependencies += "org.scalatestplus" %% "scalacheck-1-17" % "3.2.17.0" % Test,
