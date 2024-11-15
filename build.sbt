@@ -18,7 +18,7 @@ lazy val advent = (project in file("."))
     ),
     libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.17.1" % Test,
     libraryDependencies += "org.scalatestplus" %% "scalacheck-1-17" % "3.2.17.0" % Test,
-    libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.17" % Test,
+    libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.19" % Test,
     Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oDF"),
     Test / parallelExecution := false,
     Test / logBuffered := false
