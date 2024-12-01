@@ -2,6 +2,21 @@ package org.lemon.advent.year2024
 
 private object Day01:
 
-  def part1(input: String) = ???
+  def parse(input: String) = input.linesIterator
+      .map(_.split("\\s+"))
+      .map(p => (p.head.toInt, p.last.toInt))
+      .toSeq
+      .unzip
 
-  def part2(input: String) = ???
+  def part1(input: String) =
+    val (left, right) = parse(input)
+    left.sorted.zip(right.sorted)
+      .map((l, r) => (l - r).abs)
+      .sum
+
+  def part2(input: String) =
+    val (left, right) = parse(input)
+    val counts = right.groupBy(r => r).mapValues(_.size)
+    left
+      .map(l => l * counts.getOrElse(l, 0))
+      .sum
