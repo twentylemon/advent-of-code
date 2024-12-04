@@ -2,6 +2,8 @@ package org.lemon.advent.lib.`2d`
 
 import org.lemon.advent.lib.graph.UnitGraph
 
+import scala.collection.immutable.WrappedString
+
 object Coord:
 
   given Conversion[(Int, Int), Coord] = (coord: (Int, Int)) => Coord(x = coord._1, y = coord._2)
@@ -20,8 +22,11 @@ object Coord:
     def hasCoord(coord: Coord): Boolean =
       seq.indices.contains(coord.row) && seq(coord.row).indices.contains(coord.col)
 
-  extension (seq: Seq[String])
+  extension (seq: Seq[String])(using String => WrappedString)
     def apply(coord: Coord): Char = seq(coord.row)(coord.col)
+
+    def hasCoord(coord: Coord): Boolean =
+      seq.indices.contains(coord.row) && seq(coord.row).indices.contains(coord.col)
 
   extension [V](grid: Map[Coord, V])
     def toGridAdjacencyList: UnitGraph[Coord] =

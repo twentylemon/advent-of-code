@@ -22,8 +22,11 @@ object Area:
   given Conversion[Area, Iterator[Coord]] =
     (area: Area) => for y <- area.yRange.iterator; x <- area.xRange.iterator yield (x, y)
 
-  extension [T](seq: Seq[String])
+  extension [T](seq: Seq[String])(using String => WrappedString)
     def apply(area: Area): Seq[Seq[Char]] = seq.slice(area.top, area.bottom + 1).map(_.slice(area.left, area.right + 1))
+
+  extension [T](seq: Seq[Seq[T]])
+    def apply(area: Area): Seq[Seq[T]] = seq.slice(area.top, area.bottom + 1).map(_.slice(area.left, area.right + 1))
 
 case class Area(xRange: Range, yRange: Range):
   def left = xRange.min
