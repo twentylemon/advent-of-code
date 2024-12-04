@@ -19,7 +19,10 @@ object Coord:
 
     def hasCoord(coord: Coord): Boolean =
       seq.indices.contains(coord.row) && seq(coord.row).indices.contains(coord.col)
-  
+
+  extension (seq: Seq[String])
+    def apply(coord: Coord): Char = seq(coord.row)(coord.col)
+
   extension [V](grid: Map[Coord, V])
     def toGridAdjacencyList: UnitGraph[Coord] =
       grid.map((coord, _) => (coord, coord.adjacent.filter(grid.contains)))

@@ -56,6 +56,22 @@ case class Area(xRange: Range, yRange: Range):
   def topRow: Iterator[Coord] = row(top)
   def bottomRow: Iterator[Coord] = row(bottom)
 
+  def upDiagonal(startAt: Coord): Iterator[Coord] =
+    assert(contains(startAt), s"$this  does not contain startAt  $startAt")
+    Iterator.iterate(startAt)(_.up.right).takeWhile(contains)
+
+  def downDiagonal(startAt: Coord): Iterator[Coord] =
+    assert(contains(startAt), s"$this  does not contain startAt  $startAt")
+    Iterator.iterate(startAt)(_.down.right).takeWhile(contains)
+
+  def rows: Iterator[Iterator[Coord]] = yRange.iterator.map(row)
+  def cols: Iterator[Iterator[Coord]] = xRange.iterator.map(col)
+  def upDiagonals: Iterator[Iterator[Coord]] =
+    xRange.iterator.map(x => upDiagonal((x, bottom))) ++ yRange.reverseIterator.drop(1).map(y => upDiagonal((left, y)))
+  def downDiagonals: Iterator[Iterator[Coord]] =
+    xRange.iterator.map(x => downDiagonal((x, top))) ++ yRange.iterator.drop(1).map(y => downDiagonal((left, y)))
+  def diagonals: Iterator[Iterator[Coord]] = upDiagonals ++ downDiagonals
+
   def encloses(area: Area): Boolean =
     left <= area.left && right >= area.right && top <= area.top && bottom >= area.bottom
 
