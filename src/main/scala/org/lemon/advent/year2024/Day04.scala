@@ -23,12 +23,6 @@ private object Day04:
     val area = Area(lines)
     val mas = Set("MAS", "MAS".reverse)
 
-    area.upDiagonals
-      .map(
-        _.sliding(3)
-          .map(coords => (coords.head, phrase(lines, coords)))
-          .filter((_, s) => mas.contains(s))
-          .filter((start, _) => mas.contains(phrase(lines, area.downDiagonal(start.up.up).take(3).toSeq)))
-          .size
-      )
-      .sum
+    area.rectangles(3, 3)
+      .map(ar => (phrase(lines, ar.downDiagonal(ar.topLeft).toSeq), phrase(lines, ar.upDiagonal(ar.bottomLeft).toSeq)))
+      .count((s1, s2) => mas.contains(s1) && mas.contains(s2))

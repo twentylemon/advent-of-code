@@ -72,6 +72,12 @@ case class Area(xRange: Range, yRange: Range):
     xRange.iterator.map(x => downDiagonal((x, top))) ++ yRange.iterator.drop(1).map(y => downDiagonal((left, y)))
   def diagonals: Iterator[Iterator[Coord]] = upDiagonals ++ downDiagonals
 
+  def rectangles(width: Int, height: Int): Iterator[Area] =
+    for
+      x <- xRange.sliding(width)
+      y <- yRange.sliding(height)
+    yield Area(x.head to x.last, y.head to y.last)
+
   def encloses(area: Area): Boolean =
     left <= area.left && right >= area.right && top <= area.top && bottom >= area.bottom
 
