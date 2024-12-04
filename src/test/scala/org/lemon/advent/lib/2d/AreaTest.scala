@@ -54,6 +54,53 @@ class AreaTest extends UnitTest:
     )
   }
 
+  test("rows includes all coords in same iteration order as overall area") {
+    check((area: Area) => area.rows.flatMap(identity).sameElements(area))
+  }
+
+  test("cols includes all coords in same iteration order as transposed area") {
+    check((area: Area) =>
+      val transposed = Area(xRange = area.yRange, yRange = area.xRange)
+      transposed.cols.flatMap(identity).sameElements(area.map(_.flip))
+    )
+  }
+
+  test("upDiagonals contains all coords once") {
+    check((area: Area) => area.upDiagonals.flatMap(identity).toSeq.diff(area.toSeq).isEmpty)
+  }
+
+  test("downDiagonals contains all coords once") {
+    check((area: Area) => area.downDiagonals.flatMap(identity).toSeq.diff(area.toSeq).isEmpty)
+  }
+
+  test("rectangles are all correct dimension") {
+    check((area: Area) =>
+      (area.width > 4 && area.height > 4) ==> {
+        val (x, y) = (area.width - 3, area.height - 3)
+        area.rectangles(x, y).forall(r => r.width == x && r.height == y)
+      }
+    )
+  }
+
+  test("rectangles are all enclosed by area") {
+    check((area: Area) =>
+      (area.width > 4 && area.height > 4) ==> {
+        val (x, y) = (area.width - 3, area.height - 3)
+        area.rectangles(x, y).forall(area.encloses)
+      }
+    )
+  }
+
+  test("no duplicate rectangles") {
+    check((area: Area) =>
+      (area.width > 4 && area.height > 4) ==> {
+        val (x, y) = (area.width - 3, area.height - 3)
+        val rect = area.rectangles(x, y).toSeq
+        rect.distinct == rect
+      }
+    )
+  }
+
   test("area encloses itself") {
     check((area: Area) => area encloses area)
   }

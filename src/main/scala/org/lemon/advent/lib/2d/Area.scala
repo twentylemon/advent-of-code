@@ -9,8 +9,7 @@ object Area:
   def apply(grid: Map[Coord, _]): Area = apply(grid.keySet)
 
   def apply(coords: Iterable[Coord]): Area =
-    val xs = coords.map(_.x)
-    val ys = coords.map(_.y)
+    val (xs, ys) = (coords.map(_.x),coords.map(_.y))
     Area(xRange = xs.min to xs.max, yRange = ys.min to ys.max)
 
   def apply(grid: Seq[Seq[_]]): Area = Area(yRange = grid.indices, xRange = grid.head.indices)
