@@ -9,7 +9,7 @@ object Area:
   def apply(grid: Map[Coord, _]): Area = apply(grid.keySet)
 
   def apply(coords: Iterable[Coord]): Area =
-    val (xs, ys) = (coords.map(_.x),coords.map(_.y))
+    val (xs, ys) = (coords.map(_.x), coords.map(_.y))
     Area(xRange = xs.min to xs.max, yRange = ys.min to ys.max)
 
   def apply(grid: Seq[Seq[_]]): Area = Area(yRange = grid.indices, xRange = grid.head.indices)
@@ -21,6 +21,9 @@ object Area:
 
   given Conversion[Area, Iterator[Coord]] =
     (area: Area) => for y <- area.yRange.iterator; x <- area.xRange.iterator yield (x, y)
+
+  extension [T](seq: Seq[String])
+    def apply(area: Area): Seq[Seq[Char]] = seq.slice(area.top, area.bottom + 1).map(_.slice(area.left, area.right + 1))
 
 case class Area(xRange: Range, yRange: Range):
   def left = xRange.min
