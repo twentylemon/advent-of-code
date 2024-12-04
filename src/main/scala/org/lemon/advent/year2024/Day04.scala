@@ -4,7 +4,7 @@ import org.lemon.advent.lib.`2d`._
 
 private object Day04:
 
-  def phrase(wordsearch: Seq[String], coords: Seq[Coord]) = coords.map(wordsearch(_)).mkString
+  def phrase(wordsearch: Seq[String], coords: Iterable[Coord] | Iterator[Coord]) = coords.map(wordsearch(_)).mkString
 
   def part1(input: String) =
     val lines = input.linesIterator.toSeq
@@ -24,5 +24,5 @@ private object Day04:
     val mas = Set("MAS", "MAS".reverse)
 
     area.rectangles(3, 3)
-      .map(ar => (phrase(lines, ar.downDiagonal(ar.topLeft).toSeq), phrase(lines, ar.upDiagonal(ar.bottomLeft).toSeq)))
+      .map(rect => (phrase(lines, rect.downDiagonal(rect.topLeft)), phrase(lines, rect.upDiagonal(rect.bottomLeft))))
       .count((s1, s2) => mas.contains(s1) && mas.contains(s2))
