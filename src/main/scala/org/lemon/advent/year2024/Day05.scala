@@ -1,7 +1,5 @@
 package org.lemon.advent.year2024
 
-import org.lemon.advent.lib.`2d`._
-
 private object Day05:
 
   case class Rule(before: Int, after: Int)
