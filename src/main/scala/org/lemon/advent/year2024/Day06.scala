@@ -35,6 +35,5 @@ private object Day06:
     val grid = parse(input)
     val start = grid.find(_._2 == '^').get._1
     val dir = Direction('^')
-    grid.par
-      .filter(_._2 == '.')
-      .count { case (c, _) => isLoop(grid + (c -> '#'), start, dir) }
+    val path = walk(grid, start, dir)
+    path.par.count(c => isLoop(grid + (c -> '#'), start, dir))
