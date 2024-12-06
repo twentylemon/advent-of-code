@@ -29,7 +29,7 @@ private object Day06:
     else
       grid(goingTo) match
         case '#' => isLoop(grid, cameFrom, dir.turnRight, seen + ((cameFrom, dir)))
-        case _: Char => isLoop(grid, goingTo, dir, seen + ((cameFrom, dir)))
+        case _ => isLoop(grid, goingTo, dir, seen)
 
   def part2(input: String) =
     val grid = parse(input)
