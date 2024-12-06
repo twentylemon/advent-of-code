@@ -88,6 +88,34 @@ class CoordTest extends UnitTest:
     check((coord: Coord, n: Int) => coord.shift(Direction.Right, n) == coord.shiftRight(n))
   }
 
+  test("left is left direction") {
+    check((coord: Coord) => coord.directionTo(coord.left) == Some(Direction.Left))
+  }
+
+  test("right is right direction") {
+    check((coord: Coord) => coord.directionTo(coord.right) == Some(Direction.Right))
+  }
+
+  test("up is up direction") {
+    check((coord: Coord) => coord.directionTo(coord.up) == Some(Direction.Up))
+  }
+
+  test("down is down direction") {
+    check((coord: Coord) => coord.directionTo(coord.down) == Some(Direction.Down))
+  }
+
+  test("direction to self is None") {
+    check((coord: Coord) => coord.directionTo(coord) == None)
+  }
+
+  test("direction off line is None") {
+    check((coord: Coord, rhs: Coord) =>
+      coord.x != rhs.x && coord.y != rhs.y ==> {
+        coord.directionTo(rhs) == None
+      }
+    )
+  }
+
   test("manhattan distance of adjacent is 1") {
     check((coord: Coord) => coord.adjacent.forall(_.manhattan(coord) == 1))
   }

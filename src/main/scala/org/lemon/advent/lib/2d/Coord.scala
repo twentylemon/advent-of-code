@@ -67,4 +67,13 @@ case class Coord(x: Int, y: Int):
   def +(rhs: Coord): Coord = (x + rhs.x, y + rhs.y)
   def +(direction: Direction): Coord = move(direction)
   def -(rhs: Coord): Coord = (x - rhs.x, y - rhs.y)
+  def -(direction: Direction): Coord = move(direction.turnAround)
   def *(n: Int): Coord = (x * n, y * n)
+
+  def directionTo(rhs: Coord): Option[Direction] =
+    val Coord(dx, dy) = rhs - this
+    if dx == 0 && dy < 0 then Some(Direction.Up)
+    else if dx == 0 && dy > 0 then Some(Direction.Down)
+    else if dx < 0 && dy == 0 then Some(Direction.Left)
+    else if dx > 0 && dy == 0 then Some(Direction.Right)
+    else None
