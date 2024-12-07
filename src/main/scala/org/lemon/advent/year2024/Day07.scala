@@ -1,7 +1,5 @@
 package org.lemon.advent.year2024
 
-import cats.kernel.Eq
-
 private object Day07:
 
   case class Equation(result: Long, operands: Seq[Long])
