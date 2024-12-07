@@ -3,6 +3,7 @@ lazy val advent = (project in file("."))
   .settings(
     scalaVersion := "3.3.4",
     libraryDependencies += "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4",
+    libraryDependencies += "com.softwaremill.sttp.client4" %% "core" % "4.0.0-M19",
     libraryDependencies ++= Seq(
       "org.typelevel" %% "cats-core" % "2.12.0",
       "org.typelevel" %% "cats-collections-core" % "0.9.9"
@@ -21,5 +22,5 @@ lazy val advent = (project in file("."))
     libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.19" % Test,
     Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oDF"),
     Test / parallelExecution := false,
-    Test / logBuffered := false
+    Test / logBuffered := false,
   )
