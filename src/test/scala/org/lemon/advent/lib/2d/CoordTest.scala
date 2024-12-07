@@ -109,11 +109,7 @@ class CoordTest extends UnitTest:
   }
 
   test("direction off line is None") {
-    check((coord: Coord, rhs: Coord) =>
-      coord.x != rhs.x && coord.y != rhs.y ==> {
-        coord.directionTo(rhs) == None
-      }
-    )
+    check((coord: Coord) => coord.directionTo(coord.up.left) == None)
   }
 
   test("manhattan distance of adjacent is 1") {
