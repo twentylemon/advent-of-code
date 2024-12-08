@@ -7,17 +7,14 @@ private object Day08:
 
   def parse = Coord.gridToMap
 
-  def antinodes(grid: Map[Coord, Char], cond: (Coord, Coord, Coord) => Boolean)(lhs: Coord, rhs: Coord): Set[Coord] =
-    def it(d: Coord): Iterator[Coord] =
-      Iterator.iterate(lhs)(_ + d)
-        .takeWhile(grid.contains)
-        .filter(c => cond(lhs, rhs, c))
-    (it(lhs - rhs) ++ it(rhs - lhs)).toSet
+  def antinodes(grid: Map[Coord, Char])(lhs: Coord, rhs: Coord): Iterator[Coord] =
+    def it(d: Coord) = Iterator.iterate(lhs)(_ + d.reduce).takeWhile(grid.contains)
+    it(lhs - rhs) ++ it(rhs - lhs)
 
   def count(grid: Map[Coord, Char], cond: (Coord, Coord, Coord) => Boolean) =
-    val freqs = grid.view.filterNot(_._2 == '.').groupBy(_._2).mapValues(_.map(_._1).toSeq).values
+    val freqs = grid.filterNot(_._2 == '.').groupBy(_._2).values.map(_.keys)
     freqs
-      .flatMap(coords => coords.pairs.flatMap(antinodes(grid, cond).tupled))
+      .flatMap(coords => coords.pairs.flatMap((a, b) => antinodes(grid)(a, b).filter(cond(a, b, _))))
       .toSet.size
 
   def part1(input: String) = count(
