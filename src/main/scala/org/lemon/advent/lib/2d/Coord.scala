@@ -1,6 +1,7 @@
 package org.lemon.advent.lib.`2d`
 
 import org.lemon.advent.lib.graph.UnitGraph
+import org.lemon.advent.lib._
 
 import scala.collection.immutable.WrappedString
 
@@ -77,3 +78,10 @@ case class Coord(x: Int, y: Int):
     else if dx < 0 && dy == 0 then Some(Direction.Left)
     else if dx > 0 && dy == 0 then Some(Direction.Right)
     else None
+
+  def reduce: Coord =
+    if x == 0 then Coord(0, y.sign)
+    else if y == 0 then Coord(x.sign, 0)
+    else
+      val gcd = x.abs.gcd(y.abs)
+      Coord(x / gcd, y / gcd)
