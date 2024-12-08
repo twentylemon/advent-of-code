@@ -11,6 +11,7 @@ private object Day07:
   def check(equation: Equation, ops: Seq[(Long, Long) => Long]): Boolean =
     def doCheck(target: Long, operands: Seq[Long], soFar: Long): Boolean =
       if operands.isEmpty then soFar == target
+      else if soFar > target then false
       else ops.exists(f => doCheck(target, operands.tail, f(soFar, operands.head)))
     doCheck(equation.result, equation.operands.tail, equation.operands.head)
 
