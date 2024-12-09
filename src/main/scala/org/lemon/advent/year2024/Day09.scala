@@ -38,6 +38,12 @@ private object Day09:
 
   def part1(input: String) =
     val segments = parse(input)
+    // this also works and shares part 2 code entirely, but it's like 100x slower
+    // val blocks = segments.flatMap(_ match
+    //   case File(len, id) => Seq.fill(len)(File(1, id))
+    //   case Free(len) => Seq.fill(len)(Free(1))
+    // )
+    // val files = defragFiles(blocks)
     val files = defragBlocks(segments)
     checksum(files)
 
