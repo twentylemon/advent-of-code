@@ -22,7 +22,7 @@ def pathFind[N, D: Numeric](adjacency: N => Seq[(N, D)], start: N, end: N): Opti
     val node @ Path(path, distance) = queue.dequeue
     queue ++= adjacency(node.at)
       .filter((neigh, _) => visited.add(neigh))
-      .map((node, dist) => Path(node +: path, distance + dist))
+      .map((neigh, dist) => Path(neigh +: path, distance + dist))
 
   queue.headOption
 
@@ -36,8 +36,7 @@ def pathFind[N, D: Numeric](adjacency: N => Seq[(N, D)], start: N, end: N): Opti
   * @tparam N the node type
   */
 def pathFind[N](adjacency: N => Seq[N], start: N, end: N): Option[Path[N, Int]] =
-  def unitAdjacency(node: N): Seq[(N, Int)] = adjacency(node).map((_, 1))
-  pathFind(unitAdjacency, start, end)
+  pathFind(unitAdjacency(adjacency), start, end)
 
 /** Performs a dijkstra's search of the graph from `start` to `end`, returning
   * the shortest path between them.

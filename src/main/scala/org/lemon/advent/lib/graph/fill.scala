@@ -1,6 +1,7 @@
 package org.lemon.advent.lib.graph
 
 import scala.collection.mutable
+import scala.math.Numeric.Implicits.infixNumericOps
 
 /** Performs a breadth first fill of the graph from the starting node, returning
   * the set of all reachable nodes.
@@ -29,11 +30,26 @@ def fill[N](adjacency: N => Seq[N], start: N): Set[N] =
   * @return the set of all paths from `start` to any of `ends`
   * @tparam N the node type
   */
-def allPaths[N](adjacency: N => Seq[N], start: N, ends: Set[N]): Set[Path[N, Int]] =
-  val paths = mutable.Set.empty[Path[N, Int]]
-  val queue = mutable.Queue(Path(path = Seq(start), distance = 0))
+def allPaths[N, D: Numeric](adjacency: N => Seq[(N, D)], start: N, ends: Set[N]): Set[Path[N, D]] =
+  val paths = mutable.Set.empty[Path[N, D]]
+  val queue = mutable.Queue(Path(path = Seq(start), distance = summon[Numeric[D]].zero))
+
   while queue.nonEmpty do
     val node @ Path(path, distance) = queue.dequeue
     if ends(node.at) then paths.add(node)
-    queue ++= adjacency(node.at).map(neigh => Path(neigh +: path, distance + 1))
+    queue ++= adjacency(node.at).view.map((neigh, dist) => Path(neigh +: path, distance + dist))
   paths.toSet
+
+/** Performs a breadth first fill of the graph from the starting node to the ending nodes, returning
+  * all possible paths between the two sets.
+  *
+  * Note that if `adjacency` can form loops, this function will not terminate.
+  *
+  * @param adjacency function to return edges for a given node
+  * @param start the start node
+  * @param ends all possible ending nodes
+  * @return the set of all paths from `start` to any of `ends`
+  * @tparam N the node type
+  */
+def allPaths[N](adjacency: N => Seq[N], start: N, ends: Set[N]): Set[Path[N, Int]] =
+  allPaths(unitAdjacency(adjacency), start, ends)
