@@ -3,6 +3,30 @@ package org.lemon.advent.lib.graph
 import scala.collection.mutable
 import scala.math.Numeric.Implicits.infixNumericOps
 
+
+/** Performs a dijkstra's search of the graph from `start` to `end`, returning
+  * the shortest path between them.
+  *
+  * @param adjacency function to return edges for a given node
+  * @param start the start node
+  * @param ends function to check if a node is an ending node
+  * @return the shortest path between `start` and `end`, or empty if no path exists
+  * @tparam N the node type
+  * @tparam D the distance type
+  */
+def pathFind[N, D: Numeric](adjacency: N => Seq[(N, D)], start: N, ends: N => Boolean): Option[Path[N, D]] =
+  given Ordering[Path[N, D]] = Ordering.by[Path[N, D], D](_.distance).reverse
+  val queue = mutable.PriorityQueue(Path(path = Seq(start), distance = summon[Numeric[D]].zero))
+  val visited = mutable.Set(start)
+
+  while !queue.isEmpty && !ends(queue.head.at) do
+    val node @ Path(path, distance) = queue.dequeue
+    queue ++= adjacency(node.at)
+      .filter((neigh, _) => visited.add(neigh))
+      .map((neigh, dist) => Path(neigh +: path, distance + dist))
+
+  queue.headOption
+
 /** Performs a dijkstra's search of the graph from `start` to `end`, returning
   * the shortest path between them.
   *
@@ -14,17 +38,7 @@ import scala.math.Numeric.Implicits.infixNumericOps
   * @tparam D the distance type
   */
 def pathFind[N, D: Numeric](adjacency: N => Seq[(N, D)], start: N, end: N): Option[Path[N, D]] =
-  given Ordering[Path[N, D]] = Ordering.by[Path[N, D], D](_.distance).reverse
-  val queue = mutable.PriorityQueue(Path(path = Seq(start), distance = summon[Numeric[D]].zero))
-  val visited = mutable.Set(start)
-
-  while !queue.isEmpty && queue.head.at != end do
-    val node @ Path(path, distance) = queue.dequeue
-    queue ++= adjacency(node.at)
-      .filter((neigh, _) => visited.add(neigh))
-      .map((neigh, dist) => Path(neigh +: path, distance + dist))
-
-  queue.headOption
+  pathFind(adjacency, start, end == _)
 
 /** Performs a dijkstra's search of the graph from `start` to `end`, returning
   * the shortest path between them. The distance between each node is assumed to be one.

@@ -26,11 +26,11 @@ def fill[N](adjacency: N => Seq[N], start: N): Set[N] =
   *
   * @param adjacency function to return edges for a given node
   * @param start the start node
-  * @param ends all possible ending nodes
+  * @param ends function to check if a node is an ending node
   * @return the set of all paths from `start` to any of `ends`
   * @tparam N the node type
   */
-def allPaths[N, D: Numeric](adjacency: N => Seq[(N, D)], start: N, ends: Set[N]): Set[Path[N, D]] =
+def allPaths[N, D: Numeric](adjacency: N => Seq[(N, D)], start: N, ends: N => Boolean): Set[Path[N, D]] =
   val paths = mutable.Set.empty[Path[N, D]]
   val queue = mutable.Queue(Path(path = Seq(start), distance = summon[Numeric[D]].zero))
 
@@ -47,9 +47,9 @@ def allPaths[N, D: Numeric](adjacency: N => Seq[(N, D)], start: N, ends: Set[N])
   *
   * @param adjacency function to return edges for a given node
   * @param start the start node
-  * @param ends all possible ending nodes
+  * @param ends function to check if a node is an ending node
   * @return the set of all paths from `start` to any of `ends`
   * @tparam N the node type
   */
-def allPaths[N](adjacency: N => Seq[N], start: N, ends: Set[N]): Set[Path[N, Int]] =
+def allPaths[N](adjacency: N => Seq[N], start: N, ends: N => Boolean): Set[Path[N, Int]] =
   allPaths(unitAdjacency(adjacency), start, ends)
