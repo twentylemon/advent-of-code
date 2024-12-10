@@ -37,7 +37,7 @@ def allPaths[N, D: Numeric](adjacency: N => Seq[(N, D)], start: N, ends: Set[N])
   while queue.nonEmpty do
     val node @ Path(path, distance) = queue.dequeue
     if ends(node.at) then paths.add(node)
-    queue ++= adjacency(node.at).view.map((neigh, dist) => Path(neigh +: path, distance + dist))
+    queue ++= adjacency(node.at).map((neigh, dist) => Path(neigh +: path, distance + dist))
   paths.toSet
 
 /** Performs a breadth first fill of the graph from the starting node to the ending nodes, returning
