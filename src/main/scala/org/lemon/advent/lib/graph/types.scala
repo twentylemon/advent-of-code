@@ -11,3 +11,12 @@ type WeightedGraph[N, D] = Map[N, Seq[(N, D)]]
   * @tparam N the node type
   */
 type UnitGraph[N] = Map[N, Seq[N]]
+
+/** The path taken by a search algorithm.
+  * @param path the path taken
+  * @param distance the distance travelled
+  * @tparam N the node type
+  * @tparam D the distance type
+  */
+case class Path[N, D](path: Seq[N], distance: D):
+  def at = path.head

@@ -3,8 +3,6 @@ package org.lemon.advent.lib.graph
 import scala.collection.mutable
 import scala.math.Numeric.Implicits.infixNumericOps
 
-case class Path[N, D](path: Seq[N], at: N, distance: D)
-
 /** Performs a dijkstra's search of the graph from `start` to `end`, returning
   * the shortest path between them.
   *
@@ -17,14 +15,14 @@ case class Path[N, D](path: Seq[N], at: N, distance: D)
   */
 def pathFind[N, D: Numeric](adjacency: N => Seq[(N, D)], start: N, end: N): Option[Path[N, D]] =
   given Ordering[Path[N, D]] = Ordering.by[Path[N, D], D](_.distance).reverse
-  val queue = mutable.PriorityQueue(Path(path = Seq(start), at = start, distance = summon[Numeric[D]].zero))
+  val queue = mutable.PriorityQueue(Path(path = Seq(start), distance = summon[Numeric[D]].zero))
   val visited = mutable.Set(start)
 
   while !queue.isEmpty && queue.head.at != end do
-    val Path(path, at, distance) = queue.dequeue
-    queue ++= adjacency(at)
+    val node @ Path(path, distance) = queue.dequeue
+    queue ++= adjacency(node.at)
       .filter((neigh, _) => visited.add(neigh))
-      .map((node, dist) => Path(node +: path, node, distance + dist))
+      .map((node, dist) => Path(node +: path, distance + dist))
 
   queue.headOption
 

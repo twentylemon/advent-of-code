@@ -31,9 +31,9 @@ def fill[N](adjacency: N => Seq[N], start: N): Set[N] =
   */
 def allPaths[N](adjacency: N => Seq[N], start: N, ends: Set[N]): Set[Path[N, Int]] =
   val paths = mutable.Set.empty[Path[N, Int]]
-  val queue = mutable.Queue(Path(path = Seq(start), at = start, distance = 0))
+  val queue = mutable.Queue(Path(path = Seq(start), distance = 0))
   while queue.nonEmpty do
-    val node @ Path(path, at, distance) = queue.dequeue
-    if ends(at) then paths.add(node)
-    queue ++= adjacency(at).map(neigh => Path(neigh +: path, neigh, distance + 1))
+    val node @ Path(path, distance) = queue.dequeue
+    if ends(node.at) then paths.add(node)
+    queue ++= adjacency(node.at).map(neigh => Path(neigh +: path, distance + 1))
   paths.toSet
