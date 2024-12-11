@@ -15,5 +15,5 @@ class Day11Test extends UnitTest:
   }
 
   test("part 2") {
-    part2(read(file(2024)(11))) shouldBe 0
+    part2(read(file(2024)(11))) shouldBe 229557103025807L
   }

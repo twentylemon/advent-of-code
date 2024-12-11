@@ -1,5 +1,7 @@
 package org.lemon.advent.year2024
 
+import scala.collection.SortedMap
+
 private object Day11:
 
   def parse(input: String) = input.split("\\s+").map(_.toLong).toSeq
@@ -11,12 +13,15 @@ private object Day11:
       if str.size % 2 == 0 then Seq(str.take(str.size / 2).toLong, str.drop(str.size / 2).toLong)
       else Seq(n * 2024L)
 
+  def process(stones: Map[Long, Long]) =
+    Iterator.iterate(stones)(_
+      .map((stone, count) => blink(stone).groupMapReduce(identity)(_ => count)(_ + _))
+      .reduce((a, b) => a ++ b.map { case (k, v) => k -> (v + a.getOrElse(k, 0L)) }))
+
   def part1(input: String) =
-    val stones = parse(input)
-    Iterator.iterate(stones)(_.flatMap(blink)).drop(25).next.size
+    val stones = parse(input).groupMapReduce(identity)(_ => 1L)(_ + _)
+    process(stones).drop(25).next.values.sum
 
   def part2(input: String) =
-    val stones = parse(input)
-    // it's too chunky
-    // Iterator.iterate(stones)(_.flatMap(blink)).drop(75).next.size
-    0
+    val stones = parse(input).groupMapReduce(identity)(_ => 1L)(_ + _)
+    process(stones).drop(75).next.values.sum
