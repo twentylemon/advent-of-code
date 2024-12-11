@@ -1,7 +1,5 @@
 package org.lemon.advent.year2024
 
-import scala.collection.SortedMap
-
 private object Day11:
 
   def parse(input: String) = input.split("\\s+").map(_.toLong).toSeq
