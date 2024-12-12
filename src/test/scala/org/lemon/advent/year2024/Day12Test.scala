@@ -23,6 +23,25 @@ class Day12Test extends UnitTest:
     part1(read(file(2024)(12))) shouldBe 1486324
   }
 
+  test("part 2 E") {
+    val in = """|EEEEE
+                |EXXXX
+                |EEEEE
+                |EXXXX
+                |EEEEE""".stripMargin
+    part2(in) shouldBe 236
+  }
+
+  test("part 2 hole") {
+    val in = """|AAAAAA
+                |AAABBA
+                |AAABBA
+                |ABBAAA
+                |ABBAAA
+                |AAAAAA""".stripMargin
+    part2(in) shouldBe 368
+  }
+
   test("part 2 example") {
     val in = """|RRRRIICCFF
                 |RRRRIICCCF
@@ -34,9 +53,9 @@ class Day12Test extends UnitTest:
                 |MIIIIIJJEE
                 |MIIISIJEEE
                 |MMMISSJEEE""".stripMargin
-    part2(in) shouldBe 0
+    part2(in) shouldBe 1206
   }
 
   test("part 2") {
-    part2(read(file(2024)(12))) shouldBe 0
+    part2(read(file(2024)(12))) shouldBe 898684
   }
