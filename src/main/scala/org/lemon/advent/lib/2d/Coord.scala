@@ -28,6 +28,12 @@ object CoordT:
 
   given [T: Integral]: Ordering[CoordT[T]] = Ordering.by[CoordT[T], T](_.x).orElseBy(_.y)
 
+  def origin[T: Integral]: CoordT[T] = CoordT(Integral[T].zero, Integral[T].zero)
+  def unitUp[T: Integral]: CoordT[T] = CoordT(Integral[T].zero, -Integral[T].one)
+  def unitDown[T: Integral]: CoordT[T] = CoordT(Integral[T].zero, Integral[T].one)
+  def unitLeft[T: Integral]: CoordT[T] = CoordT(-Integral[T].one, Integral[T].zero)
+  def unitRight[T: Integral]: CoordT[T] = CoordT(Integral[T].one, Integral[T].zero)
+
   def apply[T: Integral](x: Int, y: Int): CoordT[T] = CoordT(Integral[T].fromInt(x), Integral[T].fromInt(y))
   def apply[T: Integral](coord: Coord): CoordT[T] = apply(coord.x, coord.y)
 
