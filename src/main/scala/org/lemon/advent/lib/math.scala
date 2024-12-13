@@ -1,13 +1,16 @@
 package org.lemon.advent.lib
 
-def gcd(a: Long, b: Long): Long = BigInt(a).gcd(BigInt(b)).toLong
+import scala.math.Integral.Implicits._
+import scala.math.Ordering.Implicits._
 
-def lcm(a: Long, b: Long) = a * b / gcd(a, b)
+extension [N: Integral](a: N)
+  def +%(n: N): N =
+    val mod = a % n
+    if mod < Integral[N].zero then mod + n else mod
 
-extension (x: Int)
-  def +%(n: Int): Int =
-    val mod = x % n
-    if mod < 0 then mod + n else mod
+  def gcd(b: N): N =
+    @annotation.tailrec
+    def loop(a: N, b: N): N = if b == Integral[N].zero then a else loop(b, a % b)
+    loop(a, b)
 
-  def gcd(y: Int): Int = org.lemon.advent.lib.gcd(x.toLong, y.toLong).toInt
-  def lcm(y: Int): Int = org.lemon.advent.lib.lcm(x.toLong, y.toLong).toInt
+  def lcm(b: N): N = a * b / a.gcd(b)
