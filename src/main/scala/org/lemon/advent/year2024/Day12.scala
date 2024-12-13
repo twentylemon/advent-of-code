@@ -7,8 +7,6 @@ import org.lemon.advent.lib.graph._
 
 private object Day12:
 
-  case class Plot(area: Set[Coord], perimeter: Set[Coord])
-
   def parse = Coord.gridToMap
 
   def adjacency(grid: Map[Coord, Char], start: Coord) =

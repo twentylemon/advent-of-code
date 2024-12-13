@@ -15,7 +15,7 @@ case class Region(coords: Set[Coord]):
     */
   def perimeter: Set[Coord] = coords.filter(_.surrounding.exists(!coords.contains(_)))
 
-  def perimeterLength = perimeter.toSeq.map(_.adjacent.count(!coords.contains(_))).sum
+  def perimeterLength = perimeter.iterator.map(_.adjacent.count(!coords.contains(_))).sum
 
   def sides =
     def in(coord: Coord) = coords(coord)
@@ -36,6 +36,6 @@ case class Region(coords: Set[Coord]):
       Seq(topLeft, topRight, botLeft, botRight, diagUpLeft, diagUpRight, diagBotLeft, diagBotRight)
         .count(identity)
 
-    perimeter.toSeq.map(sides).sum
+    perimeter.iterator.map(sides).sum
 
   def enclosing = Area(coords)
