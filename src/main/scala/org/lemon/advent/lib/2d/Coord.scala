@@ -79,9 +79,19 @@ case class Coord(x: Int, y: Int):
     else if dx > 0 && dy == 0 then Some(Direction.Right)
     else None
 
-  def reduce: Coord =
-    if x == 0 then Coord(0, y.sign)
-    else if y == 0 then Coord(x.sign, 0)
-    else
-      val gcd = x.abs.gcd(y.abs)
-      Coord(x / gcd, y / gcd)
+  def asVec: Vec = Vec(this)
+
+opaque type Vec = Coord
+object Vec:
+  def apply(coord: Coord): Vec = coord
+  def apply(x: Int, y: Int): Vec = Coord(x, y)
+
+  given Conversion[Vec, Coord] = identity
+
+  extension (vec: Vec)
+    def reduce: Vec =
+      if vec.x == 0 then Coord(0, vec.y.sign)
+      else if vec.y == 0 then Coord(vec.x.sign, 0)
+      else
+        val gcd = vec.x.abs.gcd(vec.y.abs)
+        Coord(vec.x / gcd, vec.y / gcd)
