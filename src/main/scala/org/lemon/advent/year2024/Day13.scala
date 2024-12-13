@@ -12,19 +12,28 @@ private object Day13:
         ) => ((ax.toLong, ay.toLong), (bx.toLong, by.toLong), (px.toLong, py.toLong))
   ).toSeq
 
-  def press(a: Coord, b: Coord, prize: Coord) =
-    for
-      tryA <- (0 to 100)
-      tryB <- (0 to 100)
-      if (tryA * a._1 + tryB * b._1, tryA * a._2 + tryB * b._2) == prize
-    yield (tryA, tryB)
+  def solve(a: Coord, b: Coord, prize: Coord) =
+    val ((ax, ay), (bx, by), (px, py)) = (a, b, prize)
+    // a * ax + b * bx = px  &  a * ay + b * by = py
+    // => a = (px - b * bx) / ax  &  a = (py - b * by) / ay
+    // => b = (px - a * ax) / bx  &  b = (py - a * ay) / by
+    // => a = (by * px - bx * py) / (ax * by - ay * bx)  &  b = (ay * px - ax * py) / (ay * bx - ax by)
+    val tryA = (by * px - bx * py) / (ax * by - ay * bx)
+    val tryB = (px - tryA * ax) / bx
+
+    if tryA * ax + tryB * bx == px && tryA * ay + tryB * by == py then (tryA, tryB)
+    else (0L, 0L)
 
   def part1(input: String) =
-    val machines = parse(input)
-    machines
-      .map(press.tupled(_).map(3 * _ + _).minOption.getOrElse(0))
+    parse(input)
+      .map(solve.tupled(_))
+      .map(3 * _ + _)
       .sum
 
   def part2(input: String) =
-    val machines = parse(input).map((a, b, prize) => (a, b, (prize._1 + 10000000000000L, prize._2 + 10000000000000L)))
-    0
+    val shift = 10000000000000L
+    parse(input)
+      .map((a, b, prize) => (a, b, (prize._1 + shift, prize._2 + shift)))
+      .map(solve.tupled(_))
+      .map(3 * _ + _)
+      .sum
