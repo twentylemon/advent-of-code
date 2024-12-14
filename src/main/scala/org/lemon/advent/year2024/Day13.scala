@@ -1,21 +1,21 @@
 package org.lemon.advent.year2024
 
-import org.lemon.advent.lib.`2d`.CoordT
+import org.lemon.advent.lib.`2d`.Point
 
 private object Day13:
 
-  type Coord = CoordT[Long]
+  type Coord = Point[Long]
 
   def parse(input: String): Seq[(Coord, Coord, Coord)] = input.split("\n\n").map(_.linesIterator.toSeq match
     case Seq(
           s"Button A: X+$ax, Y+$ay",
           s"Button B: X+$bx, Y+$by",
           s"Prize: X=$px, Y=$py",
-        ) => (CoordT(ax.toLong, ay.toLong), CoordT(bx.toLong, by.toLong), CoordT(px.toLong, py.toLong))
+        ) => (Point(ax.toLong, ay.toLong), Point(bx.toLong, by.toLong), Point(px.toLong, py.toLong))
   ).toSeq
 
   def solve(a: Coord, b: Coord, prize: Coord) =
-    val (CoordT(ax, ay), CoordT(bx, by), CoordT(px, py)) = (a, b, prize)
+    val (Point(ax, ay), Point(bx, by), Point(px, py)) = (a, b, prize)
     // a * ax + b * bx = px  &  a * ay + b * by = py
     // => a = (px - b * bx) / ax  &  a = (py - b * by) / ay
     // => b = (px - a * ax) / bx  &  b = (py - a * ay) / by
