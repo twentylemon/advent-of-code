@@ -23,7 +23,7 @@ private object Day13:
     val tryA = (by * px - bx * py) / (ax * by - ay * bx)
     val tryB = (px - tryA * ax) / bx
 
-    if a * tryA + b* tryB == prize then (tryA, tryB)
+    if a * tryA + b * tryB == prize then (tryA, tryB)
     else (0L, 0L)
 
   def part1(input: String) =
