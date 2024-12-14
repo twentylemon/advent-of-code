@@ -106,10 +106,15 @@ case class Area(xRange: Range, yRange: Range):
       bottomRight = Area(midX + 1 to right, midY + 1 to bottom),
     )
 
-  def dropLeft(n: Int): Area = Area(xRange.drop(n), yRange)
-  def dropRight(n: Int): Area = Area(xRange.dropRight(n), yRange)
-  def dropTop(n: Int): Area = Area(xRange, yRange.drop(n))
-  def dropBottom(n: Int): Area = Area(xRange, yRange.dropRight(n))
+  def growLeft(n: Int): Area = copy(xRange = xRange.start - n to xRange.end)
+  def growRight(n: Int): Area = copy(xRange = xRange.start to xRange.end + n)
+  def growTop(n: Int): Area = copy(yRange = yRange.start - n to yRange.end)
+  def growBottom(n: Int): Area = copy(yRange = yRange.start to yRange.end + n)
+
+  def dropLeft(n: Int): Area = growLeft(-n)
+  def dropRight(n: Int): Area = growRight(-n)
+  def dropTop(n: Int): Area = growTop(-n)
+  def dropBottom(n: Int): Area = growBottom(-n)
 
   def encloses(area: Area): Boolean =
     left <= area.left && right >= area.right && top <= area.top && bottom >= area.bottom

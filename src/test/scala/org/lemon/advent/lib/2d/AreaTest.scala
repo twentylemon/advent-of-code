@@ -101,6 +101,10 @@ class AreaTest extends UnitTest:
     )
   }
 
+  test("quadrants cover the area") {
+    check((area: Area) => area.quadrants.seq.flatMap(_.toSeq).toSet == area.toSet)
+  }
+
   test("area encloses itself") {
     check((area: Area) => area encloses area)
   }
@@ -118,6 +122,38 @@ class AreaTest extends UnitTest:
 
   test("area not enclosed by disjoint area") {
     check((area: Area) => !area.encloses(Area(area.right + 1 to area.right + 2, area.top - 2 to area.top - 1)))
+  }
+
+  test("growLeft and dropLeft are inverse") {
+    check((area: Area, n: Int) => area.growLeft(n).dropLeft(n) == area)
+  }
+
+  test("growRight and dropRight are inverse") {
+    check((area: Area, n: Int) => area.growRight(n).dropRight(n) == area)
+  }
+
+  test("growTop and dropTop are inverse") {
+    check((area: Area, n: Int) => area.growTop(n).dropTop(n) == area)
+  }
+
+  test("growBottom and dropBottom are inverse") {
+    check((area: Area, n: Int) => area.growBottom(n).dropBottom(n) == area)
+  }
+
+  test("growLeft encloses original area") {
+    check((area: Area, n: Int) => (n > 0 && n < Int.MaxValue - 1000) ==> (area.growLeft(n) encloses area))
+  }
+
+  test("growRight encloses original area") {
+    check((area: Area, n: Int) => (n > 0 && n < Int.MaxValue - 1000) ==> (area.growRight(n) encloses area))
+  }
+
+  test("growTop encloses original area") {
+    check((area: Area, n: Int) => (n > 0 && n < Int.MaxValue - 1000) ==> (area.growTop(n) encloses area))
+  }
+
+  test("growBottom encloses original area") {
+    check((area: Area, n: Int) => (n > 0 && n < Int.MaxValue - 1000) ==> (area.growBottom(n) encloses area))
   }
 
   test("clamp returns a coord in the area") {
