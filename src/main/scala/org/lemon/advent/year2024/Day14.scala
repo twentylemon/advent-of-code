@@ -9,7 +9,7 @@ private object Day14:
   ).toSeq
 
   def move(robits: Seq[(Coord, Coord)], area: Area): Seq[(Coord, Coord)] =
-    robits.map((pos, vel) => (area.clamp(pos + vel), vel))
+    robits.map((pos, vel) => ((pos + vel).shiftInto(area), vel))
 
   def quads(robits: Seq[(Coord, Coord)], area: Area) =
     val size = (area.width / 2, area.height / 2)
@@ -26,13 +26,13 @@ private object Day14:
     )
 
   def part1(input: String, example: Boolean) =
-    val area = if example then Area(0 until 11, 0 until 7) else Area(0 until 101, 0 until 103)
+    val area = if example then Area(11, 7) else Area(101, 103)
     val robits = parse(input)
     val later = Iterator.iterate(robits)(move(_, area)).drop(100).next
     quads(later, area).product
 
   def part2(input: String) =
-    val area = Area(0 until 101, 0 until 103)
+    val area = Area(101, 103)
     val robits = parse(input)
     Iterator.iterate(robits)(move(_, area))
       .drop(8168)

@@ -131,3 +131,7 @@ class CoordTest extends UnitTest:
       coords == Set(area.topLeft, area.bottomRight) || coords == Set(area.topRight, area.bottomLeft)
     )
   }
+
+  test("shiftInto returns a coord in the area") {
+    check((area: Area, coord: Coord) => area.contains(coord.shiftInto(area)))
+  }

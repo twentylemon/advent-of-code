@@ -3,7 +3,6 @@ package org.lemon.advent.lib.`2d`
 import Coord._
 
 object Direction:
-
   given Ordering[Direction] = Ordering.by(_.ordinal)
 
   def apply(ch: String | Char): Direction = ch match
@@ -13,6 +12,9 @@ object Direction:
     case "R" | 'R' | "r" | 'r' | ">" | '>' => Right
     case _ => throw AssertionError(s"unknown direction character:  $ch")
 
+/** A cardinal direction in 2d space.
+  * @param unitVector the vector representing the direction
+  */
 enum Direction(val unitVector: Coord):
   case Up extends Direction(unitUp)
   case Left extends Direction(unitLeft)

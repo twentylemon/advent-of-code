@@ -18,6 +18,7 @@ object Area:
     Area(yRange = lines.indices, xRange = lines.head.indices)
 
   def apply(left: Int, right: Int, top: Int, bottom: Int): Area = Area(left to right, top to bottom)
+  def apply(width: Int, height: Int): Area = apply(0, width - 1, 0, height - 1)
 
   given Conversion[Area, Iterator[Coord]] =
     (area: Area) => for y <- area.yRange.iterator; x <- area.xRange.iterator yield (x, y)
@@ -86,7 +87,7 @@ case class Area(xRange: Range, yRange: Range):
   def encloses(area: Area): Boolean =
     left <= area.left && right >= area.right && top <= area.top && bottom >= area.bottom
 
-  def clamp(coord: Coord): Coord = Coord(x = coord.x +% width + left, y = coord.y +% height + top)
+  def clamp(coord: Coord): Coord = Coord(x = coord.x max left min right, y = coord.y max top min bottom)
 
   def show(coord2Char: Coord => Char): String =
     import scala.collection.mutable

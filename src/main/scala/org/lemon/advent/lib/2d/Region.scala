@@ -4,13 +4,15 @@ object Region:
   given Conversion[Region, Iterator[Coord]] = _.coords.iterator
   given Conversion[Region, Set[Coord]] = _.coords
 
+/** An arbitrary region of continuous space on a 2d grid.
+  * @param coords the set of coordinates that make up the region
+  */
 case class Region(coords: Set[Coord]):
   def area = coords.size
 
   /** The perimeter of a region is the set of all coords that are on the boarder of the region.
     * Coords which are diagonally adjacent are included in the perimeter, such that it forms
     * a "continuous" line around the region.
-    *
     * @return set of coords that are one away from the region
     */
   def perimeter: Set[Coord] = coords.filter(_.surrounding.exists(!coords.contains(_)))
