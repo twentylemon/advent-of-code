@@ -1,7 +1,5 @@
 package org.lemon.advent.lib.`2d`
 
-import org.lemon.advent.lib.graph.UnitGraph
-
 import scala.collection.immutable.WrappedString
 
 /** A 2d coordinate (or vector) with integer values. Integrates with [[Area]] and [[Region]],
