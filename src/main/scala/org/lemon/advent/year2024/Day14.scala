@@ -12,18 +12,12 @@ private object Day14:
     robits.map((pos, vel) => ((pos + vel).shiftInto(area), vel))
 
   def quads(robits: Seq[(Coord, Coord)], area: Area) =
-    val size = (area.width / 2, area.height / 2)
-    val upLeft = for x <- 0 until size._1; y <- 0 until size._2 yield Coord(x, y)
-    val upRight = for x <- 0 until size._1; y <- 0 until size._2 yield Coord(area.width - x - 1, y)
-    val downLeft = for x <- 0 until size._1; y <- 0 until size._2 yield Coord(x, area.height - y - 1)
-    val downRight = for x <- 0 until size._1; y <- 0 until size._2 yield Coord(area.width - x - 1, area.height - y - 1)
-
-    Seq(
-      robits.filter(r => upLeft.contains(r._1)).size,
-      robits.filter(r => upRight.contains(r._1)).size,
-      robits.filter(r => downLeft.contains(r._1)).size,
-      robits.filter(r => downRight.contains(r._1)).size,
-    )
+    val quadrants = area.quadrants
+    quadrants.copy(
+      topLeft = quadrants.topLeft.dropRight(1).dropBottom(1),
+      topRight = quadrants.topRight.dropBottom(1),
+      bottomLeft = quadrants.bottomLeft.dropRight(1),
+    ).seq.map(quad => robits.count(r => quad.contains(r._1)))
 
   def part1(input: String, example: Boolean) =
     val area = if example then Area(11, 7) else Area(101, 103)

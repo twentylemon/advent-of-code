@@ -5,7 +5,6 @@ import org.lemon.advent.lib.+%
 import scala.collection.immutable.WrappedString
 
 object Area:
-
   def apply(grid: Map[Coord, _]): Area = apply(grid.keySet)
 
   def apply(coords: Iterable[Coord]): Area =
@@ -29,6 +28,10 @@ object Area:
   extension [T](seq: Seq[Seq[T]])
     def apply(area: Area): Seq[Seq[T]] = seq.slice(area.top, area.bottom + 1).map(_.slice(area.left, area.right + 1))
 
+/** A 2d rectangular area.
+  * @param xRange the x bounds of the rectangle
+  * @param yRange the y bounds of the rectangle
+  */
 case class Area(xRange: Range, yRange: Range):
   def left = xRange.min
   def right = xRange.max
@@ -78,11 +81,35 @@ case class Area(xRange: Range, yRange: Range):
     xRange.iterator.map(x => downDiagonal((x, top))) ++ yRange.iterator.drop(1).map(y => downDiagonal((left, y)))
   def diagonals: Iterator[Iterator[Coord]] = upDiagonals ++ downDiagonals
 
+  /** Iterates over _all_ (width x height) areas within this area.
+    * Areas returned will overlap each other, it's _every_ sub-area.
+    * @param width the sub-area width
+    * @param height the sub-aea height
+    * @return iterator of all sub-areas of the given size in this area
+    */
   def rectangles(width: Int, height: Int): Iterator[Area] =
     for
       x <- xRange.sliding(width)
       y <- yRange.sliding(height)
     yield Area(x.head to x.last, y.head to y.last)
+
+  /** Returns the four quadrants of this area. If the area has an odd width or height,
+    * the middle row or column will be in the top or left quadrants.
+    * @return the four quadrant areas of this area
+    */
+  def quadrants: Quadrants =
+    val (midX, midY) = (left + width / 2, top + height / 2)
+    Quadrants(
+      topLeft = Area(left to midX, top to midY),
+      topRight = Area(midX + 1 to right, top to midY),
+      bottomLeft = Area(left to midX, midY + 1 to bottom),
+      bottomRight = Area(midX + 1 to right, midY + 1 to bottom),
+    )
+
+  def dropLeft(n: Int): Area = Area(xRange.drop(n), yRange)
+  def dropRight(n: Int): Area = Area(xRange.dropRight(n), yRange)
+  def dropTop(n: Int): Area = Area(xRange, yRange.drop(n))
+  def dropBottom(n: Int): Area = Area(xRange, yRange.dropRight(n))
 
   def encloses(area: Area): Boolean =
     left <= area.left && right >= area.right && top <= area.top && bottom >= area.bottom
@@ -97,3 +124,6 @@ case class Area(xRange: Range, yRange: Range):
       if coord.col == right then builder.append('\n')
     )
     builder.toString
+
+case class Quadrants(topLeft: Area, topRight: Area, bottomLeft: Area, bottomRight: Area):
+  def seq: Seq[Area] = Seq(topLeft, topRight, bottomLeft, bottomRight)
