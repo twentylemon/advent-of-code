@@ -86,7 +86,6 @@ class Day15Test extends UnitTest:
     part2(in) shouldBe 9021
   }
 
-// test("part 2") {
-//   part2(read(file(2024)(15))) should be > 1463651
-//   part2(read(file(2024)(15))) shouldBe 0
-// }
+  test("part 2") {
+    part2(read(file(2024)(15))) shouldBe 1472235
+  }
