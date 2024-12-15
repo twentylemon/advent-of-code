@@ -24,7 +24,7 @@ private object Day15:
     (Coord.gridToMap(wide), parseMoves(moves))
 
   def step(grid: Map[Coord, Char], robit: Coord, dir: Direction): Map[Coord, Char] =
-    val moves = Iterator.unfold(Set(robit)) { moving =>
+    val moves = Seq.unfold(Set(robit)) { moving =>
       if moving.isEmpty then None
       else
         val nexts = moving.map(_ + dir)
@@ -36,19 +36,12 @@ private object Day15:
             case _ => Seq()
         ).filterNot(moving)
         Some(moving -> boxes)
-    }.toSeq
+    }.flatten
 
-    if moves.isEmpty then grid
+    if moves.exists(c => grid(c + dir) == '#') then grid
     else
-      val dest = moves.flatten.map(_ + dir)
-      if dest.exists(grid(_) == '#') then grid
-      else
-        val gapsFilled = moves.foldLeft(grid) { (g, moving) =>
-          moving.foldLeft(g) { (g, coord) => g.updated(coord, '.') }
-        }
-        moves.foldLeft(gapsFilled) { (g, moving) =>
-          moving.foldLeft(g) { (g, coord) => g.updated(coord + dir, grid(coord)) }
-        }
+      val gapsFilled = moves.foldLeft(grid) { (g, coord) => g.updated(coord, '.') }
+      moves.foldLeft(gapsFilled) { (g, coord) => g.updated(coord + dir, grid(coord)) }
 
   def gps(grid: Map[Coord, Char], box: Char) =
     grid.filter(_._2 == box).keysIterator.map(c => 100 * c.y + c.x).sum
