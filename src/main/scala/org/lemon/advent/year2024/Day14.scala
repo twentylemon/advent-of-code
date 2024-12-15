@@ -17,7 +17,7 @@ private object Day14:
       topLeft = quadrants.topLeft.dropRight(1).dropBottom(1),
       topRight = quadrants.topRight.dropBottom(1),
       bottomLeft = quadrants.bottomLeft.dropRight(1),
-    ).seq.map(quad => robits.count(r => quad.contains(r._1)))
+    ).toSeq.map(quad => robits.count(r => quad.contains(r._1)))
 
   def part1(input: String, example: Boolean) =
     val area = if example then Area(11, 7) else Area(101, 103)

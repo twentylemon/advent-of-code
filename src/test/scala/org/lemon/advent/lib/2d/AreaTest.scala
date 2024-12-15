@@ -102,7 +102,7 @@ class AreaTest extends UnitTest:
   }
 
   test("quadrants cover the area") {
-    check((area: Area) => area.quadrants.seq.flatMap(_.toSeq).toSet == area.toSet)
+    check((area: Area) => area.quadrants.toSeq.flatMap(_.toSeq).toSet == area.toSet)
   }
 
   test("area encloses itself") {

@@ -131,4 +131,4 @@ case class Area(xRange: Range, yRange: Range):
     builder.toString
 
 case class Quadrants(topLeft: Area, topRight: Area, bottomLeft: Area, bottomRight: Area):
-  def seq: Seq[Area] = Seq(topLeft, topRight, bottomLeft, bottomRight)
+  def toSeq: Seq[Area] = Seq(topLeft, topRight, bottomLeft, bottomRight)
