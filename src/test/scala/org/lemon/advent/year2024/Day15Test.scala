@@ -19,7 +19,7 @@ class Day15Test extends UnitTest:
     part1(in) shouldBe 2028
   }
 
-  test("part 1 example") {
+  test("part 1 large example") {
     val in = """|##########
                 |#..O..O.O#
                 |#......O.#
@@ -48,12 +48,45 @@ class Day15Test extends UnitTest:
     part1(read(file(2024)(15))) shouldBe 1448589
   }
 
-  test("part 2 example") {
-    val in = """|
-                |""".stripMargin
-    part2(in) shouldBe 0
+  test("part 2 small example") {
+    val in = """|#######
+                |#...#.#
+                |#.....#
+                |#..OO@#
+                |#..O..#
+                |#.....#
+                |#######
+                |
+                |<vv<<^^<<^^""".stripMargin
+    part2(in) shouldBe 618
   }
 
-  test("part 2") {
-    part2(read(file(2024)(15))) shouldBe 0
+  test("part 2 large example") {
+    val in = """|##########
+                |#..O..O.O#
+                |#......O.#
+                |#.OO..O.O#
+                |#..O@..O.#
+                |#O#..O...#
+                |#O..O..O.#
+                |#.OO.O.OO#
+                |#....O...#
+                |##########
+                |
+                |<vv>^<v^>v>^vv^v>v<>v^v<v<^vv<<<^><<><>>v<vvv<>^v^>^<<<><<v<<<v^vv^v>^
+                |vvv<<^>^v^^><<>>><>^<<><^vv^^<>vvv<>><^^v>^>vv<>v<<<<v<^v>^<^^>>>^<v<v
+                |><>vv>v^v^<>><>>>><^^>vv>v<^^^>>v^v^<^^>v^^>v^<^v>v<>>v^v^<v>v^^<^^vv<
+                |<<v<^>>^^^^>>>v^<>vvv^><v<<<>^^^vv^<vvv>^>v<^^^^v<>^>vvvv><>>v^<<^^^^^
+                |^><^><>>><>^^<<^^v>>><^<v>^<vv>>v>>>^v><>^v><<<<v>>v<v<v>vvv>^<><<>^><
+                |^>><>^v<><^vvv<^^<><v<<<<<><^v<<<><<<^^<v<^^^><^>>^<v^><<<^>>^v<v^v<v^
+                |>^>>^v>vv>^<<^v<>><<><<v<<v><>v<^vv<<<>^^v^>^^>>><<^v>>v^v><^^>>^<>vv^
+                |<><^^>^^^<><vvvvv^v<v<<>^v<v>v<<^><<><<><<<^^<<<^<<>><<><^^^>^^<>^>v<>
+                |^^>vv<^v^v<vv>^<><v<^v>^^^>>>^^vvv^>vvv<>>>^<^>>>>>^<<^v>^vvv<>^<><<v>
+                |v^^>>><<^^<>>^v^<v^vv<>v^<<>^<^v^v><^<<<><<^<v><v<>vv>>v><v^<vv<>v^<<^""".stripMargin
+    part2(in) shouldBe 9021
   }
+
+// test("part 2") {
+//   part2(read(file(2024)(15))) should be > 1463651
+//   part2(read(file(2024)(15))) shouldBe 0
+// }
