@@ -1,8 +1,8 @@
 package org.lemon.advent.lib.graph
 
 import scala.collection.mutable
-import scala.math.Numeric.Implicits.infixNumericOps
-
+import scala.math.Numeric.Implicits._
+import scala.math.Ordering.Implicits._
 
 /** Performs a dijkstra's search of the graph from `start` to `end`, returning
   * the shortest path between them.
@@ -26,6 +26,46 @@ def pathFind[N, D: Numeric](adjacency: N => Seq[(N, D)], start: N, ends: N => Bo
       .map((neigh, dist) => Path(neigh +: path, distance + dist))
 
   queue.headOption
+
+def allShortestPaths[N, D: Numeric](
+    adjacency: N => Seq[(N, D)],
+    start: N,
+    ends: N => Boolean,
+    best: D
+): Set[Path[N, D]] =
+  given Ordering[Path[N, D]] = Ordering.by[Path[N, D], D](_.distance).reverse
+  val paths = mutable.Set.empty[Path[N, D]]
+  val queue = mutable.PriorityQueue(Path(path = Seq(start), distance = summon[Numeric[D]].zero))
+
+  var exit = false
+  while !queue.isEmpty && !exit do
+    val node @ Path(path, distance) = queue.dequeue
+    if ends(node.at) then
+      if best == distance then
+        println(s"match: $distance  $node")
+        paths.add(node)
+    else
+      queue ++= adjacency(node.at)
+        .filter((_, d) => distance + d <= best)
+        .map((neigh, dist) => Path(neigh +: path, distance + dist))
+
+  paths.toSet
+
+def allShortestPaths2[N, D: Numeric](adjacency: N => Seq[(N, D)], start: N, ends: N => Boolean): Set[Path[N, D]] =
+  val visited = mutable.Set.empty[N]
+  val paths = mutable.Set.empty[Path[N, D]]
+
+  def dfs(loc: N, dist: D, path: Seq[N]): Unit =
+    if !visited(loc) then
+      if ends(loc) then
+        println(s"found: $dist  $path")
+        paths.add(Path(loc +: path, dist))
+      else
+        visited.add(loc)
+        adjacency(loc).foreach((neigh, d) => dfs(neigh, dist + d, loc +: path))
+        visited.remove(loc)
+  dfs(start, summon[Numeric[D]].zero, Seq.empty)
+  paths.toSet
 
 /** Performs a dijkstra's search of the graph from `start` to `end`, returning
   * the shortest path between them.
