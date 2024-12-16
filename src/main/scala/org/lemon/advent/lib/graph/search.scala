@@ -27,44 +27,35 @@ def pathFind[N, D: Numeric](adjacency: N => Seq[(N, D)], start: N, ends: N => Bo
 
   queue.headOption
 
-def allShortestPaths[N, D: Numeric](
-    adjacency: N => Seq[(N, D)],
-    start: N,
-    ends: N => Boolean,
-    best: D
-): Set[Path[N, D]] =
-  given Ordering[Path[N, D]] = Ordering.by[Path[N, D], D](_.distance).reverse
+/** Finds all shortest paths in the graph from `start` to `end`.
+  *
+  * @param adjacency function to return edges for a given node
+  * @param start the start node
+  * @param ends function to check if a node is an ending node
+  * @return set of all shortest paths between `start` and `end`
+  * @tparam N the node type
+  * @tparam D the distance type
+  */
+def allShortestPaths[N, D: Numeric](adjacency: N => Seq[(N, D)], start: N, ends: N => Boolean): Set[Path[N, D]] =
   val paths = mutable.Set.empty[Path[N, D]]
-  val queue = mutable.PriorityQueue(Path(path = Seq(start), distance = summon[Numeric[D]].zero))
+  val queue = mutable.Queue(Path(path = Seq(start), distance = summon[Numeric[D]].zero))
+  val costs = mutable.Map(start -> summon[Numeric[D]].zero)
 
-  var exit = false
-  while !queue.isEmpty && !exit do
+  while !queue.isEmpty do
     val node @ Path(path, distance) = queue.dequeue
     if ends(node.at) then
-      if best == distance then
-        println(s"match: $distance  $node")
-        paths.add(node)
-    else
-      queue ++= adjacency(node.at)
-        .filter((_, d) => distance + d <= best)
-        .map((neigh, dist) => Path(neigh +: path, distance + dist))
+      if paths.isEmpty || distance < paths.head.distance then paths.clear()
+      if paths.isEmpty || distance <= paths.head.distance then paths.add(node)
 
-  paths.toSet
+    queue ++= adjacency(node.at)
+      .filter((neigh, dist) =>
+        val costTo = distance + dist
+        costs.get(neigh) match
+          case Some(known) if known < costTo => false
+          case _ => costs(neigh) = costTo; true
+      )
+      .map((neigh, dist) => Path(neigh +: path, distance + dist))
 
-def allShortestPaths2[N, D: Numeric](adjacency: N => Seq[(N, D)], start: N, ends: N => Boolean): Set[Path[N, D]] =
-  val visited = mutable.Set.empty[N]
-  val paths = mutable.Set.empty[Path[N, D]]
-
-  def dfs(loc: N, dist: D, path: Seq[N]): Unit =
-    if !visited(loc) then
-      if ends(loc) then
-        println(s"found: $dist  $path")
-        paths.add(Path(loc +: path, dist))
-      else
-        visited.add(loc)
-        adjacency(loc).foreach((neigh, d) => dfs(neigh, dist + d, loc +: path))
-        visited.remove(loc)
-  dfs(start, summon[Numeric[D]].zero, Seq.empty)
   paths.toSet
 
 /** Performs a dijkstra's search of the graph from `start` to `end`, returning
