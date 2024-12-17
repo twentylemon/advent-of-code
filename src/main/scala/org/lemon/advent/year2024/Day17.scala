@@ -99,9 +99,9 @@ private object Day17:
 
     // the program output depends on the length of A in octal
     // assumption is that the most significant tribit of A relates to the last output
-    program.tails.toSeq.reverse.drop(1).foldLeft(Seq(0L)) { (acc, tail) =>
+    program.reverse.foldLeft(Seq(0L)) { (acc, ele) =>
       acc.flatMap(a =>
-        (a * 8 until (a + 1) * 8).filter(a => execute(initialState(a, b, c, program)).output == tail)
+        (a * 8 until (a + 1) * 8).filter(a => execute(initialState(a, b, c, program)).output.head == ele)
       )
     }
       .min
