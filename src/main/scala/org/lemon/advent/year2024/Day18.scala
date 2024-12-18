@@ -20,7 +20,7 @@ private object Day18:
   def part2(input: String, example: Boolean = false) =
     val area = if example then Area(0 to 6, 0 to 6) else Area(0 to 70, 0 to 70)
     val bytes = parse(input)
-    val lastPossible = bytes.reverse.tails.find(bits =>
+    val lastPossible = bytes.inits.find(bits =>
       pathFind(adjacency(area, bits.toSet), Coord(0, 0), area.bottomRight).isDefined
     ).get
     val impossible = bytes(lastPossible.size)
