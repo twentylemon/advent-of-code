@@ -11,9 +11,10 @@ extension (range: Range)
 
   def diff(rhs: Range): Seq[Range] = ???
 
-extension (range: Range.type)
-  def unapply(str: String) =
-    str match
-      case s"$start-$end" => start.toIntOption.zip(end.toIntOption).map(_ to _)
-      case s"$start..$end" => start.toIntOption.zip(end.toIntOption).map(_ to _)
-      case _ => None
+implicit object ParseRange:
+  extension (range: Range.type)
+    def unapply(str: String): Option[Range] =
+      str match
+        case s"${Int(start)}-${Int(end)}" => Some(start to end)
+        case s"${Int(start)}..${Int(end)}" => Some(start to end)
+        case _ => None

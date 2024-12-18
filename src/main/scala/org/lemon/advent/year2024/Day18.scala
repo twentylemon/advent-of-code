@@ -1,12 +1,13 @@
 package org.lemon.advent.year2024
 
+import org.lemon.advent.lib._
 import org.lemon.advent.lib.`2d`._
 import org.lemon.advent.lib.graph._
 
 private object Day18:
 
   def parse(input: String) = input.linesIterator.map(_ match
-    case s"$x,$y" => Coord(x.toInt, y.toInt)
+    case s"${Csv[Int](x, y)}" => Coord(x, y)
   ).toSeq
 
   def adjacency(area: Area, corrupt: Set[Coord])(coord: Coord): Seq[Coord] =
