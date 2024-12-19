@@ -6,8 +6,10 @@ import scala.collection.mutable
 
 private object Day19:
 
-  def parse(input: String) = input match
-    case Chunk(towels, targets) => (towels.split(",").map(_.trim).toSeq, targets.linesIterator.toSeq)
+  def parse(input: String) =
+    import org.lemon.advent.lib.given
+    input match
+      case Chunk(Csv[String](towels @ _*), Wsv[String](targets @ _*)) => (towels, targets)
 
   def countLayouts(towels: Seq[String], target: String) =
     val memo = mutable.Map("" -> 1L)

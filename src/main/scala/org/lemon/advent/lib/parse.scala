@@ -1,20 +1,28 @@
 package org.lemon.advent.lib
 
+import scala.math.BigInt
+
 object Chunk:
   def unapplySeq(str: String): Option[Seq[String]] = Some(str.split("\n\n").toSeq)
 
 object Num:
   def unapply[T: Numeric](s: String): Option[T] = summon[Numeric[T]].parseString(s)
 
+// givens for delimiter-separated values to be generic
+given (String => Option[String]) = Some(_)
+given (String => Option[Int]) = Int.unapply
+given (String => Option[Long]) = Long.unapply
+given (String => Option[BigInt]) = BigInt.unapply
+
 object Csv:
   private val delimeter = ","
-  def unapplySeq[T: Numeric](str: String): Option[Seq[T]] = Some(splitParse(str, delimeter).flatMap(Num.unapply[T]))
-  def unapplySeq(str: String): Option[Seq[String]] = Some(splitParse(str, delimeter))
+  def unapplySeq[T](str: String)(using unapply: String => Option[T]): Option[Seq[T]] =
+    Some(splitParse(str, delimeter).flatMap(unapply))
 
 object Wsv:
   private val delimeter = "\\s+"
-  def unapplySeq[T: Numeric](str: String): Option[Seq[T]] = Some(splitParse(str, delimeter).flatMap(Num.unapply[T]))
-  def unapplySeq(str: String): Option[Seq[String]] = Some(splitParse(str, delimeter))
+  def unapplySeq[T](str: String)(using unapply: String => Option[T]): Option[Seq[T]] =
+    Some(splitParse(str, delimeter).flatMap(unapply))
 
 private def splitParse(str: String, delimeter: String): Seq[String] =
   str.split(delimeter).map(_.trim).toSeq

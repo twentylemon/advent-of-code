@@ -6,9 +6,11 @@ import org.lemon.advent.lib.graph._
 
 private object Day18:
 
-  def parse(input: String) = input.linesIterator.map(_ match
-    case s"${Csv[Int](x, y)}" => Coord(x, y)
-  ).toSeq
+  def parse(input: String) =
+    import org.lemon.advent.lib.given
+    input.linesIterator.map(_ match
+      case s"${Csv[Int](x, y)}" => Coord(x, y)
+    ).toSeq
 
   def adjacency(area: Area, corrupt: Set[Coord])(coord: Coord): Seq[Coord] =
     coord.adjacent.filterNot(corrupt).filter(area.contains)
