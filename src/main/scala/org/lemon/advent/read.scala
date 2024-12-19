@@ -41,9 +41,13 @@ def setup(year: Int, day: Int) =
     Files.createDirectories(src.getParent)
     Files.write(src, s"""package org.lemon.advent.year$year
                         |
+                        |import org.lemon.advent.lib._
+                        |
                         |private object Day${"%02d".format(day)}:
                         |
-                        |  def parse(input: String) = input.linesIterator
+                        |  def parse(input: String) =
+                        |    import org.lemon.advent.lib.parse.{given, _}
+                        |    input
                         |
                         |  def part1(input: String) =
                         |    0

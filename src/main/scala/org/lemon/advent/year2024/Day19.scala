@@ -7,7 +7,7 @@ import scala.collection.mutable
 private object Day19:
 
   def parse(input: String) =
-    import org.lemon.advent.lib.given
+    import org.lemon.advent.lib.parse.{given, _}
     input match
       case Chunk(Csv[String](towels @ _*), Wsv[String](targets @ _*)) => (towels, targets)
 

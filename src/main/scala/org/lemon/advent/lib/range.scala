@@ -10,11 +10,3 @@ extension (range: Range)
     else Seq(range, rhs)
 
   def diff(rhs: Range): Seq[Range] = ???
-
-implicit object ParseRange:
-  extension (range: Range.type)
-    def unapply(str: String): Option[Range] =
-      str match
-        case s"${Int(start)}-${Int(end)}" => Some(start to end)
-        case s"${Int(start)}..${Int(end)}" => Some(start to end)
-        case _ => None

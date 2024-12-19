@@ -7,7 +7,7 @@ import org.lemon.advent.lib.graph._
 private object Day18:
 
   def parse(input: String) =
-    import org.lemon.advent.lib.given
+    import org.lemon.advent.lib.parse.{given, _}
     input.linesIterator.map(_ match
       case s"${Csv[Int](x, y)}" => Coord(x, y)
     ).toSeq
