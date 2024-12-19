@@ -1,7 +1,7 @@
 package org.lemon.advent.lib
 
 object Chunk:
-  def unapplySeq(str: String): Option[IterableOnce[String]] = Some(str.split("\n\n"))
+  def unapplySeq(str: String): Option[Seq[String]] = Some(str.split("\n\n").toSeq)
 
 object Num:
   def unapply[T: Numeric](s: String): Option[T] = summon[Numeric[T]].parseString(s)
