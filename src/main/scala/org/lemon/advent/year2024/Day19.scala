@@ -12,18 +12,15 @@ private object Day19:
       case Chunk(Csv[String](towels @ _*), Wsv[String](targets @ _*)) => (towels, targets)
 
   def countLayouts(towels: Seq[String], target: String) =
-    val memo = mutable.Map("" -> 1L)
-    def count(remaining: String, built: Seq[String]): Long =
-      memo.get(remaining) match
-        case Some(x) => x
-        case None =>
-          val result = towels
-            .filter(remaining.startsWith)
-            .map(towel => count(remaining.drop(towel.length), built :+ towel))
-            .sum
-          memo(remaining) = result
-          result
-    count(target, Seq())
+    lazy val count: String => Long = memoize {
+      case "" => 1L
+      case remaining =>
+        towels
+          .filter(remaining.startsWith)
+          .map(towel => count(remaining.drop(towel.length)))
+          .sum
+    }
+    count(target)
 
   def part1(input: String) =
     val (towels, targets) = parse(input)
