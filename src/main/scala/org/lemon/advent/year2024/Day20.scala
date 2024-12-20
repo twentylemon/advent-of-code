@@ -8,38 +8,34 @@ private object Day20:
 
   def parse = Coord.gridToMap
 
-  def findCheats(grid: Map[Coord, Char]): Seq[(Coord, Coord)] =
-    def isTrack(c: Char) = c == '.' || c == 'S' || c == 'E'
-    def get(coord: Coord) =
-      val c = grid.getOrElse(coord, ' ')
-      if isTrack(c) then '.' else c
+  def adjacency(grid: Map[Coord, Char])(coord: Coord) =
+    coord.adjacent.filter(c => grid.getOrElse(c, '#') != '#')
 
-    grid.iterator
-      .filter((_, c) => isTrack(c))
-      .flatMap((coord, _) =>
-        for
-          d <- Direction.values
-          if get(coord.shift(d, 1)) == '#'
-          if get(coord.shift(d, 2)) == '.'
-        yield (coord, coord.shift(d, 2))
+  def manhattans(coord: Coord, maxDist: Int) =
+    def manhattan(dist: Int) = (1 to dist).iterator
+      .flatMap(d =>
+        val inv = dist - d
+        Seq(
+          Coord(coord.x + d, coord.y + inv),
+          Coord(coord.x + inv, coord.y - d),
+          Coord(coord.x - d, coord.y - inv),
+          Coord(coord.x - inv, coord.y + d)
+        )
       )
-      .toSeq.sorted
+    (2 to maxDist).iterator.flatMap(manhattan)
 
-  def adjacency(grid: Map[Coord, Char], cheat: (Coord, Coord))(coord: Coord) =
-    val neigh = coord.adjacent.filter(c => grid.getOrElse(c, '#') != '#').map((_, 1))
-    if coord == cheat._1 then (cheat._2, 2) +: neigh else neigh
-
-  def part1(input: String) =
-    val grid = parse(input)
-    val start = grid.find(_._2 == 'S').get._1
+  def goodCheats(grid: Map[Coord, Char], maxCheatDistance: Int) =
     val end = grid.find(_._2 == 'E').get._1
-    val noCheating = pathFind(adjacency(grid, ((-1, -1), (-1, -1))), start, end).get.distance
+    val distances = distanceFrom(adjacency(grid), end)
+    distances.keysIterator
+      .flatMap(start =>
+        manhattans(start, maxCheatDistance)
+          .filter(distances.contains)
+          .map(to => distances(start) - distances(to) - start.manhattan(to))
+      )
 
-    val cheats = findCheats(grid)
-    cheats
-      .map(cheat => pathFind(adjacency(grid, cheat), start, end).get.distance)
-      .map(noCheating - _)
-      .count(_ >= 100)
+  def part1(input: String, minSaving: Int = 100) =
+    goodCheats(parse(input), 2).count(_ >= minSaving)
 
-  def part2(input: String) =
-    0
+  def part2(input: String, minSaving: Int = 100) =
+    goodCheats(parse(input), 20).count(_ >= minSaving)

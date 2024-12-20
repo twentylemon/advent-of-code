@@ -21,7 +21,7 @@ class Day20Test extends UnitTest:
                 |#.#.#.#.#.#.###
                 |#...#...#...###
                 |###############""".stripMargin
-    part1(in) shouldBe 0
+    part1(in, minSaving = 10) shouldBe 10
   }
 
   test("part 1") {
@@ -29,11 +29,24 @@ class Day20Test extends UnitTest:
   }
 
   test("part 2 example") {
-    val in = """|
-                |""".stripMargin
-    part2(in) shouldBe 0
+    val in = """|###############
+                |#...#...#.....#
+                |#.#.#.#.#.###.#
+                |#S#...#.#.#...#
+                |#######.#.#.###
+                |#######.#.#...#
+                |#######.#.###.#
+                |###..E#...#...#
+                |###.#######.###
+                |#...###...#...#
+                |#.#####.#.###.#
+                |#.#...#.#.#...#
+                |#.#.#.#.#.#.###
+                |#...#...#...###
+                |###############""".stripMargin
+    part2(in, minSaving = 50) shouldBe 285
   }
 
   test("part 2") {
-    part2(read(file(2024)(20))) shouldBe 0
+    part2(read(file(2024)(20))) shouldBe 982425
   }
