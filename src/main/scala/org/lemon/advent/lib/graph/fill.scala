@@ -31,14 +31,16 @@ def fill[N](adjacency: N => Seq[N], start: N): Set[N] =
   */
 def distanceFrom[N, D: Numeric](adjacency: N => Seq[(N, D)], end: N): Map[N, D] =
   val distances = mutable.Map(end -> summon[Numeric[D]].zero)
-  val queue = mutable.Queue(end)
+  given Ordering[(N, D)] = Ordering.by[(N, D), D](_._2)
+  val queue = mutable.PriorityQueue(distances.head)
+
   while !queue.isEmpty do
-    val node = queue.dequeue
+    val node = queue.dequeue._1
     val dist = distances(node)
     queue ++= adjacency(node)
       .filter((neigh, d) => distances.get(neigh).forall(_ > dist + d))
       .tapEach((neigh, d) => distances(neigh) = dist + d)
-      .map(_._1)
+
   distances.toMap
 
 /** Performs a breadth first fill of the graph from the starting node, returning
