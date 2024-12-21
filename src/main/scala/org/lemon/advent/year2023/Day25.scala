@@ -27,7 +27,7 @@ private object Day25:
       pathFind(adjacency, source, sink) match
         case None => None
         case Some(Path(path, _)) =>
-          val route = path.zip(path.tail).map(_.swap)
+          val route = path.reverse.zip(path.reverse.tail).map(_.swap)
           val pathFlow = route.map(flowByEdge).min
           val nextFlows = route.foldLeft(flowByEdge) { case (flow, (from, to)) =>
             flow

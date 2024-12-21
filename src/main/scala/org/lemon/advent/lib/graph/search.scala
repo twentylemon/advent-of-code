@@ -16,14 +16,14 @@ import scala.math.Ordering.Implicits._
   */
 def pathFind[N, D: Numeric](adjacency: N => Seq[(N, D)], start: N, ends: N => Boolean): Option[Path[N, D]] =
   given Ordering[Path[N, D]] = Ordering.by[Path[N, D], D](_.distance).reverse
-  val queue = mutable.PriorityQueue(Path(path = Seq(start), distance = summon[Numeric[D]].zero))
+  val queue = mutable.PriorityQueue(Path(path = Vector(start), distance = summon[Numeric[D]].zero))
   val visited = mutable.Set(start)
 
   while !queue.isEmpty && !ends(queue.head.at) do
     val node @ Path(path, distance) = queue.dequeue
     queue ++= adjacency(node.at)
       .filter((neigh, _) => visited.add(neigh))
-      .map((neigh, dist) => Path(neigh +: path, distance + dist))
+      .map((neigh, dist) => Path(path :+ neigh, distance + dist))
 
   queue.headOption
 
@@ -54,9 +54,12 @@ def allShortestPaths[N, D: Numeric](adjacency: N => Seq[(N, D)], start: N, ends:
           case Some(known) if known < costTo => false
           case _ => costs(neigh) = costTo; true
       )
-      .map((neigh, dist) => Path(neigh +: path, distance + dist))
+      .map((neigh, dist) => Path(path :+ neigh, distance + dist))
 
   paths.toSet
+
+def allShortestPaths[N](adjacency: N => Seq[N], start: N, ends: N => Boolean): Set[Path[N, Int]] =
+  allShortestPaths(unitAdjacency(adjacency), start, ends)
 
 /** Performs a dijkstra's search of the graph from `start` to `end`, returning
   * the shortest path between them.
@@ -70,6 +73,18 @@ def allShortestPaths[N, D: Numeric](adjacency: N => Seq[(N, D)], start: N, ends:
   */
 def pathFind[N, D: Numeric](adjacency: N => Seq[(N, D)], start: N, end: N): Option[Path[N, D]] =
   pathFind(adjacency, start, end == _)
+
+/** Performs a dijkstra's search of the graph from `start` to `end`, returning
+  * the shortest path between them. The distance between each node is assumed to be one.
+  *
+  * @param adjacency function to return edges for a given node, all with distance one
+  * @param start the start node
+  * @param ends function to check if a node is an ending node
+  * @return the shortest path between `start` and `end`, or empty if no path exists
+  * @tparam N the node type
+  */
+def pathFind[N](adjacency: N => Seq[N], start: N, ends: N => Boolean): Option[Path[N, Int]] =
+  pathFind(unitAdjacency(adjacency), start, ends)
 
 /** Performs a dijkstra's search of the graph from `start` to `end`, returning
   * the shortest path between them. The distance between each node is assumed to be one.
