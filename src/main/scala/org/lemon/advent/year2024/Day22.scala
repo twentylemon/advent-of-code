@@ -2,9 +2,11 @@ package org.lemon.advent.year2024
 
 import org.lemon.advent.lib._
 
+import scala.collection.parallel.CollectionConverters._
+
 private object Day22:
 
-  def parse(input: String) = input.linesIterator.map(_.toLong)
+  def parse(input: String) = input.linesIterator.map(_.toLong).toSeq
 
   extension (x: Long)
     def mix(y: Long) = x ^ y
@@ -33,7 +35,7 @@ private object Day22:
       .toMap
 
   def part2(input: String) =
-    val stores = parse(input)
+    val stores = parse(input).par
       .map(sequences)
       .toSeq
     val best = stores.flatMap(_.keys).toSet.maxBy(seq => stores.map(_.getOrElse(seq, 0L)).sum)
