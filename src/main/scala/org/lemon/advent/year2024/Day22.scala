@@ -6,7 +6,7 @@ import scala.collection.parallel.CollectionConverters._
 
 private object Day22:
 
-  def parse(input: String) = input.linesIterator.map(_.toLong).toSeq
+  def parse(input: String) = input.linesIterator.map(_.toLong).toIndexedSeq
 
   extension (x: Long)
     def mix(y: Long) = x ^ y
@@ -38,5 +38,4 @@ private object Day22:
     val stores = parse(input).par
       .map(sequences)
       .toSeq
-    val best = stores.flatMap(_.keys).toSet.maxBy(seq => stores.map(_.getOrElse(seq, 0L)).sum)
-    stores.map(_.getOrElse(best, 0L)).sum
+    stores.flatMap(_.keys).toSet.map(seq => stores.map(_.getOrElse(seq, 0L)).sum).max

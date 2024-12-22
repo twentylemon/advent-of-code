@@ -11,12 +11,12 @@ private object Day21:
     input match
       case Lines(lines @ _*) => lines
 
-  def directional = Seq(
+  def directional = IndexedSeq(
     " ^A".toSeq,
     "<v>".toSeq,
   )
   def directionalMap = asMap(directional)
-  def keypad = Seq(
+  def keypad = IndexedSeq(
     "789".toSeq,
     "456".toSeq,
     "123".toSeq,
