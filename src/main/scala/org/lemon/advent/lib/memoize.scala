@@ -2,6 +2,20 @@ package org.lemon.advent.lib
 
 import scala.collection.mutable
 
+/** Memoizes a function, caching the results of previous calls.
+  * Use as:
+  * ```scala
+  * lazy val fib: BigInt => BigInt = memoize {
+  *  case 0 => 0
+  *  case 1 => 1
+  *  case n => fib(n - 1) + fib(n - 2)
+  * }
+  * fib(100) shouldBe BigInt("354224848179261915075")
+  * ```
+  *
+  * @param f the function to memoize
+  * @return a memoized version of the function
+  */
 def memoize[T, R](f: T => R): T => R =
   val cache = mutable.Map.empty[T, R]
   (t: T) => cache.getOrElseUpdate(t, f(t))
