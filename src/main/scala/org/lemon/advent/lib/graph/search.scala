@@ -16,7 +16,7 @@ import scala.math.Ordering.Implicits._
   */
 def pathFind[N, D: Numeric](adjacency: N => Seq[(N, D)], start: N, ends: N => Boolean): Option[Path[N, D]] =
   given Ordering[Path[N, D]] = Ordering.by[Path[N, D], D](_.distance).reverse
-  val queue = mutable.PriorityQueue(Path(path = Vector(start), distance = summon[Numeric[D]].zero))
+  val queue = mutable.PriorityQueue(Path(path = Vector(start), distance = Numeric[D].zero))
   val visited = mutable.Set(start)
 
   while !queue.isEmpty && !ends(queue.head.at) do
@@ -38,8 +38,8 @@ def pathFind[N, D: Numeric](adjacency: N => Seq[(N, D)], start: N, ends: N => Bo
   */
 def allShortestPaths[N, D: Numeric](adjacency: N => Seq[(N, D)], start: N, ends: N => Boolean): Set[Path[N, D]] =
   val paths = mutable.Set.empty[Path[N, D]]
-  val queue = mutable.Queue(Path(path = Vector(start), distance = summon[Numeric[D]].zero))
-  val costs = mutable.Map(start -> summon[Numeric[D]].zero)
+  val queue = mutable.Queue(Path(path = Vector(start), distance = Numeric[D].zero))
+  val costs = mutable.Map(start -> Numeric[D].zero)
 
   while !queue.isEmpty do
     val node @ Path(path, distance) = queue.dequeue

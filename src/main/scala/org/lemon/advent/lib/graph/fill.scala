@@ -30,7 +30,7 @@ def fill[N](adjacency: N => Seq[N], start: N): Set[N] =
   * @tparam D the distance type
   */
 def distanceFrom[N, D: Numeric](adjacency: N => Seq[(N, D)], end: N): Map[N, D] =
-  val distances = mutable.Map(end -> summon[Numeric[D]].zero)
+  val distances = mutable.Map(end -> Numeric[D].zero)
   given Ordering[(N, D)] = Ordering.by[(N, D), D](_._2)
   val queue = mutable.PriorityQueue(distances.head)
 
@@ -67,7 +67,7 @@ def distanceFrom[N](adjacency: N => Seq[N], end: N): Map[N, Int] =
   */
 def allPaths[N, D: Numeric](adjacency: N => Seq[(N, D)], start: N, ends: N => Boolean): Set[Path[N, D]] =
   val paths = mutable.Set.empty[Path[N, D]]
-  val queue = mutable.Queue(Path(path = Vector(start), distance = summon[Numeric[D]].zero))
+  val queue = mutable.Queue(Path(path = Vector(start), distance = Numeric[D].zero))
 
   while queue.nonEmpty do
     val node @ Path(path, distance) = queue.dequeue
