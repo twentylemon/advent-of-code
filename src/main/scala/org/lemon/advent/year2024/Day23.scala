@@ -11,10 +11,7 @@ private object Day23:
       case s"$a-$b" => Seq((a, b), (b, a))
     )
       .toSeq
-      .groupMap(_._1)(_._2)
-      .mapValues(_.toSet)
-      .toMap
-      .withDefaultValue(Set.empty)
+      .groupMapReduce(_._1)(x => Set(x._2))(_ ++ _)
 
   def part1(input: String) =
     val graph = parse(input)

@@ -4,13 +4,13 @@ package org.lemon.advent.lib.graph
   * @tparam N the node type
   * @tparam D the distance type
   */
-type WeightedGraph[N, D] = Map[N, Seq[(N, D)]]
+type WeightedGraph[N, D] = Map[N, Iterable[(N, D)]]
 
 /** Static adjacency list. A map of `node => [neighbour...]`. The distances between all
   * nodes is assumed to be one.
   * @tparam N the node type
   */
-type UnitGraph[N] = Map[N, Seq[N]]
+type UnitGraph[N] = Map[N, Iterable[N]]
 
 /** The path taken by a search algorithm.
   * @param path the path taken

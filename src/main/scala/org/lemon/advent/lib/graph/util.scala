@@ -1,4 +1,6 @@
 package org.lemon.advent.lib.graph
 
-private def unitAdjacency[N](adjacency: N => Seq[N]): N => Seq[(N, Int)] =
+import scala.collection.IterableOps
+
+private def unitAdjacency[N, C[x] <: Iterable[x]](adjacency: N => IterableOps[N, C, _]): N => C[(N, Int)] =
   node => adjacency(node).map((_, 1))
