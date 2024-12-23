@@ -1,8 +1,7 @@
 package org.lemon.advent.year2024
 
 import org.lemon.advent.lib._
-
-import scala.collection.mutable
+import org.lemon.advent.lib.graph._
 
 private object Day23:
 
@@ -17,34 +16,14 @@ private object Day23:
       .toMap
       .withDefaultValue(Set.empty)
 
-  def bronKerbosch(graph: Map[String, Set[String]])(
-      r: Set[String],
-      p: Set[String],
-      x: Set[String]
-  )(result: mutable.Set[Set[String]]): Unit =
-    if p.isEmpty && x.isEmpty then result.add(r)
-    else
-      var (xv, pv) = (x, p)
-      val u = p.union(x).head
-      for v <- p.diff(graph(u)) do
-        bronKerbosch(graph)(r + v, pv.intersect(graph(v)), xv.intersect(graph(v)))(result)
-        xv += v
-        pv -= v
-
   def part1(input: String) =
     val graph = parse(input)
-    graph.keys
-      .triples
-      .filter((a, b, c) => a.startsWith("t") || b.startsWith("t") || c.startsWith("t"))
-      .count((a, b, c) =>
-        graph(a).contains(b) &&
-          graph(b).contains(c) &&
-          graph(c).contains(a)
-      )
+    cliques(graph)
+      .flatMap(_.triples)
+      .map((a, b, c) => Seq(a, b, c).sorted)
+      .count(_.exists(_.startsWith("t")))
 
   def part2(input: String) =
     val graph = parse(input)
-    val result = mutable.Set.empty[Set[String]]
-    bronKerbosch(graph)(Set.empty, graph.keys.toSet, Set.empty)(result)
-    val largest = result.maxBy(_.size)
+    val largest = cliques(graph).maxBy(_.size)
     largest.toSeq.sorted.mkString(",")
