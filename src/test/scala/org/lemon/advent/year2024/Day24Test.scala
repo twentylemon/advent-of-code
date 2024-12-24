@@ -75,5 +75,5 @@ class Day24Test extends UnitTest:
   }
 
   test("part 2") {
-    part2(read(file(2024)(24))) shouldBe 0
+    part2(read(file(2024)(24))) shouldBe "gwh,jct,rcb,wbw,wgb,z09,z21,z39"
   }

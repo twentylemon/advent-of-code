@@ -34,10 +34,6 @@ private object Day24:
         ).toMap
         lits ++ ops
 
-  def part1(input: String) =
-    val expressions = parse(input)
-    calc(expressions)("z")
-
   def calc(expressions: Map[String, Expression])(wire: String) =
     given ExpressionContext = ExpressionContext(expressions)
     expressions
@@ -48,28 +44,80 @@ private object Day24:
       .map { case ((_, e), i) => (1L << i) * (if e.resolve then 1 else 0) }
       .sum
 
-  def checkSum(expressions: Map[String, Expression]) =
-    calc(expressions)("x") + calc(expressions)("y") == calc(expressions)("z")
+  def part1(input: String) =
+    val expressions = parse(input)
+    calc(expressions)("z")
+
+  def checkAdditionBit(expressions: Map[String, Expression], suffixes: Iterable[String]) =
+    // add bit is x_i ^ y_i ^ carry_{i-1}, so output must be XOR
+    expressions
+      .filterKeys(gate => gate.startsWith("z") && suffixes.exists(gate.endsWith))
+      .filterNot(_._2 match
+        case Op(_, _, "XOR") => true
+        case _ => false
+      )
+      .toMap
+
+  def checkCarryBit(expressions: Map[String, Expression], suffixes: Iterable[String]) =
+    // carry bit is (a & b | a ^ b) & carry_{i-1}, so carry must be AND or OR
+    expressions
+      .filterKeys(!_.startsWith("z"))
+      .filter(_._2 match
+        case Op(Ref(r), _, _) if r.startsWith("x") || r.startsWith("y") => false
+        case Op(_, Ref(r), _) if r.startsWith("x") || r.startsWith("y") => false
+        case Op(_, _, "XOR") => true
+        case _ => false
+      )
+      .toMap
+
+  def lowestBitThatUses(gate: String, expressions: Map[String, Expression]): String =
+    val uses = expressions
+      .filter(_._2 match
+        case Op(Ref(`gate`), _, _) | Op(_, Ref(`gate`), _) => true
+        case _ => false
+      )
+    uses
+      .find(_._1.startsWith("z"))
+      .map((gate, _) => "z" + (gate.drop(1).toInt - 1).toString.padLeft(2, '0'))
+      .getOrElse(uses.map(_._1).map(lowestBitThatUses(_, expressions)).min)
+
+  extension (expressions: Map[String, Expression])
+    def swap(gate1: String, gate2: String): Map[String, Expression] =
+      expressions.updated(gate1, expressions(gate2)).updated(gate2, expressions(gate1))
 
   def part2(input: String) =
     val expressions = parse(input)
 
     def display(e: Map[String, Expression]) =
-      val x = calc(e)("x")
-      val y = calc(e)("y")
-      val z = calc(e)("z")
-      println(s"x = ${x.toBinaryString.reverse.padTo(z.toBinaryString.size, '0').reverse}")
-      println(s"y = ${y.toBinaryString.reverse.padTo(z.toBinaryString.size, '0').reverse}")
+      val (x, y, z) = (calc(e)("x"), calc(e)("y"), calc(e)("z"))
+      println(s"x = ${x.toBinaryString.padLeft(z.toBinaryString.size, '0')}")
+      println(s"y = ${y.toBinaryString.padLeft(z.toBinaryString.size, '0')}")
       println(s"z = ${z.toBinaryString}")
-      println(s"d = ${(z - x - y).toBinaryString.reverse.padTo(z.toBinaryString.size, '0').reverse}")
+      println(s"+ = ${(x + y).toBinaryString.padLeft(z.toBinaryString.size, '0')}")
+      println(s"^ = ${(z ^ (x + y)).toBinaryString.padLeft(z.toBinaryString.size, '0')}")
       println()
 
-    display(expressions)
+    // assumption is that the circuit is a regular full adder, there's no shenanigans in between
+    val bitSuffixes = expressions.keys.filter(_.startsWith("x")).map(_.drop(1))
+    val wrongAdds = checkAdditionBit(expressions, bitSuffixes)
+    val wrongCarries = checkCarryBit(expressions, bitSuffixes)
 
-    // display(expressions
-    //   .updated("bwm", expressions("jhr"))
-    //   .updated("jhr", expressions("bwm")))
-    display(expressions
-      .updated("nbb", expressions("vjc"))
-      .updated("vjc", expressions("nbb")))
-    0
+    val swapped = wrongCarries.foldLeft(expressions) { case (e, (gate, _)) =>
+      e.swap(gate, lowestBitThatUses(gate, e))
+    }
+
+    // display(swapped)
+
+    // at this point the adder is correct part for one bit
+    val (x, y, z) = (calc(swapped)("x"), calc(swapped)("y"), calc(swapped)("z"))
+    val diff = z ^ (x + y)
+    val wrongBit = (diff.toBinaryString.size - 1).toString.padLeft(2, '0')
+    // found by :eyes: at input... not sure how else this would be done
+    val gongShow = swapped
+      .filter(_._2 match
+        case Op(Ref(x), Ref(y), _) if x.endsWith(wrongBit) && y.endsWith(wrongBit) => true
+        case _ => false
+      )
+
+    // display(swapped.swap(gongShow.head._1, gongShow.last._1))
+    (wrongAdds.keys ++ wrongCarries.keys ++ gongShow.keys).toSeq.sorted.mkString(",")
