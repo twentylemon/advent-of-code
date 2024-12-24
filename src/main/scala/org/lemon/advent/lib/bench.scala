@@ -6,7 +6,7 @@ import org.openjdk.jmh.annotations.Benchmark
 
 class Bench:
 
-  @Benchmark // Jmh/run org.lemon.advent.lib.Bench
+  @Benchmark // Jmh/run -i 3 -wi 3 -f 1 -t 1  org.lemon.advent.lib.Bench
   def bench(): Unit =
     // import org.lemon.advent.year2023.Day16._
     // part1(read(file(2023)(16)))
