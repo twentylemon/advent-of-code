@@ -70,17 +70,6 @@ private object Day24:
       )
       .toMap
 
-  def lowestBitThatUses(gate: String, expressions: Map[String, Expression]): String =
-    val uses = expressions
-      .filter(_._2 match
-        case Op(Ref(`gate`), _, _) | Op(_, Ref(`gate`), _) => true
-        case _ => false
-      )
-    uses
-      .find(_._1.startsWith("z"))
-      .map((gate, _) => "z" + (gate.drop(1).toInt - 1).toString.padLeft(2, '0'))
-      .getOrElse(uses.map(_._1).map(lowestBitThatUses(_, expressions)).min)
-
   extension (expressions: Map[String, Expression])
     def swap(gate1: String, gate2: String): Map[String, Expression] =
       expressions.updated(gate1, expressions(gate2)).updated(gate2, expressions(gate1))
@@ -102,22 +91,27 @@ private object Day24:
     val wrongAdds = checkAdditionBit(expressions, bitSuffixes)
     val wrongCarries = checkCarryBit(expressions, bitSuffixes)
 
-    val swapped = wrongCarries.foldLeft(expressions) { case (e, (gate, _)) =>
-      e.swap(gate, lowestBitThatUses(gate, e))
-    }
+    val swaps = for x <- wrongAdds.keys; y <- wrongCarries.keys yield (x, y)
 
-    // display(swapped)
-
-    // at this point the adder is correct part for one bit
-    val (x, y, z) = (calc(swapped)("x"), calc(swapped)("y"), calc(swapped)("z"))
-    val diff = z ^ (x + y)
-    val wrongBit = (diff.toBinaryString.size - 1).toString.padLeft(2, '0')
-    // found by :eyes: at input... not sure how else this would be done
-    val gongShow = swapped
-      .filter(_._2 match
-        case Op(Ref(x), Ref(y), _) if x.endsWith(wrongBit) && y.endsWith(wrongBit) => true
-        case _ => false
-      )
-
-    // display(swapped.swap(gongShow.head._1, gongShow.last._1))
-    (wrongAdds.keys ++ wrongCarries.keys ++ gongShow.keys).toSeq.sorted.mkString(",")
+    // swap adds and carries; there are 3 pairs out of 4
+    swaps.triples.filter {
+      case ((a, b), (c, d), (e, f)) => a != c && a != e && c != e && b != d && b != f && d != f
+    }.flatMap {
+      case ((a, b), (c, d), (e, f)) =>
+        val swapped = expressions.swap(a, c).swap(b, d).swap(e, f)
+        // display(swapped)
+        val (x, y, z) = (calc(swapped)("x"), calc(swapped)("y"), calc(swapped)("z"))
+        val diff = z ^ (x + y)
+        val wrongBit = (diff.toBinaryString.size - 1).toString.padLeft(2, '0')
+        // found by :eyes: at input... not sure how else this would be done
+        val gongShow = swapped
+          .filter(_._2 match
+            case Op(Ref(x), Ref(y), _) if x.endsWith(wrongBit) && y.endsWith(wrongBit) => true
+            case _ => false
+          )
+        val last = swapped.swap(gongShow.head._1, gongShow.last._1)
+        // display(last)
+        Option.when(calc(last)("z") == calc(last)("x") + calc(last)("y"))(
+          (Seq(a, b, c, d, e, f) ++ gongShow.keys).sorted.mkString(",")
+        )
+    }.next
