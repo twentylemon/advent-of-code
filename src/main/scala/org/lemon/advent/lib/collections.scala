@@ -18,7 +18,7 @@ extension [A](it: Iterator[A])
 
 extension [A](it: Iterable[A])
   /** Returns an iterator view of the Cartesian product of this iterable and another.
-    * Also known as the cross product
+    * Also known as the cross product.
     *
     * @param rhs the other iterable
     * @return all pairs of elements (a, b) where a is from this iterable and b is from the other iterable
