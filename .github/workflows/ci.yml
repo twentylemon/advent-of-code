@@ -5,7 +5,7 @@ jobs:
   scala:
     strategy:
       matrix:
-        package: [lib, year2022, year2023, year2024]
+        package: [lib, year2022, year2023, year2024, year2025]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v5
