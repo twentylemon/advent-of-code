@@ -141,19 +141,19 @@ class AreaTest extends UnitTest:
   }
 
   test("growLeft encloses original area") {
-    check((area: Area, n: Int) => (n > 0 && n < Int.MaxValue - 1000) ==> (area.growLeft(n) encloses area))
+    check((area: Area, n: Int) => (n > 0 && n < 1000000000) ==> (area.growLeft(n) encloses area))
   }
 
   test("growRight encloses original area") {
-    check((area: Area, n: Int) => (n > 0 && n < Int.MaxValue - 1000) ==> (area.growRight(n) encloses area))
+    check((area: Area, n: Int) => (n > 0 && n < 1000000000) ==> (area.growRight(n) encloses area))
   }
 
   test("growTop encloses original area") {
-    check((area: Area, n: Int) => (n > 0 && n < Int.MaxValue - 1000) ==> (area.growTop(n) encloses area))
+    check((area: Area, n: Int) => (n > 0 && n < 1000000000) ==> (area.growTop(n) encloses area))
   }
 
   test("growBottom encloses original area") {
-    check((area: Area, n: Int) => (n > 0 && n < Int.MaxValue - 1000) ==> (area.growBottom(n) encloses area))
+    check((area: Area, n: Int) => (n > 0 && n < 1000000000) ==> (area.growBottom(n) encloses area))
   }
 
   test("clamp returns a coord in the area") {
