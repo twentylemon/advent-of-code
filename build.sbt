@@ -17,7 +17,7 @@ lazy val advent = (project in file("."))
       "com.github.vagmcs" %% "optimus" % "3.4.4",
       "com.github.vagmcs" %% "optimus-solver-oj" % "3.4.4"
     ),
-    libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.17.1" % Test,
+    libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.19.0" % Test,
     libraryDependencies += "org.scalatestplus" %% "scalacheck-1-17" % "3.2.18.0" % Test,
     libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.19" % Test,
     Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oDF"),
