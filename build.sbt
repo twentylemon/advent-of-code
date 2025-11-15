@@ -6,7 +6,7 @@ lazy val advent = (project in file("."))
     libraryDependencies += "com.softwaremill.sttp.client4" %% "core" % "4.0.0-M19",
     libraryDependencies ++= Seq(
       "org.typelevel" %% "cats-core" % "2.13.0",
-      "org.typelevel" %% "cats-collections-core" % "0.9.9"
+      "org.typelevel" %% "cats-collections-core" % "0.9.10"
     ),
     libraryDependencies ++= Seq(
       "io.circe" %% "circe-core" % "0.14.10",
