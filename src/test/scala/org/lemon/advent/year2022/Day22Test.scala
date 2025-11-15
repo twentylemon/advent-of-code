@@ -85,9 +85,12 @@ class Day22Test extends UnitTest {
           case _ => null
 
       if turn != null then actions += turn
-      val (num2, tail2) = tail.tail.span(_.isDigit)
-      num = num2
-      tail = tail2
+      if tail.isEmpty then
+        num = ""
+      else
+        val (num2, tail2) = tail.tail.span(_.isDigit)
+        num = num2
+        tail = tail2
 
     actions.toSeq
 
