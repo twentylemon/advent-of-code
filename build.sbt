@@ -2,10 +2,10 @@ lazy val advent = (project in file("."))
   .enablePlugins(JmhPlugin)
   .settings(
     scalaVersion := "3.3.4",
-    libraryDependencies += "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4",
+    libraryDependencies += "org.scala-lang.modules" %% "scala-parallel-collections" % "1.2.0",
     libraryDependencies += "com.softwaremill.sttp.client4" %% "core" % "4.0.0-M19",
     libraryDependencies ++= Seq(
-      "org.typelevel" %% "cats-core" % "2.12.0",
+      "org.typelevel" %% "cats-core" % "2.13.0",
       "org.typelevel" %% "cats-collections-core" % "0.9.9"
     ),
     libraryDependencies ++= Seq(
