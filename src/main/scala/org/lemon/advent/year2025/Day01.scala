@@ -18,7 +18,7 @@ private object Day01:
 
   def part2(input: String) =
     val turns = parse(input)
-    turns.scanLeft(50)(_ + _).sliding(2).map {
+    (Seq(50) ++ turns.scanLeft(50)(_ + _)).sliding(2).map {
       case Seq(from, to) if from / 100 == to / 100 && from % 100 == 0 => 1
       case Seq(from, to) => (from / 100 - to / 100).abs
     }.sum
