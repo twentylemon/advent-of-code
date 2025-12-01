@@ -3,7 +3,6 @@ package org.lemon.advent.year2025
 private object Day01:
 
   def parse(input: String) =
-    import org.lemon.advent.lib.parse.{given, _}
     input.linesIterator.map(_ match
       case s"L$x" => -x.toInt
       case s"R$x" => x.toInt
