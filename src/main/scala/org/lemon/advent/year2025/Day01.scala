@@ -18,12 +18,11 @@ private object Day01:
 
   def part2(input: String) =
     val turns = parse(input)
-    def rel(x: Int) = if x < 0 then x / 100 - 1 else x / 100
     turns.scanLeft(50)(_ + _).sliding(2).map {
-      case Seq(from, to) if from % 100 == 0 =>
-        (from / 100 - to / 100).abs - 1
-      case Seq(from, to) if to % 100 == 0 =>
-        (rel(from) - rel(to)).abs + 1
-      case Seq(from, to) =>
-        (rel(from) - rel(to)).abs
+      case Seq(from, to) if from < to => Math.floorDiv(to, 100) - Math.floorDiv(from, 100)
+      case Seq(from, to) if from > to =>
+        val minCentury = Math.floorDiv(to, 100) + (if (to % 100 == 0) 0 else 1)
+        val maxCentury = Math.floorDiv(from - 1, 100)
+        (maxCentury - minCentury + 1).max(0)
+      case _ => 0
     }.sum
