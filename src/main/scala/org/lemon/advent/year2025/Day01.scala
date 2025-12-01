@@ -18,10 +18,7 @@ private object Day01:
 
   def part2(input: String) =
     val turns = parse(input)
-    var (pastZero, at) = (0, 50)
-    turns.foreach(x =>
-      val afterTurn = at + x
-      pastZero += (afterTurn / 100).abs + (if at.signum == 0 || at.signum == afterTurn.signum then 0 else 1)
-      at = afterTurn +% 100
-    )
-    pastZero
+    turns.scanLeft(50)(_ + _).sliding(2).map {
+      case (from, to) if from / 100 == to / 100 && from % 100 == 0 => 1
+      case (from, to) => (from / 100 - to / 100).abs
+    }.sum
