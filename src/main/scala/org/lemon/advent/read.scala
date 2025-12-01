@@ -14,6 +14,15 @@ def readLines(name: String): Seq[String] =
 
 def file(year: Int)(day: Int) = s"year$year/day${"%02d".format(day)}.txt"
 
+/**
+  * Fetches the input and creates files for a given day.
+  * 
+  * Run with `sbt "run 2025 1"`, or just `run 2025 1` with sbt shell running.
+  * 
+  * Requires a valid cookie to be stored in the `session` file. Get the cookie
+  * by signing in with a browser, go to any problem input page, inspect the network
+  * tab and grab the cookie from that. It'll be `session=blah;`
+  */
 @main
 def setup(year: Int, day: Int) =
   assert(1 to 25 contains day, s"$day must be between 1 and 25")
@@ -37,13 +46,14 @@ def setup(year: Int, day: Int) =
       println(Files.write(javaPath, response.getBytes))
     }
 
-    val src = Paths.get(s"src/main/scala/org/lemon/advent/year$year/Day${"%02d".format(day)}.scala")
+    val className = s"Day${"%02d".format(day)}"
+    val src = Paths.get(s"src/main/scala/org/lemon/advent/year$year/$className.scala")
     Files.createDirectories(src.getParent)
     Files.write(src, s"""package org.lemon.advent.year$year
                         |
                         |import org.lemon.advent.lib._
                         |
-                        |private object Day${"%02d".format(day)}:
+                        |private object $className:
                         |
                         |  def parse(input: String) =
                         |    import org.lemon.advent.lib.parse.{given, _}
@@ -56,14 +66,14 @@ def setup(year: Int, day: Int) =
                         |    0
                         |""".stripMargin.getBytes)
 
-    val test = Paths.get(s"src/test/scala/org/lemon/advent/year$year/Day${"%02d".format(day)}Test.scala")
+    val test = Paths.get(s"src/test/scala/org/lemon/advent/year$year/${className}Test.scala")
     Files.createDirectories(test.getParent)
     Files.write(test, s"""package org.lemon.advent.year$year
                         |
                         |import org.lemon.advent._
-                        |import org.lemon.advent.year$year.Day${"%02d".format(day)}._
+                        |import org.lemon.advent.year$year.$className._
                         |
-                        |class Day${"%02d".format(day)}Test extends UnitTest:
+                        |class ${className}Test extends UnitTest:
                         |
                         |  test("part 1 example") {
                         |    val in = \"\"\"|
