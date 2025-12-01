@@ -14,12 +14,7 @@ private object Day01:
 
   def part1(input: String) =
     val turns = parse(input)
-    var twists = Seq(50)
-    turns.foreach(x =>
-      val at = (twists.last + x) +% 100
-      twists = twists ++ Seq(at)
-    )
-    twists.count(_ == 0)
+    turns.scanLeft(50)(_ + _).count(_ % 100 == 0)
 
   def part2(input: String) =
     val turns = parse(input)
