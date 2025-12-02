@@ -10,18 +10,17 @@ private object Day02:
       .map(_ match
         case s"$start-$end" => start.toLong to end.toLong
       )
-      .toSeq
 
-  def isDoubled(x: Long): Boolean =
+  def isDoubled(x: Long) =
     val s = x.toString
     val n = s.length
     n % 2 == 0 && s.take(n / 2) == s.drop(n / 2)
 
   def part1(input: String) =
     val ranges = parse(input)
-    ranges.flatMap(range => range.filter(isDoubled)).sum
+    ranges.flatMap(_.filter(isDoubled)).sum
 
-  def isRepeatedPattern(x: Long): Boolean =
+  def isRepeatedPattern(x: Long) =
     val s = x.toString
     val n = s.length
     (1 to n / 2)
@@ -31,4 +30,4 @@ private object Day02:
 
   def part2(input: String) =
     val ranges = parse(input)
-    ranges.flatMap(range => range.filter(isRepeatedPattern)).sum
+    ranges.flatMap(_.filter(isRepeatedPattern)).sum
