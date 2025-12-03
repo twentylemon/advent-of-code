@@ -1,7 +1,5 @@
 package org.lemon.advent.lib.parse
 
-import scala.math.BigInt
-
 /** Generic extractor object for parsing numbers.
   */
 object Num:
