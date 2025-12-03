@@ -1,7 +1,5 @@
 package org.lemon.advent.year2025
 
-import org.lemon.advent.lib._
-
 private object Day02:
 
   def parse(input: String) =
