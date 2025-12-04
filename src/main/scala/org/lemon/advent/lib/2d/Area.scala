@@ -55,6 +55,10 @@ case class Area(xRange: Range, yRange: Range):
     assert(xRange.contains(x), s"$this  does not contain column  $x")
     for y <- yRange.iterator yield (x, y)
 
+  def reverseCol(x: Int): Iterator[Coord] =
+    assert(xRange.contains(x), s"$this  does not contain column  $x")
+    for y <- yRange.reverseIterator yield (x, y)
+
   def leftCol: Iterator[Coord] = col(left)
   def rightCol: Iterator[Coord] = col(right)
 
@@ -62,8 +66,17 @@ case class Area(xRange: Range, yRange: Range):
     assert(yRange.contains(y), s"$this  does not contain row  $y")
     for x <- xRange.iterator yield (x, y)
 
+  def reverseRow(y: Int): Iterator[Coord] =
+    assert(yRange.contains(y), s"$this  does not contain row  $y")
+    for x <- xRange.reverseIterator yield (x, y)
+
   def topRow: Iterator[Coord] = row(top)
   def bottomRow: Iterator[Coord] = row(bottom)
+
+  def boundary: Iterator[Coord] =
+    if width == 1 then leftCol
+    else if height == 1 then topRow
+    else topRow ++ rightCol.drop(1) ++ reverseRow(bottom).drop(1) ++ reverseCol(left).slice(1, height - 1)
 
   def upDiagonal(startAt: Coord): Iterator[Coord] =
     assert(contains(startAt), s"$this  does not contain startAt  $startAt")

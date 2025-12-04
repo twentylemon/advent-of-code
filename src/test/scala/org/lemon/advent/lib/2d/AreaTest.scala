@@ -47,6 +47,33 @@ class AreaTest extends UnitTest:
     check((area: Area) => area.rightCol.forall(area.contains))
   }
 
+  test("reverseRow contains same points as row") {
+    check((area: Area) => area.reverseRow(area.top).toSet == area.topRow.toSet)
+  }
+
+  test("reverseCol contains same points as col") {
+    check((area: Area) => area.reverseCol(area.left).toSet == area.leftCol.toSet)
+  }
+
+  test("boundary contains only coords in area") {
+    check((area: Area) => area.boundary.forall(area.contains))
+  }
+
+  test("boundary has no duplicates") {
+    check((area: Area) =>
+      val b = area.boundary.toSeq
+      b.distinct == b
+    )
+  }
+
+  test("boundary coords are on the edge") {
+    check((area: Area) => area.boundary.forall(c => c.adjacent.exists(!area.contains(_))))
+  }
+
+  test("boundary size is perimeter") {
+    check((area: Area) => area.boundary.size == Region(area.toSet).perimeter.size)
+  }
+
   test("map with coord keys cover area") {
     check((xRange: Range, yRange: Range) =>
       val grid = (for x <- xRange; y <- yRange yield Coord(x, y)).map(x => (x, 1)).toMap
