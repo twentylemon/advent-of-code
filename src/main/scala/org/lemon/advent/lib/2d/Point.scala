@@ -51,6 +51,21 @@ case class Point[N: Integral](x: N, y: N):
   def manhattan(rhs: Point[N]): N = (x - rhs.x).abs + (y - rhs.y).abs
   def chessboard(rhs: Point[N]): N = (x - rhs.x).abs max (y - rhs.y).abs
 
+  /** Returns an iterator of all points within `distance` of this point using the given metric.
+    * This checks all points in a square around the point, so will not be correct if
+    * `metric(point, point.shift(direction, distance) > distance` (eg squared euclidean distance).
+    * @param distance the maximum distance, inclusive
+    * @param metric the distance function to use
+    * @return iterator of all points within `distance` of this point, including the point itself
+    */
+  def within(distance: N, metric: (Point[N], Point[N]) => N): Iterator[Point[N]] =
+    for
+      dy <- Iterator.iterate(-distance)(_ + `1`).takeWhile(_ <= distance)
+      dx <- Iterator.iterate(-distance)(_ + `1`).takeWhile(_ <= distance)
+      p = Point(x + dx, y + dy)
+      if metric(this, p) <= distance
+    yield p
+
   def shiftInto(area: Area): Coord =
     ((x +% fromInt(area.width)).toInt + area.left, (y +% fromInt(area.height)).toInt + area.top)
 

@@ -157,3 +157,31 @@ class CoordTest extends UnitTest:
   test("shiftInto returns a coord in the area") {
     check((area: Area, coord: Coord) => area.contains(coord.shiftInto(area)))
   }
+
+  test("within distance 0 is just the coord") {
+    given Arbitrary[(Coord, Coord) => Int] = Arbitrary(Gen.oneOf(
+      Gen.const((a: Coord, b: Coord) => a.manhattan(b)),
+      Gen.const((a: Coord, b: Coord) => a.chessboard(b))
+    ))
+    check((coord: Coord, metric: (Coord, Coord) => Int) => coord.within(0, metric).toSeq == Seq(coord))
+  }
+
+  test("within contains the coord") {
+    given Arbitrary[Int] = Arbitrary(Gen.chooseNum(0, 10))
+    given Arbitrary[(Coord, Coord) => Int] = Arbitrary(Gen.oneOf(
+      Gen.const((a: Coord, b: Coord) => a.manhattan(b)),
+      Gen.const((a: Coord, b: Coord) => a.chessboard(b))
+    ))
+    check((coord: Coord, d: Int, metric: (Coord, Coord) => Int) => coord.within(d, metric).contains(coord))
+  }
+
+  test("within distance d has correct bounds") {
+    given Arbitrary[Int] = Arbitrary(Gen.chooseNum(1, 10))
+    given Arbitrary[(Coord, Coord) => Int] = Arbitrary(Gen.oneOf(
+      Gen.const((a: Coord, b: Coord) => a.manhattan(b)),
+      Gen.const((a: Coord, b: Coord) => a.chessboard(b))
+    ))
+    check((coord: Coord, d: Int, metric: (Coord, Coord) => Int) =>
+      coord.within(d, metric).forall(c => metric(coord, c) <= d)
+    )
+  }
