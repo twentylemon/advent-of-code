@@ -7,9 +7,9 @@ import scala.collection.mutable
 private object Day19:
 
   def parse(input: String) =
-    import org.lemon.advent.lib.parse.{given, _}
+    import org.lemon.advent.lib.parse._
     input match
-      case Chunk(Csv[String](towels @ _*), Lines(targets @ _*)) => (towels, targets)
+      case Chunk(Csv(towels @ _*), targets) => (towels, targets.linesIterator.toSeq)
 
   def countLayouts(towels: Seq[String], target: String) =
     lazy val count: String => Long = memoize {

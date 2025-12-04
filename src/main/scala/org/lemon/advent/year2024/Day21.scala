@@ -6,10 +6,7 @@ import org.lemon.advent.lib.graph._
 
 private object Day21:
 
-  def parse(input: String) =
-    import org.lemon.advent.lib.parse.{given, _}
-    input match
-      case Lines(lines @ _*) => lines
+  def parse(input: String) = input.linesIterator.toSeq
 
   def directional = IndexedSeq(
     " ^A".toSeq,

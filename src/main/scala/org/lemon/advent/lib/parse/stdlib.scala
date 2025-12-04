@@ -15,9 +15,3 @@ extension (range: Range.type)
       case s"${Int(start)}-${Int(end)}" => Some(start to end)
       case s"${Int(start)}..${Int(end)}" => Some(start to end)
       case _ => None
-
-// givens for delimiter-separated values to be generic
-given (String => Option[Int]) = Int.unapply
-given (String => Option[Long]) = Long.unapply
-given (String => Option[BigInt]) = BigInt.unapply
-given (String => Option[Range]) = Range.unapply
