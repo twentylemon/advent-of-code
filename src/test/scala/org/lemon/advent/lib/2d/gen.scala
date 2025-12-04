@@ -10,6 +10,8 @@ import org.scalacheck.Gen.Choose
 given Arbitrary[Coord] = Arbitrary(Gen.resultOf(Coord.apply))
 given Shrink[Coord] = Shrink { case Coord(x, y) => shrink((x, y)).map(Coord.apply) }
 
+given Arbitrary[Direction] = Arbitrary(Gen.oneOf(Direction.values.toSeq))
+
 given Arbitrary[Range] = Arbitrary(
   for
     i <- Gen.chooseNum(0, 100)

@@ -43,6 +43,8 @@ case class Point[N: Integral](x: N, y: N):
   def shift(direction: Direction, n: N): Point[N] =
     (x + fromInt(direction.unitVector.x) * n, y + fromInt(direction.unitVector.y) * n)
 
+  def walk(direction: Direction): Iterator[Point[N]] = Iterator.iterate(this)(_.move(direction))
+
   def adjacent: Seq[Point[N]] = Seq(up, down, left, right)
   def surrounding: Seq[Point[N]] = Seq(up, down, left, right, up.left, up.right, down.left, down.right)
 

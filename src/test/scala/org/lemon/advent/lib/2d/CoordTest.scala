@@ -1,6 +1,7 @@
 package org.lemon.advent.lib.`2d`
 
 import org.lemon.advent._
+import org.lemon.advent.lib._
 import org.lemon.advent.lib.`2d`.Coord._
 import org.lemon.advent.lib.`2d`._
 import org.scalacheck.Prop._
@@ -86,6 +87,11 @@ class CoordTest extends UnitTest:
 
   test("shift(Right, n) is shiftUp(n)") {
     check((coord: Coord, n: Int) => coord.shift(Direction.Right, n) == coord.shiftRight(n))
+  }
+
+  test("walk nth element is shift by n") {
+    given Arbitrary[Int] = Arbitrary(Gen.chooseNum(0, 100))
+    check((coord: Coord, dir: Direction, n: Int) => coord.walk(dir).nth(n) == coord.shift(dir, n))
   }
 
   test("left is left direction") {
