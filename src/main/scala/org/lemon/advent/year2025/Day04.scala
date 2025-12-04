@@ -19,6 +19,5 @@ private object Day04:
     val grid = parse(input)
     Iterator.unfold(grid)(grid =>
       val toRemove = removable(grid)
-      if toRemove.isEmpty then None
-      else Some(toRemove.size, grid -- toRemove)
+      Option.when(toRemove.nonEmpty)((toRemove.size, grid -- toRemove))
     ).sum
