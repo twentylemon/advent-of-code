@@ -126,6 +126,22 @@ class CoordTest extends UnitTest:
     check((coord: Coord) => coord.adjacent.map(_ manhattan coord).forall(x => x == 1 || x == 2))
   }
 
+  test("manhattan is symmetric") {
+    check((c1: Coord, c2: Coord) => c1.manhattan(c2) == c2.manhattan(c1))
+  }
+
+  test("chessboard distance to self is 0") {
+    check((coord: Coord) => coord.chessboard(coord) == 0)
+  }
+
+  test("chessboard distance of surrounding is 1") {
+    check((coord: Coord) => coord.surrounding.forall(_.chessboard(coord) == 1))
+  }
+
+  test("chessboard is symmetric") {
+    check((c1: Coord, c2: Coord) => c1.chessboard(c2) == c2.chessboard(c1))
+  }
+
   test("surrounding contains all adjacent") {
     check((coord: Coord) => coord.adjacent.toSet.subsetOf(coord.surrounding.toSet))
   }

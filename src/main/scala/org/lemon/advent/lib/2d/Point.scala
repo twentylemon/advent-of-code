@@ -49,6 +49,7 @@ case class Point[N: Integral](x: N, y: N):
   def surrounding: Seq[Point[N]] = Seq(up, down, left, right, up.left, up.right, down.left, down.right)
 
   def manhattan(rhs: Point[N]): N = (x - rhs.x).abs + (y - rhs.y).abs
+  def chessboard(rhs: Point[N]): N = (x - rhs.x).abs max (y - rhs.y).abs
 
   def shiftInto(area: Area): Coord =
     ((x +% fromInt(area.width)).toInt + area.left, (y +% fromInt(area.height)).toInt + area.top)
