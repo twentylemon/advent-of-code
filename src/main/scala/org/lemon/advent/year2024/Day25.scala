@@ -6,9 +6,9 @@ import org.lemon.advent.lib.`2d`._
 private object Day25:
 
   def parse(input: String) =
-    import org.lemon.advent.lib.parse.{given, _}
+    import org.lemon.advent.lib.parse._
     input match
-      case Chunk(areas @ _*) => areas.map(Coord.gridToMap)
+      case Chunk(areas*) => areas.map(Coord.gridToMap)
 
   def part1(input: String) =
     val grids = parse(input)

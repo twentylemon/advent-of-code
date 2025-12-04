@@ -23,7 +23,7 @@ private object Day24:
         case "XOR" => lhs.resolve ^ rhs.resolve
 
   def parse(input: String) =
-    import org.lemon.advent.lib.parse.{given, _}
+    import org.lemon.advent.lib.parse._
     input match
       case Chunk(init, gates) =>
         val lits = init.linesIterator.map(_ match

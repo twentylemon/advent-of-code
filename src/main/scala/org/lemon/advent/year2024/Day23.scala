@@ -6,7 +6,6 @@ import org.lemon.advent.lib.graph._
 private object Day23:
 
   def parse(input: String) =
-    import org.lemon.advent.lib.parse.{given, _}
     input.linesIterator.flatMap(_ match
       case s"$a-$b" => Seq((a, b), (b, a))
     )
