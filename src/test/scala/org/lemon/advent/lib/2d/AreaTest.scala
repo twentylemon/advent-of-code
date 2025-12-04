@@ -137,18 +137,50 @@ class AreaTest extends UnitTest:
   }
 
   test("area enclosed by larger area") {
-    check((area: Area) => Area(area.left - 1 to area.right + 1, area.top - 1 to area.bottom + 1).encloses(area))
+    check((area: Area) => area.growLeft(1).growRight(1).growTop(1).growBottom(1).encloses(area))
   }
 
   test("area not enclosed by smaller area") {
     check((area: Area) =>
       (area.width > 2 && area.height > 2) ==>
-        !Area(area.left + 1 to area.right - 1, area.top + 1 to area.bottom - 1).encloses(area)
+        !area.dropLeft(1).dropRight(1).dropTop(1).dropBottom(1).encloses(area)
     )
   }
 
   test("area not enclosed by disjoint area") {
     check((area: Area) => !area.encloses(Area(area.right + 1 to area.right + 2, area.top - 2 to area.top - 1)))
+  }
+
+  test("area overlaps itself") {
+    check((area: Area) => area overlaps area)
+  }
+
+  test("area overlaps adjacent area") {
+    check((area: Area) => area overlaps area.growLeft(1).growRight(1).growTop(1).growBottom(1))
+  }
+
+  test("area does not overlap disjoint area") {
+    check((area: Area) => !area.overlaps(Area(area.right + 1 to area.right + 2, area.yRange)))
+  }
+
+  test("intersect with self is self") {
+    check((area: Area) => area.intersect(area).contains(area))
+  }
+
+  test("intersect of disjoint areas is empty") {
+    check((area: Area) => area.intersect(Area(area.right + 1 to area.right + 2, area.yRange)).isEmpty)
+  }
+
+  test("intersect is enclosed by both areas") {
+    check((a1: Area, a2: Area) =>
+      a1.intersect(a2).forall(inter => a1.encloses(inter) && a2.encloses(inter))
+    )
+  }
+
+  test("intersect contains only points in both areas") {
+    check((a1: Area, a2: Area) =>
+      a1.intersect(a2).forall(inter => inter.forall(c => a1.contains(c) && a2.contains(c)))
+    )
   }
 
   test("growLeft and dropLeft are inverse") {

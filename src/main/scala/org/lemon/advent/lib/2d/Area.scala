@@ -132,6 +132,15 @@ case class Area(xRange: Range, yRange: Range):
   def encloses(area: Area): Boolean =
     left <= area.left && right >= area.right && top <= area.top && bottom >= area.bottom
 
+  def overlaps(area: Area): Boolean =
+    left <= area.right && right >= area.left && top <= area.bottom && bottom >= area.top
+
+  def intersect(area: Area): Option[Area] =
+    Option.when(overlaps(area))(Area(
+      xRange = (left max area.left) to (right min area.right),
+      yRange = (top max area.top) to (bottom min area.bottom),
+    ))
+
   def clamp(coord: Coord): Coord = Coord(x = coord.x max left min right, y = coord.y max top min bottom)
 
   def show(coord2Char: Coord => Char): String =
