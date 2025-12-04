@@ -30,3 +30,10 @@ extension [N: Integral](a: N)
     * @return the least common multiple of this and `b`
     */
   def lcm(b: N): N = a * b / a.gcd(b)
+
+extension [N: Integral](it: Iterable[N])
+  /** @return the greatest common divisor of all elements in the iterable */
+  def gcd: N = it.reduce(_ gcd _)
+
+  /** @return the least common multiple of all elements in the iterable */
+  def lcm: N = it.reduce(_ lcm _)
