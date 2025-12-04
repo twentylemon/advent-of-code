@@ -1,6 +1,6 @@
 package org.lemon.advent.year2023
 
-import scala.collection.mutable
+import org.lemon.advent.lib._
 
 private object Day14:
 
@@ -36,18 +36,9 @@ private object Day14:
     val rotation = tiltGrid andThen rotate
     rotation andThen rotation andThen rotation andThen rotation
 
-  def cycle(grid: Seq[Seq[Char]], remaining: Int)(using memory: mutable.Map[Seq[Seq[Char]], Int]): Seq[Seq[Char]] =
-    memory.get(grid) match
-      case Some(cycleStartIndex) => 
-        val cycleLength = memory.size - cycleStartIndex
-        memory.find((_, at) => at == (cycleStartIndex + remaining % cycleLength)).get._1
-      case None =>
-        memory += (grid -> memory.size)
-        cycle(tiltCycle(grid), remaining - 1)
-
   def part2(input: String) =
     val grid = parse(input).map(_.reverse).transpose
-    given mutable.Map[Seq[Seq[Char]], Int] = mutable.Map.empty[Seq[Seq[Char]], Int]
-    cycle(grid, 1_000_000_000)
+    val cycle = findCycle(grid)(tiltCycle)
+    cycle.stateAt(1_000_000_000)
       .map(load)
       .sum
