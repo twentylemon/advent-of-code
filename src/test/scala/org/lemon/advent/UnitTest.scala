@@ -1,6 +1,5 @@
 package org.lemon.advent
 
-import org.scalactic.anyvals.PosInt
 import org.scalatest.Tag
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
