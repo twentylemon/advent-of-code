@@ -52,22 +52,22 @@ case class Area(xRange: Range, yRange: Range):
   def apply(coord: Coord): Boolean = contains(coord)
 
   def col(x: Int): Iterator[Coord] =
-    assert(xRange.contains(x), s"$this  does not contain column  $x")
+    require(xRange.contains(x), s"$this  does not contain column  $x")
     for y <- yRange.iterator yield (x, y)
 
   def reverseCol(x: Int): Iterator[Coord] =
-    assert(xRange.contains(x), s"$this  does not contain column  $x")
+    require(xRange.contains(x), s"$this  does not contain column  $x")
     for y <- yRange.reverseIterator yield (x, y)
 
   def leftCol: Iterator[Coord] = col(left)
   def rightCol: Iterator[Coord] = col(right)
 
   def row(y: Int): Iterator[Coord] =
-    assert(yRange.contains(y), s"$this  does not contain row  $y")
+    require(yRange.contains(y), s"$this  does not contain row  $y")
     for x <- xRange.iterator yield (x, y)
 
   def reverseRow(y: Int): Iterator[Coord] =
-    assert(yRange.contains(y), s"$this  does not contain row  $y")
+    require(yRange.contains(y), s"$this  does not contain row  $y")
     for x <- xRange.reverseIterator yield (x, y)
 
   def topRow: Iterator[Coord] = row(top)
@@ -79,11 +79,11 @@ case class Area(xRange: Range, yRange: Range):
     else topRow ++ rightCol.drop(1) ++ reverseRow(bottom).drop(1) ++ reverseCol(left).slice(1, height - 1)
 
   def upDiagonal(startAt: Coord): Iterator[Coord] =
-    assert(contains(startAt), s"$this  does not contain startAt  $startAt")
+    require(contains(startAt), s"$this  does not contain startAt  $startAt")
     Iterator.iterate(startAt)(_.up.right).takeWhile(contains)
 
   def downDiagonal(startAt: Coord): Iterator[Coord] =
-    assert(contains(startAt), s"$this  does not contain startAt  $startAt")
+    require(contains(startAt), s"$this  does not contain startAt  $startAt")
     Iterator.iterate(startAt)(_.down.right).takeWhile(contains)
 
   def rows: Iterator[Iterator[Coord]] = yRange.iterator.map(row)

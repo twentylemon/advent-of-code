@@ -25,8 +25,8 @@ def file(year: Int)(day: Int) = s"year$year/day${"%02d".format(day)}.txt"
   */
 @main
 def setup(year: Int, day: Int) =
-  assert(1 to 25 contains day, s"$day must be between 1 and 25")
-  assert(!LocalDate.now.isBefore(LocalDate.of(year, 12, day)), s"$year/$day is not available yet")
+  require(1 to 25 contains day, s"$day must be between 1 and 25")
+  require(!LocalDate.now.isBefore(LocalDate.of(year, 12, day)), s"$year/$day is not available yet")
   
   val path = file(year)(day)
   Using(Source.fromResource(path)) { _ =>
