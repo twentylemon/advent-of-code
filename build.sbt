@@ -5,10 +5,6 @@ lazy val advent = (project in file("."))
     libraryDependencies += "org.scala-lang.modules" %% "scala-parallel-collections" % "1.2.0",
     libraryDependencies += "com.softwaremill.sttp.client4" %% "core" % "4.0.13",
     libraryDependencies ++= Seq(
-      "org.typelevel" %% "cats-core" % "2.13.0",
-      "org.typelevel" %% "cats-collections-core" % "0.9.10"
-    ),
-    libraryDependencies ++= Seq(
       "io.circe" %% "circe-core" % "0.14.15",
       "io.circe" %% "circe-generic" % "0.14.15",
       "io.circe" %% "circe-parser" % "0.14.15"

@@ -1,11 +1,7 @@
 package org.lemon.advent.year2022
 
-import cats._
-import cats.implicits._
-import cats.collections._
-import cats.collections.syntax.all._
-
 import org.lemon.advent._
+import org.lemon.advent.lib._
 
 class Day15Test extends UnitTest {
 
@@ -24,8 +20,8 @@ class Day15Test extends UnitTest {
 
   def coverage(sensor: Sensor, row: Int) =
     val diff = (sensor.sensor.y - row).abs
-    if diff <= sensor.distance then (sensor.sensor.x - sensor.distance + diff) toIncl (sensor.sensor.x + sensor.distance - diff)
-    else 0 toExcl 0
+    if diff <= sensor.distance then (sensor.sensor.x - sensor.distance + diff) to (sensor.sensor.x + sensor.distance - diff)
+    else 0 until 0
 
   def coverageTree(sensors: Seq[Sensor], row: Int) =
     sensors.foldLeft(Diet.empty[Int])((diet, sensor) => diet + coverage(sensor, row))
@@ -33,12 +29,12 @@ class Day15Test extends UnitTest {
   def part1(in: Seq[String], row: Int) =
     val sensors = in.map(parseSensor)
     val diet = coverageTree(sensors, row)
-    coverageTree(sensors, row).toIterator.map(range => range.end - range.start).sum
+    diet.intervalsIterator.map((start, end) => end - start).sum
 
-  def part2(in: Seq[String], range: Range[Int]): Long =
+  def part2(in: Seq[String], range: Range): Long =
     val sensors = in.map(parseSensor)
-    val (diet, row) = range.toIterator.map(coverageTree(sensors, _)).zipWithIndex.dropWhile(_._1.containsRange(range)).next
-    (diet.toIterator.next.end + 1) * 4000000L + row
+    val (diet, row) = range.iterator.map(coverageTree(sensors, _)).zipWithIndex.dropWhile(_._1(range)).next
+    (diet.intervalsIterator.next.asInterval.end + 1) * 4000000L + row
 
   test("part 1 example") {
     val in = """|Sensor at x=2, y=18: closest beacon is at x=-2, y=15
@@ -79,11 +75,11 @@ class Day15Test extends UnitTest {
                 |Sensor at x=14, y=3: closest beacon is at x=15, y=3
                 |Sensor at x=20, y=1: closest beacon is at x=15, y=3""".stripMargin
 
-    part2(in.linesIterator.toSeq, 0 toIncl 20) shouldBe 56000011L
+    part2(in.linesIterator.toSeq, 0 to 20) shouldBe 56000011L
   }
 
   test("part 2") {
-    part2(readLines(file(2022)(15)), 0 toIncl 4000000) shouldBe 12543202766584L
+    part2(readLines(file(2022)(15)), 0 to 4000000) shouldBe 12543202766584L
   }
 
 }
