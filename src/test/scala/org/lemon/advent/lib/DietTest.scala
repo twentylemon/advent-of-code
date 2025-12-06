@@ -18,6 +18,17 @@ given Shrink[Range] = Shrink { case range: Range =>
     .map((start, end) => (start min end) to (start max end) by (end - start).sign)
 }
 
+given Arbitrary[Interval[Int]] = Arbitrary(for
+  i <- Gen.choose(-10000, 10000)
+  j <- Gen.choose(i, 10000)
+yield Interval(i, j))
+
+given Shrink[Interval[Int]] = Shrink { case interval: Interval[Int] =>
+  shrink((interval.start, interval.end))
+    .filter((s, e) => s <= e)
+    .map(Interval(_, _))
+}
+
 given Arbitrary[Diet[Int]] = Arbitrary(for ranges <- Gen.listOf[Range](arbitrary[Range]) yield Diet.fromRanges(ranges))
 
 given Shrink[Diet[Int]] = Shrink { case diet: Diet[Int] =>
@@ -69,12 +80,20 @@ class EmptyDietTest extends UnitTest:
     check((range: Range) => Diet.empty[Int] + range == Diet(range))
   }
 
+  test("adding Interval produces diet with single interval") {
+    check((interval: Interval[Int]) => Diet.empty[Int] + interval == Diet(interval.start to interval.end))
+  }
+
   test("removing value does nothing") {
     check((n: Int) => (Diet.empty[Int] - n) == Diet.empty[Int])
   }
 
   test("removing range does nothing") {
     check((range: Range) => (Diet.empty[Int] - range) == Diet.empty[Int])
+  }
+
+  test("removing Interval does nothing") {
+    check((interval: Interval[Int]) => (Diet.empty[Int] - interval) == Diet.empty[Int])
   }
 
   test("union is rhs") {
@@ -373,6 +392,10 @@ class SingletonIntervalDietTest extends UnitTest:
     check((range: Range) => Diet(range).contains(range))
   }
 
+  test("contains entire Interval object") {
+    check((range: Range) => Diet(range).contains(Interval(range.min, range.max)))
+  }
+
   test("contains subranges") {
     val gen =
       for
@@ -401,6 +424,10 @@ class SingletonIntervalDietTest extends UnitTest:
 
   test("does not contain disjoint Range object") {
     check(forAll(disjointRange) { (range, other) => !Diet(range).contains(other) })
+  }
+
+  test("does not contain disjoint Interval object") {
+    check(forAll(disjointRange) { (range, other) => !Diet(range).contains(Interval(other.min, other.max)) })
   }
 
   test("not isEmpty") {
@@ -445,6 +472,22 @@ class SingletonIntervalDietTest extends UnitTest:
     })
   }
 
+  test("adding disjoint Interval produces multiple intervals") {
+    check(forAll(disjointRange) { (range, other) =>
+      (Diet(range) + Interval(other.min, other.max)).toIntervals == Seq(
+        (range.min, range.max),
+        (other.min, other.max)
+      ).sorted
+    })
+  }
+
+  test("adding overlapping Interval merges intervals") {
+    check(forAll(overlappingRange) { (range, other) =>
+      val diet = Diet(range) + Interval(other.min, other.max)
+      diet.toIntervals == Seq((range.min min other.min, range.max max other.max))
+    })
+  }
+
   test("removing element from middle splits interval") {
     val gen =
       for
@@ -482,6 +525,17 @@ class SingletonIntervalDietTest extends UnitTest:
 
   test("removing entire range gives empty diet") {
     check((range: Range) => (Diet(range) - range) == Diet.empty[Int])
+  }
+
+  test("removing entire Interval gives empty diet") {
+    check((range: Range) => (Diet(range) - Interval(range.min, range.max)) == Diet.empty[Int])
+  }
+
+  test("removing overlapping Interval removes overlap") {
+    check(forAll(overlappingRange) { (range, other) =>
+      val diet = Diet(range) - Interval(other.min, other.max)
+      diet.toSet == (range.toSet -- other.toSet)
+    })
   }
 
   test("union with empty is self") {
@@ -581,6 +635,18 @@ class SingletonIntervalDietTest extends UnitTest:
 
   test("toString formats interval") {
     check((range: Range) => Diet(range).toString == s"Diet(${range.min}..${range.max})")
+  }
+
+  test("constructor with Interval matches constructor with Range") {
+    check((range: Range) => Diet(Interval(range.min, range.max)) == Diet(range))
+  }
+
+  test("apply(Interval) returns true for contained interval") {
+    check((range: Range) => Diet(range)(Interval(range.min, range.max)))
+  }
+
+  test("apply(Interval) returns false for non-contained interval") {
+    check(forAll(disjointRange) { (range, other) => !Diet(range)(Interval(other.min, other.max)) })
   }
 
 class MultipleValueDietTest extends UnitTest:

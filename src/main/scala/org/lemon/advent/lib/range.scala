@@ -39,8 +39,8 @@ extension [N: Integral](range: NumericRange[N])
     if range.isEmpty || !range.isInclusive then range
     else NumericRange.Exclusive(range.min, range.max, range.step)
 
-case class RangeLike[N: Integral](start: N, end: N) extends Iterable[N] with PartialFunction[N, N]:
-  require(start <= end, s"RangeLike requires start <= end, got start=$start, end=$end")
+case class Interval[N: Integral](start: N, end: N) extends Iterable[N] with PartialFunction[N, N]:
+  require(start <= end, s"Interval requires start <= end, got start=$start, end=$end")
   private val `1` = summon[Integral[N]].one
 
   def isInclusive: Boolean = true
@@ -69,22 +69,22 @@ case class RangeLike[N: Integral](start: N, end: N) extends Iterable[N] with Par
 
   def isDefinedAt(idx: N): Boolean = contains(start + idx)
 
-  def intersects(rhs: RangeLike[N]): Boolean = start <= rhs.end && rhs.start <= end
+  def intersects(rhs: Interval[N]): Boolean = start <= rhs.end && rhs.start <= end
 
   def toRange: Range = start.toInt to end.toInt
   def toNumericRange: NumericRange[N] = NumericRange.inclusive(start, end, `1`)
 
-  override def toString: String = s"RangeLike($start..$end)"
+  override def toString: String = s"Interval($start..$end)"
 
-object RangeLike:
-  def from(range: Range): Option[RangeLike[Int]] =
-    Option.when(range.nonEmpty)(RangeLike(range.min, range.max))
+object Interval:
+  def from(range: Range): Option[Interval[Int]] =
+    Option.when(range.nonEmpty)(Interval(range.min, range.max))
 
-  def from[N: Integral](range: NumericRange[N]): Option[RangeLike[N]] =
-    Option.when(range.nonEmpty)(RangeLike(range.min, range.max))
+  def from[N: Integral](range: NumericRange[N]): Option[Interval[N]] =
+    Option.when(range.nonEmpty)(Interval(range.min, range.max))
 
 extension [N: Integral](tuple: (N, N))
-  def asInterval: RangeLike[N] = RangeLike(tuple._1, tuple._2)
+  def asInterval: Interval[N] = Interval(tuple._1, tuple._2)
 
 /** A Discrete Interval Encoding Tree for storing sets of discrete values by encoding contiguous intervals
   *  as single entries. When new ranges are added or removed, they are merged/split with existing intervals.
@@ -122,10 +122,13 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
     if range.isEmpty then true
     else contains(range.min, range.max)
 
+  def contains(interval: Interval[N]): Boolean = contains(interval.start, interval.end)
+
   def apply(value: N): Boolean = contains(value)
   def apply(start: N, end: N): Boolean = contains(start, end)
   def apply(range: Range): Boolean = contains(range)
   def apply(range: NumericRange[N]): Boolean = contains(range)
+  def apply(interval: Interval[N]): Boolean = contains(interval)
 
   def isEmpty: Boolean = intervals.isEmpty
   def nonEmpty: Boolean = intervals.nonEmpty
@@ -176,10 +179,13 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
     if rng.isEmpty then this
     else add(rng.min, rng.max)
 
+  def add(interval: Interval[N]): Diet[N] = add(interval.start, interval.end)
+
   def +(value: N): Diet[N] = add(value)
   def +(start: N, end: N): Diet[N] = add(start, end)
   def +(range: Range): Diet[N] = add(range)
   def +(range: NumericRange[N]): Diet[N] = add(range)
+  def +(interval: Interval[N]): Diet[N] = add(interval)
 
   /** Removes a single value from the tree.
     *
@@ -229,10 +235,13 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
     if rng.isEmpty then this
     else remove(rng.min, rng.max)
 
+  def remove(interval: Interval[N]): Diet[N] = remove(interval.start, interval.end)
+
   def -(value: N): Diet[N] = remove(value)
   def -(start: N, end: N): Diet[N] = remove(start, end)
   def -(range: Range): Diet[N] = remove(range)
   def -(range: NumericRange[N]): Diet[N] = remove(range)
+  def -(interval: Interval[N]): Diet[N] = remove(interval)
 
   /** Returns the union of this diet and another.
     *
@@ -314,6 +323,7 @@ object Diet:
 
   def apply(range: Range): Diet[Int] = empty[Int].add(range)
   def apply[N: Integral](range: NumericRange[N]): Diet[N] = empty[N].add(range)
+  def apply[N: Integral](interval: Interval[N]): Diet[N] = empty[N].add(interval)
 
   def fromIntervals[N: Integral](intervals: Iterable[(N, N)]): Diet[N] =
     intervals.iterator.foldLeft(empty[N])((diet, interval) => diet.add(interval._1, interval._2))
