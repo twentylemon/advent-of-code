@@ -56,12 +56,17 @@ extension [A](it: Iterable[A])
     yield (x, y, z)
 
 extension [A, CC[X] <: SeqOps[X, CC, CC[X]]](seq: CC[A])
+  /** Splits a collection by a given delimiting value. Behaves like `String#split`.
+    *
+    * @param delimiter the value to split the collection by
+    * @return collection of each subcollection between delimiter values
+    */
   def split(delimiter: A): CC[CC[A]] =
     val factory = seq.iterableFactory
     @tailrec
-    def loop(remaining: CC[A], acc: List[CC[A]]): CC[CC[A]] =
-      if remaining.isEmpty then factory.from(acc.reverse)
+    def loop(remaining: CC[A], acc: Vector[CC[A]]): CC[CC[A]] =
+      if remaining.isEmpty then factory.from(acc)
       else
         val (before, after) = remaining.span(_ != delimiter)
-        loop(after.drop(1), if before.nonEmpty then before :: acc else acc)
-    loop(seq, Nil)
+        loop(after.drop(1), if before.nonEmpty then acc :+ before else acc)
+    loop(seq, Vector.empty)
