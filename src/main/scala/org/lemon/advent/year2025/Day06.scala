@@ -1,7 +1,6 @@
 package org.lemon.advent.year2025
 
 import org.lemon.advent.lib._
-import scala.annotation.tailrec
 
 private object Day06:
 
