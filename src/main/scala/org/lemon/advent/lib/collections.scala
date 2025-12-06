@@ -1,5 +1,8 @@
 package org.lemon.advent.lib
 
+import scala.collection.SeqOps
+import scala.annotation.tailrec
+
 extension [A](it: Iterator[A])
   /** Returns the nth element of the iterator.
     *
@@ -51,3 +54,14 @@ extension [A](it: Iterable[A])
       if i < j
       if j < k
     yield (x, y, z)
+
+extension [A, CC[X] <: SeqOps[X, CC, CC[X]]](seq: CC[A])
+  def split(delimiter: A): CC[CC[A]] =
+    val factory = seq.iterableFactory
+    @tailrec
+    def loop(remaining: CC[A], acc: List[CC[A]]): CC[CC[A]] =
+      if remaining.isEmpty then factory.from(acc.reverse)
+      else
+        val (before, after) = remaining.span(_ != delimiter)
+        loop(after.drop(1), if before.nonEmpty then before :: acc else acc)
+    loop(seq, Nil)

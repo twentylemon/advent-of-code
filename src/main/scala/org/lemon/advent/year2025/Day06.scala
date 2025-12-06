@@ -26,15 +26,9 @@ private object Day06:
       )
       .sum
 
-  def split[A](seq: Seq[A])(value: A): Seq[Seq[A]] =
-    if seq.isEmpty then Seq.empty
-    else
-      val (prefix, rest) = seq.span(_ != value)
-      prefix +: split(rest.drop(1))(value)
-
   def part2(input: String) =
     val lines = input.linesIterator.toSeq
-    val groups = split(lines.transpose)(List.fill(lines.size)(' '))
+    val groups = lines.transpose.split(Seq.fill(lines.size)(' '))
     groups.map(problem =>
       val op = problem.head.last
       val operands = problem.map(_.init.mkString.trim.toLong)
