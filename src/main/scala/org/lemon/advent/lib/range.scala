@@ -160,10 +160,11 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
 
       // find all intervals that our range covers or touches
       val absorbed = baseIntervals.rangeFrom(mergeStart).takeWhile((s, _) => s <= mergeEnd + `1`)
-      val finalEnd = absorbed.foldLeft(mergeEnd)((acc, interval) => acc max interval._2)
-      val finalIntervals = absorbed.foldLeft(baseIntervals)((acc, interval) => acc.removed(interval._1))
-
-      Diet(finalIntervals.updated(mergeStart, finalEnd))
+      if absorbed.isEmpty then Diet(baseIntervals.updated(mergeStart, mergeEnd))
+      else
+        val finalEnd = absorbed.last._2 max mergeEnd
+        val finalIntervals = baseIntervals -- absorbed.keys
+        Diet(finalIntervals.updated(mergeStart, finalEnd))
 
   /** Adds a range to this diet. The range is converted to increasing, so `5 to 3 by -1` will still add `3 to 5`.
     *
