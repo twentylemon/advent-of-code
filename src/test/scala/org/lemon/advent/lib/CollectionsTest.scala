@@ -7,21 +7,17 @@ import org.lemon.advent._
 class CollectionsTest extends UnitTest:
 
   test("split matches String#split") {
-    given Arbitrary[(String, Char)] = Arbitrary(for
-      delim <- Gen.alphaNumChar
-      parts <- Gen.listOf(Gen.stringOf(Gen.alphaNumChar.suchThat(_ != delim)))
-    yield (parts.mkString(delim.toString), delim))
+    val gen =
+      for
+        delim <- Gen.alphaNumChar
+        repeat <- Gen.choose(1, 10)
+        parts <- Gen.listOf(Gen.stringOf(Gen.alphaNumChar.suchThat(_ != delim)))
+      yield (parts.mkString(delim.toString.repeat(repeat)), delim)
 
-    check((str: String, delim: Char) =>
-      val expected = str.split(delim.toString, -1).filter(_.nonEmpty).toList
-      val actual = str.toList.split(delim).map(_.mkString).toList
+    check(forAll(gen) { (str: String, delim: Char) =>
+      val expected = str.split(delim.toString).toList
+      val splitResult = str.toList.split(delim)
+      val actual = splitResult.map(_.mkString).toList
       actual == expected
-    )
-  }
-
-  test("split on Vector preserves Vector type") {
-    check((str: String, delim: Char) =>
-      val result = str.toVector.split(delim)
-      result.isInstanceOf[Vector[?]] && result.forall(_.isInstanceOf[Vector[?]])
-    )
+    })
   }

@@ -65,8 +65,10 @@ extension [A, CC[X] <: SeqOps[X, CC, CC[X]]](seq: CC[A])
     val factory = seq.iterableFactory
     @tailrec
     def loop(remaining: CC[A], acc: Vector[CC[A]]): CC[CC[A]] =
-      if remaining.isEmpty then factory.from(acc)
+      if remaining.isEmpty then
+        if acc.isEmpty then factory.from(Vector(factory.empty))
+        else factory.from(acc.take(acc.lastIndexWhere(_.nonEmpty) + 1))
       else
         val (before, after) = remaining.span(_ != delimiter)
-        loop(after.drop(1), if before.nonEmpty then acc :+ before else acc)
+        loop(after.drop(1), acc :+ before)
     loop(seq, Vector.empty)
