@@ -1,16 +1,16 @@
 package org.lemon.advent.year2023
 
-import org.lemon.advent.lib.intersects
+import org.lemon.advent.lib.Interval
 
 import scala.collection.mutable
 
 private object Day22:
 
-  case class Brick(x: Range, y: Range, z: Range)
+  case class Brick(x: Interval[Int], y: Interval[Int], z: Interval[Int])
 
   def parse(input: String) = input.linesIterator
     .map(_ match
-      case s"$x1,$y1,$z1~$x2,$y2,$z2" => Brick(x1.toInt to x2.toInt, y1.toInt to y2.toInt, z1.toInt to z2.toInt)
+      case s"$x1,$y1,$z1~$x2,$y2,$z2" => Brick(Interval(x1.toInt to x2.toInt), Interval(y1.toInt to y2.toInt), Interval(z1.toInt to z2.toInt))
     )
     .toVector
 
@@ -20,7 +20,7 @@ private object Day22:
       .filter(below => brick.y.intersects(below.y))
       .map(_.z.max + 1)
       .maxOption.getOrElse(1)
-    brick.copy(z = supportHeight to supportHeight + brick.z.size - 1)
+    brick.copy(z = Interval(supportHeight to supportHeight + brick.z.size - 1))
 
   def fall(bricks: Seq[Brick]): Seq[Brick] =
     bricks.foldLeft(Vector.empty[Brick])((stable, brick) => stable :+ fall(brick, stable))

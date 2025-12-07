@@ -1,6 +1,7 @@
 package org.lemon.advent.year2022
 
 import org.lemon.advent._
+import org.lemon.advent.lib.Interval
 
 class Day04Test extends UnitTest {
 
@@ -16,8 +17,8 @@ class Day04Test extends UnitTest {
     .count(r => contains(r(0), r(1)))
 
   private def part2(input: String) = input.linesIterator
-    .map(_.split(',').map(parseRange))
-    .count(r => r(0).intersect(r(1)).nonEmpty)
+    .map(_.split(',').map(parseRange).map(Interval(_)))
+    .count(r => r(0).intersects(r(1)))
 
   test("part 1 example") {
     val input = """

@@ -5,16 +5,6 @@ import scala.math.Integral.Implicits._
 import scala.collection.immutable.{TreeMap, NumericRange}
 
 extension (range: Range)
-  def intersects(rhs: Range): Boolean = range.min <= rhs.max && rhs.min <= range.max
-
-  def intersect(rhs: Range): Range = math.max(range.min, rhs.min) to math.min(range.max, rhs.max)
-
-  def union(rhs: Range): Seq[Range] =
-    if range.intersects(rhs) then Seq(range.min.min(rhs.min) to range.max.max(rhs.max))
-    else Seq(range, rhs)
-
-  def diff(rhs: Range): Seq[Range] = ???
-
   def increasing: Range = if range.step > 0 then range else range.reverse
   def decreasing: Range = if range.step < 0 then range else range.reverse
 
@@ -39,6 +29,13 @@ extension [N: Integral](range: NumericRange[N])
     if range.isEmpty || !range.isInclusive then range
     else NumericRange.Exclusive(range.min, range.max, range.step)
 
+/** A discrete range of values between `start` and `end` inclusive.
+  * Differs from a Range in that it is always inclusive and has a fixed step of 1.
+  *
+  * @param start the start of the interval (inclusive)
+  * @param end the end of the interval (inclusive)
+  * @tparam N the numeric type of values stored
+  */
 case class Interval[N: Integral](start: N, end: N) extends Iterable[N] with PartialFunction[N, N]:
   require(start <= end, s"Interval requires start <= end, got start=$start, end=$end")
   private val `1` = summon[Integral[N]].one
@@ -77,11 +74,13 @@ case class Interval[N: Integral](start: N, end: N) extends Iterable[N] with Part
   override def toString: String = s"Interval($start..$end)"
 
 object Interval:
-  def from(range: Range): Option[Interval[Int]] =
-    Option.when(range.nonEmpty)(Interval(range.min, range.max))
+  def apply(range: Range): Interval[Int] =
+    require(range.step == 1, "Range must have step 1")
+    Interval(range.min, range.max)
 
-  def from[N: Integral](range: NumericRange[N]): Option[Interval[N]] =
-    Option.when(range.nonEmpty)(Interval(range.min, range.max))
+  def apply[N: Integral](range: NumericRange[N]): Interval[N] =
+    require(range.step == 1, "Range must have step 1")
+    Interval(range.min, range.max)
 
 extension [N: Integral](tuple: (N, N))
   def asInterval: Interval[N] = Interval(tuple._1, tuple._2)
@@ -117,11 +116,8 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
         case None => false
 
   def contains(range: Range): Boolean = contains(range.toNumericRange)
-
   def contains(range: NumericRange[N]): Boolean =
-    if range.isEmpty then true
-    else contains(range.min, range.max)
-
+    if range.isEmpty then true else contains(Interval(range.increasing.asInclusive))
   def contains(interval: Interval[N]): Boolean = contains(interval.start, interval.end)
 
   def apply(value: N): Boolean = contains(value)
@@ -172,14 +168,8 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
     * @return a new diet containing all values in the range
     * @throws IllegalArgumentException if the range has a step other than 1
     */
-  def add(range: Range): Diet[N] = add(range.toNumericRange[N])
-
-  def add(range: NumericRange[N]): Diet[N] =
-    val rng = range.increasing.asInclusive
-    require(rng.step == `1`, "Range must have step 1")
-    if rng.isEmpty then this
-    else add(rng.min, rng.max)
-
+  def add(range: Range): Diet[N] = add(range.toNumericRange)
+  def add(range: NumericRange[N]): Diet[N] = if range.isEmpty then this else add(Interval(range.increasing.asInclusive))
   def add(interval: Interval[N]): Diet[N] = add(interval.start, interval.end)
 
   def +(value: N): Diet[N] = add(value)
@@ -228,14 +218,9 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
     * @return a new diet with the range removed
     * @throws IllegalArgumentException if the range has a step other than 1
     */
-  def remove(range: Range): Diet[N] = remove(range.toNumericRange[N])
-
+  def remove(range: Range): Diet[N] = remove(range.toNumericRange)
   def remove(range: NumericRange[N]): Diet[N] =
-    val rng = range.increasing.asInclusive
-    require(rng.step == `1`, "Range must have step 1")
-    if rng.isEmpty then this
-    else remove(rng.min, rng.max)
-
+    if range.isEmpty then this else remove(Interval(range.increasing.asInclusive))
   def remove(interval: Interval[N]): Diet[N] = remove(interval.start, interval.end)
 
   def -(value: N): Diet[N] = remove(value)
