@@ -32,7 +32,7 @@ given Shrink[Interval[Int]] = Shrink { case interval: Interval[Int] =>
 given Arbitrary[Diet[Int]] = Arbitrary(for ranges <- Gen.listOf[Range](arbitrary[Range]) yield Diet.fromRanges(ranges))
 
 given Shrink[Diet[Int]] = Shrink { case diet: Diet[Int] =>
-  shrink(diet.toIntervals.map(_ to _)).map(Diet.fromRanges)
+  shrink(diet.toRanges).map(Diet.fromRanges)
 }
 
 class EmptyDietTest extends UnitTest:
@@ -207,7 +207,9 @@ class SingletonValueDietTest extends UnitTest:
   }
 
   test("adding disjoint value produces multiple intervals") {
-    check((n: Int, m: Int) => (n - m).abs > 1 ==> ((Diet(n) + m).toIntervals == Seq((n, n), (m, m)).sorted))
+    check((n: Int, m: Int) =>
+      (n - m).abs > 1 ==> ((Diet(n) + m).toIntervals == Seq(Interval(n, n), Interval(m, m)).sorted)
+    )
   }
 
   test("adding overlapping range produces diet with single interval") {
@@ -221,7 +223,10 @@ class SingletonValueDietTest extends UnitTest:
 
   test("adding disjoint range produces multiple intervals") {
     check((range: Range, n: Int) =>
-      n < range.min || n > range.max ==> ((Diet(n) + range).toIntervals == Seq((n, n), (range.min, range.max)).sorted)
+      n < range.min || n > range.max ==> ((Diet(n) + range).toIntervals == Seq(
+        Interval(n, n),
+        Interval(range.min, range.max)
+      ).sorted)
     )
   }
 
@@ -308,7 +313,7 @@ class SingletonValueDietTest extends UnitTest:
   }
 
   test("toIntervals is single element") {
-    check((n: Int) => Diet(n).toIntervals == Seq((n, n)))
+    check((n: Int) => Diet(n).toIntervals == Seq(Interval(n, n)))
   }
 
   test("toRanges is single element range") {
@@ -455,28 +460,28 @@ class SingletonIntervalDietTest extends UnitTest:
 
   test("adding disjoint value produces multiple intervals") {
     check(forAll(disjointValue) { (range, n) =>
-      (Diet(range) + n).toIntervals == Seq((range.min, range.max), (n, n)).sorted
+      (Diet(range) + n).toIntervals == Seq(Interval(range.min, range.max), Interval(n, n)).sorted
     })
   }
 
   test("adding overlapping range merges intervals") {
     check(forAll(overlappingRange) { (range, other) =>
       val diet = Diet(range) + other
-      diet.toIntervals == Seq((range.min min other.min, range.max max other.max))
+      diet.toIntervals == Seq(Interval(range.min min other.min, range.max max other.max))
     })
   }
 
   test("adding disjoint range produces multiple intervals") {
     check(forAll(disjointRange) { (range, other) =>
-      (Diet(range) + other).toIntervals == Seq((range.min, range.max), (other.min, other.max)).sorted
+      (Diet(range) + other).toIntervals == Seq(Interval(range.min, range.max), Interval(other.min, other.max)).sorted
     })
   }
 
   test("adding disjoint Interval produces multiple intervals") {
     check(forAll(disjointRange) { (range, other) =>
       (Diet(range) + Interval(other.min, other.max)).toIntervals == Seq(
-        (range.min, range.max),
-        (other.min, other.max)
+        Interval(range.min, range.max),
+        Interval(other.min, other.max)
       ).sorted
     })
   }
@@ -484,7 +489,7 @@ class SingletonIntervalDietTest extends UnitTest:
   test("adding overlapping Interval merges intervals") {
     check(forAll(overlappingRange) { (range, other) =>
       val diet = Diet(range) + Interval(other.min, other.max)
-      diet.toIntervals == Seq((range.min min other.min, range.max max other.max))
+      diet.toIntervals == Seq(Interval(range.min min other.min, range.max max other.max))
     })
   }
 
@@ -496,16 +501,16 @@ class SingletonIntervalDietTest extends UnitTest:
       yield (range, n)
     check(forAll(gen) { (range, n) =>
       val diet = Diet(range) - n
-      diet.toIntervals == Seq((range.min, n - 1), (n + 1, range.max))
+      diet.toIntervals == Seq(Interval(range.min, n - 1), Interval(n + 1, range.max))
     })
   }
 
   test("removing element from start shrinks interval") {
-    check((range: Range) => (Diet(range) - range.min).toIntervals == Seq((range.min + 1, range.max)))
+    check((range: Range) => (Diet(range) - range.min).toIntervals == Seq(Interval(range.min + 1, range.max)))
   }
 
   test("removing element from end shrinks interval") {
-    check((range: Range) => (Diet(range) - range.max).toIntervals == Seq((range.min, range.max - 1)))
+    check((range: Range) => (Diet(range) - range.max).toIntervals == Seq(Interval(range.min, range.max - 1)))
   }
 
   test("removing disjoint value does nothing") {
@@ -598,7 +603,7 @@ class SingletonIntervalDietTest extends UnitTest:
   }
 
   test("toIntervals is single interval") {
-    check((range: Range) => Diet(range).toIntervals == Seq((range.min, range.max)))
+    check((range: Range) => Diet(range).toIntervals == Seq(Interval(range.min, range.max)))
   }
 
   test("toRanges is single range") {
@@ -809,7 +814,7 @@ class MultipleValueDietTest extends UnitTest:
   }
 
   test("toIntervals yields all singleton intervals") {
-    check((values: Seq[Int]) => Diet(values).toIntervals == values.sorted.map(v => (v, v)))
+    check((values: Seq[Int]) => Diet(values).toIntervals == values.sorted.map(v => Interval(v, v)))
   }
 
   test("toRanges yields all singleton ranges") {
@@ -1067,7 +1072,7 @@ class MultipleIntervalDietTest extends UnitTest:
   }
 
   test("toIntervals yields all intervals") {
-    check((ranges: Seq[Range]) => Diet.fromRanges(ranges).toIntervals == ranges.map(r => (r.min, r.max)))
+    check((ranges: Seq[Range]) => Diet.fromRanges(ranges).toIntervals == ranges.map(r => Interval(r.min, r.max)))
   }
 
   test("toRanges yields all ranges") {

@@ -34,7 +34,7 @@ class Day15Test extends UnitTest {
   def part2(in: Seq[String], range: Range): Long =
     val sensors = in.map(parseSensor)
     val (diet, row) = range.iterator.map(coverageTree(sensors, _)).zipWithIndex.dropWhile(_._1(range)).next
-    (diet.intervalsIterator.next.asInterval.end + 1) * 4000000L + row
+    (diet.toIntervals.head.end + 1) * 4000000L + row
 
   test("part 1 example") {
     val in = """|Sensor at x=2, y=18: closest beacon is at x=-2, y=15

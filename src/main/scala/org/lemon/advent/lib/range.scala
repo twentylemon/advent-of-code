@@ -5,12 +5,6 @@ import scala.math.Integral.Implicits._
 import scala.collection.immutable.{TreeMap, NumericRange}
 
 extension (range: Range)
-  def increasing: Range = if range.step > 0 then range else range.reverse
-  def decreasing: Range = if range.step < 0 then range else range.reverse
-
-  def asInclusive: Range = if range.isEmpty || range.isInclusive then range else range.min to range.max by range.step
-  def asExclusive: Range = if range.isEmpty || !range.isInclusive then range else range.min to range.max by range.step
-
   def toNumericRange[N: Integral]: NumericRange[N] =
     val num = summon[Integral[N]]
     if range.isEmpty then NumericRange(num.zero, num.zero, num.one)
@@ -18,72 +12,104 @@ extension (range: Range)
       NumericRange.inclusive(num.fromInt(range.start), num.fromInt(range.end), num.fromInt(range.step))
     else NumericRange.Exclusive(num.fromInt(range.start), num.fromInt(range.end), num.fromInt(range.step))
 
-extension [N: Integral](range: NumericRange[N])
-  def increasing: NumericRange[N] = if range.step > summon[Integral[N]].zero then range else range.reverse
-  def decreasing: NumericRange[N] = if range.step < summon[Integral[N]].zero then range else range.reverse
+  def toInterval: Interval[Int] = Interval(range)
 
-  def asInclusive: NumericRange[N] =
-    if range.isEmpty || range.isInclusive then range
-    else NumericRange.inclusive(range.min, range.max, range.step)
-  def asExclusive: NumericRange[N] =
-    if range.isEmpty || !range.isInclusive then range
-    else NumericRange.Exclusive(range.min, range.max, range.step)
+extension [N: Integral](tuple: (N, N))
+  def toInterval: Interval[N] = Interval(tuple._1, tuple._2)
 
 /** A discrete range of values between `start` and `end` inclusive.
   * Differs from a Range in that it is always inclusive and has a fixed step of 1.
+  * An interval is empty when `start > end`.
   *
   * @param start the start of the interval (inclusive)
   * @param end the end of the interval (inclusive)
   * @tparam N the numeric type of values stored
   */
 case class Interval[N: Integral](start: N, end: N) extends Iterable[N] with PartialFunction[N, N]:
-  require(start <= end, s"Interval requires start <= end, got start=$start, end=$end")
-  private val `1` = summon[Integral[N]].one
+  private val num = summon[Integral[N]]
+  private val `1` = num.one
+  private val `0` = num.zero
 
   def isInclusive: Boolean = true
-  override def isEmpty: Boolean = false
-  override def nonEmpty: Boolean = true
-  override def size: Int = (end - start + `1`).toInt
-  def length: N = end - start + `1`
+  override def isEmpty: Boolean = start > end
+  override def nonEmpty: Boolean = start <= end
+  override def size: Int = length.toInt
+  def length: N = if isEmpty then `0` else end - start + `1`
 
   def contains(x: N): Boolean = x >= start && x <= end
-
-  override def head: N = start
-  override def headOption: Option[N] = Some(start)
-  override def last: N = end
-  override def lastOption: Option[N] = Some(end)
-  override def min[B >: N](using Ordering[B]): N = start
-  def minOption: Option[N] = Some(start)
-  override def max[B >: N](using Ordering[B]): N = end
-  def maxOption: Option[N] = Some(end)
-
-  override def iterator: Iterator[N] = Iterator.iterate(start)(_ + `1`).takeWhile(_ <= end)
+  def containsSlice(that: Interval[N]): Boolean = that.isEmpty || (nonEmpty && that.start >= start && that.end <= end)
 
   override def apply(idx: N): N =
     val result = start + idx
     if !contains(result) then throw new IndexOutOfBoundsException(idx.toString)
     result
 
+  override def head: N = if isEmpty then throw new NoSuchElementException("head of empty interval") else start
+  override def headOption: Option[N] = if isEmpty then None else Some(start)
+  override def last: N = if isEmpty then throw new NoSuchElementException("last of empty interval") else end
+  override def lastOption: Option[N] = if isEmpty then None else Some(end)
+
+  def min: N = if isEmpty then throw new UnsupportedOperationException("min of empty interval") else start
+  def minOption: Option[N] = if isEmpty then None else Some(start)
+  def max: N = if isEmpty then throw new UnsupportedOperationException("max of empty interval") else end
+  def maxOption: Option[N] = if isEmpty then None else Some(end)
+
+  override def iterator: Iterator[N] =
+    if isEmpty then Iterator.empty else Iterator.iterate(start)(_ + `1`).takeWhile(_ <= end)
+
+  def indices: Interval[N] = if isEmpty then Interval.empty else Interval(`0`, length - `1`)
+
+  def slice(from: N, until: N): Interval[N] =
+    if isEmpty then this
+    else
+      val clampedFrom = (from max `0`) min length
+      val clampedUntil = (until max `0`) min length
+      if clampedFrom >= clampedUntil then Interval.empty
+      else Interval(start + clampedFrom, start + clampedUntil - `1`)
+
+  def take(n: N): Interval[N] = slice(`0`, n)
+  def takeRight(n: N): Interval[N] = slice(length - n, length)
+  def drop(n: N): Interval[N] = slice(n, length)
+  def dropRight(n: N): Interval[N] = slice(`0`, length - n)
+
+  def splitAt(n: N): (Interval[N], Interval[N]) = (take(n), drop(n))
+
+  override def tail: Interval[N] =
+    if isEmpty then throw new UnsupportedOperationException("tail of empty interval")
+    else Interval(start + `1`, end)
+
+  override def init: Interval[N] =
+    if isEmpty then throw new UnsupportedOperationException("init of empty interval")
+    else Interval(start, end - `1`)
+
+  def indexOf(elem: N): N = if contains(elem) then elem - start else - `1`
+  def lastIndexOf(elem: N): N = indexOf(elem)
+
   def isDefinedAt(idx: N): Boolean = contains(start + idx)
 
-  def intersects(rhs: Interval[N]): Boolean = start <= rhs.end && rhs.start <= end
+  def intersects(rhs: Interval[N]): Boolean = nonEmpty && rhs.nonEmpty && start <= rhs.end && rhs.start <= end
 
-  def toRange: Range = start.toInt to end.toInt
-  def toNumericRange: NumericRange[N] = NumericRange.inclusive(start, end, `1`)
+  def intersect(rhs: Interval[N]): Interval[N] =
+    if !intersects(rhs) then Interval.empty else Interval(start max rhs.start, end min rhs.end)
 
-  override def toString: String = s"Interval($start..$end)"
+  def &(rhs: Interval[N]): Interval[N] = intersect(rhs)
+
+  def toRange: Range = if isEmpty then 0 until 0 else start.toInt to end.toInt
+  def toNumericRange: NumericRange[N] =
+    if isEmpty then NumericRange(`1`, `0`, `1`) else NumericRange.inclusive(start, end, `1`)
+
+  override def toString: String = if isEmpty then "Interval.empty" else s"Interval($start..$end)"
 
 object Interval:
-  def apply(range: Range): Interval[Int] =
-    require(range.step == 1, "Range must have step 1")
-    Interval(range.min, range.max)
+  def empty[N: Integral]: Interval[N] = Interval(summon[Integral[N]].one, summon[Integral[N]].zero)
+
+  def apply(range: Range): Interval[Int] = apply(range.toNumericRange[Int])
 
   def apply[N: Integral](range: NumericRange[N]): Interval[N] =
-    require(range.step == 1, "Range must have step 1")
-    Interval(range.min, range.max)
+    require(range.step == 1 || range.step == -1, "Range must have step 1 or -1")
+    if range.isEmpty then empty[N] else Interval(range.min, range.max)
 
-extension [N: Integral](tuple: (N, N))
-  def asInterval: Interval[N] = Interval(tuple._1, tuple._2)
+  given [N: Integral]: Ordering[Interval[N]] = Ordering.by(i => (i.start, i.end))
 
 /** A Discrete Interval Encoding Tree for storing sets of discrete values by encoding contiguous intervals
   *  as single entries. When new ranges are added or removed, they are merged/split with existing intervals.
@@ -116,9 +142,9 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
         case None => false
 
   def contains(range: Range): Boolean = contains(range.toNumericRange)
-  def contains(range: NumericRange[N]): Boolean =
-    if range.isEmpty then true else contains(Interval(range.increasing.asInclusive))
-  def contains(interval: Interval[N]): Boolean = contains(interval.start, interval.end)
+  def contains(range: NumericRange[N]): Boolean = contains(Interval(range))
+  def contains(interval: Interval[N]): Boolean =
+    if interval.isEmpty then true else contains(interval.start, interval.end)
 
   def apply(value: N): Boolean = contains(value)
   def apply(start: N, end: N): Boolean = contains(start, end)
@@ -169,8 +195,8 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
     * @throws IllegalArgumentException if the range has a step other than 1
     */
   def add(range: Range): Diet[N] = add(range.toNumericRange)
-  def add(range: NumericRange[N]): Diet[N] = if range.isEmpty then this else add(Interval(range.increasing.asInclusive))
-  def add(interval: Interval[N]): Diet[N] = add(interval.start, interval.end)
+  def add(range: NumericRange[N]): Diet[N] = add(Interval(range))
+  def add(interval: Interval[N]): Diet[N] = if interval.isEmpty then this else add(interval.start, interval.end)
 
   def +(value: N): Diet[N] = add(value)
   def +(start: N, end: N): Diet[N] = add(start, end)
@@ -219,9 +245,8 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
     * @throws IllegalArgumentException if the range has a step other than 1
     */
   def remove(range: Range): Diet[N] = remove(range.toNumericRange)
-  def remove(range: NumericRange[N]): Diet[N] =
-    if range.isEmpty then this else remove(Interval(range.increasing.asInclusive))
-  def remove(interval: Interval[N]): Diet[N] = remove(interval.start, interval.end)
+  def remove(range: NumericRange[N]): Diet[N] = remove(Interval(range))
+  def remove(interval: Interval[N]): Diet[N] = if interval.isEmpty then this else remove(interval.start, interval.end)
 
   def -(value: N): Diet[N] = remove(value)
   def -(start: N, end: N): Diet[N] = remove(start, end)
@@ -279,12 +304,9 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
     */
   def intervalsIterator: Iterator[(N, N)] = intervals.iterator
 
-  /** @return the intervals as a sequence of (start, end) pairs.
-    */
-  def toIntervals: Seq[(N, N)] = intervals.toSeq
-
   def toRanges: Seq[Range] = intervalsIterator.map(_.toInt to _.toInt).toSeq
   def toNumericRanges: Seq[NumericRange[N]] = intervalsIterator.map(NumericRange.inclusive(_, _, `1`)).toSeq
+  def toIntervals: Seq[Interval[N]] = intervalsIterator.map(Interval(_, _)).toSeq
 
   def toSeq: Seq[N] = iterator.toSeq
   def toSet: Set[N] = iterator.toSet

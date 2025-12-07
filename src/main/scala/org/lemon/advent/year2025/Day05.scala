@@ -16,7 +16,7 @@ private object Day05:
 
   def part1(input: String) =
     val (ranges, ids) = parse(input)
-    ids.count(id => ranges.map(_.asInterval).exists(_.contains(id)))
+    ids.count(id => ranges.map(_.toInterval).exists(_.contains(id)))
 
   def part2(input: String) =
     val (ranges, _) = parse(input)
