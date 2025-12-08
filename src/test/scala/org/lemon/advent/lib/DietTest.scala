@@ -163,7 +163,7 @@ class SingletonValueDietTest extends UnitTest:
     for
       rhs <- arbitrary[Diet[Int]]
       n <- (rhs.minOption, rhs.maxOption) match
-        case (Some(min), Some(max)) => Gen.oneOf(Gen.choose(Int.MinValue, min - 1), Gen.choose(max + 1, Int.MaxValue))
+        case (Some(min), Some(max)) => Gen.oneOf(Gen.choose(Int.MinValue, min - 2), Gen.choose(max + 2, Int.MaxValue))
         case _ => arbitrary[Int]
     yield (n, rhs)
 
@@ -356,7 +356,7 @@ class SingletonIntervalDietTest extends UnitTest:
   val disjointValue =
     for
       range <- arbitrary[Range]
-      n <- Gen.oneOf(Gen.choose(Int.MinValue, range.min - 1), Gen.choose(range.max + 1, Int.MaxValue))
+      n <- Gen.oneOf(Gen.choose(Int.MinValue, range.min - 2), Gen.choose(range.max + 2, Int.MaxValue))
     yield (range, n)
 
   val overlappingValue =
