@@ -113,8 +113,8 @@ object Interval:
   def apply[N: Integral](range: NumericRange[N]): Interval[N] =
     require(range.step == 1 || range.step == -1, "Range must have step 1 or -1")
     if range.isEmpty then empty[N]
-    else if range.step == 1 then Interval(range.start, range.end)
-    else Interval(range.end, range.start)
+    else if range.step == 1 then Interval(range.head, range.last)
+    else Interval(range.last, range.head)
 
   given [N: Integral]: Ordering[Interval[N]] = Ordering.by[Interval[N], N](_.start).orElseBy(_.end)
 
