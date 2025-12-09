@@ -123,11 +123,13 @@ case class Area(xRange: Range, yRange: Range):
   def growRight(n: Int): Area = copy(xRange = xRange.start to xRange.end + n)
   def growTop(n: Int): Area = copy(yRange = yRange.start - n to yRange.end)
   def growBottom(n: Int): Area = copy(yRange = yRange.start to yRange.end + n)
+  def expand(n: Int): Area = growLeft(n).growTop(n).growRight(n).growBottom(n)
 
   def dropLeft(n: Int): Area = growLeft(-n)
   def dropRight(n: Int): Area = growRight(-n)
   def dropTop(n: Int): Area = growTop(-n)
   def dropBottom(n: Int): Area = growBottom(-n)
+  def contract(n: Int): Area = dropLeft(n).dropTop(n).dropRight(n).dropBottom(n)
 
   def encloses(area: Area): Boolean =
     left <= area.left && right >= area.right && top <= area.top && bottom >= area.bottom
