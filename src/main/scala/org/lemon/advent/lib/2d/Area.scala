@@ -131,17 +131,20 @@ case class Area(xRange: Range, yRange: Range):
   def dropBottom(n: Int): Area = growBottom(-n)
   def contract(n: Int): Area = dropLeft(n).dropTop(n).dropRight(n).dropBottom(n)
 
-  def encloses(area: Area): Boolean =
-    left <= area.left && right >= area.right && top <= area.top && bottom >= area.bottom
+  def encloses(rhs: Area): Boolean =
+    left <= rhs.left && right >= rhs.right && top <= rhs.top && bottom >= rhs.bottom
 
-  def overlaps(area: Area): Boolean =
-    left <= area.right && right >= area.left && top <= area.bottom && bottom >= area.top
+  def overlaps(rhs: Area): Boolean =
+    left <= rhs.right && right >= rhs.left && top <= rhs.bottom && bottom >= rhs.top
+  def intersects(rhs: Area): Boolean = overlaps(rhs)
 
-  def intersect(area: Area): Option[Area] =
-    Option.when(overlaps(area))(Area(
-      xRange = (left max area.left) to (right min area.right),
-      yRange = (top max area.top) to (bottom min area.bottom),
+  def intersect(rhs: Area): Option[Area] =
+    Option.when(intersects(rhs))(Area(
+      xRange = (left max rhs.left) to (right min rhs.right),
+      yRange = (top max rhs.top) to (bottom min rhs.bottom),
     ))
+  
+  def &(rhs: Area): Option[Area] = intersect(rhs)
 
   def clamp(coord: Coord): Coord = Coord(x = coord.x max left min right, y = coord.y max top min bottom)
 

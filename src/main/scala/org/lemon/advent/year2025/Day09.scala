@@ -3,9 +3,6 @@ package org.lemon.advent.year2025
 import org.lemon.advent.lib.*
 import org.lemon.advent.lib.`2d`.*
 
-import scala.collection.Searching.*
-import scala.collection.parallel.CollectionConverters.*
-
 private object Day09:
 
   def parse(input: String) =
@@ -23,30 +20,12 @@ private object Day09:
 
   def part2(input: String) =
     val coords = parse(input)
-    val rows = (coords :+ coords.head).sliding(2).collect {
-      case Seq(from, to) if from.y == to.y => (from.y, from.bounding(to).xRange.toInterval)
-    }.toSeq
-
-    lazy val inside: Int => Seq[Interval[Int]] = memoize { x =>
-      val crossings = rows.collect { case (y, interval) if interval.contains(x) => y }.sorted
-      if crossings.isEmpty then Seq.empty
-      else if crossings.size % 2 == 1 then Seq(Interval(crossings.min, crossings.max))
-      else crossings.grouped(2).collect { case Seq(y1, y2) => Interval(y1, y2) }.toSeq
-    }
-
-    val corners = coords.map(_.x).distinct.sorted.toVector
-    def isValid(area: Area): Boolean =
-      val lo = corners.search(area.left).insertionPoint
-      val hi = corners.search(area.right + 1).insertionPoint
-      val xs = corners.slice(lo, hi)
-
-      val allXs = (Vector(area.left) ++ xs :+ area.right)
-      val midpoints = allXs.sliding(2).collect { case Seq(a, b) => (a + b) / 2 }.toVector
-      val yInterval = area.yRange.toInterval
-      (xs ++ midpoints :+ area.left :+ area.right).forall(x => inside(x).exists(_.containsSlice(yInterval)))
-
-    coords.pairs.toVector.par
+    val segments = (coords.last +: coords).zip(coords).map(_ `bounding` _)
+    coords.pairs
       .map(_ `bounding` _)
-      .filter(isValid)
+      .filter(area =>
+        val greens = area.contract(1)
+        greens.isEmpty || !segments.exists(_.intersects(greens))
+      )
       .map(area => area.width.toLong * area.height.toLong)
       .max
