@@ -143,8 +143,7 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
 
   def contains(range: Range): Boolean = contains(range.toNumericRange)
   def contains(range: NumericRange[N]): Boolean = contains(Interval(range))
-  def contains(interval: Interval[N]): Boolean =
-    if interval.isEmpty then true else contains(interval.start, interval.end)
+  def contains(interval: Interval[N]): Boolean = contains(interval.start, interval.end)
 
   def apply(value: N): Boolean = contains(value)
   def apply(start: N, end: N): Boolean = contains(start, end)
@@ -196,7 +195,7 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
     */
   def add(range: Range): Diet[N] = add(range.toNumericRange)
   def add(range: NumericRange[N]): Diet[N] = add(Interval(range))
-  def add(interval: Interval[N]): Diet[N] = if interval.isEmpty then this else add(interval.start, interval.end)
+  def add(interval: Interval[N]): Diet[N] = add(interval.start, interval.end)
 
   def +(value: N): Diet[N] = add(value)
   def +(start: N, end: N): Diet[N] = add(start, end)
@@ -246,7 +245,7 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
     */
   def remove(range: Range): Diet[N] = remove(range.toNumericRange)
   def remove(range: NumericRange[N]): Diet[N] = remove(Interval(range))
-  def remove(interval: Interval[N]): Diet[N] = if interval.isEmpty then this else remove(interval.start, interval.end)
+  def remove(interval: Interval[N]): Diet[N] = remove(interval.start, interval.end)
 
   def -(value: N): Diet[N] = remove(value)
   def -(start: N, end: N): Diet[N] = remove(start, end)
