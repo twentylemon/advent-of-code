@@ -859,7 +859,7 @@ class MultipleIntervalDietTest extends UnitTest:
     for
       count <- Gen.choose(2, 5)
       first <- Gen.choose(-1000, 1000)
-      specs <- Gen.listOfN(count, for  len <- Gen.choose(1, 50); gap <- Gen.choose(2, 100)  yield (len, gap))
+      specs <- Gen.listOfN(count, for len <- Gen.choose(1, 50); gap <- Gen.choose(2, 100) yield (len, gap))
     yield specs.scanLeft((first, first)) { case ((_, prevEnd), (len, gap)) =>
       val start = prevEnd + gap
       (start, start + len - 1)
