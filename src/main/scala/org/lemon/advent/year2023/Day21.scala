@@ -1,6 +1,6 @@
 package org.lemon.advent.year2023
 
-import org.lemon.advent.lib.`2d`._
+import org.lemon.advent.lib.`2d`.*
 import scala.collection.mutable
 
 private object Day21:
@@ -47,7 +47,7 @@ private object Day21:
     val numEvenGrids = square(((numGridsOver + 1) / 2) * 2)
     val odd = count(grid, start)(2 * size + 1)
     val even = count(grid, start)(2 * size)
-    
+
     val left = count(grid, start.copy(x = area.left))(size - 1)
     val right = count(grid, start.copy(x = area.right))(size - 1)
     val top = count(grid, start.copy(y = area.top))(size - 1)

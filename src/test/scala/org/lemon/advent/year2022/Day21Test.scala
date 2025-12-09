@@ -1,6 +1,6 @@
 package org.lemon.advent.year2022
 
-import org.lemon.advent._
+import org.lemon.advent.*
 
 class Day21Test extends UnitTest {
 

@@ -1,13 +1,13 @@
 package org.lemon.advent.lib.`2d`
 
-import org.lemon.advent._
-import org.lemon.advent.lib.`2d`._
-import org.scalacheck.Prop._
-import org.scalacheck._
+import org.lemon.advent.*
+import org.lemon.advent.lib.`2d`.*
+import org.scalacheck.Prop.*
+import org.scalacheck.*
 
 class DirectionTest extends UnitTest:
 
-  import Direction._
+  import Direction.*
 
   for
     (src, dest) <- Seq((Up, Left), (Left, Down), (Down, Right), (Right, Up))

@@ -1,8 +1,8 @@
 package org.lemon.advent.lib.`2d`
 
-import org.lemon.advent.lib._
+import org.lemon.advent.lib.*
 
-import scala.math.Integral.Implicits._
+import scala.math.Integral.Implicits.*
 
 /** A 2d vector with integral values. Contains some extensions over [[Point]]
   * which only make sense in a vector context.

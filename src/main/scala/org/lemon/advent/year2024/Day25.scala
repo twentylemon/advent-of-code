@@ -1,12 +1,12 @@
 package org.lemon.advent.year2024
 
-import org.lemon.advent.lib._
-import org.lemon.advent.lib.`2d`._
+import org.lemon.advent.lib.*
+import org.lemon.advent.lib.`2d`.*
 
 private object Day25:
 
   def parse(input: String) =
-    import org.lemon.advent.lib.parse._
+    import org.lemon.advent.lib.parse.*
     input match
       case Chunk(areas*) => areas.map(Coord.gridToMap)
 

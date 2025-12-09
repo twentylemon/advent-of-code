@@ -1,7 +1,7 @@
 package org.lemon.advent.year2023
 
-import org.lemon.advent.lib.`2d`.Coord._
-import org.lemon.advent.lib.`2d`._
+import org.lemon.advent.lib.`2d`.Coord.*
+import org.lemon.advent.lib.`2d`.*
 
 import scala.collection.mutable
 
@@ -19,10 +19,10 @@ private object Day17:
     val firstSteps = Seq(init, init.copy(direction = Direction.Down))
 
     given Ordering[Step] = Ordering[Int].on[Step](_.heatLoss).reverse
-    val queue = mutable.PriorityQueue(firstSteps: _*)
+    val queue = mutable.PriorityQueue(firstSteps*)
 
     case class Seen(at: Coord, direction: Direction, forward: Int)
-    val seen = mutable.Set(firstSteps.map(step => Seen(step.at, step.direction, step.forward)): _*)
+    val seen = mutable.Set(firstSteps.map(step => Seen(step.at, step.direction, step.forward))*)
 
     while !queue.isEmpty && queue.head.at != end do
       val step = queue.dequeue

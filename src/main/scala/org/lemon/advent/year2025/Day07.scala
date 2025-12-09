@@ -1,7 +1,7 @@
 package org.lemon.advent.year2025
 
-import org.lemon.advent.lib._
-import org.lemon.advent.lib.`2d`._
+import org.lemon.advent.lib.*
+import org.lemon.advent.lib.`2d`.*
 
 private object Day07:
 

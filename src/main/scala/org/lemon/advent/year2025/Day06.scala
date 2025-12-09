@@ -1,11 +1,11 @@
 package org.lemon.advent.year2025
 
-import org.lemon.advent.lib._
+import org.lemon.advent.lib.*
 
 private object Day06:
 
   def parse(input: String) =
-    import org.lemon.advent.lib.parse._
+    import org.lemon.advent.lib.parse.*
     val lines = input.linesIterator.toSeq
     val operands = lines.init.map(_ match
       case Wsv(xs*) => xs.map(_.toLong)

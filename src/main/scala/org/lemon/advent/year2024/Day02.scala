@@ -3,9 +3,9 @@ package org.lemon.advent.year2024
 private object Day02:
 
   def parse(input: String) = input.linesIterator
-      .map(_.split("\\s+"))
-      .map(_.map(_.toInt).toSeq)
-      .toSeq
+    .map(_.split("\\s+"))
+    .map(_.map(_.toInt).toSeq)
+    .toSeq
 
   def part1(input: String) = parse(input).count(isSafe)
 

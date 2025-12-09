@@ -1,6 +1,6 @@
 package org.lemon.advent.year2024
 
-import org.lemon.advent.lib.`2d`._
+import org.lemon.advent.lib.`2d`.*
 
 private object Day06:
 

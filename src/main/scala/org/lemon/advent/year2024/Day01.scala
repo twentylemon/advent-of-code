@@ -3,10 +3,10 @@ package org.lemon.advent.year2024
 private object Day01:
 
   def parse(input: String) = input.linesIterator
-      .map(_.split("\\s+"))
-      .map(p => (p.head.toInt, p.last.toInt))
-      .toSeq
-      .unzip
+    .map(_.split("\\s+"))
+    .map(p => (p.head.toInt, p.last.toInt))
+    .toSeq
+    .unzip
 
   def part1(input: String) =
     val (left, right) = parse(input)

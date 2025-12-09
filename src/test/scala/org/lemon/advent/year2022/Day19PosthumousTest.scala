@@ -1,6 +1,6 @@
 package org.lemon.advent.year2022
 
-import org.lemon.advent._
+import org.lemon.advent.*
 import scala.collection.mutable
 
 /** This was written after the fact, after seeing others get good runtimes in scala.
@@ -57,7 +57,7 @@ class Day19PosthumousTest extends UnitTest {
   def solve(blueprint: Blueprint, time: Int): Int =
     val initialState = State(robots = Resources(ore = 1), bank = Resources(), time = time)
     val best = Map.empty[Int, State].withDefaultValue(initialState)
-    val queue = mutable.PriorityQueue(initialState)(Ordering.by(state => (state.time, state.bank.geode)))
+    val queue = mutable.PriorityQueue(initialState)(using Ordering.by(state => (state.time, state.bank.geode)))
 
     def iterate(queue: mutable.PriorityQueue[State], best: Map[Int, State]): Int =
       val state = queue.dequeue
@@ -84,7 +84,7 @@ class Day19PosthumousTest extends UnitTest {
         ).map(_.tick(1).addRobot(Resources(geode = 1), blueprint.geode))
 
         val branches = Seq(buildGeode, buildObsidian, buildClay, buildOre).flatten
-        queue.enqueue(branches: _*)
+        queue.enqueue(branches*)
         iterate(queue, best + (state.time -> state))
 
     iterate(queue, best)

@@ -17,7 +17,7 @@ private object Day01:
     turns.scanLeft(50)(_ + _).sliding(2).map {
       case Seq(from, to) if from < to => Math.floorDiv(to, 100) - Math.floorDiv(from, 100)
       case Seq(from, to) if from > to =>
-        val minCentury = Math.floorDiv(to, 100) + (if (to % 100 == 0) 0 else 1)
+        val minCentury = Math.floorDiv(to, 100) + (if to % 100 == 0 then 0 else 1)
         val maxCentury = Math.floorDiv(from - 1, 100)
         (maxCentury - minCentury + 1).max(0)
       case _ => 0

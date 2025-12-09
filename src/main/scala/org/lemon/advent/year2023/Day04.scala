@@ -31,4 +31,3 @@ private object Day04:
   def part2(input: String) =
     val cards = parse(input).toSeq
     winMe(cards, cards) + cards.length
-  

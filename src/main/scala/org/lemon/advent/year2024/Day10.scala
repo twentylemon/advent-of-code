@@ -2,8 +2,8 @@ package org.lemon.advent.year2024
 
 import scala.collection.mutable
 
-import org.lemon.advent.lib.`2d`._
-import org.lemon.advent.lib.graph._
+import org.lemon.advent.lib.`2d`.*
+import org.lemon.advent.lib.graph.*
 
 private object Day10:
 

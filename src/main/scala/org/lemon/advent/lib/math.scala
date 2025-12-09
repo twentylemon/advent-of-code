@@ -1,7 +1,7 @@
 package org.lemon.advent.lib
 
-import scala.math.Integral.Implicits._
-import scala.math.Ordering.Implicits._
+import scala.math.Integral.Implicits.*
+import scala.math.Ordering.Implicits.*
 
 extension [N: Integral](a: N)
   /** Returns the positive modulo of this mod `n`. If the regular modulo is negative, this
@@ -33,7 +33,7 @@ extension [N: Integral](a: N)
 
 extension [N: Integral](it: Iterable[N])
   /** @return the greatest common divisor of all elements in the iterable */
-  def gcd: N = it.reduce(_ gcd _)
+  def gcd: N = it.reduce(_ `gcd` _)
 
   /** @return the least common multiple of all elements in the iterable */
-  def lcm: N = it.reduce(_ lcm _)
+  def lcm: N = it.reduce(_ `lcm` _)

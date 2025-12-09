@@ -1,7 +1,7 @@
 package org.lemon.advent.year2023
 
 import scala.collection.immutable.NumericRange
-import scala.collection.parallel.CollectionConverters._
+import scala.collection.parallel.CollectionConverters.*
 
 private object Day05:
 

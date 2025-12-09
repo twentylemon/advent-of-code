@@ -1,6 +1,6 @@
 package org.lemon.advent.year2022
 
-import org.lemon.advent._
+import org.lemon.advent.*
 
 class Day25Test extends UnitTest {
 
@@ -13,7 +13,6 @@ class Day25Test extends UnitTest {
       val decToDigit = digitToDec.map(_.swap).toMap
 
     extension (snafu: Snafu)
-      def toString: String = snafu
       def +(rhs: Snafu): Snafu =
         val result = snafu.reverse.zipAll(rhs.reverse, '0', '0')
           .foldLeft(("", 0))((accum, digits) =>
@@ -29,7 +28,7 @@ class Day25Test extends UnitTest {
           case x if x > 2 => (Snafu.decToDigit(x - 5), 1)
           case x if x < -2 => (Snafu.decToDigit(x + 5), -1)
           case x => (Snafu.decToDigit(x), 0)
-  import Snafus._
+  import Snafus.*
 
   def part1(in: Seq[String]): Snafu = in.map(s => Snafu(s)).reduce(_ + _)
 

@@ -1,7 +1,7 @@
 package org.lemon.advent.lib
 
-import scala.math.Ordering.Implicits._
-import scala.math.Integral.Implicits._
+import scala.math.Ordering.Implicits.*
+import scala.math.Integral.Implicits.*
 import scala.collection.immutable.{TreeMap, NumericRange}
 
 extension (range: Range)

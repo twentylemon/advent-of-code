@@ -1,7 +1,7 @@
 package org.lemon.advent.year2022
 
-import org.lemon.advent._
-import org.lemon.advent.lib._
+import org.lemon.advent.*
+import org.lemon.advent.lib.*
 
 class Day15Test extends UnitTest {
 
@@ -12,7 +12,7 @@ class Day15Test extends UnitTest {
     def manhattan(rhs: Coord) = (coord.x - rhs.x).abs + (coord.y - rhs.y).abs
 
   case class Sensor(sensor: Coord, beacon: Coord):
-    val distance = sensor manhattan beacon
+    val distance = sensor `manhattan` beacon
 
   def parseSensor(line: String) = line match
     case s"Sensor at x=$xs, y=$ys: closest beacon is at x=$xb, y=$yb" =>

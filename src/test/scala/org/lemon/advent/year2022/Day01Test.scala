@@ -1,7 +1,7 @@
 package org.lemon.advent.year2022
 
 import scala.io.Source
-import org.lemon.advent._
+import org.lemon.advent.*
 
 class Day01Test extends UnitTest {
   def parse(input: String) = Source.fromString(input).getLines.toSeq

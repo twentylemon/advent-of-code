@@ -1,6 +1,6 @@
 package org.lemon.advent.year2023
 
-import org.lemon.advent.lib._
+import org.lemon.advent.lib.*
 
 private object Day14:
 
@@ -24,12 +24,12 @@ private object Day14:
     .map(row.size - _._2)
     .sum
 
-  def part1(input: String) = 
+  def part1(input: String) =
     val grid = parse(input)
     tiltGrid(grid.transpose)
       .map(load)
       .sum
-      
+
   def rotate(grid: Seq[Seq[Char]]) = grid.transpose.map(_.reverse)
 
   def tiltCycle =

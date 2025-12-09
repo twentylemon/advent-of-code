@@ -1,9 +1,9 @@
 package org.lemon.advent.lib.`2d`
 
-import org.lemon.advent._
-import org.lemon.advent.lib.`2d`._
-import org.scalacheck.Prop._
-import org.scalacheck._
+import org.lemon.advent.*
+import org.lemon.advent.lib.`2d`.*
+import org.scalacheck.Prop.*
+import org.scalacheck.*
 
 class AreaTest extends UnitTest:
 
@@ -133,7 +133,7 @@ class AreaTest extends UnitTest:
   }
 
   test("area encloses itself") {
-    check((area: Area) => area encloses area)
+    check((area: Area) => area `encloses` area)
   }
 
   test("area enclosed by larger area") {
@@ -152,11 +152,11 @@ class AreaTest extends UnitTest:
   }
 
   test("area overlaps itself") {
-    check((area: Area) => area overlaps area)
+    check((area: Area) => area `overlaps` area)
   }
 
   test("area overlaps adjacent area") {
-    check((area: Area) => area overlaps area.growLeft(1).growRight(1).growTop(1).growBottom(1))
+    check((area: Area) => area `overlaps` area.growLeft(1).growRight(1).growTop(1).growBottom(1))
   }
 
   test("area does not overlap disjoint area") {
@@ -200,19 +200,19 @@ class AreaTest extends UnitTest:
   }
 
   test("growLeft encloses original area") {
-    check((area: Area, n: Int) => (n > 0 && n < Int.MaxValue - 1000) ==> (area.growLeft(n) encloses area))
+    check((area: Area, n: Int) => (n > 0 && n < Int.MaxValue - 1000) ==> (area.growLeft(n) `encloses` area))
   }
 
   test("growRight encloses original area") {
-    check((area: Area, n: Int) => (n > 0 && n < Int.MaxValue - 1000) ==> (area.growRight(n) encloses area))
+    check((area: Area, n: Int) => (n > 0 && n < Int.MaxValue - 1000) ==> (area.growRight(n) `encloses` area))
   }
 
   test("growTop encloses original area") {
-    check((area: Area, n: Int) => (n > 0 && n < Int.MaxValue - 1000) ==> (area.growTop(n) encloses area))
+    check((area: Area, n: Int) => (n > 0 && n < Int.MaxValue - 1000) ==> (area.growTop(n) `encloses` area))
   }
 
   test("growBottom encloses original area") {
-    check((area: Area, n: Int) => (n > 0 && n < Int.MaxValue - 1000) ==> (area.growBottom(n) encloses area))
+    check((area: Area, n: Int) => (n > 0 && n < Int.MaxValue - 1000) ==> (area.growBottom(n) `encloses` area))
   }
 
   test("clamp returns a coord in the area") {

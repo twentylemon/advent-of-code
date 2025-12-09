@@ -1,7 +1,7 @@
 package org.lemon.advent.year2022
 
 import scala.collection.mutable
-import org.lemon.advent._
+import org.lemon.advent.*
 
 class Day09Test extends UnitTest {
 
@@ -22,7 +22,7 @@ class Day09Test extends UnitTest {
       case _ => tail
 
   def update(rope: Rope, step: (Coord => Coord), n: Int, tailPos: mutable.Map[Coord, Int]): Rope =
-    val newRope = mutable.Seq(rope: _*)
+    val newRope = mutable.Seq(rope*)
     for _ <- 1 to n do
       newRope(0) = step(newRope(0))
       for i <- 1 to rope.size - 1 do newRope(i) = drag(newRope(i - 1), newRope(i))

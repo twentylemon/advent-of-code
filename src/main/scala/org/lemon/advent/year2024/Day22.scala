@@ -1,8 +1,8 @@
 package org.lemon.advent.year2024
 
-import org.lemon.advent.lib._
+import org.lemon.advent.lib.*
 
-import scala.collection.parallel.CollectionConverters._
+import scala.collection.parallel.CollectionConverters.*
 
 private object Day22:
 

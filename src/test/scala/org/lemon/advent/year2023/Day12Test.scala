@@ -1,7 +1,7 @@
 package org.lemon.advent.year2023
 
-import org.lemon.advent._
-import org.lemon.advent.year2023.Day12._
+import org.lemon.advent.*
+import org.lemon.advent.year2023.Day12.*
 
 class Day12Test extends UnitTest:
   val in = """|???.### 1,1,3

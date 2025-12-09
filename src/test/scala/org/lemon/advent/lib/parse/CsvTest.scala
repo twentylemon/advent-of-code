@@ -1,9 +1,9 @@
 package org.lemon.advent.lib.parse
 
-import org.lemon.advent._
-import org.scalacheck.Prop._
-import org.scalacheck._
-import org.scalacheck.Arbitrary._
+import org.lemon.advent.*
+import org.scalacheck.Prop.*
+import org.scalacheck.*
+import org.scalacheck.Arbitrary.*
 
 class CsvTest extends UnitTest:
 

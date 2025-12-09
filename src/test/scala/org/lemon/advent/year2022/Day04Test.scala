@@ -1,6 +1,6 @@
 package org.lemon.advent.year2022
 
-import org.lemon.advent._
+import org.lemon.advent.*
 import org.lemon.advent.lib.Interval
 
 class Day04Test extends UnitTest {

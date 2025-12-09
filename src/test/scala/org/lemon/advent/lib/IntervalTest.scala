@@ -1,10 +1,10 @@
 package org.lemon.advent.lib
 
-import org.lemon.advent._
+import org.lemon.advent.*
 import org.scalacheck.{Arbitrary, Shrink, Gen}
-import org.scalacheck.Prop._
-import org.scalacheck.Shrink._
-import org.scalacheck.Arbitrary._
+import org.scalacheck.Prop.*
+import org.scalacheck.Shrink.*
+import org.scalacheck.Arbitrary.*
 
 class RangeExtensionTest extends UnitTest:
   given Arbitrary[Range] = Arbitrary(for

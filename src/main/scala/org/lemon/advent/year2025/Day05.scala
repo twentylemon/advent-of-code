@@ -1,11 +1,11 @@
 package org.lemon.advent.year2025
 
-import org.lemon.advent.lib._
+import org.lemon.advent.lib.*
 
 private object Day05:
 
   def parse(input: String) =
-    import org.lemon.advent.lib.parse._
+    import org.lemon.advent.lib.parse.*
     input match
       case Chunk(freshies, whoKnows) =>
         val ranges = freshies.linesIterator.map(_ match
