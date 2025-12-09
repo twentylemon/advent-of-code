@@ -3,7 +3,7 @@ lazy val advent = (project in file("."))
   .settings(
     scalaVersion := "3.7.4",
     scalacOptions ++= Seq("-language:implicitConversions"),
-    scalacOptions ++= Seq("-rewrite", "-source:future-migration"),
+    // scalacOptions ++= Seq("-rewrite", "-source:future-migration"),
     libraryDependencies += "org.scala-lang.modules" %% "scala-parallel-collections" % "1.2.0",
     libraryDependencies += "com.softwaremill.sttp.client4" %% "core" % "4.0.13",
     libraryDependencies ++= Seq(
