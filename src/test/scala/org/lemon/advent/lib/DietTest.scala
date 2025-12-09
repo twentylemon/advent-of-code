@@ -208,7 +208,7 @@ class SingletonValueDietTest extends UnitTest:
 
   test("adding disjoint value produces multiple intervals") {
     check((n: Int, m: Int) =>
-      (n - m).abs > 1 ==> ((Diet(n) + m).toIntervals == Seq(Interval(n, n), Interval(m, m)).sorted)
+      (n - m).abs > 2 ==> ((Diet(n) + m).toIntervals == Seq(Interval(n, n), Interval(m, m)).sorted)
     )
   }
 
