@@ -27,14 +27,14 @@ private object Day09:
       case Seq(from, to) if from.y == to.y => (from.y, from.bounding(to).xRange.toInterval)
     }.toSeq
 
-    lazy val check: Int => Seq[Interval[Int]] = memoize { x =>
-      val crossings = rows.collect { case (y, Interval(from, to)) if from <= x && to >= x => y }.sorted
+    lazy val inside: Int => Seq[Interval[Int]] = memoize { x =>
+      val crossings = rows.collect { case (y, interval) if interval.contains(x) => y }.sorted
       if crossings.isEmpty then Seq.empty
       else if crossings.size % 2 == 1 then Seq(Interval(crossings.min, crossings.max))
       else crossings.grouped(2).collect { case Seq(y1, y2) => Interval(y1, y2) }.toSeq
     }
 
-    val corners = rows.flatMap((_, i) => Seq(i.start, i.end)).distinct.sorted.toVector
+    val corners = coords.map(_.x).distinct.sorted.toVector
     def isValid(area: Area): Boolean =
       val lo = corners.search(area.left).insertionPoint
       val hi = corners.search(area.right + 1).insertionPoint
@@ -43,7 +43,7 @@ private object Day09:
       val allXs = (Vector(area.left) ++ xs :+ area.right)
       val midpoints = allXs.sliding(2).collect { case Seq(a, b) => (a + b) / 2 }.toVector
       val yInterval = area.yRange.toInterval
-      (xs ++ midpoints :+ area.left :+ area.right).forall(x => check(x).exists(_.containsSlice(yInterval)))
+      (xs ++ midpoints :+ area.left :+ area.right).forall(x => inside(x).exists(_.containsSlice(yInterval)))
 
     coords.pairs.toVector.par
       .map(_ `bounding` _)
