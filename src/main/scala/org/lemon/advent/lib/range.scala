@@ -111,7 +111,7 @@ object Interval:
     else if range.step == 1 then Interval(range.start, range.end)
     else Interval(range.end, range.start)
 
-  given [N: Integral]: Ordering[Interval[N]] = Ordering.by(i => (i.start, i.end))
+  given [N: Integral]: Ordering[Interval[N]] = Ordering.by[Interval[N], N](_.start).orElseBy(_.end)
 
 /** A Discrete Interval Encoding Tree for storing sets of discrete values by encoding contiguous intervals
   *  as single entries. When new ranges are added or removed, they are merged/split with existing intervals.
