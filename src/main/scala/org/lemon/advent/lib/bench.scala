@@ -10,7 +10,7 @@ class Bench:
   def bench(): Unit =
     // import org.lemon.advent.year2023.Day16._
     // part1(read(file(2023)(16)))
-    
+
     Area(0 to 100, 0 to 100).toSeq
 
     ()

@@ -23,7 +23,7 @@ class CycleTest extends UnitTest:
     cycle shouldBe Cycle(offset = 1, period = 3, history = Seq("a", "b", "c", "d"))
     cycle.stateAt(0) shouldBe "a"
     cycle.stateAt(1) shouldBe "b"
-    cycle.stateAt(100) shouldBe "b"  // (100 - 1) % 3 = 0 -> position 0 in cycle -> history(1) = "b"
+    cycle.stateAt(100) shouldBe "b" // (100 - 1) % 3 = 0 -> position 0 in cycle -> history(1) = "b"
   }
 
   test("findCycle with fixed points") {
@@ -55,6 +55,6 @@ class CycleTest extends UnitTest:
     cycle.stateAt(8) shouldBe 2
     // 1 billion steps: position in cycle = (1000000000 - 2) % 3 = 2, so state is history(4) = 4
     cycle.stateAt(1000000000L) shouldBe 4
-    cycle.stateAt(1000000001L) shouldBe 2  // position 0 in cycle
-    cycle.stateAt(1000000002L) shouldBe 3  // position 1 in cycle
+    cycle.stateAt(1000000001L) shouldBe 2 // position 0 in cycle
+    cycle.stateAt(1000000002L) shouldBe 3 // position 1 in cycle
   }

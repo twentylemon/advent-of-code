@@ -10,7 +10,8 @@ private object Day22:
 
   def parse(input: String) = input.linesIterator
     .map(_ match
-      case s"$x1,$y1,$z1~$x2,$y2,$z2" => Brick(Interval(x1.toInt to x2.toInt), Interval(y1.toInt to y2.toInt), Interval(z1.toInt to z2.toInt))
+      case s"$x1,$y1,$z1~$x2,$y2,$z2" =>
+        Brick(Interval(x1.toInt to x2.toInt), Interval(y1.toInt to y2.toInt), Interval(z1.toInt to z2.toInt))
     )
     .toVector
 
