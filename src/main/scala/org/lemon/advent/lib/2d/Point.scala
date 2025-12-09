@@ -5,11 +5,6 @@ import org.lemon.advent.lib.*
 import scala.math.Integral.Implicits.*
 import scala.math.Ordering.Implicits.*
 
-private def `0`[T: Integral]: T = Integral[T].zero
-private def `1`[T: Integral]: T = Integral[T].one
-private def `-1`[T: Integral]: T = -Integral[T].one
-private def fromInt[T: Integral](n: Int): T = Integral[T].fromInt(n)
-
 object Point:
   given [T: Integral]: Conversion[(T, T), Point[T]] = (coord: (T, T)) => Point(x = coord._1, y = coord._2)
 
@@ -65,6 +60,10 @@ case class Point[N: Integral](x: N, y: N):
       p = Point(x + dx, y + dy)
       if metric(this, p) <= distance
     yield p
+
+  def xInterval(rhs: Point[N]): Interval[N] = Interval(x min rhs.x, x max rhs.x)
+  def yInterval(rhs: Point[N]): Interval[N] = Interval(y min rhs.y, y max rhs.y)
+  def bounding(rhs: Point[N]): Rect[N] = Rect(xRange = xInterval(rhs), yRange = yInterval(rhs))
 
   def shiftInto(area: Area): Coord =
     ((x +% fromInt(area.width)).toInt + area.left, (y +% fromInt(area.height)).toInt + area.top)

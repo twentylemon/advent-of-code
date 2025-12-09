@@ -26,9 +26,8 @@ object Coord:
     .toMap
 
 extension (coord: Coord)
-  def xRange(rhs: Coord): Range = coord.x.min(rhs.x) to coord.x.max(rhs.x)
-  def yRange(rhs: Coord): Range = coord.y.min(rhs.y) to coord.y.max(rhs.y)
-  def bounding(rhs: Coord): Area = Area(xRange = xRange(rhs), yRange = yRange(rhs))
+  def xRange(rhs: Coord): Range = coord.xInterval(rhs).toRange
+  def yRange(rhs: Coord): Range = coord.yInterval(rhs).toRange
 
 extension [T](seq: Seq[Seq[T]])
   def apply(coord: Coord): T = seq(coord.row)(coord.col)

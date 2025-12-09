@@ -33,6 +33,8 @@ case class Interval[N: Integral](start: N, end: N) extends Iterable[N] with Part
   def isInclusive: Boolean = true
   override def isEmpty: Boolean = start > end
   override def nonEmpty: Boolean = start <= end
+
+  @deprecated("use length instead")
   override def size: Int = length.toInt
   def length: N = if isEmpty then `0` else end - start + `1`
 
@@ -56,6 +58,9 @@ case class Interval[N: Integral](start: N, end: N) extends Iterable[N] with Part
 
   override def iterator: Iterator[N] =
     if isEmpty then Iterator.empty else Iterator.iterate(start)(_ + `1`).takeWhile(_ <= end)
+
+  def reverseIterator: Iterator[N] =
+    if isEmpty then Iterator.empty else Iterator.iterate(end)(_ - `1`).takeWhile(_ >= start)
 
   def indices: Interval[N] = if isEmpty then Interval.empty else Interval(`0`, length - `1`)
 

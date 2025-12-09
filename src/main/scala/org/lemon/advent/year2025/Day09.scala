@@ -8,14 +8,14 @@ private object Day09:
   def parse(input: String) =
     import org.lemon.advent.lib.parse.*
     input.linesIterator.map(_ match
-      case Csv(x, y) => Coord(x.toInt, y.toInt)
+      case Csv(x, y) => Point(x.toLong, y.toLong)
     ).toSeq
 
   def part1(input: String) =
     val coords = parse(input)
     coords.pairs
       .map(_ `bounding` _)
-      .map(area => area.width.toLong * area.height.toLong)
+      .map(_.size)
       .max
 
   def part2(input: String) =
@@ -27,5 +27,5 @@ private object Day09:
         val greens = area.contract(1)
         greens.isEmpty || !segments.exists(_.intersects(greens))
       )
-      .map(area => area.width.toLong * area.height.toLong)
+      .map(_.size)
       .max
