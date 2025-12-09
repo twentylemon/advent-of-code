@@ -13,7 +13,6 @@ class Day25Test extends UnitTest {
       val decToDigit = digitToDec.map(_.swap).toMap
 
     extension (snafu: Snafu)
-      def toString: String = snafu
       def +(rhs: Snafu): Snafu =
         val result = snafu.reverse.zipAll(rhs.reverse, '0', '0')
           .foldLeft(("", 0))((accum, digits) =>
