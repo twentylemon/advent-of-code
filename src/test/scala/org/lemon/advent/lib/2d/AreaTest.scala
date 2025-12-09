@@ -215,6 +215,18 @@ class AreaTest extends UnitTest:
     check((area: Area, n: Int) => (n > 0 && n < Int.MaxValue - 1000) ==> (area.growBottom(n) `encloses` area))
   }
 
+  test("expand encloses original area") {
+    check((area: Area, n: Int) => (n > 0 && n < Int.MaxValue - 1000) ==> (area.expand(n) `encloses` area))
+  }
+
+  test("expand and contract are inverse") {
+    check((area: Area, n: Int) => area.expand(n).contract(n) == area)
+  }
+
+  test("contract is enclosed by original area") {
+    check((area: Area) => (area.width > 2 && area.height > 2) ==> (area `encloses` area.contract(1)))
+  }
+
   test("clamp returns a coord in the area") {
     check((area: Area, coord: Coord) => area.contains(area.clamp(coord)))
   }
