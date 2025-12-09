@@ -1,8 +1,8 @@
 package org.lemon.advent.lib.`2d`
 
-import org.lemon.advent.lib.`2d`._
+import org.lemon.advent.lib.`2d`.*
 import org.scalacheck.{Arbitrary, Shrink, Gen}
-import org.scalacheck.Shrink._
+import org.scalacheck.Shrink.*
 
 given Arbitrary[Coord] = Arbitrary(Gen.resultOf(Coord.apply))
 given Shrink[Coord] = Shrink { case Coord(x, y) => shrink((x, y)).map(Coord.apply) }

@@ -89,7 +89,7 @@ private object Day20:
             if signal && chain.contains(circuit.name) then
               counts.updateWith(circuit.name)(_.orElse(Some(press)))
               if counts.size == chain.size then
-                throw new AssertionError(counts.values.fold(1L)(_ lcm _).toString)
+                throw new AssertionError(counts.values.fold(1L)(_ `lcm` _).toString)
         )
       0L
     catch

@@ -1,11 +1,11 @@
 package org.lemon.advent.lib.`2d`
 
-import org.lemon.advent._
-import org.lemon.advent.lib._
-import org.lemon.advent.lib.`2d`.Coord._
-import org.lemon.advent.lib.`2d`._
-import org.scalacheck.Prop._
-import org.scalacheck._
+import org.lemon.advent.*
+import org.lemon.advent.lib.*
+import org.lemon.advent.lib.`2d`.Coord.*
+import org.lemon.advent.lib.`2d`.*
+import org.scalacheck.Prop.*
+import org.scalacheck.*
 
 class CoordTest extends UnitTest:
 
@@ -123,7 +123,7 @@ class CoordTest extends UnitTest:
   }
 
   test("manhattan distance of surrounding is 1 or 2") {
-    check((coord: Coord) => coord.adjacent.map(_ manhattan coord).forall(x => x == 1 || x == 2))
+    check((coord: Coord) => coord.adjacent.map(_ `manhattan` coord).forall(x => x == 1 || x == 2))
   }
 
   test("manhattan is symmetric") {

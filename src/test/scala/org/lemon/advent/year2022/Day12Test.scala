@@ -1,7 +1,7 @@
 package org.lemon.advent.year2022
 
 import scala.collection.mutable
-import org.lemon.advent._
+import org.lemon.advent.*
 
 class Day12Test extends UnitTest {
 
@@ -39,8 +39,8 @@ class Day12Test extends UnitTest {
     Iterator.iterate(end)(cameFrom).takeWhile(!start.contains(_)).toSeq
 
   def solve(maze: Maze)(start: Seq[Coord], end: Coord) =
-    val stepsTaken = mutable.Map[Coord, Int](start.map(_ -> 0): _*)
-    val queue = mutable.PriorityQueue[Coord]()(Ordering[Int].on((c: Coord) => c.manhattan(end) + stepsTaken(c)).reverse)
+    val stepsTaken = mutable.Map[Coord, Int](start.map(_ -> 0)*)
+    val queue = mutable.PriorityQueue[Coord]()(using Ordering[Int].on((c: Coord) => c.manhattan(end) + stepsTaken(c)).reverse)
 
     val cameFrom = mutable.Map.empty[Coord, Coord]
     queue ++= start

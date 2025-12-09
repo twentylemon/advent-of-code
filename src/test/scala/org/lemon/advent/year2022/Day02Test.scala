@@ -1,6 +1,6 @@
 package org.lemon.advent.year2022
 
-import org.lemon.advent._
+import org.lemon.advent.*
 
 class Day02Test extends UnitTest {
   sealed trait Toss

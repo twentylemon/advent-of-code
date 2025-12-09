@@ -1,6 +1,6 @@
 package org.lemon.advent.lib
 
-import org.lemon.advent._
+import org.lemon.advent.*
 
 class CycleTest extends UnitTest:
 

@@ -2,8 +2,8 @@ package org.lemon.advent
 
 import scala.io.Source
 import scala.util.Using
-import sttp.client4._
-import java.nio.file._
+import sttp.client4.*
+import java.nio.file.*
 import java.time.LocalDate
 
 def read(name: String): String =
@@ -51,12 +51,12 @@ def setup(year: Int, day: Int) =
     Files.createDirectories(src.getParent)
     Files.write(src, s"""package org.lemon.advent.year$year
                         |
-                        |import org.lemon.advent.lib._
+                        |import org.lemon.advent.lib.*
                         |
                         |private object $className:
                         |
                         |  def parse(input: String) =
-                        |    import org.lemon.advent.lib.parse._
+                        |    import org.lemon.advent.lib.parse.*
                         |    input
                         |
                         |  def part1(input: String) =
@@ -70,8 +70,8 @@ def setup(year: Int, day: Int) =
     Files.createDirectories(test.getParent)
     Files.write(test, s"""package org.lemon.advent.year$year
                         |
-                        |import org.lemon.advent._
-                        |import org.lemon.advent.year$year.$className._
+                        |import org.lemon.advent.*
+                        |import org.lemon.advent.year$year.$className.*
                         |
                         |class ${className}Test extends UnitTest:
                         |

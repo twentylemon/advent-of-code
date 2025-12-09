@@ -1,11 +1,11 @@
 package org.lemon.advent.year2022
 
-import org.lemon.advent._
+import org.lemon.advent.*
 import scala.collection.mutable
-import optimus.optimization._
-import optimus.algebra._
+import optimus.optimization.*
+import optimus.algebra.*
 import optimus.optimization.enums.SolverLib
-import optimus.optimization.model._
+import optimus.optimization.model.*
 
 @org.scalatest.Ignore // tests are quite slow. python implementation is much faster, like. hours faster
 class Day19Test extends UnitTest {

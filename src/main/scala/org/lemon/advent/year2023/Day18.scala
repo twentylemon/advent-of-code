@@ -1,7 +1,7 @@
 package org.lemon.advent.year2023
 
-import org.lemon.advent.lib.`2d`._
-import org.lemon.advent.lib.`2d`.Coord._
+import org.lemon.advent.lib.`2d`.*
+import org.lemon.advent.lib.`2d`.Coord.*
 
 import scala.collection.mutable
 
@@ -34,7 +34,7 @@ private object Day18:
   def solve(prs: String => Seq[Coord])(input: String) =
     val edges = prs(input)
     val corners = trace(edges)
-    innerArea(corners) + (edges.map(_ manhattan origin).sum / 2 + 1)
+    innerArea(corners) + (edges.map(_ `manhattan` origin).sum / 2 + 1)
 
   def part1 = solve(parse)
 

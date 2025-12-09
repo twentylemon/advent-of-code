@@ -3,7 +3,7 @@ package org.lemon.advent.year2025
 private object Day02:
 
   def parse(input: String) =
-    import org.lemon.advent.lib.parse._
+    import org.lemon.advent.lib.parse.*
     input.linesIterator.flatMap(_ match
       case Csv(ranges*) => ranges.map(_ match
           case s"$start-$end" => start.toLong to end.toLong

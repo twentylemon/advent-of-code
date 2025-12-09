@@ -1,8 +1,8 @@
 package org.lemon.advent.lib.graph
 
 import scala.collection.mutable
-import scala.math.Numeric.Implicits._
-import scala.math.Ordering.Implicits._
+import scala.math.Numeric.Implicits.*
+import scala.math.Ordering.Implicits.*
 
 /** Performs a breadth first fill of the graph from the starting node, returning
   * the set of all reachable nodes.

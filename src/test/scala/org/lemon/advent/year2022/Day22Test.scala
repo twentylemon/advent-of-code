@@ -1,6 +1,6 @@
 package org.lemon.advent.year2022
 
-import org.lemon.advent._
+import org.lemon.advent.*
 import scala.collection.mutable
 
 class Day22Test extends UnitTest {
@@ -24,7 +24,7 @@ class Day22Test extends UnitTest {
     case Turn(direction: Direction)
     case Walk(steps: Int)
 
-  import Facing._, Action._, Direction._
+  import Facing.*, Action.*, Direction.*
 
   class Node(val location: Coord, val contents: Char):
     var east: Node = null
@@ -46,7 +46,7 @@ class Day22Test extends UnitTest {
         case West => node.east = this; this.west = node
         case North => node.south = this; this.north = node
 
-    def walk(facing: Facing): LazyList[Node] = LazyList.iterate(this)(_ neighbour facing)
+    def walk(facing: Facing): LazyList[Node] = LazyList.iterate(this)(_ `neighbour` facing)
 
     override def toString = s"Node(location=$location, contents=$contents)"
 

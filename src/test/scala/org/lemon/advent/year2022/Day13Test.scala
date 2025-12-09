@@ -1,10 +1,10 @@
 package org.lemon.advent.year2022
 
-import io.circe._
-import io.circe.syntax._
-import io.circe.parser._
-import scala.math.Ordering.Implicits._
-import org.lemon.advent._
+import io.circe.*
+import io.circe.syntax.*
+import io.circe.parser.*
+import scala.math.Ordering.Implicits.*
+import org.lemon.advent.*
 
 class Day13Test extends UnitTest {
 

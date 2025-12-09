@@ -34,7 +34,7 @@ private object Day08:
       .map(_.dropWhile(!_._1.endsWith("Z")))
       .map(_.next._2.toLong)
 
-    cycle.fold(1L)(_ lcm _)
+    cycle.fold(1L)(_ `lcm` _)
 
   def cycleGraph(directions: String, graph: Map[String, (String, String)]) = graph.keySet
     .map(loc => (loc, directions.foldLeft(loc)((p, d) => move(p, d, graph))))
@@ -53,4 +53,4 @@ private object Day08:
       .filter(_.endsWith("A"))
       .map(cyclesUntilEnd(cycle, _))
 
-    loop.fold(1L)(_ lcm _) * directions.length
+    loop.fold(1L)(_ `lcm` _) * directions.length

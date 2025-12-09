@@ -1,6 +1,6 @@
 package org.lemon.advent.year2023
 
-import org.lemon.advent.lib._
+import org.lemon.advent.lib.*
 
 private object Day14:
 

@@ -1,8 +1,8 @@
 package org.lemon.advent.lib.graph
 
 import scala.collection.mutable
-import scala.math.Numeric.Implicits._
-import scala.math.Ordering.Implicits._
+import scala.math.Numeric.Implicits.*
+import scala.math.Ordering.Implicits.*
 
 /** Performs an A* search of the graph from `start` to `end`, returning
   * the shortest path between them. When `heuristic` always returns zero,

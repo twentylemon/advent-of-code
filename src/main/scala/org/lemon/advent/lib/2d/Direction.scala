@@ -1,6 +1,6 @@
 package org.lemon.advent.lib.`2d`
 
-import Coord._
+import Coord.*
 
 object Direction:
   given Ordering[Direction] = Ordering.by(_.ordinal)

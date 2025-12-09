@@ -6,7 +6,7 @@ import org.lemon.advent.lib.graph.fill
 
 import scala.annotation.tailrec
 import scala.collection.mutable
-import scala.collection.parallel.CollectionConverters._
+import scala.collection.parallel.CollectionConverters.*
 
 private object Day25:
 

@@ -1,13 +1,13 @@
 package org.lemon.advent.year2025
 
-import org.lemon.advent.lib._
+import org.lemon.advent.lib.*
 
 private object Day08:
 
   type Coord = (Long, Long, Long)
 
   def parse(input: String) =
-    import org.lemon.advent.lib.parse._
+    import org.lemon.advent.lib.parse.*
     input.linesIterator.map(_ match
       case Csv(x, y, z) => (x.toLong, y.toLong, z.toLong)
     ).toSeq

@@ -1,13 +1,13 @@
 package org.lemon.advent.year2024
 
-import org.lemon.advent.lib._
+import org.lemon.advent.lib.*
 
 import scala.collection.mutable
 
 private object Day19:
 
   def parse(input: String) =
-    import org.lemon.advent.lib.parse._
+    import org.lemon.advent.lib.parse.*
     input match
       case Chunk(Csv(towels @ _*), targets) => (towels, targets.linesIterator.toSeq)
 

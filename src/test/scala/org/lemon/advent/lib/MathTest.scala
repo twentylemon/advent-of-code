@@ -1,9 +1,9 @@
 package org.lemon.advent.lib
 
-import org.lemon.advent._
+import org.lemon.advent.*
 import org.lemon.advent.lib.lcm
 import org.lemon.advent.lib.gcd
-import org.scalacheck.Prop._
+import org.scalacheck.Prop.*
 
 class MathTest extends UnitTest:
 

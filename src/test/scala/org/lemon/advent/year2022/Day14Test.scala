@@ -1,7 +1,7 @@
 package org.lemon.advent.year2022
 
 import scala.collection.mutable
-import org.lemon.advent._
+import org.lemon.advent.*
 
 class Day14Test extends UnitTest {
 
@@ -22,7 +22,7 @@ class Day14Test extends UnitTest {
   enum Trickle:
     case Rest(coord: Coord)
     case Fall
-  import Trickle._
+  import Trickle.*
 
   def parseRocks(line: String): Iterator[Rock] = line
     .split(" -> ")

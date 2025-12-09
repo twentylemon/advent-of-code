@@ -1,10 +1,10 @@
 package org.lemon.advent.lib
 
-import org.lemon.advent._
+import org.lemon.advent.*
 import org.scalacheck.{Arbitrary, Shrink, Gen}
-import org.scalacheck.Prop._
-import org.scalacheck.Shrink._
-import org.scalacheck.Arbitrary._
+import org.scalacheck.Prop.*
+import org.scalacheck.Shrink.*
+import org.scalacheck.Arbitrary.*
 
 given Arbitrary[Range] = Arbitrary(for
   i <- Gen.choose(-10000, 10000)
@@ -859,7 +859,7 @@ class MultipleIntervalDietTest extends UnitTest:
     for
       count <- Gen.choose(2, 5)
       first <- Gen.choose(-1000, 1000)
-      specs <- Gen.listOfN(count, for { len <- Gen.choose(1, 50); gap <- Gen.choose(2, 100) } yield (len, gap))
+      specs <- Gen.listOfN(count, for  len <- Gen.choose(1, 50); gap <- Gen.choose(2, 100)  yield (len, gap))
     yield specs.scanLeft((first, first)) { case ((_, prevEnd), (len, gap)) =>
       val start = prevEnd + gap
       (start, start + len - 1)

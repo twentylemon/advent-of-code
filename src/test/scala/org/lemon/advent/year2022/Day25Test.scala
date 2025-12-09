@@ -1,6 +1,6 @@
 package org.lemon.advent.year2022
 
-import org.lemon.advent._
+import org.lemon.advent.*
 
 class Day25Test extends UnitTest {
 
@@ -29,7 +29,7 @@ class Day25Test extends UnitTest {
           case x if x > 2 => (Snafu.decToDigit(x - 5), 1)
           case x if x < -2 => (Snafu.decToDigit(x + 5), -1)
           case x => (Snafu.decToDigit(x), 0)
-  import Snafus._
+  import Snafus.*
 
   def part1(in: Seq[String]): Snafu = in.map(s => Snafu(s)).reduce(_ + _)
 

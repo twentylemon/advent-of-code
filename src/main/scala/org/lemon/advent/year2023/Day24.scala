@@ -2,7 +2,7 @@ package org.lemon.advent.year2023
 
 import org.lemon.advent.lib.pairs
 
-import scala.collection.parallel.CollectionConverters._
+import scala.collection.parallel.CollectionConverters.*
 
 private object Day24:
 

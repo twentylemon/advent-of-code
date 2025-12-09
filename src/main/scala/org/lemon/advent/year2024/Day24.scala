@@ -1,6 +1,6 @@
 package org.lemon.advent.year2024
 
-import org.lemon.advent.lib._
+import org.lemon.advent.lib.*
 
 private object Day24:
 
@@ -23,7 +23,7 @@ private object Day24:
         case "XOR" => lhs.resolve ^ rhs.resolve
 
   def parse(input: String) =
-    import org.lemon.advent.lib.parse._
+    import org.lemon.advent.lib.parse.*
     input match
       case Chunk(init, gates) =>
         val lits = init.linesIterator.map(_ match

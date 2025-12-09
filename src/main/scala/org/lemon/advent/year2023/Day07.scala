@@ -1,6 +1,6 @@
 package org.lemon.advent.year2023
 
-import scala.math.Ordering.Implicits._
+import scala.math.Ordering.Implicits.*
 
 private object Day07:
 

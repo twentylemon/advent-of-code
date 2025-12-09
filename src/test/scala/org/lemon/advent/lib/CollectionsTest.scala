@@ -1,8 +1,8 @@
 package org.lemon.advent.lib
 
-import org.scalacheck._
-import org.scalacheck.Prop._
-import org.lemon.advent._
+import org.scalacheck.*
+import org.scalacheck.Prop.*
+import org.lemon.advent.*
 
 class CollectionsTest extends UnitTest:
 

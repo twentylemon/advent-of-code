@@ -1,7 +1,7 @@
 package org.lemon.advent.year2025
 
-import org.lemon.advent._
-import org.lemon.advent.year2025.Day01._
+import org.lemon.advent.*
+import org.lemon.advent.year2025.Day01.*
 
 class Day01Test extends UnitTest:
 

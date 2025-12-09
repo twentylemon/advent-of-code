@@ -1,9 +1,9 @@
 package org.lemon.advent.lib.`2d`
 
-import org.lemon.advent.lib._
+import org.lemon.advent.lib.*
 
-import scala.math.Integral.Implicits._
-import scala.math.Ordering.Implicits._
+import scala.math.Integral.Implicits.*
+import scala.math.Ordering.Implicits.*
 
 private def `0`[T: Integral]: T = Integral[T].zero
 private def `1`[T: Integral]: T = Integral[T].one
