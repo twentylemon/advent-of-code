@@ -39,9 +39,9 @@ private object Day08:
       case ((mst, minDist, parent), _) =>
         val remaining = all -- mst
         val u = remaining.minBy(minDist)
-        val neighbors = remaining - u
+        val neighbours = remaining - u
 
-        val (newDist, newParent) = neighbors.foldLeft((minDist, parent)) {
+        val (newDist, newParent) = neighbours.foldLeft((minDist, parent)) {
           case ((dist, par), v) =>
             val d = euclidean(u, v)
             if d < dist(v) then (dist.updated(v, d), par.updated(v, u))
