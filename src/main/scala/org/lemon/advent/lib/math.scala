@@ -3,6 +3,11 @@ package org.lemon.advent.lib
 import scala.math.Integral.Implicits.*
 import scala.math.Ordering.Implicits.*
 
+def `0`[N: Integral]: N = Integral[N].zero
+def `1`[N: Integral]: N = Integral[N].one
+def `-1`[N: Integral]: N = -Integral[N].one
+def fromInt[N: Integral](n: Int): N = Integral[N].fromInt(n)
+
 extension [N: Integral](a: N)
   /** Returns the positive modulo of this mod `n`. If the regular modulo is negative, this
     * will shift it back into the positive ranges.
