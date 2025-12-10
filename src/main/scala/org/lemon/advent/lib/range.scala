@@ -1,16 +1,16 @@
 package org.lemon.advent.lib
 
+import org.lemon.advent.lib.`2d`.*
 import scala.math.Ordering.Implicits.*
 import scala.math.Integral.Implicits.*
 import scala.collection.immutable.{TreeMap, NumericRange}
 
 extension (range: Range)
   def toNumericRange[N: Integral]: NumericRange[N] =
-    val num = summon[Integral[N]]
-    if range.isEmpty then NumericRange(num.zero, num.zero, num.one)
+    if range.isEmpty then NumericRange.Exclusive(`0`, `0`, `1`)
     else if range.isInclusive then
-      NumericRange.inclusive(num.fromInt(range.start), num.fromInt(range.end), num.fromInt(range.step))
-    else NumericRange.Exclusive(num.fromInt(range.start), num.fromInt(range.end), num.fromInt(range.step))
+      NumericRange.inclusive(fromInt(range.start), fromInt(range.end), fromInt(range.step))
+    else NumericRange.Exclusive(fromInt(range.start), fromInt(range.end), fromInt(range.step))
 
   def toInterval: Interval[Int] = Interval(range)
 
@@ -26,10 +26,6 @@ extension [N: Integral](tuple: (N, N))
   * @tparam N the numeric type of values stored
   */
 case class Interval[N: Integral](start: N, end: N) extends Iterable[N] with PartialFunction[N, N]:
-  private val num = summon[Integral[N]]
-  private val `1` = num.one
-  private val `0` = num.zero
-
   def isInclusive: Boolean = true
   override def isEmpty: Boolean = start > end
   override def nonEmpty: Boolean = start <= end
@@ -125,9 +121,6 @@ object Interval:
   * @param intervals the underlying interval storage, mapping each interval's start to its end (inclusive)
   */
 case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
-  private val num = Integral[N]
-  private val `1` = num.one
-
   /** Returns whether this tree contains the given value.
     *
     * @param value the value to check
