@@ -1,8 +1,8 @@
 package org.lemon.advent.year2022
 
 import org.lemon.advent.*
+import org.lemon.advent.lib.*
 import scala.collection.mutable
-import org.lemon.advent.lib.ortools._
 
 class Day19Test extends UnitTest {
 
