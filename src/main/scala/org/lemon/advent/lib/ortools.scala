@@ -127,3 +127,10 @@ case class LinearConstraint(terms: Map[Var, Double], lb: Double, ub: Double)
 extension [N: Numeric](n: N)
   def *[V <: Var](v: V): LinearExpr = LinearExpr(Map(v -> summon[Numeric[N]].toDouble(n)), 0)
   def *(e: LinearExpr): LinearExpr = e * summon[Numeric[N]].toDouble(n)
+
+extension (vars: Iterable[Var])
+  def sumExpr: LinearExpr = vars.foldLeft(LinearExpr.Zero)((acc, v) => acc + LinearExpr(v))
+
+extension (exprs: Iterable[LinearExpr])
+  @scala.annotation.targetName("sumLinearExpr")
+  def sumExpr: LinearExpr = exprs.foldLeft(LinearExpr.Zero)(_ + _)
