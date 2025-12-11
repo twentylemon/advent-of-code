@@ -29,4 +29,6 @@ def findCycle[S](initial: S)(step: S => S): Cycle[S] =
   Cycle(offset, period, history)
 
 case class Cycle[S](offset: Int, period: Int, history: Seq[S]):
-  def stateAt(n: Long): S = history.lift(n.toInt).getOrElse(history(((n - offset) % period + offset).toInt))
+  def stateAt(n: Long): S =
+    if n < history.size then history(n.toInt)
+    else history(((n - offset) % period + offset).toInt)
