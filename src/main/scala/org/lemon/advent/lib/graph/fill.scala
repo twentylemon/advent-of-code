@@ -31,7 +31,7 @@ def fill[N](adjacency: N => Iterable[N], start: N): Set[N] =
   */
 def distanceFrom[N, D: Numeric](adjacency: N => Iterable[(N, D)], end: N): Map[N, D] =
   val distances = mutable.Map(end -> Numeric[D].zero)
-  given Ordering[(N, D)] = Ordering.by[(N, D), D](_._2)
+  given Ordering[(N, D)] = Ordering.by[(N, D), D](_._2).reverse
   val queue = mutable.PriorityQueue(distances.head)
 
   while !queue.isEmpty do
