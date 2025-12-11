@@ -1,6 +1,7 @@
 package org.lemon.advent.year2025
 
 import org.lemon.advent.lib.*
+import org.lemon.advent.lib.ortools.*
 
 private object Day10:
 
