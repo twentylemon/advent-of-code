@@ -223,7 +223,7 @@ class SingletonValueDietTest extends UnitTest:
 
   test("adding disjoint range produces multiple intervals") {
     check((range: Range, n: Int) =>
-      n < range.min || n > range.max ==> ((Diet(n) + range).toIntervals == Seq(
+      n < range.min - 1 || n > range.max + 1 ==> ((Diet(n) + range).toIntervals == Seq(
         Interval(n, n),
         Interval(range.min, range.max)
       ).sorted)
