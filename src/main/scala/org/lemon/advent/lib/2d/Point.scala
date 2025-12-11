@@ -38,7 +38,8 @@ case class Point[N: Integral](x: N, y: N):
   def shift(direction: Direction, n: N): Point[N] =
     (x + fromInt(direction.unitVector.x) * n, y + fromInt(direction.unitVector.y) * n)
 
-  def walk(direction: Direction): Iterator[Point[N]] = Iterator.iterate(this)(_.move(direction))
+  def walk(step: Point[N]): Iterator[Point[N]] = Iterator.iterate(this)(_ + step)
+  def walk(direction: Direction): Iterator[Point[N]] = walk(direction.unitVector.to[N])
 
   def adjacent: Seq[Point[N]] = Seq(up, down, left, right)
   def surrounding: Seq[Point[N]] = Seq(up, down, left, right, up.left, up.right, down.left, down.right)
@@ -65,10 +66,14 @@ case class Point[N: Integral](x: N, y: N):
   def yInterval(rhs: Point[N]): Interval[N] = Interval(y min rhs.y, y max rhs.y)
   def bounding(rhs: Point[N]): Rect[N] = Rect(xRange = xInterval(rhs), yRange = yInterval(rhs))
 
-  def shiftInto(area: Area): Coord =
-    ((x +% fromInt(area.width)).toInt + area.left, (y +% fromInt(area.height)).toInt + area.top)
+  def shiftInto(rect: Rect[N]): Point[N] = ((x +% rect.width) + rect.left, (y +% rect.height) + rect.top)
 
-  def flip = Point[N](x = y, y = x)
+  def flip = Point(x = y, y = x)
+
+  def rotateClockwise: Point[N] = Point(x = -y, y = x)
+  def rotateClockwise(about: Point[N]): Point[N] = (this - about).rotateClockwise + about
+  def rotateCounterClockwise: Point[N] = Point(x = y, y = -x)
+  def rotateCounterClockwise(about: Point[N]): Point[N] = (this - about).rotateCounterClockwise + about
 
   def +(rhs: Point[N]): Point[N] = (x + rhs.x, y + rhs.y)
   def +(direction: Direction): Point[N] = move(direction)
@@ -85,3 +90,5 @@ case class Point[N: Integral](x: N, y: N):
     else None
 
   def asVec: VecT[N] = VecT[N](this)
+
+  def to[M: Integral]: Point[M] = Point[M](fromString[M](x.toString), fromString[M](y.toString))

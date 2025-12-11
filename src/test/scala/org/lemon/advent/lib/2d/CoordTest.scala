@@ -94,6 +94,20 @@ class CoordTest extends UnitTest:
     check((coord: Coord, dir: Direction, n: Int) => coord.walk(dir).nth(n) == coord.shift(dir, n))
   }
 
+  test("walk(step) first element is self") {
+    check((coord: Coord, step: Coord) => coord.walk(step).next() == coord)
+  }
+
+  test("walk(step) nth element is coord + step * n") {
+    given Arbitrary[Int] = Arbitrary(Gen.chooseNum(0, 100))
+    check((coord: Coord, step: Coord, n: Int) => coord.walk(step).nth(n) == coord + step * n)
+  }
+
+  test("walk(step) with zero steps is always coord") {
+    given Arbitrary[Int] = Arbitrary(Gen.chooseNum(0, 100))
+    check((coord: Coord, n: Int) => coord.walk(Coord.origin).nth(n) == coord)
+  }
+
   test("left is left direction") {
     check((coord: Coord) => coord.directionTo(coord.left) == Some(Direction.Left))
   }
@@ -184,4 +198,48 @@ class CoordTest extends UnitTest:
     check((coord: Coord, d: Int, metric: (Coord, Coord) => Int) =>
       coord.within(d, metric).forall(c => metric(coord, c) <= d)
     )
+  }
+
+  test("rotateClockwise four times is identity") {
+    check((coord: Coord) => coord.rotateClockwise.rotateClockwise.rotateClockwise.rotateClockwise == coord)
+  }
+
+  test("rotateCounterClockwise four times is identity") {
+    check((coord: Coord) =>
+      coord.rotateCounterClockwise.rotateCounterClockwise.rotateCounterClockwise.rotateCounterClockwise == coord
+    )
+  }
+
+  test("rotateClockwise and rotateCounterClockwise are inverses") {
+    check((coord: Coord) => coord.rotateClockwise.rotateCounterClockwise == coord)
+  }
+
+  test("rotateClockwise turns right") {
+    check((dir: Direction) => dir.unitVector.rotateClockwise == dir.turnRight.unitVector)
+  }
+
+  test("rotateCounterClockwise turns left") {
+    check((dir: Direction) => dir.unitVector.rotateCounterClockwise == dir.turnLeft.unitVector)
+  }
+
+  test("rotateClockwise around center four times is identity") {
+    check((coord: Coord, about: Coord) =>
+      coord.rotateClockwise(about).rotateClockwise(about).rotateClockwise(about).rotateClockwise(about) == coord
+    )
+  }
+
+  test("rotateClockwise around origin is same as rotateClockwise") {
+    check((coord: Coord) => coord.rotateClockwise(Coord.origin) == coord.rotateClockwise)
+  }
+
+  test("to[Int] is identity") {
+    check((coord: Coord) => coord.to[Int] == coord)
+  }
+
+  test("to[Long] and back is identity") {
+    check((coord: Coord) => coord.to[Long].to[Int] == coord)
+  }
+
+  test("to[Long] preserves coordinates") {
+    check((coord: Coord) => coord.to[Long] == Point[Long](coord.x.toLong, coord.y.toLong))
   }
