@@ -18,17 +18,17 @@ class MipModel(name: String = "mip", solverType: SolverType = SolverType.CBC):
   private var objectiveValue: Option[Double] = None
   private var status: SolveStatus = SolveStatus.NotSolved
 
-  def intVar(name: String, lb: Double = 0, ub: Double = Double.MaxValue): Var =
+  def intVar(name: String, lb: Double = 0, ub: Double = Double.MaxValue): IntVar =
     require(!variables.contains(name), s"variable $name already exists")
-    variables.getOrElseUpdate(name, IntVar(solver.makeIntVar(lb, ub, name)))
+    variables.getOrElseUpdate(name, IntVar(solver.makeIntVar(lb, ub, name))).asInstanceOf[IntVar]
 
-  def boolVar(name: String): Var =
+  def boolVar(name: String): BoolVar =
     require(!variables.contains(name), s"variable $name already exists")
-    variables.getOrElseUpdate(name, BoolVar(solver.makeBoolVar(name)))
+    variables.getOrElseUpdate(name, BoolVar(solver.makeBoolVar(name))).asInstanceOf[BoolVar]
 
-  def numVar(name: String, lb: Double = 0, ub: Double = Double.MaxValue): Var =
+  def numVar(name: String, lb: Double = 0, ub: Double = Double.MaxValue): NumVar =
     require(!variables.contains(name), s"variable $name already exists")
-    variables.getOrElseUpdate(name, NumVar(solver.makeNumVar(lb, ub, name)))
+    variables.getOrElseUpdate(name, NumVar(solver.makeNumVar(lb, ub, name))).asInstanceOf[NumVar]
 
   def subjectTo(constraint: LinearConstraint): Unit =
     val c = solver.makeConstraint(constraint.lb, constraint.ub, "")
