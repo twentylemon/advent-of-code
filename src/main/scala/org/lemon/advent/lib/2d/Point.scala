@@ -46,6 +46,9 @@ case class Point[N: Integral](x: N, y: N):
 
   def manhattan(rhs: Point[N]): N = (x - rhs.x).abs + (y - rhs.y).abs
   def chessboard(rhs: Point[N]): N = (x - rhs.x).abs max (y - rhs.y).abs
+  def euclidean(rhs: Point[N]): N = 
+    val (dx, dy) = (x - rhs.x, y - rhs.y)
+    dx * dx + dy * dy
 
   /** Returns an iterator of all points within `distance` of this point using the given metric.
     * This checks all points in a square around the point, so will not be correct if

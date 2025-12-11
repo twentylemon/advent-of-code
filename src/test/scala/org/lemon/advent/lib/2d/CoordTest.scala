@@ -136,8 +136,10 @@ class CoordTest extends UnitTest:
     check((coord: Coord) => coord.adjacent.forall(_.manhattan(coord) == 1))
   }
 
-  test("manhattan distance of surrounding is 1 or 2") {
-    check((coord: Coord) => coord.adjacent.map(_ `manhattan` coord).forall(x => x == 1 || x == 2))
+  test("manhattan distance of diagonal is 2") {
+    check((coord: Coord) =>
+      Seq(coord.up.left, coord.up.right, coord.down.left, coord.down.right).forall(_.manhattan(coord) == 2)
+    )
   }
 
   test("manhattan is symmetric") {
@@ -154,6 +156,24 @@ class CoordTest extends UnitTest:
 
   test("chessboard is symmetric") {
     check((c1: Coord, c2: Coord) => c1.chessboard(c2) == c2.chessboard(c1))
+  }
+
+  test("euclidean distance to self is 0") {
+    check((coord: Coord) => coord.euclidean(coord) == 0)
+  }
+
+  test("euclidean distance of adjacent is 1") {
+    check((coord: Coord) => coord.adjacent.forall(_.euclidean(coord) == 1))
+  }
+
+  test("euclidean distance of diagonal is 2") {
+    check((coord: Coord) =>
+      Seq(coord.up.left, coord.up.right, coord.down.left, coord.down.right).forall(_.euclidean(coord) == 2)
+    )
+  }
+
+  test("euclidean is symmetric") {
+    check((c1: Coord, c2: Coord) => c1.euclidean(c2) == c2.euclidean(c1))
   }
 
   test("surrounding contains all adjacent") {
