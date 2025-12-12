@@ -50,9 +50,10 @@ class Day25Test extends UnitTest {
       ("2=", "2=", "1=1"), // 8 + 8 = 16
       ("1==", "1==", "101"), // 13 + 13 = 26
     )
-  do test(s"snafu `$lhs + $rhs = $expected") {
-    (lhs + rhs) shouldBe expected
-  }
+  do
+    test(s"snafu `$lhs + $rhs = $expected") {
+      (lhs + rhs) shouldBe expected
+    }
 
   test("part 1 example") {
     val in = """|1=-0-2

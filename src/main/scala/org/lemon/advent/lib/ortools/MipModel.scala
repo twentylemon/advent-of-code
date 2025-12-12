@@ -29,7 +29,7 @@ class MipModel(name: String = "mip", solverType: SolverType = SolverType.CBC):
   def numVar(name: String, lb: Double = 0, ub: Double = Double.MaxValue): NumVar =
     require(!variables.contains(name), s"variable $name already exists")
     variables.getOrElseUpdate(name, NumVar(solver.makeNumVar(lb, ub, name))).asInstanceOf[NumVar]
-  
+
   def apply(name: String): Var = variables(name)
 
   def subjectTo(constraint: LinearConstraint): Unit =

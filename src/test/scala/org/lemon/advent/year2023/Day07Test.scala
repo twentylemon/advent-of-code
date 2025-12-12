@@ -4,7 +4,7 @@ import org.lemon.advent.*
 import org.lemon.advent.year2023.Day07.*
 
 class Day07Test extends UnitTest:
-  
+
   val in = """|32T3K 765
               |T55J5 684
               |KK677 28

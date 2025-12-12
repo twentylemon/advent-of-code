@@ -20,7 +20,8 @@ class Day15Test extends UnitTest {
 
   def coverage(sensor: Sensor, row: Int) =
     val diff = (sensor.sensor.y - row).abs
-    if diff <= sensor.distance then (sensor.sensor.x - sensor.distance + diff) to (sensor.sensor.x + sensor.distance - diff)
+    if diff <= sensor.distance then
+      (sensor.sensor.x - sensor.distance + diff) to (sensor.sensor.x + sensor.distance - diff)
     else 0 until 0
 
   def coverageTree(sensors: Seq[Sensor], row: Int) =

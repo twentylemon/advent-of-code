@@ -4,7 +4,7 @@ import org.lemon.advent.*
 import org.lemon.advent.year2023.Day06.*
 
 class Day06Test extends UnitTest:
-  
+
   val in = """|Time:      7  15   30
               |Distance:  9  40  200""".stripMargin
 

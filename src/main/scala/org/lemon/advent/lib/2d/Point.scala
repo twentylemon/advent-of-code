@@ -46,7 +46,7 @@ case class Point[N: Integral](x: N, y: N):
 
   def manhattan(rhs: Point[N]): N = (x - rhs.x).abs + (y - rhs.y).abs
   def chessboard(rhs: Point[N]): N = (x - rhs.x).abs max (y - rhs.y).abs
-  def euclidean(rhs: Point[N]): N = 
+  def euclidean(rhs: Point[N]): N =
     val (dx, dy) = (x - rhs.x, y - rhs.y)
     dx * dx + dy * dy
 

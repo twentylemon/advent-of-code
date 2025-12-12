@@ -34,7 +34,7 @@ class Day14Test extends UnitTest {
     val spot = Iterator.iterate(source)(c => c.down)
       .dropWhile(c => !deep(c) && !occupied(c))
       .next
-    
+
     if deep(spot) then Fall
     else if !occupied(spot.left) then trickle(occupied, deep)(spot.left)
     else if !occupied(spot.right) then trickle(occupied, deep)(spot.right)
@@ -49,8 +49,7 @@ class Day14Test extends UnitTest {
     def deep(coord: Coord) = coord.y > deepest
 
     var resting = true
-    while resting
-    do
+    while resting do
       trickle(occupied, deep)((500, 0)) match
         case Fall => resting = false
         case Rest(coord) => sand += coord
@@ -65,8 +64,7 @@ class Day14Test extends UnitTest {
     def deep(coord: Coord) = false
 
     var resting = true
-    while resting
-    do
+    while resting do
       trickle(occupied, deep)((500, 0)) match
         case Rest((500, 0)) => resting = false
         case Rest(coord) => sand += coord

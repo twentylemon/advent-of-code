@@ -13,7 +13,6 @@ class Day21Test extends UnitTest:
                 |379A""".stripMargin
     part1(in) shouldBe 126384
   }
-  
 
   test("part 1") {
     part1(read(file(2024)(21))) shouldBe 222670

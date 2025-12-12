@@ -206,7 +206,8 @@ class Day22Test extends UnitTest {
             case (0, 3, 0, 4) => ((100 + modX, 0), facing) // F -> B
             case (0, 3, 1, 3) => ((50 + modY, 149), North) // F -> D
             case (0, 3, 0, 2) => (next, facing) // F -> E
-            case _ => throw new IllegalStateException(s"unexpected face transition: ($faceX, $faceY) -> ($nextX, $nextY)")
+            case _ =>
+              throw new IllegalStateException(s"unexpected face transition: ($faceX, $faceY) -> ($nextX, $nextY)")
 
         if walls(nextAt) then it else State(at = nextAt, facing = nextFacing)
       )

@@ -4,7 +4,7 @@ import org.lemon.advent.*
 import org.lemon.advent.year2023.Day05.*
 
 class Day05Test extends UnitTest:
-  
+
   val in = """|seeds: 79 14 55 13
               |
               |seed-to-soil map:

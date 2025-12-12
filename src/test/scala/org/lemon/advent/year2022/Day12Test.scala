@@ -40,7 +40,8 @@ class Day12Test extends UnitTest {
 
   def solve(maze: Maze)(start: Seq[Coord], end: Coord) =
     val stepsTaken = mutable.Map[Coord, Int](start.map(_ -> 0)*)
-    val queue = mutable.PriorityQueue[Coord]()(using Ordering[Int].on((c: Coord) => c.manhattan(end) + stepsTaken(c)).reverse)
+    val queue =
+      mutable.PriorityQueue[Coord]()(using Ordering[Int].on((c: Coord) => c.manhattan(end) + stepsTaken(c)).reverse)
 
     val cameFrom = mutable.Map.empty[Coord, Coord]
     queue ++= start
