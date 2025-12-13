@@ -1,8 +1,10 @@
 package org.lemon.advent.year2023
 
+import org.lemon.advent.lib.*
+
 private object Day13:
 
-  def parse(input: String) = input.split("\n\n")
+  def parse(input: String) = input.chunks
     .map(g => g.linesIterator.map(_.toCharArray.toSeq).toSeq)
 
   def reflecting(grid: Seq[Seq[Char]], diff: Int) =

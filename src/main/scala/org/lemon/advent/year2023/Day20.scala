@@ -1,6 +1,6 @@
 package org.lemon.advent.year2023
 
-import org.lemon.advent.lib.lcm
+import org.lemon.advent.lib.*
 
 import scala.collection.mutable
 
@@ -41,14 +41,14 @@ private object Day20:
   def parse(input: String) =
     val circuits = input.linesIterator
       .map(_ match
-        case s"%$name -> $downstream" => FlipFlip(name = name, downstream = downstream.split(", "))
-        case s"&$name -> $downstream" => Conjuction(name = name, downstream = downstream.split(", "))
-        case s"broadcaster -> $downstream" => Broadcast(name = "broadcaster", downstream = downstream.split(", "))
+        case s"%$name -> $downstream" => FlipFlip(name = name, downstream = downstream.csv)
+        case s"&$name -> $downstream" => Conjuction(name = name, downstream = downstream.csv)
+        case s"broadcaster -> $downstream" => Broadcast(name = "broadcaster", downstream = downstream.csv)
       )
       .map(circuit => circuit.name -> circuit)
       .toMap + ("button" -> Broadcast(name = "button", downstream = Seq("broadcaster")))
 
-    val expected = input.linesIterator.flatMap(_.split(" -> ").last.split(", ")).distinct.filterNot(circuits.contains)
+    val expected = input.linesIterator.flatMap(_.split(" -> ").last.csv).distinct.filterNot(circuits.contains)
     circuits ++ expected.map(Output(_)).map(output => output.name -> output).toMap
 
   def pressTheButton(context: CircuitContext, sniff: (Boolean, Circuit) => Any = (_, _) => ()): (Long, Long) =

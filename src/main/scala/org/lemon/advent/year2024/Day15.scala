@@ -9,11 +9,11 @@ private object Day15:
     input.filterNot(_.isWhitespace).map(Direction.apply)
 
   def parse(input: String): (Map[Coord, Char], Seq[Direction]) =
-    val Array(grid, moves) = input.split("\n\n")
+    val Seq(grid, moves) = input.chunks
     (Coord.gridToMap(grid), parseMoves(moves))
 
   def parseWide(input: String): (Map[Coord, Char], Seq[Direction]) =
-    val Array(grid, moves) = input.split("\n\n")
+    val Seq(grid, moves) = input.chunks
     val wide = grid.flatMap(_ match
       case '#' => "##"
       case 'O' => "[]"

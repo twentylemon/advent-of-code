@@ -1,11 +1,13 @@
 package org.lemon.advent.year2023
 
+import org.lemon.advent.lib.*
+
 private object Day06:
   def parse(input: String) =
     val ins = input.linesIterator
-      .map(_ match
-        case s"$_: $nums" => nums.split(" ").map(_.trim).map(_.toLongOption).flatten.toSeq
-      )
+      .map {
+        case s"$_: $nums" => nums.wsv.map(_.toLongOption).flatten
+      }
       .toSeq
     ins(0).zip(ins(1))
 

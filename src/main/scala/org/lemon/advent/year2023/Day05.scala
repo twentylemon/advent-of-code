@@ -1,5 +1,7 @@
 package org.lemon.advent.year2023
 
+import org.lemon.advent.lib.*
+
 import scala.collection.immutable.NumericRange
 import scala.collection.parallel.CollectionConverters.*
 
@@ -13,24 +15,23 @@ private object Day05:
   case class Mapping(from: String, to: String, ranges: Seq[RangeMap])
 
   def parseMapping(block: String) =
-    val lines = block.split("\n")
+    val lines = block.linesIterator.toSeq
     val (from, to) = lines.head match
       case s"$from-to-$to map:" => (from, to)
 
     val ranges = lines.tail
-      .map(_.split(" "))
-      .map(_.map(x => x.toLong))
-      .map { case Array(destStart, srcStart, length) =>
+      .map(_.wsv.map(_.toLong))
+      .map { case Seq(destStart, srcStart, length) =>
         RangeMap(srcStart until srcStart + length, destStart until destStart + length)
       }
 
     Mapping(from, to, ranges)
 
   def parse(input: String) =
-    val chunks = input.split("\n\n")
+    val chunks = input.chunks
 
     val seeds = chunks.head match
-      case s"seeds: $nums" => nums.split(" ").map(_.trim).map(_.toLong)
+      case s"seeds: $nums" => nums.wsv.map(_.toLong)
 
     (seeds.toSeq, chunks.tail.map(parseMapping))
 

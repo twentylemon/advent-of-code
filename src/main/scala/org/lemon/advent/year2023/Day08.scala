@@ -1,11 +1,11 @@
 package org.lemon.advent.year2023
 
-import org.lemon.advent.lib.lcm
+import org.lemon.advent.lib.*
 
 private object Day08:
 
   def parse(input: String) =
-    val Array(directions, tail) = input.split("\n\n")
+    val Seq(directions, tail) = input.chunks
     val graph = tail.linesIterator
       .map(_ match
         case s"$from = ($l, $r)" => (from, (l, r))

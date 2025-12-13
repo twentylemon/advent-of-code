@@ -1,5 +1,7 @@
 package org.lemon.advent.year2024
 
+import org.lemon.advent.lib.*
+
 private object Day17:
 
   case class State(
@@ -73,7 +75,7 @@ private object Day17:
           s"Register B: $b",
           s"Register C: $c",
           s"Program: $program",
-        ) => (a.toInt, b.toInt, c.toInt, program.split(",").map(_.toInt).toSeq)
+        ) => (a.toInt, b.toInt, c.toInt, program.csv.map(_.toInt))
 
   def initialState(a: Long, b: Long, c: Long, program: Seq[Int]) =
     State(program, 0, a, b, c, Seq())

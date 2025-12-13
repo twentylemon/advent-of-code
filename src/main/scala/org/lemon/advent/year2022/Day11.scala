@@ -1,5 +1,7 @@
 package org.lemon.advent.year2022
 
+import org.lemon.advent.lib.*
+
 private object Day11:
 
   case class Monkey(
@@ -19,8 +21,8 @@ private object Day11:
       case s"Operation: new = old * $rhs" => (old: BigInt) => old * rhs.toInt
 
   def parseTarget(test: String, ifTrue: String, ifFalse: String): BigInt => Int =
-    val trueTarget = ifTrue.strip.split(" ").last.toInt
-    val falseTarget = ifFalse.strip.split(" ").last.toInt
+    val trueTarget = ifTrue.strip.wsv.last.toInt
+    val falseTarget = ifFalse.strip.wsv.last.toInt
     test.strip match
       case s"Test: divisible by $n" => (x: BigInt) => if x % n.toInt == 0 then trueTarget else falseTarget
 
@@ -31,7 +33,7 @@ private object Day11:
   def parseMonkey(in: String) =
     val lines = in.linesIterator.map(_.strip).toSeq
     val id = lines(0) match { case s"Monkey $i:" => i.toInt }
-    val items = lines(1).strip match { case s"Starting items: $list" => list.split(", ").map(BigInt(_)) }
+    val items = lines(1).strip match { case s"Starting items: $list" => list.csv.map(BigInt(_)) }
     val inspect = parseInspect(lines(2))
     val target = parseTarget(lines(3), lines(4), lines(5))
     val divisor = parseDivisor(lines(3))
@@ -55,12 +57,12 @@ private object Day11:
     monkeys.keysIterator.toSeq.sorted.foldLeft(monkeys)((m, id) => turn(relax)(id)(m))
 
   def part1(input: String) =
-    val monkeys = input.split("\n\n").map(parseMonkey).map(m => m.id -> m).toMap
+    val monkeys = input.chunks.map(parseMonkey).map(m => m.id -> m).toMap
     val ending = (1 to 20).foldLeft(monkeys)((m, _) => round(x => x / 3)(m))
     ending.values.map(_.totalInspected).toSeq.sorted.takeRight(2).reduce(_ * _)
 
   def part2(input: String) =
-    val monkeys = input.split("\n\n").map(parseMonkey).map(m => m.id -> m).toMap
+    val monkeys = input.chunks.map(parseMonkey).map(m => m.id -> m).toMap
     val mod = monkeys.values.map(_.divisor).reduce(_ * _)
     val ending = (1 to 10000).foldLeft(monkeys)((m, i) => round(x => x % mod)(m))
     ending.values.map(_.totalInspected).toSeq.sorted.takeRight(2).map(_.toLong).reduce(_ * _)

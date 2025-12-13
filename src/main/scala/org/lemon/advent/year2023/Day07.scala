@@ -1,5 +1,7 @@
 package org.lemon.advent.year2023
 
+import org.lemon.advent.lib.*
+
 import scala.math.Ordering.Implicits.*
 
 private object Day07:
@@ -48,8 +50,8 @@ private object Day07:
           case _ => throw AssertionError(kind)
 
   def parse(input: String) = input.linesIterator
-    .map(_.split(" "))
-    .map { case Array(hand, bid) => Hand(hand.map(Rank.apply), bid.toInt) }
+    .map(_.wsv)
+    .map { case Seq(hand, bid) => Hand(hand.map(Rank.apply), bid.toInt) }
     .toSeq
 
   def run(input: String)(using Ordering[Hand]) = parse(input)

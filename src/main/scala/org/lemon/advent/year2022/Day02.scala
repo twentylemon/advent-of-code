@@ -1,5 +1,7 @@
 package org.lemon.advent.year2022
 
+import org.lemon.advent.lib.*
+
 private object Day02:
 
   sealed trait Toss
@@ -16,7 +18,7 @@ private object Day02:
       case 'C' | 'Z' => Scissors
 
   def parseGame(s: String) =
-    val row = s.split(" ").map(_.head).map(parseToss)
+    val row = s.wsv.map(_.head).map(parseToss)
     Game(them = row(0), me = row(1))
 
   def score(game: Game) = scoreToss(game) + scoreWin(game)
@@ -56,7 +58,7 @@ private object Day02:
       Game(them = x, me = Seq(Rock, Paper, Scissors).find(t => scoreWin(Game(me = t, them = x)) == 6).get)
 
   def parseStrat(s: String) =
-    val row = s.split(" ").map(_.head)
+    val row = s.wsv.map(_.head)
     Strat(them = parseToss(row(0)), outcome = parseOutcome(row(1)))
 
   def part2(input: String) = input.linesIterator.map(parseStrat).map(x => score(x)).sum

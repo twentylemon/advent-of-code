@@ -1,12 +1,13 @@
 package org.lemon.advent.year2024
 
+import org.lemon.advent.lib.*
 import org.lemon.advent.lib.`2d`.Point
 
 private object Day13:
 
   type Coord = Point[Long]
 
-  def parse(input: String): Seq[(Coord, Coord, Coord)] = input.split("\n\n").map(_.linesIterator.toSeq match
+  def parse(input: String): Seq[(Coord, Coord, Coord)] = input.chunks.map(_.linesIterator.toSeq match
     case Seq(
           s"Button A: X+$ax, Y+$ay",
           s"Button B: X+$bx, Y+$by",

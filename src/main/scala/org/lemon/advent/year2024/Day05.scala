@@ -1,13 +1,15 @@
 package org.lemon.advent.year2024
 
+import org.lemon.advent.lib.*
+
 private object Day05:
 
   case class Rule(before: Int, after: Int)
 
   def parse(input: String) =
-    val Array(rules, pages) = input.split("\n\n")
+    val Seq(rules, pages) = input.chunks
     val r = rules.linesIterator.map { case s"$before|$after" => Rule(before.toInt, after.toInt) }.toSeq
-    val p = pages.linesIterator.map(_.split(",").map(_.toInt).toSeq).toSeq
+    val p = pages.linesIterator.map(_.csv.map(_.toInt)).toSeq
     (r, p)
 
   @annotation.tailrec

@@ -1,18 +1,18 @@
 package org.lemon.advent.year2023
 
+import org.lemon.advent.lib.*
+
 private object Day02:
 
   case class Dice(num: Int, colour: String)
   case class Game(id: Int, pulls: Seq[Seq[Dice]])
 
   def parsePulls(pulls: String): Seq[Seq[Dice]] = pulls.split(";")
-    .map(_.split(","))
-    .map(_.map(x => x.strip))
+    .map(_.csv)
     .map(_.map(dice =>
       dice match
         case s"$num $colour" => Dice(num.toInt, colour)
     ))
-    .map(_.toSeq)
     .toSeq
 
   def parse(input: String): Seq[Game] = input.linesIterator

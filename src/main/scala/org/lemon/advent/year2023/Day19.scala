@@ -1,5 +1,7 @@
 package org.lemon.advent.year2023
 
+import org.lemon.advent.lib.*
+
 private object Day19:
 
   type Gear = Map[Char, Int]
@@ -11,13 +13,11 @@ private object Day19:
     )
     .toSeq
 
-  def parseFlow(flow: String) = flow.split(",")
-    .map(_ match
-      case s"$v>$n:$dest" => Flow(v = v.head, op = '>', lit = n.toInt, dest = dest)
-      case s"$v<$n:$dest" => Flow(v = v.head, op = '<', lit = n.toInt, dest = dest)
-      case otherwise => Flow(v = 'x', op = '>', lit = -1, dest = otherwise)
-    )
-    .toSeq
+  def parseFlow(flow: String) = flow.csv.map {
+    case s"$v>$n:$dest" => Flow(v = v.head, op = '>', lit = n.toInt, dest = dest)
+    case s"$v<$n:$dest" => Flow(v = v.head, op = '<', lit = n.toInt, dest = dest)
+    case otherwise => Flow(v = 'x', op = '>', lit = -1, dest = otherwise)
+  }
 
   def parseFlows(input: String) = input.linesIterator
     .map(_ match
@@ -26,7 +26,7 @@ private object Day19:
     .toMap
 
   def parse(input: String) =
-    val Array(flows, gears) = input.split("\n\n")
+    val Seq(flows, gears) = input.chunks
     (parseFlows(flows), parseGears(gears))
 
   def compare(gear: Gear, v: Char, op: Char, lit: Int) =

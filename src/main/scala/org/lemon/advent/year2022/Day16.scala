@@ -1,5 +1,6 @@
 package org.lemon.advent.year2022
 
+import org.lemon.advent.lib.*
 import scala.collection.mutable
 import scala.collection.BitSet
 
@@ -9,7 +10,7 @@ private object Day16:
 
   def parseValve(in: String) = in match
     case s"Valve $id has flow rate=$rate; $_ $_ to $_ $tunnels" =>
-      Valve(id = id, rate = rate.toInt, tunnels = tunnels.split(", "))
+      Valve(id = id, rate = rate.toInt, tunnels = tunnels.csv)
 
   def maxFlow(
       currentValve: String,

@@ -1,16 +1,16 @@
 package org.lemon.advent.year2023
 
+import org.lemon.advent.lib.*
+
 private object Day15:
 
   def hash(part: String) = part.map(_.toInt).foldLeft(0)((code, ch) => (code + ch) * 17 % 256)
 
-  def part1(input: String) = input.split(",")
-    .map(_.trim)
+  def part1(input: String) = input.csv
     .map(hash)
     .sum
 
-  def part2(input: String) = input.split(",")
-    .map(_.trim)
+  def part2(input: String) = input.csv
     .map(chunk => if chunk.endsWith("-") then (chunk.dropRight(1), -1) else (chunk.dropRight(2), chunk.last.asDigit))
     .map((label, op) => (label, hash(label), op))
     .foldLeft(Seq.fill(256)(Seq.empty[(String, Int)])) {

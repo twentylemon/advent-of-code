@@ -1,9 +1,11 @@
 package org.lemon.advent.year2024
 
+import org.lemon.advent.lib.*
+
 private object Day01:
 
   def parse(input: String) = input.linesIterator
-    .map(_.split("\\s+"))
+    .map(_.wsv)
     .map(p => (p.head.toInt, p.last.toInt))
     .toSeq
     .unzip

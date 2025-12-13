@@ -25,4 +25,4 @@ extension (str: String)
     *
     * @return the chunks of text separated by blank lines
     */
-  def chunks: Seq[String] = str.split("\n\n").map(_.trim).filter(_.nonEmpty).toSeq
+  def chunks: Seq[String] = str.split("\n\n").filter(_.trim.nonEmpty).toSeq

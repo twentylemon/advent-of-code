@@ -1,5 +1,6 @@
 package org.lemon.advent.year2023
 
+import org.lemon.advent.lib.*
 import org.lemon.advent.lib.graph.Path
 import org.lemon.advent.lib.graph.pathFind
 import org.lemon.advent.lib.graph.fill
@@ -14,9 +15,9 @@ private object Day25:
     def sorted = if pair._1 < pair._2 then pair else pair.swap
 
   def parse(input: String) = input.linesIterator
-    .map(_ match
-      case s"$node: $edges" => edges.split(" ").map(_.trim).flatMap(e => Seq((node, e), (e, node)))
-    )
+    .map {
+      case s"$node: $edges" => edges.wsv.flatMap(e => Seq((node, e), (e, node)))
+    }
     .flatten
     .toSeq
     .groupMap(_._1)(_._2)

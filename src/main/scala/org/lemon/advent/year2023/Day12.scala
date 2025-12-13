@@ -1,12 +1,14 @@
 package org.lemon.advent.year2023
 
+import org.lemon.advent.lib.*
+
 import scala.collection.mutable
 
 private object Day12:
 
   def parse(input: String) = input.linesIterator
-    .map(_.split(" "))
-    .map { case Array(springs, counts) => (springs, counts.split(",").map(_.toInt).toSeq) }
+    .map(_.wsv)
+    .map { case Seq(springs, counts) => (springs, counts.csv.map(_.toInt)) }
 
   def countPossible(springs: String, notes: Seq[Int]) =
     def loop(springs: String, notes: Seq[Int], chunkSize: Int)(using

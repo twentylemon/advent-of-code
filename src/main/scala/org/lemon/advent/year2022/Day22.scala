@@ -1,5 +1,6 @@
 package org.lemon.advent.year2022
 
+import org.lemon.advent.lib.*
 import scala.collection.mutable
 
 private object Day22:
@@ -102,7 +103,7 @@ private object Day22:
     case Walk(steps) => state.copy(at = state.at.walk(state.facing).take(steps + 1).takeWhile(!isWall(_)).last)
 
   def part1(in: String) =
-    val split = in.split("\n\n")
+    val split = in.chunks
     val rows = parseBoard(split(0).linesIterator.toSeq)
     val actions = parseActions(split(1))
 
@@ -121,7 +122,7 @@ private object Day22:
   def part2(in: String) =
     case class State(at: Coord, facing: Facing)
 
-    val split = in.split("\n\n")
+    val split = in.chunks
     val walls = findWalls(split(0).linesIterator.toSeq).toSet
     val actions = parseActions(split(1)) :+ null.asInstanceOf[Turn]
 

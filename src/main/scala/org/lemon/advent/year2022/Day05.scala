@@ -1,5 +1,7 @@
 package org.lemon.advent.year2022
 
+import org.lemon.advent.lib.*
+
 private object Day05:
 
   private def parseStacks(lines: Seq[String]): Seq[Seq[Char]] = lines
@@ -19,14 +21,14 @@ private object Day05:
       )
 
   def part1(input: String) =
-    val parts = input.split("\n\n")
+    val parts = input.chunks
     val stacks = parseStacks(parts(0).linesIterator.toSeq.dropRight(1))
     val moves = parts(1).linesIterator
     val result = moves.foldLeft(stacks)(applyMove(true))
     result.map(_.head).mkString
 
   def part2(input: String) =
-    val parts = input.split("\n\n")
+    val parts = input.chunks
     val stacks = parseStacks(parts(0).linesIterator.toSeq.dropRight(1))
     val moves = parts(1).linesIterator
     val result = moves.foldLeft(stacks)(applyMove(false))

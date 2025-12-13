@@ -1,11 +1,13 @@
 package org.lemon.advent.year2024
 
+import org.lemon.advent.lib.*
+
 private object Day07:
 
   case class Equation(result: Long, operands: Seq[Long])
 
   def parse(input: String) = input.linesIterator
-    .map { case s"$result: $operands" => Equation(result.toLong, operands.split(" ").map(_.toLong).toSeq) }
+    .map { case s"$result: $operands" => Equation(result.toLong, operands.wsv.map(_.toLong)) }
     .toSeq
 
   def check(equation: Equation, ops: Seq[(Long, Long) => Long]): Boolean =

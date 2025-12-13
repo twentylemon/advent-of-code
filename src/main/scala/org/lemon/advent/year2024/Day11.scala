@@ -1,8 +1,10 @@
 package org.lemon.advent.year2024
 
+import org.lemon.advent.lib.*
+
 private object Day11:
 
-  def parse(input: String) = input.split("\\s+").map(_.toLong).toSeq
+  def parse(input: String) = input.wsv.map(_.toLong)
 
   def blink(n: Long): Seq[Long] =
     if n == 0 then Seq(1)

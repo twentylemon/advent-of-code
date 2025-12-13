@@ -1,9 +1,11 @@
 package org.lemon.advent.year2023
 
+import org.lemon.advent.lib.*
+
 private object Day09:
 
   def parse(input: String) = input.linesIterator
-    .map(_.split(" ").map(_.trim).map(_.toLong).toSeq)
+    .map(_.wsv.map(_.toLong))
 
   def nextSequenceValue(seq: Seq[Long]) =
     Iterator.iterate(seq)(s => s.zip(s.tail).map((l, r) => r - l))

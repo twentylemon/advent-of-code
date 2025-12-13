@@ -1,5 +1,6 @@
 package org.lemon.advent.year2022
 
+import org.lemon.advent.lib.*
 import io.circe.*
 import io.circe.syntax.*
 import io.circe.parser.*
@@ -29,7 +30,7 @@ private object Day13:
             case (Seq(xs*), Seq(ys*)) => xs.lengthCompare(ys)
         case _ => throw AssertionError()
 
-  def part1(input: String) = input.split("\n\n")
+  def part1(input: String) = input.chunks
     .map(_.linesIterator.toSeq)
     .map(lines => (parseJson(lines(0)), parseJson(lines(1))))
     .zipWithIndex
@@ -40,5 +41,5 @@ private object Day13:
   def part2(input: String) =
     val key1 = "[[2]]"
     val key2 = "[[6]]"
-    val packets = input.split("\n\n").flatMap(_.linesIterator).appendedAll(Seq(key1, key2)).map(parseJson).sorted
+    val packets = input.chunks.flatMap(_.linesIterator).appendedAll(Seq(key1, key2)).map(parseJson).sorted
     (packets.indexOf(parseJson(key1)) + 1) * (packets.indexOf(parseJson(key2)) + 1)

@@ -1,6 +1,7 @@
 package org.lemon.advent.year2022
 
 import org.lemon.advent.lib.Interval
+import org.lemon.advent.lib.csv
 
 private object Day04:
 
@@ -12,9 +13,9 @@ private object Day04:
     lhs.containsSlice(rhs) || rhs.containsSlice(lhs)
 
   def part1(input: String) = input.linesIterator
-    .map(_.split(',').map(parseRange))
+    .map(_.csv.map(parseRange))
     .count(r => contains(r(0), r(1)))
 
   def part2(input: String) = input.linesIterator
-    .map(_.split(',').map(parseRange).map(Interval(_)))
+    .map(_.csv.map(parseRange).map(Interval(_)))
     .count(r => r(0).intersects(r(1)))

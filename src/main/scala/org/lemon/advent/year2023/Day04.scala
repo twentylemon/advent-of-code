@@ -1,12 +1,14 @@
 package org.lemon.advent.year2023
 
+import org.lemon.advent.lib.*
+
 private object Day04:
 
   case class Card(id: Int, winning: Seq[Int], pulls: Seq[Int]):
     val matches = (winning intersect pulls).length
 
   def parseCard(line: String) =
-    def asIntSeq(nums: String) = nums.split("\\s+").map(_.trim).filter(_.nonEmpty).map(_.toInt)
+    def asIntSeq(nums: String) = nums.wsv.map(_.toInt)
     line match
       case s"Card $n: $win | $pull" => Card(id = n.trim.toInt, winning = asIntSeq(win), pulls = asIntSeq(pull))
 
