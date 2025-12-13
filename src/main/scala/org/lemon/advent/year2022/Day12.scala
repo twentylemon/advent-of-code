@@ -29,10 +29,10 @@ private object Day12:
     val maze = parseMaze(input)
     val adjacency = (coord: Coord) =>
       coord.adjacent.filter(maze.hasCoord).filter(neigh => maze(neigh) - maze(coord) < 2)
-    pathFind(adjacency, maze.start, maze.end).map(_.distance).getOrElse(0)
+    pathFind(adjacency, maze.start, maze.end).map(_.distance).get
 
   def part2(input: Seq[String]) =
     val maze = parseMaze(input)
     val adjacency = (coord: Coord) =>
       coord.adjacent.filter(maze.hasCoord).filter(neigh => maze(coord) - maze(neigh) < 2)
-    pathFind(adjacency, maze.end, maze(_) == 'a').map(_.distance).getOrElse(0)
+    pathFind(adjacency, maze.end, maze(_) == 'a').map(_.distance).get
