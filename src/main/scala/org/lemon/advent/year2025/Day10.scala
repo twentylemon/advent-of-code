@@ -6,17 +6,17 @@ import org.lemon.advent.lib.ortools.*
 private object Day10:
 
   def parse(input: String) =
-    import org.lemon.advent.lib.parse.*
-    input.linesIterator.map(_ match
-      case Wsv(s"[$target]", rest*) =>
-        val buttons = rest.init.map {
-          case s"($inner)" => inner.csv.map(_.toInt)
-        }
-        val joltage = rest.last match
-          case s"{$inner}" => inner.csv.map(_.toInt)
+    input.linesIterator.map(line =>
+      line.wsv match
+        case Seq(s"[$target]", rest*) =>
+          val buttons = rest.init.map {
+            case s"($inner)" => inner.csv.map(_.toInt)
+          }
+          val joltage = rest.last match
+            case s"{$inner}" => inner.csv.map(_.toInt)
 
-        val targets = target.map(c => if c == '.' then 0 else 1)
-        (targets, buttons, joltage)
+          val targets = target.map(c => if c == '.' then 0 else 1)
+          (targets, buttons, joltage)
     ).toSeq
 
   def solve(buttons: Seq[Seq[Int]], targetValues: Seq[Int], useParity: Boolean) =

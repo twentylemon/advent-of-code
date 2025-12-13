@@ -13,10 +13,10 @@ private object Day12:
       case Chunk(xs*) =>
         val shapes = xs
           .collect { case s"$x:\n$grid" => Coord.gridToMap(grid) }
-        val trees = xs.last.linesIterator.map(_ match
-          case s"${x}x$y: ${Wsv(ns*)}" =>
-            Problem(Area(x.toInt, y.toInt), ns.map(_.toInt))
-        ).toSeq
+        val trees = xs.last.linesIterator.map {
+          case s"${x}x$y: $rest" =>
+            Problem(Area(x.toInt, y.toInt), rest.wsv.map(_.toInt))
+        }.toSeq
         (shapes, trees)
 
   def part1(input: String) =

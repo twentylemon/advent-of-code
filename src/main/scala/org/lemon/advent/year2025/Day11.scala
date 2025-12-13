@@ -6,10 +6,9 @@ import org.lemon.advent.lib.graph.*
 private object Day11:
 
   def parse(input: String) =
-    import org.lemon.advent.lib.parse.*
-    input.linesIterator.map(_ match
-      case s"$from: ${Wsv(to*)}" => (from, to)
-    ).toMap
+    input.linesIterator.map {
+      case s"$from: $rest" => (from, rest.wsv)
+    }.toMap
 
   def countPaths(graph: Map[String, Seq[String]], start: String, end: String) =
     lazy val count: String => Long = memoize { (name: String) =>

@@ -9,12 +9,20 @@ extension (str: String)
     */
   def padLeft(len: Int, c: Char) = c.toString * (len - str.length) + str
 
-  // TODO move parsing utilities here; remove parse entirely
-  // wsv: Seq[String]
-  // chunks: Seq[String]
-
   /** Splits the string by commas into a sequence of strings.
     *
     * @return the comma-separated values
     */
   def csv: Seq[String] = str.split(",").map(_.trim).filter(_.nonEmpty).toSeq
+
+  /** Splits the string by whitespace into a sequence of strings.
+    *
+    * @return the whitespace-separated values
+    */
+  def wsv: Seq[String] = str.split("\\s+").map(_.trim).filter(_.nonEmpty).toSeq
+
+  /** Splits the string by double newlines into a sequence of strings.
+    *
+    * @return the chunks of text separated by blank lines
+    */
+  def chunks: Seq[String] = str.split("\n\n").map(_.trim).filter(_.nonEmpty).toSeq

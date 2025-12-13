@@ -5,14 +5,9 @@ import org.lemon.advent.lib.*
 private object Day06:
 
   def parse(input: String) =
-    import org.lemon.advent.lib.parse.*
     val lines = input.linesIterator.toSeq
-    val operands = lines.init.map(_ match
-      case Wsv(xs*) => xs.map(_.toLong)
-    )
-    val operators =
-      lines.last match
-        case Wsv(ops*) => ops
+    val operands = lines.init.map(_.wsv.map(_.toLong))
+    val operators = lines.last.wsv
 
     (operands, operators)
 
