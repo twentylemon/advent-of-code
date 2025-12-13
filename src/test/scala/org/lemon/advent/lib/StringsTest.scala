@@ -50,9 +50,12 @@ class StringsTest extends UnitTest:
     check((xs: Seq[String]) => xs.mkString("\n\n").chunks == xs)
   }
 
-  test("chunks splits with multiple blank lines") {
-    // multiple blank lines (\n\n\n) create empty chunks between them that get filtered; just check contains
-    check((xs: Seq[String]) => xs.mkString("\n\n\n").chunks.forall(xs.contains))
+  test("chunks handles multiple blank lines") {
+    // multiple consecutive newlines should produce the same chunks when trimmed
+    given Arbitrary[Int] = Arbitrary(Gen.choose(3, 10))
+    check((xs: Seq[String], gap: Int) =>
+      xs.mkString("\n\n").chunks.map(_.trim) == xs.mkString("\n" * gap).chunks.map(_.trim)
+    )
   }
 
   test("chunks handles empty string") {
