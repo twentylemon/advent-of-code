@@ -1,24 +1,18 @@
 package org.lemon.advent.year2022
 
+import org.lemon.advent.lib.`2d`.*
+
 import scala.collection.mutable
 
 private object Day09:
 
-  type Coord = (Int, Int)
-  extension (coord: Coord)
-    def x = coord._1
-    def y = coord._2
-
   type Rope = Seq[Coord]
 
   def drag(head: Coord, tail: Coord): Coord =
-    (head, tail) match
-      case ((hx, hy), (tx, ty)) if (hx - tx).abs == 2 && hy == ty => ((hx + tx) / 2, ty)
-      case ((hx, hy), (tx, ty)) if hx == tx && (hy - ty).abs == 2 => (tx, (hy + ty) / 2)
-      case ((hx, hy), (tx, ty)) if (hx - tx).abs == 1 && (hy - ty).abs == 2 => (hx, (hy + ty) / 2)
-      case ((hx, hy), (tx, ty)) if (hx - tx).abs == 2 && (hy - ty).abs == 1 => ((hx + tx) / 2, hy)
-      case ((hx, hy), (tx, ty)) if (hx - tx).abs == 2 && (hy - ty).abs == 2 => ((hx + tx) / 2, (hy + ty) / 2)
-      case _ => tail
+    if head.chessboard(tail) > 1 then
+      val diff = head - tail
+      tail + (diff.x.sign, diff.y.sign)
+    else tail
 
   def update(rope: Rope, step: (Coord => Coord), n: Int, tailPos: mutable.Map[Coord, Int]): Rope =
     val newRope = mutable.Seq(rope*)
@@ -29,14 +23,14 @@ private object Day09:
     newRope.toSeq
 
   def move(move: String, rope: Rope, tailPos: mutable.Map[Coord, Int]) = move match
-    case s"L $n" => update(rope, h => (h.x - 1, h.y), n.toInt, tailPos)
-    case s"R $n" => update(rope, h => (h.x + 1, h.y), n.toInt, tailPos)
-    case s"U $n" => update(rope, h => (h.x, h.y + 1), n.toInt, tailPos)
-    case s"D $n" => update(rope, h => (h.x, h.y - 1), n.toInt, tailPos)
+    case s"L $n" => update(rope, _.left, n.toInt, tailPos)
+    case s"R $n" => update(rope, _.right, n.toInt, tailPos)
+    case s"U $n" => update(rope, _.up, n.toInt, tailPos)
+    case s"D $n" => update(rope, _.down, n.toInt, tailPos)
 
   def trackTail(in: String, numberOfKnots: Int) =
     val tailPos = mutable.Map.empty[Coord, Int].withDefaultValue(0)
-    var rope = Seq.fill(numberOfKnots)((0, 0))
+    var rope = Seq.fill(numberOfKnots)(Coord.origin)
     in.linesIterator.foldLeft(rope)((r, m) => move(m, r, tailPos))
     tailPos
 
