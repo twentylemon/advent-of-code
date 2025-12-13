@@ -85,7 +85,7 @@ case class Point[N: Integral](x: N, y: N):
   def *(n: N): Point[N] = (x * n, y * n)
 
   def directionTo(rhs: Point[N]): Option[Direction] =
-    val Point[N](dx, dy) = rhs - this
+    val Point(dx, dy) = rhs - this
     if dx == `0` && dy < `0` then Some(Direction.Up)
     else if dx == `0` && dy > `0` then Some(Direction.Down)
     else if dx < `0` && dy == `0` then Some(Direction.Left)
