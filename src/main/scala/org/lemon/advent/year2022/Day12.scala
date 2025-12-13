@@ -1,18 +1,11 @@
 package org.lemon.advent.year2022
 
+import org.lemon.advent.lib.`2d`.*
+import org.lemon.advent.lib.graph.*
+
 import scala.collection.mutable
 
 private object Day12:
-
-  type Coord = (Int, Int)
-  extension (coord: Coord)
-    def x = coord._1
-    def y = coord._2
-    def up = (coord.x, coord.y - 1)
-    def down = (coord.x, coord.y + 1)
-    def left = (coord.x - 1, coord.y)
-    def right = (coord.x + 1, coord.y)
-    def manhattan(rhs: Coord) = (coord.x - rhs.x).abs + (coord.y - rhs.y).abs
 
   type Maze = Seq[Seq[Char]]
   extension (maze: Maze)
@@ -22,7 +15,6 @@ private object Day12:
         case 'S' => 'a'
         case 'E' => 'z'
         case _ => c
-    def isCell(coord: Coord) = maze.indices.contains(coord.y) && maze(coord.y).indices.contains(coord.x)
     def findFirstOf(c: Char) = (for
       y <- maze.indices
       x <- maze(y).indices
@@ -30,42 +22,17 @@ private object Day12:
     yield (x, y)).head
     def start = maze.findFirstOf('S')
     def end = maze.findFirstOf('E')
-    def neighbours(coord: Coord) = Seq(coord.up, coord.down, coord.left, coord.right).filter(maze.isCell)
 
   def parseMaze(lines: Seq[String]) = lines.map(_.toSeq)
 
-  private def asPath(start: Seq[Coord], end: Coord, cameFrom: mutable.Map[Coord, Coord]): Seq[Coord] =
-    Iterator.iterate(end)(cameFrom).takeWhile(!start.contains(_)).toSeq
-
-  def solve(maze: Maze)(start: Seq[Coord], end: Coord) =
-    val stepsTaken = mutable.Map[Coord, Int](start.map(_ -> 0)*)
-    val queue =
-      mutable.PriorityQueue[Coord]()(using Ordering[Int].on((c: Coord) => c.manhattan(end) + stepsTaken(c)).reverse)
-
-    val cameFrom = mutable.Map.empty[Coord, Coord]
-    queue ++= start
-
-    while !queue.isEmpty && queue.head != end do
-      val cell = queue.dequeue
-      val stepsToNeigh = stepsTaken(cell) + 1
-      queue ++= maze.neighbours(cell)
-        .filter(neigh => maze(neigh) - maze(cell) < 2)
-        .filter(neigh => !stepsTaken.contains(neigh) || stepsTaken(neigh) > stepsToNeigh)
-        .tapEach(neigh => stepsTaken.put(neigh, stepsToNeigh))
-        .tapEach(neigh => cameFrom.put(neigh, cell))
-
-    asPath(start, end, cameFrom)
-
   def part1(input: Seq[String]) =
     val maze = parseMaze(input)
-    solve(maze)(Seq(maze.start), maze.end).size
+    val adjacency = (coord: Coord) =>
+      coord.adjacent.filter(maze.hasCoord).filter(neigh => maze(neigh) - maze(coord) < 2)
+    pathFind(adjacency, maze.start, maze.end).map(_.distance).getOrElse(0)
 
   def part2(input: Seq[String]) =
     val maze = parseMaze(input)
-    val starts =
-      for
-        y <- maze.indices
-        x <- maze(y).indices
-        if maze((x, y)) == 'a'
-      yield (x, y)
-    solve(maze)(starts, maze.end).size
+    val adjacency = (coord: Coord) =>
+      coord.adjacent.filter(maze.hasCoord).filter(neigh => maze(coord) - maze(neigh) < 2)
+    pathFind(adjacency, maze.end, maze(_) == 'a').map(_.distance).getOrElse(0)
