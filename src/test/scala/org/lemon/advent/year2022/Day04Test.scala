@@ -1,35 +1,18 @@
 package org.lemon.advent.year2022
 
 import org.lemon.advent.*
-import org.lemon.advent.lib.Interval
+import org.lemon.advent.year2022.Day04.*
 
-class Day04Test extends UnitTest {
-
-  private def parseRange(in: String) =
-    val bounds = in.split('-')
-    bounds(0).toInt to bounds(1).toInt
-
-  private def contains(lhs: Range, rhs: Range) =
-    lhs.containsSlice(rhs) || rhs.containsSlice(lhs)
-
-  private def part1(input: String) = input.linesIterator
-    .map(_.split(',').map(parseRange))
-    .count(r => contains(r(0), r(1)))
-
-  private def part2(input: String) = input.linesIterator
-    .map(_.split(',').map(parseRange).map(Interval(_)))
-    .count(r => r(0).intersects(r(1)))
+class Day04Test extends UnitTest:
 
   test("part 1 example") {
-    val input = """
-            |2-4,6-8
-            |2-3,4-5
-            |5-7,7-9
-            |2-8,3-7
-            |6-6,4-6
-            |2-6,4-8""".stripMargin.strip
-
-    part1(input) shouldBe 2
+    val in = """|2-4,6-8
+                |2-3,4-5
+                |5-7,7-9
+                |2-8,3-7
+                |6-6,4-6
+                |2-6,4-8""".stripMargin
+    part1(in) shouldBe 2
   }
 
   test("part 1") {
@@ -37,18 +20,15 @@ class Day04Test extends UnitTest {
   }
 
   test("part 2 example") {
-    val input = """
-            |2-4,6-8
-            |2-3,4-5
-            |5-7,7-9
-            |2-8,3-7
-            |6-6,4-6
-            |2-6,4-8""".stripMargin.strip
-
-    part2(input) shouldBe 4
+    val in = """|2-4,6-8
+                |2-3,4-5
+                |5-7,7-9
+                |2-8,3-7
+                |6-6,4-6
+                |2-6,4-8""".stripMargin
+    part2(in) shouldBe 4
   }
 
   test("part 2") {
     part2(read(file(2022)(4))) shouldBe 857
   }
-}
