@@ -1,14 +1,13 @@
 package org.lemon.advent.year2025
 
+import org.lemon.advent.lib.*
+
 private object Day02:
 
   def parse(input: String) =
-    import org.lemon.advent.lib.parse.*
-    input.linesIterator.flatMap(_ match
-      case Csv(ranges*) => ranges.map(_ match
-          case s"$start-$end" => start.toLong to end.toLong
-        )
-    )
+    input.linesIterator.flatMap(_.csv.map {
+      case s"$start-$end" => start.toLong to end.toLong
+    })
 
   def isDoubled(x: Long) =
     val s = x.toString

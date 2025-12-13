@@ -9,11 +9,11 @@ private object Day10:
     import org.lemon.advent.lib.parse.*
     input.linesIterator.map(_ match
       case Wsv(s"[$target]", rest*) =>
-        val buttons = rest.init.map(_ match
-          case s"(${Csv(buttons*)})" => buttons.map(_.toInt)
-        )
+        val buttons = rest.init.map {
+          case s"($inner)" => inner.csv.map(_.toInt)
+        }
         val joltage = rest.last match
-          case s"{${Csv(joltage*)}}" => joltage.map(_.toInt)
+          case s"{$inner}" => inner.csv.map(_.toInt)
 
         val targets = target.map(c => if c == '.' then 0 else 1)
         (targets, buttons, joltage)

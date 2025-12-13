@@ -5,11 +5,6 @@ private trait GenSep:
   def unapplySeq(str: String): Option[Seq[String]] =
     Some(str.split(delimiter).map(_.trim).toSeq.filter(_.nonEmpty))
 
-/** Matches chunks separated by commas.
-  */
-object Csv extends GenSep:
-  val delimiter = ","
-
 /** Matches chunks separated by any whitespace.
   */
 object Wsv extends GenSep:

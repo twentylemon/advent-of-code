@@ -7,9 +7,9 @@ private object Day08:
   type Coord = (Long, Long, Long)
 
   def parse(input: String) =
-    import org.lemon.advent.lib.parse.*
-    input.linesIterator.map(_ match
-      case Csv(x, y, z) => (x.toLong, y.toLong, z.toLong)
+    input.linesIterator.map(line =>
+      val Seq(x, y, z) = line.csv
+      (x.toLong, y.toLong, z.toLong)
     ).toSeq
 
   def euclidean(lhs: Coord, rhs: Coord) =

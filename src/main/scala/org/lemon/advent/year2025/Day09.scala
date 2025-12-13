@@ -6,9 +6,9 @@ import org.lemon.advent.lib.`2d`.*
 private object Day09:
 
   def parse(input: String) =
-    import org.lemon.advent.lib.parse.*
-    input.linesIterator.map(_ match
-      case Csv(x, y) => Point(x.toLong, y.toLong)
+    input.linesIterator.map(line =>
+      val Seq(x, y) = line.csv
+      Point(x.toLong, y.toLong)
     ).toSeq
 
   def part1(input: String) =
