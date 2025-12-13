@@ -12,11 +12,11 @@ class Day12Test extends UnitTest:
                 |acctuvwj
                 |abdefghi""".stripMargin
 
-    part1(in.linesIterator.toSeq) shouldBe 31
+    part1(in) shouldBe 31
   }
 
   test("part 1") {
-    part1(readLines(file(2022)(12))) shouldBe 534
+    part1(read(file(2022)(12))) shouldBe 534
   }
 
   test("part 2 example") {
@@ -26,9 +26,9 @@ class Day12Test extends UnitTest:
                 |acctuvwj
                 |abdefghi""".stripMargin
 
-    part2(in.linesIterator.toSeq) shouldBe 29
+    part2(in) shouldBe 29
   }
 
   test("part 2") {
-    part2(readLines(file(2022)(12))) shouldBe 525
+    part2(read(file(2022)(12))) shouldBe 525
   }
