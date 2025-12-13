@@ -57,7 +57,6 @@ def setup(year: Int, day: Int) =
           |private object $className:
           |
           |  def parse(input: String) =
-          |    import org.lemon.advent.lib.parse.*
           |    input
           |
           |  def part1(input: String) =

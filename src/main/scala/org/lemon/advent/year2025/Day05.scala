@@ -5,14 +5,12 @@ import org.lemon.advent.lib.*
 private object Day05:
 
   def parse(input: String) =
-    import org.lemon.advent.lib.parse.*
-    input match
-      case Chunk(freshies, whoKnows) =>
-        val ranges = freshies.linesIterator.map(_ match
-          case s"$start-$end" => (start.toLong, end.toLong)
-        ).toSeq
-        val ids = whoKnows.linesIterator.map(_.toLong).toSeq
-        (ranges, ids)
+    val Seq(freshies, whoKnows) = input.chunks
+    val ranges = freshies.linesIterator.map {
+      case s"$start-$end" => (start.toLong, end.toLong)
+    }.toSeq
+    val ids = whoKnows.linesIterator.map(_.toLong).toSeq
+    (ranges, ids)
 
   def part1(input: String) =
     val (ranges, ids) = parse(input)

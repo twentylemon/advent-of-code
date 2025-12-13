@@ -23,16 +23,14 @@ private object Day24:
         case "XOR" => lhs.resolve ^ rhs.resolve
 
   def parse(input: String) =
-    import org.lemon.advent.lib.parse.*
-    input match
-      case Chunk(init, gates) =>
-        val lits = init.linesIterator.map(_ match
-          case s"$k: $v" => k -> Literal(v.toInt >= 1)
-        ).toMap
-        val ops = gates.linesIterator.map(_ match
-          case s"$lhs $op $rhs -> $out" => out -> Op(Ref(lhs), Ref(rhs), op)
-        ).toMap
-        lits ++ ops
+    val Seq(init, gates) = input.chunks
+    val lits = init.linesIterator.map {
+      case s"$k: $v" => k -> Literal(v.toInt >= 1)
+    }.toMap
+    val ops = gates.linesIterator.map {
+      case s"$lhs $op $rhs -> $out" => out -> Op(Ref(lhs), Ref(rhs), op)
+    }.toMap
+    lits ++ ops
 
   def calc(expressions: Map[String, Expression])(wire: String) =
     given ExpressionContext = ExpressionContext(expressions)

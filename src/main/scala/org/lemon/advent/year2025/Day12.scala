@@ -8,16 +8,14 @@ private object Day12:
   case class Problem(area: Area, requirements: Seq[Int])
 
   def parse(input: String) =
-    import org.lemon.advent.lib.parse.*
-    input match
-      case Chunk(xs*) =>
-        val shapes = xs
-          .collect { case s"$x:\n$grid" => Coord.gridToMap(grid) }
-        val trees = xs.last.linesIterator.map {
-          case s"${x}x$y: $rest" =>
-            Problem(Area(x.toInt, y.toInt), rest.wsv.map(_.toInt))
-        }.toSeq
-        (shapes, trees)
+    val xs = input.chunks
+    val shapes = xs
+      .collect { case s"$x:\n$grid" => Coord.gridToMap(grid) }
+    val trees = xs.last.linesIterator.map {
+      case s"${x}x$y: $rest" =>
+        Problem(Area(x.toInt, y.toInt), rest.wsv.map(_.toInt))
+    }.toSeq
+    (shapes, trees)
 
   def part1(input: String) =
     val (shapes, trees) = parse(input)
