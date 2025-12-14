@@ -21,11 +21,11 @@ class Day15Test extends UnitTest:
                 |Sensor at x=14, y=3: closest beacon is at x=15, y=3
                 |Sensor at x=20, y=1: closest beacon is at x=15, y=3""".stripMargin
 
-    part1(in.linesIterator.toSeq, 10) shouldBe 26
+    part1(in, 10) shouldBe 26
   }
 
   test("part 1") {
-    part1(readLines(file(2022)(15)), 2000000) shouldBe 5607466
+    part1(read(file(2022)(15)), 2000000) shouldBe 5607466
   }
 
   test("part 2 example") {
@@ -44,9 +44,9 @@ class Day15Test extends UnitTest:
                 |Sensor at x=14, y=3: closest beacon is at x=15, y=3
                 |Sensor at x=20, y=1: closest beacon is at x=15, y=3""".stripMargin
 
-    part2(in.linesIterator.toSeq, 0 to 20) shouldBe 56000011L
+    part2(in, 0 to 20) shouldBe 56000011L
   }
 
   test("part 2") {
-    part2(readLines(file(2022)(15)), 0 to 4000000) shouldBe 12543202766584L
+    part2(read(file(2022)(15)), 0 to 4000000) shouldBe 12543202766584L
   }

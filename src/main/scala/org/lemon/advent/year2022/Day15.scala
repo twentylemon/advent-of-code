@@ -1,14 +1,9 @@
 package org.lemon.advent.year2022
 
 import org.lemon.advent.lib.*
+import org.lemon.advent.lib.`2d`.*
 
 private object Day15:
-
-  type Coord = (Int, Int)
-  extension (coord: Coord)
-    def x = coord._1
-    def y = coord._2
-    def manhattan(rhs: Coord) = (coord.x - rhs.x).abs + (coord.y - rhs.y).abs
 
   case class Sensor(sensor: Coord, beacon: Coord):
     val distance = sensor `manhattan` beacon
@@ -26,12 +21,12 @@ private object Day15:
   def coverageTree(sensors: Seq[Sensor], row: Int) =
     sensors.foldLeft(Diet.empty[Int])((diet, sensor) => diet + coverage(sensor, row))
 
-  def part1(input: Seq[String], row: Int) =
-    val sensors = input.map(parseSensor)
+  def part1(input: String, row: Int) =
+    val sensors = input.linesIterator.map(parseSensor).toSeq
     val diet = coverageTree(sensors, row)
     diet.intervalsIterator.map((start, end) => end - start).sum
 
-  def part2(input: Seq[String], range: Range): Long =
-    val sensors = input.map(parseSensor)
+  def part2(input: String, range: Range): Long =
+    val sensors = input.linesIterator.map(parseSensor).toSeq
     val (diet, row) = range.iterator.map(coverageTree(sensors, _)).zipWithIndex.dropWhile(_._1(range)).next
-    (diet.toIntervals.head.end + 1) * 4000000L + row
+    (diet.intervalsIterator.next._2 + 1) * 4000000L + row
