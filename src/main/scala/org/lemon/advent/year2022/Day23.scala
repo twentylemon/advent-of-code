@@ -1,32 +1,32 @@
 package org.lemon.advent.year2022
 
-private object Day23:
+import org.lemon.advent.lib.`2d`.*
 
-  case class Coord(x: Int, y: Int)
-  extension (coord: Coord)
-    def N = Coord(coord.x, coord.y - 1)
-    def S = Coord(coord.x, coord.y + 1)
-    def W = Coord(coord.x - 1, coord.y)
-    def E = Coord(coord.x + 1, coord.y)
-    def NW = Coord(coord.x - 1, coord.y - 1)
-    def NE = Coord(coord.x + 1, coord.y - 1)
-    def SW = Coord(coord.x - 1, coord.y + 1)
-    def SE = Coord(coord.x + 1, coord.y + 1)
+private object Day23:
 
   type Check = (Seq[Coord => Coord], Coord => Coord)
   extension (check: Check)
     def conditions = check._1
     def move = check._2
 
-  def parse(in: Seq[String]): Set[Coord] =
-    (for (row, y) <- in.zipWithIndex; (c, x) <- row.zipWithIndex; if c == '#' yield Coord(x, y)).toSet
+  def u(c: Coord) = c.up
+  def d(c: Coord) = c.down
+  def l(c: Coord) = c.left
+  def r(c: Coord) = c.right
+  def ul(c: Coord) = c.up.left
+  def ur(c: Coord) = c.up.right
+  def dl(c: Coord) = c.down.left
+  def dr(c: Coord) = c.down.right
+
+  def parse(in: String): Set[Coord] =
+    Coord.gridToMap(in).filter(_._2 == '#').keySet
 
   def candidate(elf: Coord, round: Int, elves: Set[Coord]) =
     def move(check: Check) =
       if check.conditions.map(f => f(elf)).exists(elves) then None else Some(check.move(elf))
 
-    val shouldChill = (Set(elf.N, elf.S, elf.E, elf.W, elf.NE, elf.NW, elf.SE, elf.SW) & elves).isEmpty
-    val checks = Seq((Seq(N, NE, NW), N), (Seq(S, SE, SW), S), (Seq(W, NW, SW), W), (Seq(E, NE, SE), E))
+    val shouldChill = (elf.surrounding.toSet & elves).isEmpty
+    val checks = Seq((Seq(u, ur, ul), u), (Seq(d, dr, dl), d), (Seq(l, ul, dl), l), (Seq(r, ur, dr), r))
     val check = Iterator.continually(checks).flatMap(x => x).drop(round % checks.size)
     if shouldChill then None
     else move(check.next) orElse move(check.next) orElse move(check.next) orElse move(check.next)
@@ -42,13 +42,9 @@ private object Day23:
         Some(afterMove, (afterMove, round + 1))
     )
 
-  def boundingBox(elves: Set[Coord]) =
-    (elves.map(_.x).min to elves.map(_.x).max, elves.map(_.y).min to elves.map(_.y).max)
-
-  def part1(in: Seq[String]) =
+  def part1(in: String) =
     val start = parse(in)
     val end = simulate(start).drop(9).next
-    val box = boundingBox(end)
-    box._1.size * box._2.size - start.size
+    Area(end).size - start.size
 
-  def part2(in: Seq[String]) = simulate(parse(in)).size + 1
+  def part2(in: String) = simulate(parse(in)).size + 1

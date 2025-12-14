@@ -1,6 +1,7 @@
 package org.lemon.advent.year2022
 
 import org.lemon.advent.*
+import org.lemon.advent.lib.`2d`.*
 import org.lemon.advent.year2022.Day23.*
 
 class Day23Test extends UnitTest:
@@ -13,7 +14,7 @@ class Day23Test extends UnitTest:
                 |..##.
                 |.....""".stripMargin
 
-    simulate(parse(in.linesIterator.toSeq)).drop(2).next should contain theSameElementsAs Set(
+    simulate(parse(in)).drop(2).next should contain theSameElementsAs Set(
       Coord(2, 0),
       Coord(4, 1),
       Coord(0, 2),
@@ -31,11 +32,11 @@ class Day23Test extends UnitTest:
                 |##.#.##
                 |.#..#..""".stripMargin
 
-    part1(in.linesIterator.toSeq) shouldBe 110
+    part1(in) shouldBe 110
   }
 
   test("part 1") {
-    part1(readLines(file(2022)(23))) shouldBe 4005
+    part1(read(file(2022)(23))) shouldBe 4005
   }
 
   test("part 2 example") {
@@ -47,9 +48,9 @@ class Day23Test extends UnitTest:
                 |##.#.##
                 |.#..#..""".stripMargin
 
-    part2(in.linesIterator.toSeq) shouldBe 20
+    part2(in) shouldBe 20
   }
 
   test("part 2") {
-    part2(readLines(file(2022)(23))) shouldBe 1008
+    part2(read(file(2022)(23))) shouldBe 1008
   }
