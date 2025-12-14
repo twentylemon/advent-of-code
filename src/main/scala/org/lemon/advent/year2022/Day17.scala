@@ -1,24 +1,22 @@
 package org.lemon.advent.year2022
 
-private object Day17:
+import org.lemon.advent.lib.*
+import org.lemon.advent.lib.`2d`.*
 
-  type Coord = (Int, Int)
-  extension (coord: Coord)
-    def x = coord._1
-    def y = coord._2
+private object Day17:
 
   case class BoardState(board: Set[Coord], wind: String, cycle: Int, rock: Int, maxHeight: Int)
 
-  val rocks = Seq(
-    (0 to 3).map((_, 0)).toSeq, // wide boy
+  val rocks: Seq[Seq[Coord]] = Seq(
+    (0 to 3).map(Coord(_, 0)).toSeq, // wide boy
     Seq((1, 0), (0, 1), (1, 1), (2, 1), (1, 2)), // crossy lad
     Seq((0, 0), (1, 0), (2, 0), (2, 1), (2, 2)), // the knight moves like an L
-    (0 to 3).map((0, _)).toSeq, // tall boy
-    for x <- 0 to 1; y <- 0 to 1 yield (x, y) // box boy
+    (0 to 3).map(Coord(0, _)).toSeq, // tall boy
+    for x <- 0 to 1; y <- 0 to 1 yield Coord(x, y) // box boy
   )
 
   extension (rock: Seq[Coord])
-    def translate(amount: Coord) = rock.map(r => (r.x + amount.x, r.y + amount.y))
+    def translate(amount: Coord) = rock.map(_ + amount)
 
   def occupied(coord: Coord, board: Set[Coord]) = coord.x <= 0 || coord.x >= 8 || board(coord)
 
@@ -30,7 +28,7 @@ private object Day17:
     if fall.exists(occupied(_, board)) then (afterWind, nextCycle) else trickle(board, fall, wind, nextCycle)
 
   def dropRock(state: BoardState) =
-    val nextRock = rocks(state.rock).translate(3, state.maxHeight + 4)
+    val nextRock = rocks(state.rock).translate((3, state.maxHeight + 4))
     val (rest, cycle) = trickle(state.board, nextRock, state.wind, state.cycle)
     state.copy(
       board = state.board ++ rest,
@@ -40,11 +38,11 @@ private object Day17:
     )
 
   def rocksFallEveryoneDies(wind: String) =
-    val initial = BoardState(board = (0 to 7).map((_, 0)).toSet, wind = wind, cycle = 0, rock = 0, maxHeight = 0)
+    val initial = BoardState(board = (0 to 7).map(Coord(_, 0)).toSet, wind = wind, cycle = 0, rock = 0, maxHeight = 0)
     Iterator.iterate(initial)(dropRock)
 
   def part1(input: String) =
-    rocksFallEveryoneDies(input).drop(2022).next.maxHeight
+    rocksFallEveryoneDies(input).nth(2022).maxHeight
 
   def part2(input: String) =
     val cycleLength = rocks.size * input.size // could be shorter, but the real cycle should go evenly into this
