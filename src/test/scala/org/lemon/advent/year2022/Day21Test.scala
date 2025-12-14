@@ -21,11 +21,11 @@ class Day21Test extends UnitTest:
                 |lgvd: ljgn * ptdq
                 |drzm: hmdt - zczc
                 |hmdt: 32""".stripMargin
-    part1(in.linesIterator.toSeq) shouldBe 152
+    part1(in) shouldBe 152
   }
 
   test("part 1") {
-    part1(readLines(file(2022)(21))) shouldBe 168502451381566L
+    part1(read(file(2022)(21))) shouldBe 168502451381566L
   }
 
   test("part 2 example") {
@@ -44,9 +44,9 @@ class Day21Test extends UnitTest:
                 |lgvd: ljgn * ptdq
                 |drzm: hmdt - zczc
                 |hmdt: 32""".stripMargin
-    part2(in.linesIterator.toSeq) shouldBe 301
+    part2(in) shouldBe 301
   }
 
   test("part 2") {
-    part2(readLines(file(2022)(21))) shouldBe 3343167719435L
+    part2(read(file(2022)(21))) shouldBe 3343167719435L
   }

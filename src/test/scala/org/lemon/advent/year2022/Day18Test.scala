@@ -6,11 +6,15 @@ import org.lemon.advent.year2022.Day18.*
 class Day18Test extends UnitTest:
 
   test("part 1 combined cubes") {
-    part1(Seq("1,1,1", "2,1,1")) shouldBe 10
+    val in = """|1,1,1
+                |2,1,1""".stripMargin
+    part1(in) shouldBe 10
   }
 
   test("part 1 separate cubes") {
-    part1(Seq("1,1,1", "3,1,1")) shouldBe 12
+    val in = """|1,1,1
+                |3,1,1""".stripMargin
+    part1(in) shouldBe 12
   }
 
   test("part 1 example") {
@@ -27,11 +31,11 @@ class Day18Test extends UnitTest:
                 |3,2,5
                 |2,1,5
                 |2,3,5""".stripMargin
-    part1(in.linesIterator.toSeq) shouldBe 64
+    part1(in) shouldBe 64
   }
 
   test("part 1") {
-    part1(readLines(file(2022)(18))) shouldBe 4460
+    part1(read(file(2022)(18))) shouldBe 4460
   }
 
   test("part 2 example") {
@@ -48,9 +52,9 @@ class Day18Test extends UnitTest:
                 |3,2,5
                 |2,1,5
                 |2,3,5""".stripMargin
-    part2(in.linesIterator.toSeq) shouldBe 58
+    part2(in) shouldBe 58
   }
 
   test("part 2") {
-    part2(readLines(file(2022)(18))) shouldBe 2498
+    part2(read(file(2022)(18))) shouldBe 2498
   }

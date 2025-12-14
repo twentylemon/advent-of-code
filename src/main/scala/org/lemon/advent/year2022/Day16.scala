@@ -43,14 +43,14 @@ private object Day16:
         memory += (key -> flow)
         flow
 
-  def part1(input: Seq[String]): Int =
-    val allValves = input.map(parseValve)
+  def part1(input: String): Int =
+    val allValves = input.linesIterator.map(parseValve).toSeq
     given Seq[Valve] = allValves.filter(_.rate > 0)
     given Map[String, Valve] = allValves.map(v => v.id -> v).toMap
     maxFlow("AA", 30, BitSet.empty, 0)
 
-  def part2(input: Seq[String]): Int =
-    val allValves = input.map(parseValve)
+  def part2(input: String): Int =
+    val allValves = input.linesIterator.map(parseValve).toSeq
     given Seq[Valve] = allValves.filter(_.rate > 0)
     given Map[String, Valve] = allValves.map(v => v.id -> v).toMap
     maxFlow("AA", 26, BitSet.empty, 1)

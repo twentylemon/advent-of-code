@@ -92,6 +92,6 @@ private object Day19:
     model.release()
     max.round.toInt
 
-  def part1(in: Seq[String]) = in.map(parseBlueprint).map(blueprint => blueprint.id * optimize(blueprint, 24)).sum
+  def part1(in: String) = in.linesIterator.map(parseBlueprint).map(blueprint => blueprint.id * optimize(blueprint, 24)).sum
 
-  def part2(in: Seq[String]) = in.take(3).map(parseBlueprint).map(optimize(_, 32)).product
+  def part2(in: String) = in.linesIterator.take(3).map(parseBlueprint).map(optimize(_, 32)).product

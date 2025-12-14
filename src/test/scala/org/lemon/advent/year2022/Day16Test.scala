@@ -17,11 +17,11 @@ class Day16Test extends UnitTest:
                 |Valve II has flow rate=0; tunnels lead to valves AA, JJ
                 |Valve JJ has flow rate=21; tunnel leads to valve II""".stripMargin
 
-    part1(in.linesIterator.toSeq) shouldBe 1651
+    part1(in) shouldBe 1651
   }
 
   test("part 1") {
-    part1(readLines(file(2022)(16))) shouldBe 1737
+    part1(read(file(2022)(16))) shouldBe 1737
   }
 
   test("part 2 example") {
@@ -36,9 +36,9 @@ class Day16Test extends UnitTest:
                 |Valve II has flow rate=0; tunnels lead to valves AA, JJ
                 |Valve JJ has flow rate=21; tunnel leads to valve II""".stripMargin
 
-    part2(in.linesIterator.toSeq) shouldBe 1707
+    part2(in) shouldBe 1707
   }
 
   test("part 2") {
-    part2(readLines(file(2022)(16))) shouldBe 2216
+    part2(read(file(2022)(16))) shouldBe 2216
   }

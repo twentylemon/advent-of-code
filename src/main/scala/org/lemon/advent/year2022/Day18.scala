@@ -33,10 +33,10 @@ private object Day18:
 
   def faces(cubes: Iterable[Coord]): Map[Face, Int] = cubes.view.flatMap(faces).groupBy(x => x).mapValues(_.size).toMap
 
-  def part1(in: Seq[String]) = faces(in.map(parseCube)).values.count(_ == 1)
+  def part1(in: String) = faces(in.linesIterator.map(parseCube).toSeq).values.count(_ == 1)
 
-  def part2(in: Seq[String]) =
-    val cubes = in.map(parseCube).toSet
+  def part2(in: String) =
+    val cubes = in.linesIterator.map(parseCube).toSet
     val (xBox, yBox, zBox) = (
       cubes.map(_.x).min - 1 to cubes.map(_.x).max + 1,
       cubes.map(_.y).min - 1 to cubes.map(_.y).max + 1,

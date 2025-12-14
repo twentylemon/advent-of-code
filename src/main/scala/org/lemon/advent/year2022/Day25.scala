@@ -28,5 +28,5 @@ private object Day25:
           case x => (Snafu.decToDigit(x), 0)
   import Snafus.*
 
-  def part1(in: Seq[String]): Snafu = in.map(s => Snafu(s)).reduce(_ + _)
+  def part1(in: String): Snafu = in.linesIterator.map(s => Snafu(s)).reduce(_ + _)
 

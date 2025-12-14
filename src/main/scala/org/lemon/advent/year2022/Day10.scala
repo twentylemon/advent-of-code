@@ -22,7 +22,7 @@ private object Day10:
 
   def signalStrength(state: State, cycle: Int) = cycle * state.registers("x")
 
-  def part1(program: Seq[String]) = program
+  def part1(program: String) = program.linesIterator
     .map(parse)
     .foldLeft(Seq.fill(2)(State(Map("x" -> 1))))((state, instruction) => state ++ instruction(state.last))
     .zipWithIndex
@@ -30,7 +30,7 @@ private object Day10:
     .map(Function.tupled(signalStrength))
     .sum
 
-  def part2(program: Seq[String]) = program
+  def part2(program: String) = program.linesIterator
     .map(parse)
     .foldLeft(Seq.fill(1)(State(Map("x" -> 1))))((state, instruction) => state ++ instruction(state.last))
     .zipWithIndex

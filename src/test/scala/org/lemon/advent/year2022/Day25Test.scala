@@ -45,9 +45,9 @@ class Day25Test extends UnitTest:
                 |1=
                 |122""".stripMargin
 
-    part1(in.linesIterator.toSeq) shouldBe Snafu("2=-1=0")
+    part1(in) shouldBe Snafu("2=-1=0")
   }
 
   test("part 1") {
-    part1(readLines(file(2022)(25))) shouldBe Snafu("2=0=02-0----2-=02-10")
+    part1(read(file(2022)(25))) shouldBe Snafu("2=0=02-0----2-=02-10")
   }

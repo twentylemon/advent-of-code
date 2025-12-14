@@ -29,12 +29,12 @@ private object Day20:
 
     seq.indices.sortBy(normalToMix).map(seq)
 
-  def part1(in: Seq[String]) =
-    val m = mix(in.map(_.toInt))
+  def part1(in: String) =
+    val m = mix(in.linesIterator.map(_.toLong).toSeq)
     val i = m.indexWhere(_ == 0)
     m((i + 1000) % m.size) + m((i + 2000) % m.size) + m((i + 3000) % m.size)
 
-  def part2(in: Seq[String]) =
-    val m = mix(in.map(_.toInt).map(811589153L * _), 10)
+  def part2(in: String) =
+    val m = mix(in.linesIterator.map(_.toLong).map(811589153L * _).toSeq, 10)
     val i = m.indexWhere(_ == 0)
     m((i + 1000) % m.size) + m((i + 2000) % m.size) + m((i + 3000) % m.size)

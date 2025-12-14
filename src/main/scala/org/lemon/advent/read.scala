@@ -9,9 +9,6 @@ import java.time.LocalDate
 def read(name: String): String =
   Using.resource(Source.fromResource(name))(source => source.mkString)
 
-def readLines(name: String): Seq[String] =
-  Using.resource(Source.fromResource(name))(source => source.getLines.toSeq)
-
 def file(year: Int)(day: Int) = s"year$year/day${"%02d".format(day)}.txt"
 
 /** Fetches the input and creates files for a given day.

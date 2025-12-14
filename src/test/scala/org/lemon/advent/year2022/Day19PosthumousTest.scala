@@ -89,9 +89,9 @@ class Day19PosthumousTest extends UnitTest {
 
     iterate(queue, best)
 
-  def part1(in: Seq[String]) = in.map(parseBlueprint).map(blueprint => blueprint.id * solve(blueprint, 24)).sum
+  def part1(in: String) = in.linesIterator.map(parseBlueprint).map(blueprint => blueprint.id * solve(blueprint, 24)).sum
 
-  def part2(in: Seq[String]) = in.take(3).map(parseBlueprint).map(solve(_, 32)).product
+  def part2(in: String) = in.linesIterator.take(3).map(parseBlueprint).map(solve(_, 32)).product
 
   test("part 1 blueprint 1") {
     val in =
@@ -109,22 +109,22 @@ class Day19PosthumousTest extends UnitTest {
     val in = """|Blueprint 1: Each ore robot costs 4 ore. Each clay robot costs 2 ore. Each obsidian robot costs 3 ore and 14 clay. Each geode robot costs 2 ore and 7 obsidian.
                 |Blueprint 2: Each ore robot costs 2 ore. Each clay robot costs 3 ore. Each obsidian robot costs 3 ore and 8 clay. Each geode robot costs 3 ore and 12 obsidian.""".stripMargin
 
-    part1(in.linesIterator.toSeq) shouldBe 33
+    part1(in) shouldBe 33
   }
 
   test("part 1") {
-    part1(readLines(file(2022)(19))) shouldBe 2160
+    part1(read(file(2022)(19))) shouldBe 2160
   }
 
   ignore("part 2 example") {
     val in = """|Blueprint 1: Each ore robot costs 4 ore. Each clay robot costs 2 ore. Each obsidian robot costs 3 ore and 14 clay. Each geode robot costs 2 ore and 7 obsidian.
                 |Blueprint 2: Each ore robot costs 2 ore. Each clay robot costs 3 ore. Each obsidian robot costs 3 ore and 8 clay. Each geode robot costs 3 ore and 12 obsidian.""".stripMargin
 
-    part2(in.linesIterator.toSeq) shouldBe 56 * 62
+    part2(in) shouldBe 56 * 62
   }
 
   test("part 2") {
-    part2(readLines(file(2022)(19))) shouldBe 13340
+    part2(read(file(2022)(19))) shouldBe 13340
   }
 
 }

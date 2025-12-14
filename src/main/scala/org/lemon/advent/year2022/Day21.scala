@@ -55,8 +55,8 @@ private object Day21:
       )
     case s"$v: $lit" => (v, Literal(lit.toLong))
 
-  def part1(in: Seq[String]) =
-    val monkeys = in.map(parseExpression).toMap
+  def part1(in: String) =
+    val monkeys = in.linesIterator.map(parseExpression).toMap
     given ExpressionContext = ExpressionContext(monkeys)
     monkeys("root").resolve.get
 
@@ -77,8 +77,8 @@ private object Day21:
       case Divide(lhs, Literal(n)) => solve(lhs, n * knownValue)
       case _ => ???
 
-  def part2(in: Seq[String]) =
-    val monkeys = in.map(parseExpression).toMap
+  def part2(in: String) =
+    val monkeys = in.linesIterator.map(parseExpression).toMap
     given ExpressionContext = ExpressionContext(monkeys + ("humn" -> Unknown))
 
     val root = monkeys("root").asInstanceOf[BinaryOperation]
