@@ -69,8 +69,6 @@ case class Point[N: Integral](x: N, y: N):
   def yInterval(rhs: Point[N]): Interval[N] = Interval(y min rhs.y, y max rhs.y)
   def bounding(rhs: Point[N]): Rect[N] = Rect(xRange = xInterval(rhs), yRange = yInterval(rhs))
 
-  def shiftInto(rect: Rect[N]): Point[N] = ((x +% rect.width) + rect.left, (y +% rect.height) + rect.top)
-
   def flip = Point(x = y, y = x)
 
   def rotateClockwise: Point[N] = Point(x = -y, y = x)

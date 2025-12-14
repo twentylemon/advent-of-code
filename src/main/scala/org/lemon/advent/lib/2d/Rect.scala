@@ -153,6 +153,8 @@ case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
 
   def clamp(coord: Point[N]): Point[N] = Point(x = coord.x max left min right, y = coord.y max top min bottom)
 
+  def wrap(coord: Point[N]): Point[N] = Point(x = ((coord.x - left) +% width) + left, ((coord.y - top) +% height) + top)
+
   def show(coord2Char: Point[N] => Char): String =
     import scala.collection.mutable
     val builder = mutable.StringBuilder(size.toInt + height.toInt)

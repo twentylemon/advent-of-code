@@ -9,7 +9,7 @@ private object Day14:
   ).toSeq
 
   def move(robits: Seq[(Coord, Coord)], area: Area): Seq[(Coord, Coord)] =
-    robits.map((pos, vel) => ((pos + vel).shiftInto(area), vel))
+    robits.map((pos, vel) => (area.wrap(pos + vel), vel))
 
   def quads(robits: Seq[(Coord, Coord)], area: Area) =
     val quadrants = area.quadrants

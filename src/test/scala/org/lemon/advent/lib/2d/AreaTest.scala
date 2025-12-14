@@ -1,6 +1,7 @@
 package org.lemon.advent.lib.`2d`
 
 import org.lemon.advent.*
+import org.lemon.advent.lib.*
 import org.lemon.advent.lib.`2d`.*
 import org.scalacheck.Prop.*
 import org.scalacheck.*
@@ -229,4 +230,24 @@ class AreaTest extends UnitTest:
 
   test("clamp returns a coord in the area") {
     check((area: Area, coord: Coord) => area.contains(area.clamp(coord)))
+  }
+
+  test("wrap returns a coord in the area") {
+    check((area: Area, coord: Coord) => area.contains(area.wrap(coord)))
+  }
+
+  test("wrap of coord inside area is identity") {
+    check((area: Area) => area.forall(c => area.wrap(c) == c))
+  }
+
+  test("wrap x coordinate wraps toroidally") {
+    check((area: Area, coord: Coord) =>
+      ((area.wrap(coord).x - area.left) +% area.width) == ((coord.x - area.left) +% area.width)
+    )
+  }
+
+  test("wrap y coordinate wraps toroidally") {
+    check((area: Area, coord: Coord) =>
+      ((area.wrap(coord).y - area.top) +% area.height) == ((coord.y - area.top) +% area.height)
+    )
   }

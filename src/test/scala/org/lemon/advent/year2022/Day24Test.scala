@@ -13,11 +13,11 @@ class Day24Test extends UnitTest:
                 |#<^v^^>#
                 |######.#""".stripMargin
 
-    part1(in.linesIterator.toSeq) shouldBe 18
+    part1(in) shouldBe 18
   }
 
   test("part 1") {
-    part1(readLines(file(2022)(24))) shouldBe 247
+    part1(read(file(2022)(24))) shouldBe 247
   }
 
   test("part 2 example") {
@@ -28,9 +28,9 @@ class Day24Test extends UnitTest:
                 |#<^v^^>#
                 |######.#""".stripMargin
 
-    part2(in.linesIterator.toSeq) shouldBe 54
+    part2(in) shouldBe 54
   }
 
   test("part 2") {
-    part2(readLines(file(2022)(24))) shouldBe 728
+    part2(read(file(2022)(24))) shouldBe 728
   }

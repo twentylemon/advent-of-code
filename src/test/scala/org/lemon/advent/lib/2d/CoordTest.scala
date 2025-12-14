@@ -188,10 +188,6 @@ class CoordTest extends UnitTest:
     )
   }
 
-  test("shiftInto returns a coord in the area") {
-    check((area: Area, coord: Coord) => area.contains(coord.shiftInto(area)))
-  }
-
   test("within distance 0 is just the coord") {
     given Arbitrary[(Coord, Coord) => Int] = Arbitrary(Gen.oneOf(
       Gen.const((a: Coord, b: Coord) => a.manhattan(b)),
