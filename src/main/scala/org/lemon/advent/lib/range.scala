@@ -101,7 +101,7 @@ case class Interval[N: Integral](start: N, end: N) extends Iterable[N] with Part
   override def toString: String = if isEmpty then "Interval.empty" else s"Interval($start..$end)"
 
 object Interval:
-  def empty[N: Integral]: Interval[N] = Interval(summon[Integral[N]].one, summon[Integral[N]].zero)
+  def empty[N: Integral]: Interval[N] = Interval(Integral[N].one, Integral[N].zero)
 
   def apply(range: Range): Interval[Int] = apply(range.toNumericRange[Int])
 
