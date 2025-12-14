@@ -1,7 +1,7 @@
 package org.lemon.advent.year2023
 
 import org.lemon.advent.lib.`2d`.*
-import scala.collection.mutable
+import org.lemon.advent.lib.graph.*
 
 private object Day21:
 
@@ -10,20 +10,8 @@ private object Day21:
   def start(grid: Map[Coord, Char]) = grid.find(_._2 == 'S').map(_._1).get
 
   def count(grid: Map[Coord, Char], start: Coord)(depth: Int): Long =
-    val goochie = mutable.Set.empty[Coord]
-    val seen = mutable.Set(start)
-    val queue = mutable.Queue((start, depth))
-
-    while !queue.isEmpty do
-      val (coord, step) = queue.dequeue
-      if step % 2 == 0 then goochie += coord
-      if step > 0 && step <= depth then
-        queue ++= coord.adjacent
-          .filter(coord => grid.getOrElse(coord, '#') != '#')
-          .filter(seen.add)
-          .map((_, step - 1))
-
-    goochie.size
+    def adjacency(coord: Coord) = coord.adjacent.filter(c => grid.getOrElse(c, '#') != '#')
+    distanceFrom(adjacency, start, depth).count((_, dist) => dist % 2 == depth % 2)
 
   def part1(input: String, depth: Int = 64) =
     val grid = parse(input)

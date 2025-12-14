@@ -1,6 +1,6 @@
 package org.lemon.advent.year2022
 
-import scala.collection.mutable
+import org.lemon.advent.lib.graph.*
 
 private object Day18:
 
@@ -44,12 +44,9 @@ private object Day18:
     )
     def inBoundingBox(coord: Coord) = xBox.contains(coord.x) && yBox.contains(coord.y) && zBox.contains(coord.z)
 
-    val air = mutable.Set((xBox.min, yBox.min, zBox.min))
-    val queue = air.to(mutable.Queue)
-    while !queue.isEmpty do
-      val cube = queue.dequeue
-      val adjacentAir = cube.cardinals.filter(inBoundingBox) -- air -- cubes
-      air ++= adjacentAir
-      queue ++= adjacentAir
+    val air = fill(
+      (coord: Coord) => coord.cardinals.filter(inBoundingBox).filterNot(cubes),
+      (xBox.min, yBox.min, zBox.min)
+    )
 
     (faces(air).keySet & faces(cubes).keySet).size

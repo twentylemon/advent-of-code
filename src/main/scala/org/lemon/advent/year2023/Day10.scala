@@ -1,8 +1,7 @@
 package org.lemon.advent.year2023
 
 import org.lemon.advent.lib.`2d`.*
-
-import scala.collection.mutable
+import org.lemon.advent.lib.graph.*
 
 private object Day10:
 
@@ -28,20 +27,11 @@ private object Day10:
   def startOf(grid: Map[Coord, Pipe]) = grid.values.find(_.char == 'S').get
 
   def pathFind(start: Coord, grid: Map[Coord, Pipe]): Map[Pipe, Int] =
-    val stepsTaken = mutable.Map(start -> 0)
-    val queue = mutable.Queue.empty[Coord]
+    def adjacency(coord: Coord) = grid(coord).connections
+      .filter(grid.contains)
+      .filter(neigh => grid(neigh).connections.contains(coord))
 
-    queue += start
-    while !queue.isEmpty && queue.size < 10 * grid.size do
-      val cell = queue.dequeue
-      val stepsToNeigh = stepsTaken(cell) + 1
-      queue ++= grid(cell).connections
-        .filter(grid.contains)
-        .filter(neigh => grid(neigh).connections.contains(cell))
-        .filter(neigh => stepsTaken.getOrElse(neigh, Int.MaxValue) > stepsToNeigh)
-        .tapEach(neigh => stepsTaken.put(neigh, stepsToNeigh))
-
-    stepsTaken.map((coord, steps) => (grid(coord), steps)).toMap
+    distanceFrom(adjacency, start).map((coord, steps) => (grid(coord), steps))
 
   def part1(input: String) =
     val grid = parse(input)

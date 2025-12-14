@@ -20,39 +20,65 @@ def fill[N](adjacency: N => Iterable[N], start: N): Set[N] =
     queue ++= adjacency(node).filter(nodes.add)
   nodes.toSet
 
+/** Performs a breadth first fill of the graph from the starting node up to a maximum distance,
+  * returning the distance to all reachable nodes within that limit.
+  *
+  * @param adjacency function to return edges for a given node
+  * @param end the node to calculate distances to
+  * @param maxDistance the maximum distance to explore
+  * @return the map of reachable nodes to their distances from `end`
+  * @tparam N the node type
+  * @tparam D the distance type
+  */
+def distanceFrom[N, D: Numeric](adjacency: N => Iterable[(N, D)], end: N, maxDistance: D): Map[N, D] =
+  val distances = mutable.Map(end -> Numeric[D].zero)
+  // given Ordering[(N, D)] = Ordering.by[(N, D), D](_._2).reverse
+  // val queue = mutable.PriorityQueue(distances.head)
+  val queue = mutable.Queue(distances.head)
+  while !queue.isEmpty do
+    val node = queue.dequeue._1
+    val dist = distances(node)
+    if dist < maxDistance then
+      queue ++= adjacency(node)
+        .filter((neigh, d) => dist + d <= maxDistance && distances.get(neigh).forall(_ > dist + d))
+        .tapEach((neigh, d) => distances(neigh) = dist + d)
+  distances.toMap
+
 /** Performs a breadth first fill of the graph from the starting node, returning
   * the distance to all reachable nodes.
   *
   * @param adjacency function to return edges for a given node
   * @param end the node to calculate distances to
-  * @return the set of reachable nodes from `start`
+  * @return the set of reachable nodes from `end`
   * @tparam N the node type
   * @tparam D the distance type
   */
 def distanceFrom[N, D: Numeric](adjacency: N => Iterable[(N, D)], end: N): Map[N, D] =
-  val distances = mutable.Map(end -> Numeric[D].zero)
-  given Ordering[(N, D)] = Ordering.by[(N, D), D](_._2).reverse
-  val queue = mutable.PriorityQueue(distances.head)
-
-  while !queue.isEmpty do
-    val node = queue.dequeue._1
-    val dist = distances(node)
-    queue ++= adjacency(node)
-      .filter((neigh, d) => distances.get(neigh).forall(_ > dist + d))
-      .tapEach((neigh, d) => distances(neigh) = dist + d)
-
-  distances.toMap
+  distanceFrom(adjacency, end, Numeric[D].fromInt(Int.MaxValue))
 
 /** Performs a breadth first fill of the graph from the starting node, returning
   * the distance to all reachable nodes. The distance between each node is assumed to be one.
   *
   * @param adjacency function to return edges for a given node
   * @param end the node to calculate distances to
-  * @return the set of reachable nodes from `start`
+  * @return the map of reachable nodes to their distances from `end`
   * @tparam N the node type
   */
 def distanceFrom[N](adjacency: N => Iterable[N], end: N): Map[N, Int] =
   distanceFrom(unitAdjacency(adjacency), end)
+
+/** Performs a breadth first fill of the graph from the starting node up to a maximum distance,
+  * returning the distance to all reachable nodes within that limit. The distance between
+  * each node is assumed to be one.
+  *
+  * @param adjacency function to return edges for a given node
+  * @param end the node to calculate distances to
+  * @param maxDistance the maximum distance to explore
+  * @return the map of reachable nodes to their distances from `end`
+  * @tparam N the node type
+  */
+def distanceFrom[N](adjacency: N => Iterable[N], end: N, maxDistance: Int): Map[N, Int] =
+  distanceFrom(unitAdjacency(adjacency), end, maxDistance)
 
 /** Performs a breadth first fill of the graph from the starting node to the ending nodes, returning
   * all possible paths between the two sets.
