@@ -27,3 +27,7 @@ def memoize[T1, T2, R](f: (T1, T2) => R): (T1, T2) => R =
 def memoize[T1, T2, T3, R](f: (T1, T2, T3) => R): (T1, T2, T3) => R =
   val cache = mutable.Map.empty[(T1, T2, T3), R]
   (t1: T1, t2: T2, t3: T3) => cache.getOrElseUpdate((t1, t2, t3), f(t1, t2, t3))
+
+def memoize[T1, T2, T3, T4, R](f: (T1, T2, T3, T4) => R): (T1, T2, T3, T4) => R =
+  val cache = mutable.Map.empty[(T1, T2, T3, T4), R]
+  (t1: T1, t2: T2, t3: T3, t4: T4) => cache.getOrElseUpdate((t1, t2, t3, t4), f(t1, t2, t3, t4))
