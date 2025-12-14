@@ -45,15 +45,19 @@ private object Day17:
     rocksFallEveryoneDies(input).nth(2022).maxHeight
 
   def part2(input: String) =
-    val cycleLength = rocks.size * input.size // could be shorter, but the real cycle should go evenly into this
-    val heights = rocksFallEveryoneDies(input).map(_.maxHeight).take(2 * cycleLength).toSeq
-    val heightChanges = heights.sliding(2).map(x => x(1) - x(0)).toSeq
+    def topProfile(s: BoardState): Seq[Int] =
+      (1 to 7).map(x => s.maxHeight - s.board.filter(_.x == x).map(_.y).max)
 
-    val cycleOfHeights = heightChanges.takeRight(cycleLength)
-    val cycleStart = heightChanges.indexOfSlice(cycleOfHeights)
-    val cycleHeightChange = heights(heightChanges.size - cycleLength) - heights(cycleStart)
-    val cycleNumRocks = heightChanges.size - cycleLength - cycleStart
+    def sameState(s1: BoardState, s2: BoardState) =
+      s1.cycle == s2.cycle && s1.rock == s2.rock && topProfile(s1) == topProfile(s2)
 
-    val lastCycleStart = 1000000000000L - cycleStart
-    val (numCycles, remaining) = (lastCycleStart / cycleNumRocks, lastCycleStart % cycleNumRocks)
-    numCycles * cycleHeightChange + heights(cycleStart + remaining.toInt)
+    val initial = BoardState(board = (0 to 7).map(Coord(_, 0)).toSet, wind = input, cycle = 0, rock = 0, maxHeight = 0)
+    val cycle = findCycle(initial)(dropRock, sameState)
+
+    val target = 1_000_000_000_000L
+    val afterOneCycle = dropRock(cycle.history(cycle.offset + cycle.period - 1))
+    val heightPerCycle = afterOneCycle.maxHeight - cycle.history(cycle.offset).maxHeight
+
+    val posInCycle = ((target - cycle.offset) % cycle.period).toInt
+    val numFullCycles = (target - cycle.offset) / cycle.period
+    cycle.history(cycle.offset + posInCycle).maxHeight + numFullCycles * heightPerCycle
