@@ -19,9 +19,9 @@ private object Day11:
       .reduce((a, b) => a ++ b.map { case (k, v) => k -> (v + a.getOrElse(k, 0L)) }))
 
   def part1(input: String) =
-    val stones = parse(input).groupMapReduce(identity)(_ => 1L)(_ + _)
+    val stones = parse(input).frequencies.view.mapValues(_.toLong).toMap
     process(stones).nth(25).values.sum
 
   def part2(input: String) =
-    val stones = parse(input).groupMapReduce(identity)(_ => 1L)(_ + _)
+    val stones = parse(input).frequencies.view.mapValues(_.toLong).toMap
     process(stones).nth(75).values.sum
