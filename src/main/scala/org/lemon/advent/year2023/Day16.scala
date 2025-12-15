@@ -1,9 +1,9 @@
 package org.lemon.advent.year2023
 
-import org.lemon.advent.lib.`2d`.Coord.*
 import org.lemon.advent.lib.`2d`.*
+import org.lemon.advent.lib.`2d`.Coord.*
+import org.lemon.advent.lib.graph.*
 
-import scala.collection.mutable
 import scala.collection.parallel.CollectionConverters.*
 
 private object Day16:
@@ -11,10 +11,7 @@ private object Day16:
   // we know the position and the velocity. deal with it.
   case class Photon(position: Coord, velocity: Coord)
 
-  def parse(input: String) = input.linesIterator
-    .zipWithIndex
-    .flatMap((line, row) => line.zipWithIndex.map((ch, col) => (Coord(col, row) -> ch)))
-    .toMap
+  def parse = Coord.gridToMap
 
   def interact(cell: Char, photon: Photon) = cell match
     case '-' if photon.velocity.y != 0 =>
@@ -31,16 +28,8 @@ private object Day16:
       Seq(photon.copy(position = photon.position + photon.velocity))
 
   def countEnergized(grid: Map[Coord, Char], photon: Photon) =
-    val seen = mutable.Set(photon)
-    val queue = mutable.Queue(photon)
-
-    while !queue.isEmpty do
-      val light = queue.dequeue
-      queue ++= interact(grid(light.position), light)
-        .filter(p => grid.contains(p.position))
-        .filter(seen.add)
-
-    seen.map(_.position).size
+    def adjacency(p: Photon) = interact(grid(p.position), p).filter(x => grid.contains(x.position))
+    fill(adjacency, photon).map(_.position).size
 
   def part1(input: String) = countEnergized(parse(input), Photon(position = (0, 0), velocity = unitRight))
 
