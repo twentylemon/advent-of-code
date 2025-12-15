@@ -48,10 +48,10 @@ private object Day15:
 
   def part1(input: String) =
     val (grid, moves) = parse(input)
-    val last = moves.foldLeft(grid)((g, d) => step(g, g.find(_._2 == '@').get._1, d))
+    val last = moves.foldLeft(grid)((g, d) => step(g, g.findValue('@').get, d))
     gps(last, 'O')
 
   def part2(input: String) =
     val (grid, moves) = parseWide(input)
-    val last = moves.foldLeft(grid)((g, d) => step(g, g.find(_._2 == '@').get._1, d))
+    val last = moves.foldLeft(grid)((g, d) => step(g, g.findValue('@').get, d))
     gps(last, '[')

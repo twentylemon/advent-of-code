@@ -1,5 +1,6 @@
 package org.lemon.advent.year2023
 
+import org.lemon.advent.lib.*
 import org.lemon.advent.lib.`2d`.*
 import org.lemon.advent.lib.graph.*
 
@@ -7,15 +8,13 @@ private object Day21:
 
   def parse = Coord.gridToMap
 
-  def start(grid: Map[Coord, Char]) = grid.find(_._2 == 'S').map(_._1).get
-
   def count(grid: Map[Coord, Char], start: Coord)(depth: Int): Long =
     def adjacency(coord: Coord) = coord.adjacent.filter(c => grid.getOrElse(c, '#') != '#')
     distanceFrom(adjacency, start, depth).count((_, dist) => dist % 2 == depth % 2)
 
   def part1(input: String, depth: Int = 64) =
     val grid = parse(input)
-    count(grid, start(grid))(depth)
+    count(grid, grid.findValue('S').get)(depth)
 
   def square(n: Long): Long = n * n
 
@@ -23,7 +22,7 @@ private object Day21:
     val grid = parse(input)
     val area = Area(grid)
     val size = area.width
-    val start = this.start(grid)
+    val start = grid.findValue('S').get
 
     assert(area.width == area.height, "grid is a square")
     assert(depth % area.width == area.width / 2, "start is in the middle")

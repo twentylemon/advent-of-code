@@ -10,7 +10,7 @@ private object Day07:
     Coord.gridToMap(manifold.mkString("\n"))
 
   def simulate(grid: Map[Coord, Char]) =
-    val start = grid.find(_._2 == 'S').get._1
+    val start = grid.findValue('S').get
 
     def step(beams: Map[Coord, Long]) =
       beams.toSeq.flatMap((beam, count) =>

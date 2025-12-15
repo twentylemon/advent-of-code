@@ -55,6 +55,14 @@ extension [A](it: Iterable[A])
       k <- indexed.indices.drop(j + 1).iterator
     yield (indexed(i), indexed(j), indexed(k))
 
+extension [K, V](map: Map[K, V])
+  /** Finds the first key associated with a given value.
+    *
+    * @param value the value to search for
+    * @return the key associated with the value, or None if not found
+    */
+  def findValue(value: V): Option[K] = map.find(_._2 == value).map(_._1)
+
 extension [A, CC[X] <: SeqOps[X, CC, CC[X]]](seq: CC[A])(using NotGiven[A =:= Char])
   /** Splits a collection by a given delimiting value. Behaves like `String#split`.
     *

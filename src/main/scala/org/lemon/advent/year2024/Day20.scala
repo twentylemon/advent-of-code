@@ -25,7 +25,7 @@ private object Day20:
     (2 to maxDist).iterator.flatMap(manhattan)
 
   def goodCheats(grid: Map[Coord, Char], maxCheatDistance: Int) =
-    val end = grid.find(_._2 == 'E').get._1
+    val end = grid.findValue('E').get
     val distances = distanceFrom(adjacency(grid), end)
     distances.keysIterator
       .flatMap(start =>

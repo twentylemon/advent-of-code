@@ -1,5 +1,6 @@
 package org.lemon.advent.year2024
 
+import org.lemon.advent.lib.*
 import org.lemon.advent.lib.`2d`.*
 
 private object Day06:
@@ -17,7 +18,7 @@ private object Day06:
 
   def part1(input: String) =
     val grid = parse(input)
-    val start = grid.find(_._2 == '^').get._1
+    val start = grid.findValue('^').get
     walk(grid, start, Direction('^')).size
 
   type Paths = Map[Coord, Map[Direction, Coord]]
@@ -47,6 +48,6 @@ private object Day06:
   def part2(input: String) =
     val grid = parse(input)
     val paths = routes(grid)
-    val start = grid.find(_._2 == '^').get._1
+    val start = grid.findValue('^').get
     val dir = Direction('^')
     walk(grid, start, dir).count(isLoop(paths, _)(start, dir))
