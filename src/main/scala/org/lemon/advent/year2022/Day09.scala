@@ -23,10 +23,7 @@ private object Day09:
     newRope.toSeq
 
   def move(move: String, rope: Rope, tailPos: mutable.Map[Coord, Int]) = move match
-    case s"L $n" => update(rope, _.left, n.toInt, tailPos)
-    case s"R $n" => update(rope, _.right, n.toInt, tailPos)
-    case s"U $n" => update(rope, _.up, n.toInt, tailPos)
-    case s"D $n" => update(rope, _.down, n.toInt, tailPos)
+    case s"$dir $n" => update(rope, _.move(Direction(dir)), n.toInt, tailPos)
 
   def trackTail(in: String, numberOfKnots: Int) =
     val tailPos = mutable.Map.empty[Coord, Int].withDefaultValue(0)
