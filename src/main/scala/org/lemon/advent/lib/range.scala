@@ -13,8 +13,28 @@ extension (range: Range)
 
   def toInterval: Interval[Int] = Interval(range)
 
+extension [N: Integral](range: NumericRange[N])
+  def toInterval: Interval[N] = Interval(range)
+
 extension [N: Integral](tuple: (N, N))
   def toInterval: Interval[N] = Interval(tuple._1, tuple._2)
+
+object Interval:
+  def empty[N: Integral]: Interval[N] = Interval(Integral[N].one, Integral[N].zero)
+
+  def apply(range: Range): Interval[Int] = apply(range.toNumericRange[Int])
+
+  def apply[N: Integral](range: NumericRange[N]): Interval[N] =
+    require(range.step == 1 || range.step == -1, "Range must have step 1 or -1")
+    if range.isEmpty then empty[N]
+    else if range.step == 1 then Interval(range.head, range.last)
+    else Interval(range.last, range.head)
+
+  given [N: Integral]: Ordering[Interval[N]] = Ordering.by[Interval[N], N](_.start).orElseBy(_.end)
+
+  given Conversion[Range, Interval[Int]] = _.toInterval
+  given [N: Integral]: Conversion[NumericRange[N], Interval[N]] = _.toInterval
+  given [N: Integral]: Conversion[(N, N), Interval[N]] = _.toInterval
 
 /** A discrete range of values between `start` and `end` inclusive.
   * Differs from a Range in that it is always inclusive and has a fixed step of 1.
@@ -76,11 +96,11 @@ case class Interval[N: Integral](start: N, end: N) extends Iterable[N] with Part
 
   override def tail: Interval[N] =
     if isEmpty then throw new UnsupportedOperationException("tail of empty interval")
-    else Interval(start + `1`, end)
+    else drop(`1`)
 
   override def init: Interval[N] =
     if isEmpty then throw new UnsupportedOperationException("init of empty interval")
-    else Interval(start, end - `1`)
+    else dropRight(`1`)
 
   def indexOf(elem: N): N = if contains(elem) then elem - start else - `1`
   def lastIndexOf(elem: N): N = indexOf(elem)
@@ -100,18 +120,24 @@ case class Interval[N: Integral](start: N, end: N) extends Iterable[N] with Part
 
   override def toString: String = if isEmpty then "Interval.empty" else s"Interval($start..$end)"
 
-object Interval:
-  def empty[N: Integral]: Interval[N] = Interval(Integral[N].one, Integral[N].zero)
+object Diet:
+  def empty[N: Integral]: Diet[N] = Diet(TreeMap.empty[N, N])
 
-  def apply(range: Range): Interval[Int] = apply(range.toNumericRange[Int])
+  def apply[N: Integral](values: N*): Diet[N] = apply(values)
+  def apply[N: Integral](values: Iterable[N]): Diet[N] =
+    values.iterator.foldLeft(empty[N])(_ + _)
 
-  def apply[N: Integral](range: NumericRange[N]): Interval[N] =
-    require(range.step == 1 || range.step == -1, "Range must have step 1 or -1")
-    if range.isEmpty then empty[N]
-    else if range.step == 1 then Interval(range.head, range.last)
-    else Interval(range.last, range.head)
+  def apply[N: Integral](start: N, end: N): Diet[N] = empty[N].add(start, end)
 
-  given [N: Integral]: Ordering[Interval[N]] = Ordering.by[Interval[N], N](_.start).orElseBy(_.end)
+  def apply(range: Range): Diet[Int] = empty[Int].add(range)
+  def apply[N: Integral](range: NumericRange[N]): Diet[N] = empty[N].add(range)
+  def apply[N: Integral](interval: Interval[N]): Diet[N] = empty[N].add(interval)
+
+  def fromIntervals[N: Integral](intervals: Iterable[(N, N)]): Diet[N] =
+    intervals.iterator.foldLeft(empty[N])((diet, interval) => diet.add(interval._1, interval._2))
+
+  def fromRanges(ranges: Iterable[Range]): Diet[Int] = ranges.foldLeft(empty[Int])(_ + _)
+  def fromRanges[N: Integral](ranges: Iterable[NumericRange[N]]): Diet[N] = ranges.foldLeft(empty[N])(_ + _)
 
 /** A Discrete Interval Encoding Tree for storing sets of discrete values by encoding contiguous intervals
   *  as single entries. When new ranges are added or removed, they are merged/split with existing intervals.
@@ -317,22 +343,3 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
   override def toString: String =
     if isEmpty then "Diet()"
     else intervals.map((s, e) => if s == e then s.toString else s"$s..$e").mkString("Diet(", ", ", ")")
-
-object Diet:
-  def empty[N: Integral]: Diet[N] = Diet(TreeMap.empty[N, N])
-
-  def apply[N: Integral](values: N*): Diet[N] = apply(values)
-  def apply[N: Integral](values: Iterable[N]): Diet[N] =
-    values.iterator.foldLeft(empty[N])(_ + _)
-
-  def apply[N: Integral](start: N, end: N): Diet[N] = empty[N].add(start, end)
-
-  def apply(range: Range): Diet[Int] = empty[Int].add(range)
-  def apply[N: Integral](range: NumericRange[N]): Diet[N] = empty[N].add(range)
-  def apply[N: Integral](interval: Interval[N]): Diet[N] = empty[N].add(interval)
-
-  def fromIntervals[N: Integral](intervals: Iterable[(N, N)]): Diet[N] =
-    intervals.iterator.foldLeft(empty[N])((diet, interval) => diet.add(interval._1, interval._2))
-
-  def fromRanges(ranges: Iterable[Range]): Diet[Int] = ranges.foldLeft(empty[Int])(_ + _)
-  def fromRanges[N: Integral](ranges: Iterable[NumericRange[N]]): Diet[N] = ranges.foldLeft(empty[N])(_ + _)
