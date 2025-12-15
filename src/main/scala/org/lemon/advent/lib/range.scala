@@ -181,7 +181,7 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
 
   /** @return the total count of discrete values in the tree
     */
-  def size: N = intervals.map((start, end) => end - start + `1`).sum
+  def size: N = intervals.iterator.map((start, end) => end - start + `1`).sum
 
   /** Adds a single value to the tree.
     *
