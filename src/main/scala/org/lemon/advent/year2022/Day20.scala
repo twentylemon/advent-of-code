@@ -1,13 +1,9 @@
 package org.lemon.advent.year2022
 
+import org.lemon.advent.lib.*
 import scala.collection.mutable
 
 private object Day20:
-
-  extension (i: Long)
-    def +%(n: Long): Long =
-      val mod = i % n
-      if mod < 0 then mod + n else mod
 
   def mix(seq: Seq[Long], times: Int = 1): Seq[Long] =
     val normalToMix = seq.indices.map(i => (i -> i)).to(mutable.Map)
@@ -20,7 +16,7 @@ private object Day20:
     for _ <- 1 to times; i <- seq.indices do
       val v = seq(i)
       val mixIndex = normalToMix(i)
-      val posMod = (mixIndex + v) +% (seq.size - 1)
+      val posMod = (mixIndex + v) +% (seq.size - 1L)
       val newMixIndex = if posMod == 0 then seq.size - 1 else posMod.toInt
 
       if mixIndex != newMixIndex then
