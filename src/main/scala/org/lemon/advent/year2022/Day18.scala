@@ -1,5 +1,6 @@
 package org.lemon.advent.year2022
 
+import org.lemon.advent.lib.*
 import org.lemon.advent.lib.graph.*
 
 private object Day18:
@@ -31,7 +32,7 @@ private object Day18:
     (cube.x, cube.y, cube.z - 0.5)
   )
 
-  def faces(cubes: Iterable[Coord]): Map[Face, Int] = cubes.view.flatMap(faces).groupBy(x => x).mapValues(_.size).toMap
+  def faces(cubes: Iterable[Coord]): Map[Face, Int] = cubes.view.flatMap(faces).frequencies
 
   def part1(in: String) = faces(in.linesIterator.map(parseCube).toSeq).values.count(_ == 1)
 

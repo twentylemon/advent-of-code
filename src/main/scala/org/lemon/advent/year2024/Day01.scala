@@ -18,7 +18,7 @@ private object Day01:
 
   def part2(input: String) =
     val (left, right) = parse(input)
-    val counts = right.groupBy(r => r).mapValues(_.size)
+    val counts = right.frequencies
     left
       .map(l => l * counts.getOrElse(l, 0))
       .sum

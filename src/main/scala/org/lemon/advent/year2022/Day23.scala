@@ -35,7 +35,7 @@ private object Day23:
   def simulate(elves: Set[Coord]) =
     Iterator.unfold((elves, 0))((elfyLads, round) =>
       val candidates = elfyLads.map(elf => elf -> candidate(elf, round, elfyLads)).toMap
-      val counts = candidates.values.groupBy(x => x).mapValues(_.size)
+      val counts = candidates.values.frequencies
       val valid = candidates.filter((elf, cand) => cand.isDefined && counts(cand) == 1)
       if valid.isEmpty then None
       else

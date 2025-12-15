@@ -55,6 +55,12 @@ extension [A](it: Iterable[A])
       k <- indexed.indices.drop(j + 1).iterator
     yield (indexed(i), indexed(j), indexed(k))
 
+  /** Returns a map of element frequencies.
+    *
+    * @return a map from each element to its count
+    */
+  def frequencies: Map[A, Int] = it.groupMapReduce(identity)(_ => 1)(_ + _)
+
 extension [K, V](map: Map[K, V])
   /** Finds the first key associated with a given value.
     *

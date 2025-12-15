@@ -24,7 +24,7 @@ private object Day07:
   given Ordering[Kind] = Ordering.by(_.ordinal)
 
   case class Hand(cards: Seq[Rank], bid: Int):
-    val freq: Map[Rank, Int] = cards.groupBy(x => x).mapValues(_.size).toMap
+    val freq: Map[Rank, Int] = cards.frequencies
 
     val kind: Kind =
       freq.values.toSeq.sorted match

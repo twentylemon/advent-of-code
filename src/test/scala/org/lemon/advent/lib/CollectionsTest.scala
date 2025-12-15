@@ -21,3 +21,14 @@ class CollectionsTest extends UnitTest:
       actual == expected
     })
   }
+
+  test("frequencies counts match elements") {
+    check(forAll { (it: Iterable[Int]) =>
+      val freq = it.frequencies
+      it.forall(elem => freq(elem) == it.count(_ == elem))
+    })
+  }
+
+  test("frequencies keys are exactly the distinct elements") {
+    check(forAll { (it: Iterable[Int]) => it.frequencies.keySet == it.toSet })
+  }
