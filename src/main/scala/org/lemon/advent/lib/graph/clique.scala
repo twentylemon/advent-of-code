@@ -33,5 +33,5 @@ def cliques[N](nodes: Set[N], adjacency: N => Iterable[N]): Set[Set[N]] =
   * @param graph the graph as an adjacency list
   * @return set of all maximal cliques
   */
-def cliques[N](graph: Map[N, Iterable[N]]): Set[Set[N]] =
+def cliques[N](graph: UnitGraph[N]): Set[Set[N]] =
   cliques(graph.keySet, graph.withDefaultValue(Set.empty))
