@@ -52,7 +52,7 @@ case class Point[N: Integral](x: N, y: N):
 
   /** Returns an iterator of all points within `distance` of this point using the given metric.
     * This checks all points in a square around the point, so will not be correct if
-    * `metric(point, point.shift(direction, distance) > distance` (eg squared euclidean distance).
+    * `metric(point, point.shift(direction, distance)) > distance` (eg squared euclidean distance).
     * @param distance the maximum distance, inclusive
     * @param metric the distance function to use
     * @return iterator of all points within `distance` of this point, including the point itself
@@ -60,10 +60,11 @@ case class Point[N: Integral](x: N, y: N):
   def within(distance: N, metric: (Point[N], Point[N]) => N): Iterator[Point[N]] =
     for
       dy <- Iterator.iterate(-distance)(_ + `1`).takeWhile(_ <= distance)
-      dx <- Iterator.iterate(-distance)(_ + `1`).takeWhile(_ <= distance)
-      p = Point(x + dx, y + dy)
-      if metric(this, p) <= distance
-    yield p
+      max = Iterator.iterate(distance)(_ - `1`).takeWhile(_ >= `0`)
+        .find(dx => metric(this, Point(x + dx, y + dy)) <= distance)
+        .getOrElse(`0`)
+      dx <- Iterator.iterate(-max)(_ + `1`).takeWhile(_ <= max)
+    yield Point(x + dx, y + dy)
 
   def xInterval(rhs: Point[N]): Interval[N] = Interval(x min rhs.x, x max rhs.x)
   def yInterval(rhs: Point[N]): Interval[N] = Interval(y min rhs.y, y max rhs.y)
