@@ -1,5 +1,6 @@
 package org.lemon.advent.year2022
 
+import org.lemon.advent.lib.*
 import org.lemon.advent.lib.`2d`.*
 
 private object Day23:
@@ -44,7 +45,7 @@ private object Day23:
 
   def part1(in: String) =
     val start = parse(in)
-    val end = simulate(start).drop(9).next
+    val end = simulate(start).nth(9)
     Area(end).size - start.size
 
   def part2(in: String) = simulate(parse(in)).size + 1
