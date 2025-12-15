@@ -35,11 +35,11 @@ extension [A](it: Iterable[A])
     * @return iterator of all unordered pairs
     */
   def pairs: Iterator[(A, A)] =
+    val indexed = it.toIndexedSeq
     for
-      (x, i) <- it.iterator.zipWithIndex
-      (y, j) <- it.iterator.zipWithIndex
-      if i < j
-    yield (x, y)
+      i <- indexed.indices.iterator
+      j <- indexed.indices.drop(i + 1).iterator
+    yield (indexed(i), indexed(j))
 
   /** Returns an iterator of all unordered triples of elements in the iterable.
     * If the collection contains duplicates, the triples will not be unique.
@@ -47,13 +47,12 @@ extension [A](it: Iterable[A])
     * @return iterator of all unordered triples
     */
   def triples: Iterator[(A, A, A)] =
+    val indexed = it.toIndexedSeq
     for
-      (x, i) <- it.iterator.zipWithIndex
-      (y, j) <- it.iterator.zipWithIndex
-      (z, k) <- it.iterator.zipWithIndex
-      if i < j
-      if j < k
-    yield (x, y, z)
+      i <- indexed.indices.iterator
+      j <- indexed.indices.drop(i + 1).iterator
+      k <- indexed.indices.drop(j + 1).iterator
+    yield (indexed(i), indexed(j), indexed(k))
 
 extension [A, CC[X] <: SeqOps[X, CC, CC[X]]](seq: CC[A])
   /** Splits a collection by a given delimiting value. Behaves like `String#split`.
