@@ -5,12 +5,16 @@ import Coord.*
 object Direction:
   given Ordering[Direction] = Ordering.by(_.ordinal)
 
-  def apply(ch: String | Char): Direction = ch match
-    case "U" | 'U' | "u" | 'u' | "^" | '^' => Up
-    case "D" | 'D' | "d" | 'd' | "v" | 'v' => Down
-    case "L" | 'L' | "l" | 'l' | "<" | '<' => Left
-    case "R" | 'R' | "r" | 'r' | ">" | '>' => Right
-    case _ => throw AssertionError(s"unknown direction character:  $ch")
+  def apply(ch: String | Char): Direction =
+    unapply(ch).getOrElse(throw IllegalArgumentException(s"unknown direction character: $ch"))
+
+  def unapply(ch: String | Char): Option[Direction] =
+    ch match
+      case "U" | 'U' | "u" | 'u' | "^" | '^' => Some(Up)
+      case "D" | 'D' | "d" | 'd' | "v" | 'v' => Some(Down)
+      case "L" | 'L' | "l" | 'l' | "<" | '<' => Some(Left)
+      case "R" | 'R' | "r" | 'r' | ">" | '>' => Some(Right)
+      case _ => None
 
 /** A cardinal direction in 2d space.
   * @param unitVector the vector representing the direction

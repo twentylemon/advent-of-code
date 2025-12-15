@@ -14,10 +14,7 @@ private object Day23:
 
   def neighbours(from: Coord, grid: Map[Coord, Char]) =
     grid(from) match
-      case '<' => Seq(from.left)
-      case '>' => Seq(from.right)
-      case '^' => Seq(from.up)
-      case 'v' => Seq(from.down)
+      case Direction(d) => Seq(from.move(d))
       case _ => from.adjacent
 
   def scenicRoute(start: Coord, end: Coord, edges: WeightedGraph[Coord, Int]) =
