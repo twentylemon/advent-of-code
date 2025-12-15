@@ -20,8 +20,8 @@ private object Day11:
 
   def part1(input: String) =
     val stones = parse(input).groupMapReduce(identity)(_ => 1L)(_ + _)
-    process(stones).drop(25).next.values.sum
+    process(stones).nth(25).values.sum
 
   def part2(input: String) =
     val stones = parse(input).groupMapReduce(identity)(_ => 1L)(_ + _)
-    process(stones).drop(75).next.values.sum
+    process(stones).nth(75).values.sum
