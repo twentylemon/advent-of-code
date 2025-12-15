@@ -134,7 +134,7 @@ case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
   def dropRight(n: N): Rect[N] = growRight(-n)
   def dropTop(n: N): Rect[N] = growTop(-n)
   def dropBottom(n: N): Rect[N] = growBottom(-n)
-  def contract(n: N): Rect[N] = dropLeft(n).dropTop(n).dropRight(n).dropBottom(n)
+  def contract(n: N): Rect[N] = expand(-n)
 
   def encloses(rhs: Rect[N]): Boolean =
     left <= rhs.left && right >= rhs.right && top <= rhs.top && bottom >= rhs.bottom
