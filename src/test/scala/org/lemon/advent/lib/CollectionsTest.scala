@@ -16,7 +16,7 @@ class CollectionsTest extends UnitTest:
 
     check(forAll(gen) { (str: String, delim: Char) =>
       val expected = str.split(delim.toString).toList
-      val splitResult = str.toList.split(delim)
+      val splitResult = str.toList.map(_.toString).split(delim.toString)
       val actual = splitResult.map(_.mkString).toList
       actual == expected
     })

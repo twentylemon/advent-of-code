@@ -2,6 +2,7 @@ package org.lemon.advent.lib
 
 import scala.collection.SeqOps
 import scala.annotation.tailrec
+import scala.util.NotGiven
 
 extension [A](it: Iterator[A])
   /** Returns the nth element of the iterator.
@@ -54,7 +55,7 @@ extension [A](it: Iterable[A])
       k <- indexed.indices.drop(j + 1).iterator
     yield (indexed(i), indexed(j), indexed(k))
 
-extension [A, CC[X] <: SeqOps[X, CC, CC[X]]](seq: CC[A])
+extension [A, CC[X] <: SeqOps[X, CC, CC[X]]](seq: CC[A])(using NotGiven[A =:= Char])
   /** Splits a collection by a given delimiting value. Behaves like `String#split`.
     *
     * @param delimiter the value to split the collection by

@@ -1,6 +1,6 @@
 package org.lemon.advent.year2022
 
-import org.lemon.advent.lib.{Interval, csv}
+import org.lemon.advent.lib.*
 
 private object Day04:
 
