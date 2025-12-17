@@ -5,15 +5,17 @@ import org.lemon.advent.year2015.Day01.*
 
 class Day01Test extends UnitTest:
 
-  for (input, expected) <- Seq(
-    ("(())", 0),
-    ("()()", 0),
-    ("(((", 3),
-    ("(()(()(", 3),
-    ("))(((((", 3),
-    (")))", -3),
-    (")())())", -3),
-  ) do
+  for
+    (input, expected) <- Seq(
+      ("(())", 0),
+      ("()()", 0),
+      ("(((", 3),
+      ("(()(()(", 3),
+      ("))(((((", 3),
+      (")))", -3),
+      (")())())", -3),
+    )
+  do
     test(s"part 1 example $input") {
       part1(input) shouldBe expected
     }
@@ -22,10 +24,12 @@ class Day01Test extends UnitTest:
     part1(read(file(2015)(1))) shouldBe 138
   }
 
-  for (input, expected) <- Seq(
-    (")", 1),
-    ("()())", 5),
-  ) do
+  for
+    (input, expected) <- Seq(
+      (")", 1),
+      ("()())", 5),
+    )
+  do
     test(s"part 2 example $input") {
       part2(input) shouldBe expected
     }

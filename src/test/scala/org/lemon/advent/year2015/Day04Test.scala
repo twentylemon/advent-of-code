@@ -5,10 +5,12 @@ import org.lemon.advent.year2015.Day04.*
 
 class Day04Test extends UnitTest:
 
-  for (input, expected) <- Seq(
-    ("abcdef", 609043),
-    ("pqrstuv", 1048970),
-  ) do
+  for
+    (input, expected) <- Seq(
+      ("abcdef", 609043),
+      ("pqrstuv", 1048970),
+    )
+  do
     test(s"part 1 example $input") {
       part1(input) shouldBe expected
     }
