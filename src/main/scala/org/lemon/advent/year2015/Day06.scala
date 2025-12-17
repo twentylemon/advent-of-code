@@ -34,7 +34,7 @@ private object Day06:
   def affected(cells: Seq[Area], area: Area) =
     val lo = cells.search(area).insertionPoint
     val hi = cells.search(Area(area.right + 1, area.right + 1, 0, 0)).insertionPoint
-    cells.slice(lo, hi).filter(cell => (cell & area).nonEmpty)
+    cells.slice(lo, hi).filter(_.intersects(area))
 
   def part1(input: String) =
     val ops = parse(input)
