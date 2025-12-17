@@ -77,7 +77,8 @@ case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
   def bottomRow: Iterator[Point[N]] = row(bottom)
 
   def boundary: Iterator[Point[N]] =
-    if width == `1` then leftCol
+    if isEmpty then Iterator.empty
+    else if width == `1` then leftCol
     else if height == `1` then topRow
     else topRow ++ rightCol.drop(1) ++ reverseRow(bottom).drop(1) ++ reverseCol(left).drop(1).take(height.toInt - 2)
 
@@ -106,10 +107,12 @@ case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
     * @return iterator of all sub-areas of the given size in this area
     */
   def rectangles(width: N, height: N): Iterator[Rect[N]] =
-    for
-      startX <- xRange.take(this.width - width + `1`).iterator
-      startY <- yRange.take(this.height - height + `1`).iterator
-    yield Rect(Interval(startX, startX + width - `1`), Interval(startY, startY + height - `1`))
+    if isEmpty then Iterator.empty
+    else
+      for
+        startX <- xRange.take(this.width - width + `1`).iterator
+        startY <- yRange.take(this.height - height + `1`).iterator
+      yield Rect(Interval(startX, startX + width - `1`), Interval(startY, startY + height - `1`))
 
   /** Returns the four quadrants of this area. If the area has an odd width or height,
     * the middle row or column will be in the top or left quadrants.
@@ -137,19 +140,25 @@ case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
   def contract(n: N): Rect[N] = expand(-n)
 
   def encloses(rhs: Rect[N]): Boolean =
-    left <= rhs.left && right >= rhs.right && top <= rhs.top && bottom >= rhs.bottom
+    if rhs.isEmpty then true
+    else if isEmpty then false
+    else
+      left <= rhs.left && right >= rhs.right && top <= rhs.top && bottom >= rhs.bottom
 
   def overlaps(rhs: Rect[N]): Boolean =
-    left <= rhs.right && right >= rhs.left && top <= rhs.bottom && bottom >= rhs.top
+    nonEmpty && rhs.nonEmpty && left <= rhs.right && right >= rhs.left && top <= rhs.bottom && bottom >= rhs.top
   def intersects(rhs: Rect[N]): Boolean = overlaps(rhs)
 
-  def intersect(rhs: Rect[N]): Option[Rect[N]] =
-    Option.when(intersects(rhs))(Rect(
-      xRange = Interval(left max rhs.left, right min rhs.right),
-      yRange = Interval(top max rhs.top, bottom min rhs.bottom),
-    ))
+  def intersect(rhs: Rect[N]): Rect[N] =
+    if isEmpty then this
+    else if rhs.isEmpty then rhs
+    else
+      Rect(
+        xRange = Interval(left max rhs.left, right min rhs.right),
+        yRange = Interval(top max rhs.top, bottom min rhs.bottom),
+      )
 
-  def &(rhs: Rect[N]): Option[Rect[N]] = intersect(rhs)
+  def &(rhs: Rect[N]): Rect[N] = intersect(rhs)
 
   def clamp(coord: Point[N]): Point[N] = Point(x = coord.x max left min right, y = coord.y max top min bottom)
 

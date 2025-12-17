@@ -7,6 +7,11 @@ import org.scalacheck.Prop.*
 import org.scalacheck.*
 
 class AreaTest extends UnitTest:
+  val emptyArea: Gen[Area] =
+    for
+      x <- Gen.choose(-100, 100)
+      y <- Gen.choose(-100, 100)
+    yield Area(x, x - 1, y, y - 1)
 
   test("area contains all enclosed points") {
     check((area: Area) => area.forall(area.contains))
@@ -165,7 +170,7 @@ class AreaTest extends UnitTest:
   }
 
   test("intersect with self is self") {
-    check((area: Area) => area.intersect(area).contains(area))
+    check((area: Area) => area.intersect(area) == area)
   }
 
   test("intersect of disjoint areas is empty") {
@@ -174,14 +179,13 @@ class AreaTest extends UnitTest:
 
   test("intersect is enclosed by both areas") {
     check((a1: Area, a2: Area) =>
-      a1.intersect(a2).forall(inter => a1.encloses(inter) && a2.encloses(inter))
+      val inter = a1.intersect(a2)
+      a1.encloses(inter) && a2.encloses(inter)
     )
   }
 
   test("intersect contains only points in both areas") {
-    check((a1: Area, a2: Area) =>
-      a1.intersect(a2).forall(inter => inter.forall(c => a1.contains(c) && a2.contains(c)))
-    )
+    check((a1: Area, a2: Area) => a1.intersect(a2).forall(c => a1.contains(c) && a2.contains(c)))
   }
 
   test("growLeft and dropLeft are inverse") {
