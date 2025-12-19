@@ -19,8 +19,8 @@ class Day06Test extends UnitTest:
 
   for
     (input, expected) <- Seq(
-      ("turn on 0,0 through 0,0", 1),
-      ("toggle 0,0 through 999,999", 2000000)
+      "turn on 0,0 through 0,0" -> 1,
+      "toggle 0,0 through 999,999" -> 2000000
     )
   do
     test(s"part 2 example $input") {

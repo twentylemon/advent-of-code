@@ -7,9 +7,9 @@ class Day03Test extends UnitTest:
 
   for
     (input, expected) <- Seq(
-      (">", 2),
-      ("^>v<", 4),
-      ("^v^v^v^v^v", 2),
+      ">" -> 2,
+      "^>v<" -> 4,
+      "^v^v^v^v^v" -> 2,
     )
   do
     test(s"part 1 example $input") {
