@@ -11,7 +11,7 @@ private object Day02:
   def part1(input: String) = parse(input).count(isSafe)
 
   def isSafe(report: Seq[Int]): Boolean =
-    def diffs = report.sliding(2).map { case Seq(a, b) => (b - a).abs }
+    def diffs = report.sliding2.map((a, b) => (b - a).abs)
     val sorted = report.sorted
     (report == sorted || report == sorted.reverse) && diffs.forall(1 to 3 contains _)
 

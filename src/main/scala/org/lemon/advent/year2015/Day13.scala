@@ -1,5 +1,7 @@
 package org.lemon.advent.year2015
 
+import org.lemon.advent.lib.*
+
 private object Day13:
 
   def parse(input: String) = input.linesIterator.map(_ match
@@ -13,7 +15,7 @@ private object Day13:
       .map(arrangement =>
         val first = graph((arrangement.head, people.head)) + graph((people.head, arrangement.head))
         val last = graph((arrangement.last, people.head)) + graph((people.head, arrangement.last))
-        val rest = arrangement.sliding(2).map { case Seq(from, to) => graph((from, to)) + graph((to, from)) }.sum
+        val rest = arrangement.sliding2.map(x => graph(x) + graph(x.swap)).sum
         first + last + rest
       )
       .max

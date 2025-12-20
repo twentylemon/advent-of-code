@@ -20,6 +20,15 @@ extension [A](it: Iterator[A])
     */
   def nthOption(n: Int): Option[A] = it.drop(n).nextOption
 
+  /** Returns `sliding(2)` as tuples instead of collections.
+    *
+    * @return sliding window of pairs in the iterator
+    */
+  def sliding2: Iterator[(A, A)] =
+    val (it1, it2) = it.duplicate
+    if it2.hasNext then it2.next
+    it1.zip(it2)
+
 extension [A](it: Iterable[A])
   /** Returns an iterator view of the Cartesian product of this iterable and another.
     * Also known as the cross product.
@@ -54,6 +63,13 @@ extension [A](it: Iterable[A])
       j <- indexed.indices.drop(i + 1).iterator
       k <- indexed.indices.drop(j + 1).iterator
     yield (indexed(i), indexed(j), indexed(k))
+
+  /** Returns `sliding(2)` as tuples instead of collections.
+    * Singleton collections yield an empty result.
+    *
+    * @return sliding window of pairs in the collection
+    */
+  def sliding2 = it lazyZip it.drop(1)
 
   /** Returns a map of element frequencies.
     *

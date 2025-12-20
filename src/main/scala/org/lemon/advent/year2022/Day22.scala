@@ -49,7 +49,7 @@ private object Day22:
         line.zipWithIndex.filter((c, _) => !c.isWhitespace).map((c, x) =>
           Node(location = (x + 1, y + 1), contents = c)
         )
-      (nodes :+ nodes.head).sliding(2).foreach(n => n(0).connect(Right, n(1)))
+      (nodes :+ nodes.head).sliding2.foreach((a, b) => a.connect(Right, b))
       nodes.head
 
     val rows = in.zipWithIndex.map(parseRow)

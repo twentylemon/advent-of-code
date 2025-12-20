@@ -1,5 +1,6 @@
 package org.lemon.advent.year2022
 
+import org.lemon.advent.lib.*
 import org.lemon.advent.lib.`2d`.*
 
 import scala.collection.mutable
@@ -13,10 +14,10 @@ private object Day14:
 
   def parseRocks(line: String): Iterator[Area] = line
     .split(" -> ")
-    .toSeq
+    .iterator
     .map { case s"$x,$y" => Coord(x.toInt, y.toInt) }
-    .sliding(2)
-    .map { case Seq(c1, c2) => c1.bounding(c2) }
+    .sliding2
+    .map((c1, c2) => c1.bounding(c2))
 
   def trickle(occupied: Coord => Boolean, deep: Coord => Boolean)(source: Coord): Trickle =
     val spot = source.walk(Direction.Down)

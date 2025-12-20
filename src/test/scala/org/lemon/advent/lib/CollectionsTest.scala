@@ -6,6 +6,51 @@ import org.lemon.advent.*
 
 class CollectionsTest extends UnitTest:
 
+  test("pairs is equal to stdlib combinations(2) of a set") {
+    check((xs: Set[Int]) =>
+      val pair = xs.pairs.toSeq.sorted
+      val combo = xs.toSeq
+        .combinations(2)
+        .map { case Seq(a, b) => (a, b) }
+        .toSeq
+        .sorted
+      pair == combo
+    )
+  }
+
+  test("triples is equal to stdlib combinations(3) of a set") {
+    check((xs: Set[Int]) =>
+      val trip = xs.triples.toSeq.sorted
+      val combo = xs.toSeq
+        .combinations(3)
+        .map { case Seq(a, b, c) => (a, b, c) }
+        .toSeq
+        .sorted
+      trip == combo
+    )
+  }
+
+  test("sliding2 is equivalent to sliding(2) with singletons removed") {
+    check((xs: Seq[Int]) => xs.sliding(2).collect { case Seq(a, b) => (a, b) }.toSeq == xs.sliding2.toSeq)
+  }
+
+  test("iterator sliding2 is equivalent to sliding(2) with singletons removed") {
+    check((xs: Seq[Int]) =>
+      xs.iterator.sliding(2).collect { case Seq(a, b) => (a, b) }.toSeq == xs.iterator.sliding2.toSeq
+    )
+  }
+
+  test("frequencies counts match elements") {
+    check(forAll { (it: Iterable[Int]) =>
+      val freq = it.frequencies
+      it.forall(elem => freq(elem) == it.count(_ == elem))
+    })
+  }
+
+  test("frequencies keys are exactly the distinct elements") {
+    check(forAll { (it: Iterable[Int]) => it.frequencies.keySet == it.toSet })
+  }
+
   test("split matches String#split") {
     val gen =
       for
@@ -20,15 +65,4 @@ class CollectionsTest extends UnitTest:
       val actual = splitResult.map(_.mkString).toList
       actual == expected
     })
-  }
-
-  test("frequencies counts match elements") {
-    check(forAll { (it: Iterable[Int]) =>
-      val freq = it.frequencies
-      it.forall(elem => freq(elem) == it.count(_ == elem))
-    })
-  }
-
-  test("frequencies keys are exactly the distinct elements") {
-    check(forAll { (it: Iterable[Int]) => it.frequencies.keySet == it.toSet })
   }

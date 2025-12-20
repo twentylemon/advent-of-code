@@ -26,8 +26,8 @@ private object Day22:
 
   def sequences(secret: Long) =
     Iterator.iterate(secret)(process)
-      .sliding(2)
-      .map { case Seq(a, b) => (price(b), price(b) - price(a)) }
+      .sliding2
+      .map((a, b) => (price(b), price(b) - price(a)))
       .take(2000)
       .sliding(4)
       .map { case Seq((_, a), (_, b), (_, c), (price, d)) => (a, b, c, d) -> price }

@@ -24,9 +24,9 @@ private object Day06:
   def compress(areas: Seq[Area]) =
     val xs = areas.flatMap(area => Seq(area.left, area.right + 1)).distinct.sorted
     val ys = areas.flatMap(area => Seq(area.top, area.bottom + 1)).distinct.sorted
-    xs.sliding(2).toSeq
-      .cartesianProduct(ys.sliding(2).toSeq)
-      .collect { case (Seq(x1, x2), Seq(y1, y2)) => Area(x1, x2 - 1, y1, y2 - 1) }
+    xs.sliding2
+      .cartesianProduct(ys.sliding2)
+      .map { case ((x1, x2), (y1, y2)) => Area(x1 until x2, y1 until y2) }
       .filter(_.nonEmpty)
       .toIndexedSeq
       .sorted
