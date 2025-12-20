@@ -1,0 +1,34 @@
+package org.lemon.advent.year2015
+
+import org.lemon.advent.lib.*
+
+private object Day08:
+
+  def parse(input: String) = input.linesIterator.toSeq
+
+  def decode(str: String) =
+    @annotation.tailrec
+    def loop(str: List[Char], acc: Int): Int = str match
+      case Nil => acc
+      case '\\' :: 'x' :: a :: b :: tail => loop(tail, acc + 1)
+      case '\\' :: a :: tail => loop(tail, acc + 1)
+      case '"' :: tail => loop(tail, acc)
+      case _ :: tail => loop(tail, acc + 1)
+    loop(str.toList, 0)
+
+  def part1(input: String) =
+    val list = parse(input)
+    list.map(str => str.size - decode(str)).sum
+
+  def encode(str: String) =
+    @annotation.tailrec
+    def loop(str: List[Char], acc: Int): Int = str match
+      case Nil => acc
+      case '\\' :: tail => loop(tail, acc + 2)
+      case '"' :: tail => loop(tail, acc + 2)
+      case _ :: tail => loop(tail, acc + 1)
+    loop(str.toList, 2)
+
+  def part2(input: String) =
+    val list = parse(input)
+    list.map(str => encode(str) - str.size).sum
