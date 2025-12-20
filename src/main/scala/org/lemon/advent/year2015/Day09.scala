@@ -1,7 +1,5 @@
 package org.lemon.advent.year2015
 
-import org.lemon.advent.lib.*
-
 private object Day09:
 
   def parse(input: String) = input.linesIterator.flatMap(_ match
