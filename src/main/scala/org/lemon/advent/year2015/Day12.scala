@@ -20,4 +20,4 @@ private object Day12:
 
   def part2(input: String) =
     val json = parse(input).getOrElse(Json.Null)
-    sum(json, !_.values.exists(j => j.isString && j.asString.get == "red"))
+    sum(json, !_.values.exists(_.asString.contains("red")))
