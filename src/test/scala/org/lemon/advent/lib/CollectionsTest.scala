@@ -40,6 +40,30 @@ class CollectionsTest extends UnitTest:
     )
   }
 
+  test("sliding3 is equivalent to sliding(3) with partial windows removed") {
+    check((xs: Seq[Int]) =>
+      xs.sliding(3).collect { case Seq(a, b, c) => (a, b, c) }.toSeq == xs.sliding3.toSeq
+    )
+  }
+
+  test("iterator sliding3 is equivalent to sliding(3) with partial windows removed") {
+    check((xs: Seq[Int]) =>
+      xs.iterator.sliding(3).collect { case Seq(a, b, c) => (a, b, c) }.toSeq == xs.iterator.sliding3.toSeq
+    )
+  }
+
+  test("sliding4 is equivalent to sliding(4) with partial windows removed") {
+    check((xs: Seq[Int]) =>
+      xs.sliding(4).collect { case Seq(a, b, c, d) => (a, b, c, d) }.toSeq == xs.sliding4.toSeq
+    )
+  }
+
+  test("iterator sliding4 is equivalent to sliding(4) with partial windows removed") {
+    check((xs: Seq[Int]) =>
+      xs.iterator.sliding(4).collect { case Seq(a, b, c, d) => (a, b, c, d) }.toSeq == xs.iterator.sliding4.toSeq
+    )
+  }
+
   test("frequencies counts match elements") {
     check(forAll { (it: Iterable[Int]) =>
       val freq = it.frequencies

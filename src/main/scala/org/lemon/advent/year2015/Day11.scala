@@ -6,7 +6,7 @@ private object Day11:
 
   def valid(password: String) =
     def iol = password.exists("iol".contains)
-    def straight = password.sliding(3).exists(s => s(0) + 1 == s(1) && s(1) + 1 == s(2))
+    def straight = password.sliding3.exists((a, b, c) => a + 1 == b && b + 1 == c)
     def pairPairs =
       @annotation.tailrec
       def loop(str: String, pairs: Set[Char]): Boolean =

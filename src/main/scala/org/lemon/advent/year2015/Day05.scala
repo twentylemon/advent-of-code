@@ -15,7 +15,7 @@ private object Day05:
 
   def supernice(str: String) =
     def pairpair = str.sliding(2).exists(s => str.indexOf(s, str.indexOf(s) + 2) != -1)
-    def sandwich = str.sliding(3).exists(s => s(0) == s(2))
+    def sandwich = str.sliding3.exists((a, _, c) => a == c)
     pairpair && sandwich
 
   def part2(input: String) =

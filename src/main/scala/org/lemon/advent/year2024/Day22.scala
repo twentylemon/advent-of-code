@@ -29,8 +29,8 @@ private object Day22:
       .sliding2
       .map((a, b) => (price(b), price(b) - price(a)))
       .take(2000)
-      .sliding(4)
-      .map { case Seq((_, a), (_, b), (_, c), (price, d)) => (a, b, c, d) -> price }
+      .sliding4
+      .map { case ((_, a), (_, b), (_, c), (price, d)) => (a, b, c, d) -> price }
       .distinctBy(_._1)
       .toMap
 

@@ -29,6 +29,34 @@ extension [A](it: Iterator[A])
     if it2.hasNext then it2.next
     it1.zip(it2)
 
+  /** Returns `sliding(3)` as tuples instead of collections.
+    *
+    * @return sliding window of triples in the iterator
+    */
+  def sliding3: Iterator[(A, A, A)] =
+    val (it1, rest) = it.duplicate
+    val (it2, it3) = rest.duplicate
+    if it2.hasNext then it2.next
+    (1 to 2).foreach(_ => if it3.hasNext then it3.next)
+    new Iterator[(A, A, A)]:
+      def hasNext = it1.hasNext && it2.hasNext && it3.hasNext
+      def next = (it1.next, it2.next, it3.next)
+
+  /** Returns `sliding(4)` as tuples instead of collections.
+    *
+    * @return sliding window of 4-tuples in the iterator
+    */
+  def sliding4: Iterator[(A, A, A, A)] =
+    val (it1, rest1) = it.duplicate
+    val (it2, rest2) = rest1.duplicate
+    val (it3, it4) = rest2.duplicate
+    if it2.hasNext then it2.next
+    (1 to 2).foreach(_ => if it3.hasNext then it3.next)
+    (1 to 3).foreach(_ => if it4.hasNext then it4.next)
+    new Iterator[(A, A, A, A)]:
+      def hasNext = it1.hasNext && it2.hasNext && it3.hasNext && it4.hasNext
+      def next = (it1.next, it2.next, it3.next, it4.next)
+
 extension [A](it: Iterable[A])
   /** Returns an iterator view of the Cartesian product of this iterable and another.
     * Also known as the cross product.
@@ -70,6 +98,18 @@ extension [A](it: Iterable[A])
     * @return sliding window of pairs in the collection
     */
   def sliding2 = it lazyZip it.drop(1)
+
+  /** Returns `sliding(3)` as tuples instead of collections.
+    *
+    * @return sliding window of triples in the collection
+    */
+  def sliding3 = it lazyZip it.drop(1) lazyZip it.drop(2)
+
+  /** Returns `sliding(4)` as tuples instead of collections.
+    *
+    * @return sliding window of 4-tuples in the collection
+    */
+  def sliding4 = it lazyZip it.drop(1) lazyZip it.drop(2) lazyZip it.drop(3)
 
   /** Returns a map of element frequencies.
     *
