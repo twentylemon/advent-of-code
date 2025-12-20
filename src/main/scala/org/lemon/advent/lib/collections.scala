@@ -61,6 +61,8 @@ extension [A](it: Iterable[A])
     */
   def frequencies: Map[A, Int] = it.groupMapReduce(identity)(_ => 1)(_ + _)
 
+  def slidingPairs: Iterable[(A, A)] = it.zip(it.tail)
+
 extension [K, V](map: Map[K, V])
   /** Finds the first key associated with a given value.
     *
