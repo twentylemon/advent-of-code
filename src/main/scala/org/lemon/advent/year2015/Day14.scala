@@ -1,6 +1,5 @@
 package org.lemon.advent.year2015
 
-import org.lemon.advent.lib.*
 import scala.math.Integral.Implicits.*
 
 private object Day14:
