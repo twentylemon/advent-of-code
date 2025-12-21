@@ -9,11 +9,14 @@ private object Day18:
     val grid = Coord.gridToMap(input)
     (grid.filter(_._2 == '#').keySet, Area(grid))
 
-  def tick(area: Area)(living: Set[Coord]) = area.filter(coord =>
-    val alive = coord.surrounding.count(living)
-    if living(coord) then alive == 2 || alive == 3
-    else alive == 3
-  ).toSet
+  def tick(area: Area)(living: Set[Coord]) = living.view
+    .flatMap(_.surrounding)
+    .filter(area(_))
+    .frequencies
+    .collect {
+      case (coord, 3) => coord
+      case (coord, 2) if living(coord) => coord
+    }.toSet
 
   def part1(input: String, steps: Int = 100) =
     val (initial, area) = parse(input)
