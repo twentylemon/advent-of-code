@@ -32,5 +32,5 @@ class Day18Test extends UnitTest:
   }
 
   test("part 2") {
-    part2(read(file(2015)(18))) shouldBe 0
+    part2(read(file(2015)(18))) shouldBe 1006
   }
