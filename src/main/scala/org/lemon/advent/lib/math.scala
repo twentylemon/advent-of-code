@@ -20,6 +20,13 @@ extension [N: Integral](a: N)
     val mod = a % n
     if mod < Integral[N].zero then mod + n else mod
 
+  /** Returns `this / n` rounded up.
+    *
+    * @param n the divisor
+    * @return the result of division, rounding up if necessary
+    */
+  def /^(n: N): N = (a + n - `1`) / n
+
   /** Returns the greatest common divisor of this and `b`.
     *
     * @param b the other number
