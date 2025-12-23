@@ -8,7 +8,7 @@ private object Day01:
   def parse(input: String) = input.linesIterator.flatMap(_.csv).map(x => (Direction(x.head), x.tail.toInt)).toSeq
 
   def walk(steps: Seq[(Direction, Int)]) =
-    val turns = steps.scanLeft(Direction.Up) { case (facing, (turn, steps)) =>
+    val turns = steps.scanLeft(Direction.Up) { case (facing, (turn, _)) =>
       turn match
         case Direction.Left => facing.turnLeft
         case Direction.Right => facing.turnRight
