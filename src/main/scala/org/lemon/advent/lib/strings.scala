@@ -1,5 +1,7 @@
 package org.lemon.advent.lib
 
+import scala.util.Try
+
 extension (str: String)
   /** Prepends the string with the given character until it reaches the given length.
     *
@@ -26,3 +28,15 @@ extension (str: String)
     * @return the chunks of text separated by blank lines
     */
   def chunks: Seq[String] = str.split("\n\n").filter(_.trim.nonEmpty).toSeq
+
+  /** Parses the string into a BigInt.
+    *
+    * @return the string as a BigInt
+    */
+  def toBigInt: BigInt = BigInt(str)
+
+  /** Tris to parse the string into a BigInt, returning None if it fails.
+    *
+    * @return the string as a BigInt, or None on failure
+    */
+  def toBigIntOption: Option[BigInt] = Try(BigInt(str)).toOption

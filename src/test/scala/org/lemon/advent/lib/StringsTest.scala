@@ -61,3 +61,23 @@ class StringsTest extends UnitTest:
   test("chunks handles empty string") {
     "".chunks == Seq.empty
   }
+
+  test("toBigInt round trip") {
+    check((n: BigInt) => n.toString.toBigInt == n)
+  }
+
+  test("toBigInt works with + prefix") {
+    check((n: BigInt) => ("+" + n.abs.toString).toBigInt == n.abs)
+  }
+
+  test("toBigInt works with - prefix") {
+    check((n: BigInt) => ("-" + n.abs.toString).toBigInt == -n.abs)
+  }
+
+  test("toBigIntOption round trip") {
+    check((n: BigInt) => n.toString.toBigIntOption == Some(n))
+  }
+
+  test("toBigIntOption returns None for invalid strings") {
+    check(forAll(Gen.alphaStr.suchThat(_.nonEmpty))(s => s.toBigIntOption == None))
+  }

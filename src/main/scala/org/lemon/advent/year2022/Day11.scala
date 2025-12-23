@@ -33,7 +33,7 @@ private object Day11:
   def parseMonkey(in: String) =
     val lines = in.linesIterator.map(_.strip).toSeq
     val id = lines(0) match { case s"Monkey $i:" => i.toInt }
-    val items = lines(1).strip match { case s"Starting items: $list" => list.csv.map(BigInt(_)) }
+    val items = lines(1).strip match { case s"Starting items: $list" => list.csv.map(_.toBigInt) }
     val inspect = parseInspect(lines(2))
     val target = parseTarget(lines(3), lines(4), lines(5))
     val divisor = parseDivisor(lines(3))
