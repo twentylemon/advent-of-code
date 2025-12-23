@@ -42,6 +42,7 @@ case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
   def bottomRight: Point[N] = Point(right, bottom)
   def topRight: Point[N] = Point(right, top)
   def bottomLeft: Point[N] = Point(left, bottom)
+  def corners: Seq[Point[N]] = Seq(topLeft, topRight, bottomRight, bottomLeft)
 
   def width: N = xRange.length
   def height: N = yRange.length

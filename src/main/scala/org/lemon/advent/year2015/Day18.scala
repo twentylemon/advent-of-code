@@ -24,5 +24,5 @@ private object Day18:
 
   def part2(input: String, steps: Int = 100) =
     val (initial, area) = parse(input)
-    val corners = Set(area.topLeft, area.topRight, area.bottomLeft, area.bottomRight)
+    val corners = area.corners.toSet
     Iterator.iterate(initial ++ corners)(tick(area)(_) ++ corners).nth(steps).size
