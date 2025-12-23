@@ -72,10 +72,10 @@ case class Point[N: Integral](x: N, y: N):
 
   def flip = Point(x = y, y = x)
 
-  def rotateClockwise: Point[N] = Point(x = -y, y = x)
-  def rotateClockwise(about: Point[N]): Point[N] = (this - about).rotateClockwise + about
-  def rotateCounterClockwise: Point[N] = Point(x = y, y = -x)
-  def rotateCounterClockwise(about: Point[N]): Point[N] = (this - about).rotateCounterClockwise + about
+  def rotateRight: Point[N] = Point(x = -y, y = x)
+  def rotateRight(about: Point[N]): Point[N] = (this - about).rotateRight + about
+  def rotateLeft: Point[N] = Point(x = y, y = -x)
+  def rotateLeft(about: Point[N]): Point[N] = (this - about).rotateLeft + about
 
   def +(rhs: Point[N]): Point[N] = (x + rhs.x, y + rhs.y)
   def +(direction: Direction): Point[N] = move(direction)

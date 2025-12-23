@@ -216,36 +216,36 @@ class CoordTest extends UnitTest:
     )
   }
 
-  test("rotateClockwise four times is identity") {
-    check((coord: Coord) => coord.rotateClockwise.rotateClockwise.rotateClockwise.rotateClockwise == coord)
+  test("rotateRight four times is identity") {
+    check((coord: Coord) => coord.rotateRight.rotateRight.rotateRight.rotateRight == coord)
   }
 
-  test("rotateCounterClockwise four times is identity") {
+  test("rotateLeft four times is identity") {
     check((coord: Coord) =>
-      coord.rotateCounterClockwise.rotateCounterClockwise.rotateCounterClockwise.rotateCounterClockwise == coord
+      coord.rotateLeft.rotateLeft.rotateLeft.rotateLeft == coord
     )
   }
 
-  test("rotateClockwise and rotateCounterClockwise are inverses") {
-    check((coord: Coord) => coord.rotateClockwise.rotateCounterClockwise == coord)
+  test("rotateRight and rotateLeft are inverses") {
+    check((coord: Coord) => coord.rotateRight.rotateLeft == coord)
   }
 
-  test("rotateClockwise turns right") {
-    check((dir: Direction) => dir.unitVector.rotateClockwise == dir.turnRight.unitVector)
+  test("rotateRight turns right") {
+    check((dir: Direction) => dir.unitVector.rotateRight == dir.turnRight.unitVector)
   }
 
-  test("rotateCounterClockwise turns left") {
-    check((dir: Direction) => dir.unitVector.rotateCounterClockwise == dir.turnLeft.unitVector)
+  test("rotateLeft turns left") {
+    check((dir: Direction) => dir.unitVector.rotateLeft == dir.turnLeft.unitVector)
   }
 
-  test("rotateClockwise around center four times is identity") {
+  test("rotateRight around center four times is identity") {
     check((coord: Coord, about: Coord) =>
-      coord.rotateClockwise(about).rotateClockwise(about).rotateClockwise(about).rotateClockwise(about) == coord
+      coord.rotateRight(about).rotateRight(about).rotateRight(about).rotateRight(about) == coord
     )
   }
 
-  test("rotateClockwise around origin is same as rotateClockwise") {
-    check((coord: Coord) => coord.rotateClockwise(Coord.origin) == coord.rotateClockwise)
+  test("rotateRight around origin is same as rotateRight") {
+    check((coord: Coord) => coord.rotateRight(Coord.origin) == coord.rotateRight)
   }
 
   test("to[Int] is identity") {
