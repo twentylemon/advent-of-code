@@ -94,3 +94,13 @@ case class Point[N: Integral](x: N, y: N):
   def asVec: VecT[N] = VecT[N](this)
 
   def to[M: Integral]: Point[M] = Point[M](fromString[M](x.toString), fromString[M](y.toString))
+
+extension [N: Integral](vertices: Seq[Point[N]])
+  /** Computes the area of a polygon using the shoelace formula.
+    * @return the area of the polygon
+    */
+  def shoelaceArea: N = vertices
+    .lazyZip(vertices.tail :+ vertices.head)
+    .map((a, b) => a.x * b.y - a.y * b.x)
+    .reduce(_ + _)
+    .abs / Integral[N].fromInt(2)
