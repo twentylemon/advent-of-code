@@ -205,12 +205,17 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
         case _ => (start, end, intervals)
 
       // find all intervals that our range covers or touches
-      val absorbed = baseIntervals.rangeFrom(mergeStart).takeWhile((s, _) => s <= mergeEnd + `1`)
-      if absorbed.isEmpty then Diet(baseIntervals.updated(mergeStart, mergeEnd))
-      else
-        val finalEnd = absorbed.last._2 max mergeEnd
-        val finalIntervals = baseIntervals -- absorbed.keys
-        Diet(finalIntervals.updated(mergeStart, finalEnd))
+      val iter = baseIntervals.iteratorFrom(mergeStart)
+      iter.nextOption match
+        case None => Diet(baseIntervals.updated(mergeStart, mergeEnd))
+        case Some((s, e)) if s > mergeEnd + `1` => Diet(baseIntervals.updated(mergeStart, mergeEnd))
+        case Some((s, e)) =>
+          // at least one overlap, collect the rest
+          val rest = iter.takeWhile((s2, _) => s2 <= (mergeEnd max e) + `1`).toList
+          val absorbed = (s, e) :: rest
+          val finalEnd = absorbed.last._2 max mergeEnd
+          val finalIntervals = absorbed.foldLeft(baseIntervals)((m, kv) => m - kv._1)
+          Diet(finalIntervals.updated(mergeStart, finalEnd))
 
   /** Adds a range to this diet. The range is converted to increasing, so `5 to 3 by -1` will still add `3 to 5`.
     *
