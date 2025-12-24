@@ -5,18 +5,24 @@ import scala.collection.parallel.CollectionConverters.*
 
 private object Day04:
 
-  def md5(input: String) = MessageDigest.getInstance("MD5").digest(input.getBytes).map("%02x".format(_)).mkString
+  def fiveZeros(input: String)(idx: Int) =
+    val hash = MessageDigest.getInstance("MD5").digest(s"$input$idx".getBytes)
+    Option.when(hash(0) == 0 && hash(1) == 0 && (hash(2) & 0xf0) == 0)(idx)
+
+  def sixZeros(input: String)(idx: Int) =
+    val hash = MessageDigest.getInstance("MD5").digest(s"$input$idx".getBytes)
+    Option.when(hash(0) == 0 && hash(1) == 0 && hash(2) == 0)(idx)
 
   def part1(input: String) =
-    val key = input.trim
+    val md = fiveZeros(input.trim)
     Iterator.from(1)
       .grouped(100_000)
-      .flatMap(_.par.filter(i => md5(key + i).startsWith("00000")).seq.minOption)
+      .flatMap(_.par.flatMap(md).seq.minOption)
       .next
 
   def part2(input: String) =
-    val key = input.trim
+    val md = sixZeros(input.trim)
     Iterator.from(1)
       .grouped(100_000)
-      .flatMap(_.par.filter(i => md5(key + i).startsWith("000000")).seq.minOption)
+      .flatMap(_.par.flatMap(md).seq.minOption)
       .next
