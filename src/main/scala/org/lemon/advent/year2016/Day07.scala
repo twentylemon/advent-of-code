@@ -4,8 +4,6 @@ import org.lemon.advent.lib.*
 
 private object Day07:
 
-  def parse(input: String) = input.linesIterator.toSeq
-
   def cut(ip: String) = Iterator.unfold(ip)(ip =>
     Option.when(ip.nonEmpty) {
       val (supernet, rest1) = ip.span(_ != '[')
@@ -21,7 +19,7 @@ private object Day07:
     supernets.exists(abba) && !hypernets.exists(abba)
 
   def part1(input: String) =
-    parse(input).count(tls)
+    input.linesIterator.count(tls)
 
   def aba(net: String) = net.sliding3.filter((a, b, c) => a == c && a != b).map((a, b, _) => (a, b))
 
@@ -31,4 +29,4 @@ private object Day07:
     supernets.flatMap(aba).exists((a, b) => babs.contains((b, a)))
 
   def part2(input: String) =
-    parse(input).count(ssl)
+    input.linesIterator.count(ssl)
