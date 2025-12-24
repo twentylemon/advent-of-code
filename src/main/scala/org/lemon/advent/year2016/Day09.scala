@@ -4,7 +4,6 @@ private object Day09:
 
   def inflate(zip: String, goDeeper: Boolean): Long =
     zip match
-      case "" => 0L
       case s"$pre(${len}x$n)$suf" =>
         val (data, rest) = suf.splitAt(len.toInt)
         val dataSize = if goDeeper then inflate(data, goDeeper) else data.size.toLong
