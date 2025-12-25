@@ -4,9 +4,9 @@ import org.lemon.advent.lib.`2d`.*
 
 private object Day02:
 
-  def parse(input: String) = input.linesIterator.map(_ match
+  def parse(input: String) = input.linesIterator.map {
     case s"${l}x${w}x${h}" => (l.toInt, w.toInt, h.toInt)
-  ).toSeq
+  }.toSeq
 
   def part1(input: String) =
     val boxes = parse(input)

@@ -5,9 +5,9 @@ import org.lemon.advent.lib.`2d`.*
 
 private object Day14:
 
-  def parse(input: String) = input.linesIterator.map(_ match
+  def parse(input: String) = input.linesIterator.map {
     case s"p=$px,$py v=$vx,$vy" => (Coord(px.toInt, py.toInt), Coord(vx.toInt, vy.toInt))
-  ).toSeq
+  }.toSeq
 
   def move(robits: Seq[(Coord, Coord)], area: Area): Seq[(Coord, Coord)] =
     robits.map((pos, vel) => (area.wrap(pos + vel), vel))

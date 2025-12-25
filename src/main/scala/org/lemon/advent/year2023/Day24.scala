@@ -13,14 +13,12 @@ private object Day24:
 
   case class Hail(position: Point, velocity: Point)
 
-  def parse(input: String) = input.linesIterator
-    .map(_ match
-      case s"$x, $y, $z @ $vx, $vy, $vz" => Hail(
-          position = Point(x = x.trim.toLong, y = y.trim.toLong, z = z.trim.toLong),
-          velocity = Point(x = vx.trim.toLong, y = vy.trim.toLong, z = vz.trim.toLong)
-        )
-    )
-    .toSeq
+  def parse(input: String) = input.linesIterator.map {
+    case s"$x, $y, $z @ $vx, $vy, $vz" => Hail(
+        position = Point(x = x.trim.toLong, y = y.trim.toLong, z = z.trim.toLong),
+        velocity = Point(x = vx.trim.toLong, y = vy.trim.toLong, z = vz.trim.toLong)
+      )
+  }.toSeq
 
   def futureIntersection2d(lhs: Hail, rhs: Hail): Option[(Double, Double)] =
     val Point(x1, y1, _) = lhs.position

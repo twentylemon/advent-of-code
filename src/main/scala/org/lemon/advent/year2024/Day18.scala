@@ -6,10 +6,9 @@ import org.lemon.advent.lib.graph.*
 
 private object Day18:
 
-  def parse(input: String) =
-    input.linesIterator.map(_ match
-      case s"$x,$y" => Coord(x.toInt, y.toInt)
-    ).toSeq
+  def parse(input: String) = input.linesIterator.map {
+    case s"$x,$y" => Coord(x.toInt, y.toInt)
+  }.toSeq
 
   def adjacency(area: Area, corrupt: Set[Coord])(coord: Coord): Seq[Coord] =
     coord.adjacent.filterNot(corrupt).filter(area.contains)

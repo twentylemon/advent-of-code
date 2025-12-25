@@ -15,11 +15,11 @@ private object Day06:
 
   def parse(input: String) =
     def area(x1: String, x2: String, y1: String, y2: String) = Area(x1.toInt, x2.toInt, y1.toInt, y2.toInt)
-    input.linesIterator.map(_ match
+    input.linesIterator.map {
       case s"turn off $x1,$y1 through $x2,$y2" => (TurnOff, area(x1, x2, y1, y2))
       case s"turn on $x1,$y1 through $x2,$y2" => (TurnOn, area(x1, x2, y1, y2))
       case s"toggle $x1,$y1 through $x2,$y2" => (Toggle, area(x1, x2, y1, y2))
-    ).toSeq
+    }.toSeq
 
   def compress(areas: Seq[Area]) =
     val xs = areas.flatMap(area => Seq(area.left, area.right + 1)).distinct.sorted

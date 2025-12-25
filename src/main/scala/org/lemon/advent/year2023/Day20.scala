@@ -40,11 +40,11 @@ private object Day20:
 
   def parse(input: String) =
     val circuits = input.linesIterator
-      .map(_ match
+      .map {
         case s"%$name -> $downstream" => FlipFlip(name = name, downstream = downstream.csv)
         case s"&$name -> $downstream" => Conjuction(name = name, downstream = downstream.csv)
         case s"broadcaster -> $downstream" => Broadcast(name = "broadcaster", downstream = downstream.csv)
-      )
+      }
       .map(circuit => circuit.name -> circuit)
       .toMap + ("button" -> Broadcast(name = "button", downstream = Seq("broadcaster")))
 

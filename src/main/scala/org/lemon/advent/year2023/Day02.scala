@@ -15,11 +15,9 @@ private object Day02:
     ))
     .toSeq
 
-  def parse(input: String): Seq[Game] = input.linesIterator
-    .map(_ match
-      case s"Game $id: $games" => Game(id.toInt, parsePulls(games))
-    )
-    .toSeq
+  def parse(input: String): Seq[Game] = input.linesIterator.map {
+    case s"Game $id: $games" => Game(id.toInt, parsePulls(games))
+  }.toSeq
 
   def getMaxPerColour(game: Game) = game.pulls
     .flatten

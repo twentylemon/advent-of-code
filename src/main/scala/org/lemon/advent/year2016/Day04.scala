@@ -6,11 +6,11 @@ private object Day04:
 
   case class Room(name: String, sector: Int, checksum: String)
 
-  def parse(input: String) = input.linesIterator.map(_ match
+  def parse(input: String) = input.linesIterator.map {
     case s"$prefix[$checksum]" =>
       val dashed = prefix.split('-')
       Room(name = dashed.init.mkString("-"), sector = dashed.last.toInt, checksum = checksum)
-  ).toSeq
+  }.toSeq
 
   def real(room: Room) =
     val top5 = room.name.replace("-", "").frequencies.toSeq.sortBy((ch, n) => (-n, ch)).take(5).map(_._1)
@@ -23,10 +23,10 @@ private object Day04:
     parse(input)
       .filter(real)
       .map(room =>
-        val mapped = room.name.map(_ match
+        val mapped = room.name.map {
           case '-' => ' '
           case ch => ((ch - 'a' + room.sector) % 26 + 'a').toChar
-        ).mkString
+        }.mkString
         room.copy(name = mapped)
       )
       .sortBy(_.name)

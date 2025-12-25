@@ -25,14 +25,14 @@ private object Day07:
 
   def parse(input: String): Map[String, Expr] =
     def litOrRef(name: String) = name.toIntOption.map[Expr](Literal(_)).getOrElse(Reference[Int](name))
-    input.linesIterator.map(_ match
+    input.linesIterator.map {
       case s"NOT $lhs -> $d" => d -> Not(Reference(lhs))
       case s"$lhs AND $rhs -> $d" => d -> And(litOrRef(lhs), litOrRef(rhs))
       case s"$lhs OR $rhs -> $d" => d -> Or(litOrRef(lhs), litOrRef(rhs))
       case s"$lhs LSHIFT $rhs -> $d" => d -> LeftShift(litOrRef(lhs), litOrRef(rhs))
       case s"$lhs RSHIFT $rhs -> $d" => d -> RightShift(litOrRef(lhs), litOrRef(rhs))
       case s"$lit -> $d" => d -> litOrRef(lit)
-    ).toMap
+    }.toMap
 
   def part1(input: String, output: String = "a") =
     val expressions = parse(input)

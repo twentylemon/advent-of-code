@@ -5,11 +5,11 @@ import org.lemon.advent.lib.*
 private object Day16:
 
   def parse(input: String) =
-    input.linesIterator.map(_ match
+    input.linesIterator.map {
       case s"Sue $id: $props" => Map("id" -> id.toInt) ++ props.csv.map {
           case s"$key: $value" => key -> value.toInt
         }.toMap
-    ).toSeq
+    }.toSeq
 
   val target = Map(
     "children" -> 3,

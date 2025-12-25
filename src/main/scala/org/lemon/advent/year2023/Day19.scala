@@ -7,11 +7,9 @@ private object Day19:
   type Gear = Map[Char, Int]
   case class Flow(v: Char, op: Char, lit: Int, dest: String)
 
-  def parseGears(input: String) = input.linesIterator
-    .map(_ match
-      case s"{x=$x,m=$m,a=$a,s=$s}" => Map('x' -> x.toInt, 'm' -> m.toInt, 'a' -> a.toInt, 's' -> s.toInt)
-    )
-    .toSeq
+  def parseGears(input: String) = input.linesIterator.map {
+    case s"{x=$x,m=$m,a=$a,s=$s}" => Map('x' -> x.toInt, 'm' -> m.toInt, 'a' -> a.toInt, 's' -> s.toInt)
+  }.toSeq
 
   def parseFlow(flow: String) = flow.csv.map {
     case s"$v>$n:$dest" => Flow(v = v.head, op = '>', lit = n.toInt, dest = dest)
@@ -19,11 +17,9 @@ private object Day19:
     case otherwise => Flow(v = 'x', op = '>', lit = -1, dest = otherwise)
   }
 
-  def parseFlows(input: String) = input.linesIterator
-    .map(_ match
-      case s"$name{$flow}" => (name, parseFlow(flow))
-    )
-    .toMap
+  def parseFlows(input: String) = input.linesIterator.map {
+    case s"$name{$flow}" => (name, parseFlow(flow))
+  }.toMap
 
   def parse(input: String) =
     val Seq(flows, gears) = input.chunks

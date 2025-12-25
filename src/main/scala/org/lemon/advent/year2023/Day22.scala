@@ -8,11 +8,9 @@ private object Day22:
 
   case class Brick(x: Interval[Int], y: Interval[Int], z: Interval[Int])
 
-  def parse(input: String) = input.linesIterator
-    .map(_ match
-      case s"$x1,$y1,$z1~$x2,$y2,$z2" => Brick(x1.toInt to x2.toInt, y1.toInt to y2.toInt, z1.toInt to z2.toInt)
-    )
-    .toVector
+  def parse(input: String) = input.linesIterator.map {
+    case s"$x1,$y1,$z1~$x2,$y2,$z2" => Brick(x1.toInt to x2.toInt, y1.toInt to y2.toInt, z1.toInt to z2.toInt)
+  }.toVector
 
   def fall(brick: Brick, bricks: Seq[Brick]): Brick =
     val supportHeight = bricks

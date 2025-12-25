@@ -4,10 +4,10 @@ private object Day15:
 
   case class Ingredient(capacity: Int, durability: Int, flavour: Int, texture: Int, calories: Int)
 
-  def parse(input: String) = input.linesIterator.map(_ match
+  def parse(input: String) = input.linesIterator.map {
     case s"$_: capacity $c, durability $d, flavor $f, texture $t, calories $cal" =>
       Ingredient(capacity = c.toInt, durability = d.toInt, flavour = f.toInt, texture = t.toInt, calories = cal.toInt)
-  ).toIndexedSeq
+  }.toIndexedSeq
 
   def score(ingredients: Seq[Ingredient], counts: Seq[Int]) = ingredients.zip(counts)
     .map((i, n) => (n * i.capacity, n * i.durability, n * i.flavour, n * i.texture))

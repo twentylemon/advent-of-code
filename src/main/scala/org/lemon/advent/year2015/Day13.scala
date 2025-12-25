@@ -4,11 +4,11 @@ import org.lemon.advent.lib.*
 
 private object Day13:
 
-  def parse(input: String) = input.linesIterator.map(_ match
+  def parse(input: String) = input.linesIterator.map {
     case s"$from would $d $n happiness units by sitting next to $to." =>
       val amt = if d == "gain" then n.toInt else -n.toInt
       (from, to) -> amt
-  ).toMap
+  }.toMap
 
   def seatPeeps(graph: Map[(String, String), Int], people: Seq[String]) =
     people.tail.permutations

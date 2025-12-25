@@ -15,14 +15,14 @@ private object Day23:
 
   case class State(registers: Map[String, Int], pointer: Int)
 
-  def parse(input: String) = input.linesIterator.map(_ match
+  def parse(input: String) = input.linesIterator.map {
     case s"hlf $r" => Hlf(r)
     case s"tpl $r" => Tpl(r)
     case s"inc $r" => Inc(r)
     case s"jmp $off" => Jmp(off.toInt)
     case s"jie $r, $off" => Jie(r, off.toInt)
     case s"jio $r, $off" => Jio(r, off.toInt)
-  ).toIndexedSeq
+  }.toIndexedSeq
 
   def run(program: Seq[Instruction])(state: State) =
     def step(r: String)(map: Option[Int] => Option[Int]) =

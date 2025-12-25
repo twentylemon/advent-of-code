@@ -10,11 +10,11 @@ private object Day08:
   case class RotateRow(row: Int, shift: Int) extends Instruction
   case class RotateCol(col: Int, shift: Int) extends Instruction
 
-  def parse(input: String) = input.linesIterator.map(_ match
+  def parse(input: String) = input.linesIterator.map {
     case s"rect ${a}x$b" => Rect(a.toInt, b.toInt)
     case s"rotate row y=$y by $s" => RotateRow(y.toInt, s.toInt)
     case s"rotate column x=$x by $s" => RotateCol(x.toInt, s.toInt)
-  ).toSeq
+  }.toSeq
 
   def run(input: String, area: Area) =
     parse(input).foldLeft(Set.empty[Coord])((state, instr) =>

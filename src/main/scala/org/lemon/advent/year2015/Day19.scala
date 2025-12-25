@@ -6,9 +6,9 @@ private object Day19:
 
   def parse(input: String) =
     val Seq(transitions, molecule) = input.chunks
-    val replacements = transitions.linesIterator.map(_ match
+    val replacements = transitions.linesIterator.map {
       case s"$from => $to" => from -> to
-    )
+    }
     (molecule, replacements.toSeq)
 
   def enumerate(molecule: String, replacements: Seq[(String, String)]) =

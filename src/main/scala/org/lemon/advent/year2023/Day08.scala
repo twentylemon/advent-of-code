@@ -6,11 +6,9 @@ private object Day08:
 
   def parse(input: String) =
     val Seq(directions, tail) = input.chunks
-    val graph = tail.linesIterator
-      .map(_ match
-        case s"$from = ($l, $r)" => (from, (l, r))
-      )
-      .toMap
+    val graph = tail.linesIterator.map {
+      case s"$from = ($l, $r)" => (from, (l, r))
+    }.toMap
     (directions, graph)
 
   def move(loc: String, direction: Char, graph: Map[String, (String, String)]) =

@@ -4,11 +4,10 @@ import org.lemon.advent.lib.*
 
 private object Day01:
 
-  def parse(input: String) =
-    input.linesIterator.map(_ match
-      case s"L$x" => -x.toInt
-      case s"R$x" => x.toInt
-    ).toSeq
+  def parse(input: String) = input.linesIterator.map {
+    case s"L$x" => -x.toInt
+    case s"R$x" => x.toInt
+  }.toSeq
 
   def part1(input: String) =
     val turns = parse(input)

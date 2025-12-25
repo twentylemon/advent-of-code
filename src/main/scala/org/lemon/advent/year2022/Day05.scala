@@ -12,13 +12,13 @@ private object Day05:
 
   private def applyMove(reverse: Boolean)(stacks: Seq[Seq[Char]], line: String) = line match
     case s"move $n from $from to $to" =>
-      stacks.zipWithIndex.map(_ match
+      stacks.zipWithIndex.map {
         case (s, i) if i == from.toInt - 1 => s.drop(n.toInt)
         case (s, i) if i == to.toInt - 1 =>
           val toMove = stacks(from.toInt - 1).take(n.toInt)
           if reverse then toMove.reverse :++ s else toMove :++ s
         case (s, _) => s
-      )
+      }
 
   def part1(input: String) =
     val parts = input.chunks

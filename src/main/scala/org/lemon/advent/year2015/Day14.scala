@@ -6,10 +6,10 @@ private object Day14:
 
   case class Reindeer(name: String, speed: Int, time: Int, rest: Int)
 
-  def parse(input: String) = input.linesIterator.map(_ match
+  def parse(input: String) = input.linesIterator.map {
     case s"$r can fly $v km/s for $t seconds, but then must rest for $n seconds." =>
       Reindeer(name = r, speed = v.toInt, time = t.toInt, rest = n.toInt)
-  ).toSeq
+  }.toSeq
 
   def distanceAt(reindeer: Reindeer, at: Int) =
     val cycleTime = reindeer.time + reindeer.rest
