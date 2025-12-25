@@ -33,7 +33,7 @@ def fill[N](adjacency: N => Iterable[N] | Iterator[N], start: N): Set[N] =
 def distanceFrom[N, D: Numeric](
     adjacency: N => Iterable[(N, D)] | Iterator[(N, D)],
     end: N,
-    maxDistance: D
+    maxDistance: D,
 ): Map[N, D] =
   val distances = mutable.Map(end -> Numeric[D].zero)
   // given Ordering[(N, D)] = Ordering.by[(N, D), D](_._2).reverse
@@ -98,7 +98,7 @@ def distanceFrom[N](adjacency: N => Iterable[N] | Iterator[N], end: N, maxDistan
 def allPaths[N, D: Numeric](
     adjacency: N => Iterable[(N, D)] | Iterator[(N, D)],
     start: N,
-    ends: N => Boolean
+    ends: N => Boolean,
 ): Set[Path[N, D]] =
   val paths = mutable.Set.empty[Path[N, D]]
   val queue = mutable.Queue(Path(path = Vector(start), distance = Numeric[D].zero))
