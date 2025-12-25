@@ -1,5 +1,7 @@
 package org.lemon.advent.year2015
 
+import org.lemon.advent.lib.*
+
 private object Day23:
 
   sealed trait Instruction:
@@ -39,9 +41,9 @@ private object Day23:
   def part1(input: String, register: String = "b") =
     val program = parse(input)
     val state = State(program.map(_.register -> 0).toMap, 0)
-    LazyList.unfold(state)(run(program)(_).map(s => s -> s)).last.registers(register)
+    Iterator.unfold(state)(run(program)(_).map(s => s -> s)).last.registers(register)
 
   def part2(input: String) =
     val program = parse(input)
     val state = State(program.map(_.register -> 0).toMap + ("a" -> 1), 0)
-    LazyList.unfold(state)(run(program)(_).map(s => s -> s)).last.registers("b")
+    Iterator.unfold(state)(run(program)(_).map(s => s -> s)).last.registers("b")

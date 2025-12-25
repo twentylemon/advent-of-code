@@ -1,5 +1,7 @@
 package org.lemon.advent.year2016
 
+import org.lemon.advent.lib.*
+
 private object Day10:
 
   enum Dest:
@@ -53,5 +55,5 @@ private object Day10:
 
   def part2(input: String) =
     val robits = parse(input)
-    val (_, out) = LazyList.unfold(robits -> Map.empty[Int, Seq[Int]])(step.tupled(_).map(x => x -> x)).last
+    val (_, out) = Iterator.unfold(robits -> Map.empty[Int, Seq[Int]])(step.tupled(_).map(x => x -> x)).last
     (0 to 2).map(out(_).head).product

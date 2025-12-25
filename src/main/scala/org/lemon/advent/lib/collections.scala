@@ -20,6 +20,12 @@ extension [A](it: Iterator[A])
     */
   def nthOption(n: Int): Option[A] = it.drop(n).nextOption
 
+  /** Returns the last element of the iterator.
+    *
+    * @return the last element
+    */
+  def last: A = it.reduceLeft((_, b) => b)
+
   /** Returns `sliding(2)` as tuples instead of collections.
     *
     * @return sliding window of pairs in the iterator
