@@ -2,8 +2,6 @@ package org.lemon.advent.year2015
 
 private object Day08:
 
-  def parse(input: String) = input.linesIterator.toSeq
-
   def decode(str: String) =
     @annotation.tailrec
     def loop(str: List[Char], acc: Int): Int = str match
@@ -15,8 +13,7 @@ private object Day08:
     loop(str.toList, 0)
 
   def part1(input: String) =
-    val list = parse(input)
-    list.map(str => str.size - decode(str)).sum
+    input.linesIterator.map(str => str.size - decode(str)).sum
 
   def encode(str: String) =
     @annotation.tailrec
@@ -28,5 +25,4 @@ private object Day08:
     loop(str.toList, 2)
 
   def part2(input: String) =
-    val list = parse(input)
-    list.map(str => encode(str) - str.size).sum
+    input.linesIterator.map(str => encode(str) - str.size).sum

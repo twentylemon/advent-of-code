@@ -6,8 +6,6 @@ import org.lemon.advent.lib.graph.*
 
 private object Day21:
 
-  def parse(input: String) = input.linesIterator.toSeq
-
   def directional = IndexedSeq(
     " ^A".toSeq,
     "<v>".toSeq,
@@ -60,12 +58,12 @@ private object Day21:
   def complexity(code: String, distance: Long) = code.filter(_.isDigit).toInt * distance
 
   def part1(input: String) =
-    parse(input)
+    input.linesIterator
       .map(code => complexity(code, pathLength(code, 2)))
       .sum
 
   def part2(input: String) =
-    parse(input)
+    input.linesIterator
       .map(code => complexity(code, pathLength(code, 25)))
       .sum
 
