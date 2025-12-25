@@ -21,9 +21,7 @@ private object Day08:
 
   def part1(input: String) =
     val (directions, graph) = parse(input)
-    walk(directions, graph, "AAA")
-      .dropWhile(_._1 != "ZZZ")
-      .next._2
+    walk(directions, graph, "AAA").collectFirst { case (loc, steps) if loc == "ZZZ" => steps }.get
 
   def part2(input: String) =
     val (directions, graph) = parse(input)
@@ -31,8 +29,7 @@ private object Day08:
     val cycle = graph.keySet.toSeq
       .filter(_.endsWith("A"))
       .map(walk(directions, graph, _))
-      .map(_.dropWhile(!_._1.endsWith("Z")))
-      .map(_.next._2.toLong)
+      .map(_.collectFirst { case (loc, steps) if loc.endsWith("Z") => steps.toLong }.get)
 
     cycle.fold(1L)(_ `lcm` _)
 
@@ -43,8 +40,7 @@ private object Day08:
   def cyclesUntilEnd(cycle: Map[String, String], start: String) =
     Iterator.iterate(start)(loc => cycle(loc))
       .zipWithIndex
-      .dropWhile(!_._1.endsWith("Z"))
-      .next._2.toLong
+      .collectFirst { case (loc, steps) if loc.endsWith("Z") => steps.toLong }.get
 
   def part2_alternate(input: String) =
     val (directions, graph) = parse(input)

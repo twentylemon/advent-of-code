@@ -20,9 +20,7 @@ private object Day14:
     .map((c1, c2) => c1.bounding(c2))
 
   def trickle(occupied: Coord => Boolean, deep: Coord => Boolean)(source: Coord): Trickle =
-    val spot = source.walk(Direction.Down)
-      .dropWhile(c => !deep(c) && !occupied(c))
-      .next
+    val spot = source.walk(Direction.Down).find(c => deep(c) || occupied(c)).get
 
     if deep(spot) then Fall
     else if !occupied(spot.left) then trickle(occupied, deep)(spot.left)

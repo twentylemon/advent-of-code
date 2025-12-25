@@ -49,7 +49,7 @@ private object Day10:
     val robits = parse(input)
     Iterator.unfold(robits -> Map.empty[Int, Seq[Int]])(step.tupled(_).map(x => x -> x))
       .flatMap((r, _) => r.values.find(_.compared.contains(compares)))
-      .buffered.head.id
+      .next.id
 
   def part2(input: String) =
     val robits = parse(input)
