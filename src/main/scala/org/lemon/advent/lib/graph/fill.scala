@@ -12,7 +12,7 @@ import scala.math.Ordering.Implicits.*
   * @return the set of reachable nodes from `start`
   * @tparam N the node type
   */
-def fill[N](adjacency: N => Iterable[N], start: N): Set[N] =
+def fill[N](adjacency: N => Iterable[N] | Iterator[N], start: N): Set[N] =
   val nodes = mutable.Set(start)
   val queue = mutable.Queue(start)
   while !queue.isEmpty do
@@ -30,7 +30,11 @@ def fill[N](adjacency: N => Iterable[N], start: N): Set[N] =
   * @tparam N the node type
   * @tparam D the distance type
   */
-def distanceFrom[N, D: Numeric](adjacency: N => Iterable[(N, D)], end: N, maxDistance: D): Map[N, D] =
+def distanceFrom[N, D: Numeric](
+    adjacency: N => Iterable[(N, D)] | Iterator[(N, D)],
+    end: N,
+    maxDistance: D
+): Map[N, D] =
   val distances = mutable.Map(end -> Numeric[D].zero)
   // given Ordering[(N, D)] = Ordering.by[(N, D), D](_._2).reverse
   // val queue = mutable.PriorityQueue(distances.head)
@@ -53,7 +57,7 @@ def distanceFrom[N, D: Numeric](adjacency: N => Iterable[(N, D)], end: N, maxDis
   * @tparam N the node type
   * @tparam D the distance type
   */
-def distanceFrom[N, D: Numeric](adjacency: N => Iterable[(N, D)], end: N): Map[N, D] =
+def distanceFrom[N, D: Numeric](adjacency: N => Iterable[(N, D)] | Iterator[(N, D)], end: N): Map[N, D] =
   distanceFrom(adjacency, end, Numeric[D].fromInt(Int.MaxValue))
 
 /** Performs a breadth first fill of the graph from the starting node, returning
@@ -64,7 +68,7 @@ def distanceFrom[N, D: Numeric](adjacency: N => Iterable[(N, D)], end: N): Map[N
   * @return the map of reachable nodes to their distances from `end`
   * @tparam N the node type
   */
-def distanceFrom[N](adjacency: N => Iterable[N], end: N): Map[N, Int] =
+def distanceFrom[N](adjacency: N => Iterable[N] | Iterator[N], end: N): Map[N, Int] =
   distanceFrom(unitAdjacency(adjacency), end)
 
 /** Performs a breadth first fill of the graph from the starting node up to a maximum distance,
@@ -77,7 +81,7 @@ def distanceFrom[N](adjacency: N => Iterable[N], end: N): Map[N, Int] =
   * @return the map of reachable nodes to their distances from `end`
   * @tparam N the node type
   */
-def distanceFrom[N](adjacency: N => Iterable[N], end: N, maxDistance: Int): Map[N, Int] =
+def distanceFrom[N](adjacency: N => Iterable[N] | Iterator[N], end: N, maxDistance: Int): Map[N, Int] =
   distanceFrom(unitAdjacency(adjacency), end, maxDistance)
 
 /** Performs a breadth first fill of the graph from the starting node to the ending nodes, returning
@@ -91,7 +95,11 @@ def distanceFrom[N](adjacency: N => Iterable[N], end: N, maxDistance: Int): Map[
   * @return the set of all paths from `start` to any of `ends`
   * @tparam N the node type
   */
-def allPaths[N, D: Numeric](adjacency: N => Iterable[(N, D)], start: N, ends: N => Boolean): Set[Path[N, D]] =
+def allPaths[N, D: Numeric](
+    adjacency: N => Iterable[(N, D)] | Iterator[(N, D)],
+    start: N,
+    ends: N => Boolean
+): Set[Path[N, D]] =
   val paths = mutable.Set.empty[Path[N, D]]
   val queue = mutable.Queue(Path(path = Vector(start), distance = Numeric[D].zero))
 
@@ -113,5 +121,5 @@ def allPaths[N, D: Numeric](adjacency: N => Iterable[(N, D)], start: N, ends: N 
   * @return the set of all paths from `start` to any of `ends`
   * @tparam N the node type
   */
-def allPaths[N](adjacency: N => Iterable[N], start: N, ends: N => Boolean): Set[Path[N, Int]] =
+def allPaths[N](adjacency: N => Iterable[N] | Iterator[N], start: N, ends: N => Boolean): Set[Path[N, Int]] =
   allPaths(unitAdjacency(adjacency), start, ends)

@@ -12,9 +12,9 @@ package org.lemon.advent.lib.graph
   * @tparam N the node type
   * @tparam D the distance type
   */
-def compress[N, D: Numeric](adjacency: N => Iterable[(N, D)], nodes: Set[N]): WeightedGraph[N, D] =
-  def corridorAdjacency(target: N)(node: N): Iterable[(N, D)] =
-    adjacency(node).filter((n, _) => n == target || !nodes.contains(n))
+def compress[N, D: Numeric](adjacency: N => Iterable[(N, D)] | Iterator[(N, D)], nodes: Set[N]): WeightedGraph[N, D] =
+  def corridorAdjacency(target: N)(node: N): Iterator[(N, D)] =
+    adjacency(node).iterator.filter((n, _) => n == target || !nodes.contains(n))
 
   def edgesFrom(start: N): Iterable[(N, D)] =
     (nodes - start)
@@ -30,7 +30,7 @@ def compress[N, D: Numeric](adjacency: N => Iterable[(N, D)], nodes: Set[N]): We
   * @return a weighted graph containing only the important nodes with edges weighted by shortest path distances
   * @tparam N the node type
   */
-def compress[N](adjacency: N => Iterable[N], nodes: Set[N]): WeightedGraph[N, Int] =
+def compress[N](adjacency: N => Iterable[N] | Iterator[N], nodes: Set[N]): WeightedGraph[N, Int] =
   compress(unitAdjacency(adjacency), nodes)
 
 /** Compresses a graph by keeping only the specified important nodes and computing

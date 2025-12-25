@@ -17,7 +17,7 @@ import scala.math.Ordering.Implicits.*
   * @tparam D the distance type
   */
 def pathFind[N, D: Numeric](
-    adjacency: N => Iterable[(N, D)],
+    adjacency: N => Iterable[(N, D)] | Iterator[(N, D)],
     heuristic: N => D,
     start: N,
     ends: N => Boolean,
@@ -45,7 +45,12 @@ def pathFind[N, D: Numeric](
   * @tparam N the node type
   * @tparam D the distance type
   */
-def pathFind[N, D: Numeric](adjacency: N => Iterable[(N, D)], heuristic: N => D, start: N, end: N): Option[Path[N, D]] =
+def pathFind[N, D: Numeric](
+    adjacency: N => Iterable[(N, D)] | Iterator[(N, D)],
+    heuristic: N => D,
+    start: N,
+    end: N,
+): Option[Path[N, D]] =
   pathFind(adjacency, heuristic, start, end == _)
 
 /** Performs an A* search of the graph from `start` to `end`, returning
@@ -58,7 +63,12 @@ def pathFind[N, D: Numeric](adjacency: N => Iterable[(N, D)], heuristic: N => D,
   * @return the shortest path between `start` and `end`, or empty if no path exists
   * @tparam N the node type
   */
-def pathFind[N](adjacency: N => Iterable[N], heuristic: N => Int, start: N, ends: N => Boolean): Option[Path[N, Int]] =
+def pathFind[N](
+    adjacency: N => Iterable[N] | Iterator[N],
+    heuristic: N => Int,
+    start: N,
+    ends: N => Boolean,
+): Option[Path[N, Int]] =
   pathFind(unitAdjacency(adjacency), heuristic, start, ends)
 
 /** Performs an A* search of the graph from `start` to `end`, returning
@@ -71,7 +81,12 @@ def pathFind[N](adjacency: N => Iterable[N], heuristic: N => Int, start: N, ends
   * @return the shortest path between `start` and `end`, or empty if no path exists
   * @tparam N the node type
   */
-def pathFind[N](adjacency: N => Iterable[N], heuristic: N => Int, start: N, end: N): Option[Path[N, Int]] =
+def pathFind[N](
+    adjacency: N => Iterable[N] | Iterator[N],
+    heuristic: N => Int,
+    start: N,
+    end: N,
+): Option[Path[N, Int]] =
   pathFind(unitAdjacency(adjacency), heuristic, start, end)
 
 /** Performs an A* search of the graph from `start` to `end`, returning
@@ -111,7 +126,11 @@ def pathFind[N](graph: UnitGraph[N], heuristic: N => Int, start: N, end: N): Opt
   * @tparam N the node type
   * @tparam D the distance type
   */
-def pathFind[N, D: Numeric](adjacency: N => Iterable[(N, D)], start: N, ends: N => Boolean): Option[Path[N, D]] =
+def pathFind[N, D: Numeric](
+    adjacency: N => Iterable[(N, D)] | Iterator[(N, D)],
+    start: N,
+    ends: N => Boolean,
+): Option[Path[N, D]] =
   pathFind(adjacency, _ => Numeric[D].zero, start, ends)
 
 /** Performs a dijkstra's search of the graph from `start` to `end`, returning
@@ -124,7 +143,7 @@ def pathFind[N, D: Numeric](adjacency: N => Iterable[(N, D)], start: N, ends: N 
   * @tparam N the node type
   * @tparam D the distance type
   */
-def pathFind[N, D: Numeric](adjacency: N => Iterable[(N, D)], start: N, end: N): Option[Path[N, D]] =
+def pathFind[N, D: Numeric](adjacency: N => Iterable[(N, D)] | Iterator[(N, D)], start: N, end: N): Option[Path[N, D]] =
   pathFind(adjacency, start, end == _)
 
 /** Performs a dijkstra's search of the graph from `start` to `end`, returning
@@ -136,7 +155,7 @@ def pathFind[N, D: Numeric](adjacency: N => Iterable[(N, D)], start: N, end: N):
   * @return the shortest path between `start` and `end`, or empty if no path exists
   * @tparam N the node type
   */
-def pathFind[N](adjacency: N => Iterable[N], start: N, ends: N => Boolean): Option[Path[N, Int]] =
+def pathFind[N](adjacency: N => Iterable[N] | Iterator[N], start: N, ends: N => Boolean): Option[Path[N, Int]] =
   pathFind(unitAdjacency(adjacency), start, ends)
 
 /** Performs a dijkstra's search of the graph from `start` to `end`, returning
@@ -148,7 +167,7 @@ def pathFind[N](adjacency: N => Iterable[N], start: N, ends: N => Boolean): Opti
   * @return the shortest path between `start` and `end`, or empty if no path exists
   * @tparam N the node type
   */
-def pathFind[N](adjacency: N => Iterable[N], start: N, end: N): Option[Path[N, Int]] =
+def pathFind[N](adjacency: N => Iterable[N] | Iterator[N], start: N, end: N): Option[Path[N, Int]] =
   pathFind(unitAdjacency(adjacency), start, end)
 
 /** Performs a dijkstra's search of the graph from `start` to `end`, returning
@@ -185,7 +204,11 @@ def pathFind[N](graph: UnitGraph[N], start: N, end: N): Option[Path[N, Int]] =
   * @tparam N the node type
   * @tparam D the distance type
   */
-def allShortestPaths[N, D: Numeric](adjacency: N => Iterable[(N, D)], start: N, ends: N => Boolean): Set[Path[N, D]] =
+def allShortestPaths[N, D: Numeric](
+    adjacency: N => Iterable[(N, D)] | Iterator[(N, D)],
+    start: N,
+    ends: N => Boolean,
+): Set[Path[N, D]] =
   val paths = mutable.Set.empty[Path[N, D]]
   val queue = mutable.Queue(Path(path = Vector(start), distance = Numeric[D].zero))
   val costs = mutable.Map(start -> Numeric[D].zero)
@@ -216,5 +239,5 @@ def allShortestPaths[N, D: Numeric](adjacency: N => Iterable[(N, D)], start: N, 
   * @return set of all shortest paths between `start` and `end`
   * @tparam N the node type
   */
-def allShortestPaths[N](adjacency: N => Iterable[N], start: N, ends: N => Boolean): Set[Path[N, Int]] =
+def allShortestPaths[N](adjacency: N => Iterable[N] | Iterator[N], start: N, ends: N => Boolean): Set[Path[N, Int]] =
   allShortestPaths(unitAdjacency(adjacency), start, ends)
