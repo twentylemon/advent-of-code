@@ -17,7 +17,7 @@ private object Day12:
     case s"inc $x" => Inc(x)
     case s"dec $x" => Dec(x)
     case s"jnz $x $offset" => Jnz(x, offset.toInt)
-  }.toSeq
+  }.toIndexedSeq
 
   def run(program: Seq[Instruction])(state: State) =
     def step(r: String)(map: Option[Int] => Option[Int]) =
