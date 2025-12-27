@@ -24,7 +24,7 @@ private object Day15:
   def part1(input: String, row: Int) =
     val sensors = input.linesIterator.map(parseSensor).toSeq
     val diet = coverageTree(sensors, row)
-    diet.intervalsIterator.map((start, end) => end - start).sum
+    diet.intervalsIterator.map(i => i.end - i.start).sum
 
   def part2(input: String, range: Range): Long =
     val sensors = input.linesIterator.map(parseSensor).toSeq

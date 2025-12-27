@@ -29,10 +29,10 @@ given Shrink[Interval[Int]] = Shrink { case interval: Interval[Int] =>
     .map(Interval(_, _))
 }
 
-given Arbitrary[Diet[Int]] = Arbitrary(for ranges <- Gen.listOf[Range](arbitrary[Range]) yield Diet.fromRanges(ranges))
+given Arbitrary[Diet[Int]] = Arbitrary(for ranges <- Gen.listOf[Range](arbitrary[Range]) yield Diet(ranges))
 
 given Shrink[Diet[Int]] = Shrink { case diet: Diet[Int] =>
-  shrink(diet.toRanges).map(Diet.fromRanges)
+  shrink(diet.toRanges).map(Diet.apply)
 }
 
 class EmptyDietTest extends UnitTest:
@@ -309,7 +309,7 @@ class SingletonValueDietTest extends UnitTest:
   }
 
   test("intervalsIterator is single interval") {
-    check((n: Int) => Diet(n).intervalsIterator.toSeq == Seq((n, n)))
+    check((n: Int) => Diet(n).intervalsIterator.toSeq == Seq(Interval(n, n)))
   }
 
   test("toIntervals is single element") {
@@ -599,7 +599,7 @@ class SingletonIntervalDietTest extends UnitTest:
   }
 
   test("intervalsIterator is single interval") {
-    check((range: Range) => Diet(range).intervalsIterator.toSeq == Seq((range.min, range.max)))
+    check((range: Range) => Diet(range).intervalsIterator.toSeq == Seq(Interval(range.min, range.max)))
   }
 
   test("toIntervals is single interval") {
@@ -810,7 +810,7 @@ class MultipleValueDietTest extends UnitTest:
   }
 
   test("intervalsIterator yields all singleton intervals") {
-    check((values: Seq[Int]) => Diet(values).intervalsIterator.toSeq == values.sorted.map(v => (v, v)))
+    check((values: Seq[Int]) => Diet(values).intervalsIterator.toSeq == values.sorted.map(v => Interval(v, v)))
   }
 
   test("toIntervals yields all singleton intervals") {
@@ -905,15 +905,15 @@ class MultipleIntervalDietTest extends UnitTest:
     yield (ranges, start to end)
 
   test("contains all elements in all ranges") {
-    check((ranges: Seq[Range]) => ranges.flatMap(_.toSet).toSet.forall(Diet.fromRanges(ranges).contains))
+    check((ranges: Seq[Range]) => ranges.flatMap(_.toSet).toSet.forall(Diet(ranges).contains))
   }
 
   test("contains each individual range") {
-    check((ranges: Seq[Range]) => ranges.forall(r => Diet.fromRanges(ranges).contains(r.min, r.max)))
+    check((ranges: Seq[Range]) => ranges.forall(r => Diet(ranges).contains(r.min, r.max)))
   }
 
   test("contains each individual Range object") {
-    check((ranges: Seq[Range]) => ranges.forall(r => Diet.fromRanges(ranges).contains(r)))
+    check((ranges: Seq[Range]) => ranges.forall(r => Diet(ranges).contains(r)))
   }
 
   test("contains subranges within each interval") {
@@ -924,7 +924,7 @@ class MultipleIntervalDietTest extends UnitTest:
         start <- Gen.choose(range.min, range.max)
         end <- Gen.choose(start, range.max)
       yield (ranges, start, end)
-    check(forAll(gen) { (ranges, start, end) => Diet.fromRanges(ranges).contains(start, end) })
+    check(forAll(gen) { (ranges, start, end) => Diet(ranges).contains(start, end) })
   }
 
   test("does not contain range spanning gap between intervals") {
@@ -934,182 +934,182 @@ class MultipleIntervalDietTest extends UnitTest:
         idx <- Gen.choose(0, ranges.size - 2)
       yield (ranges, ranges(idx).max, ranges(idx + 1).min)
     check(forAll(gen) { (ranges, gapStart, gapEnd) =>
-      !Diet.fromRanges(ranges).contains(gapStart, gapEnd)
+      !Diet(ranges).contains(gapStart, gapEnd)
     })
   }
 
   test("does not contain elements outside ranges") {
-    check(forAll(disjointValue) { (ranges, n) => !Diet.fromRanges(ranges).contains(n) })
+    check(forAll(disjointValue) { (ranges, n) => !Diet(ranges).contains(n) })
   }
 
   test("does not contain disjoint range") {
-    check(forAll(disjointRange) { (ranges, other) => !Diet.fromRanges(ranges).contains(other.min, other.max) })
+    check(forAll(disjointRange) { (ranges, other) => !Diet(ranges).contains(other.min, other.max) })
   }
 
   test("does not contain disjoint Range object") {
-    check(forAll(disjointRange) { (ranges, other) => !Diet.fromRanges(ranges).contains(other) })
+    check(forAll(disjointRange) { (ranges, other) => !Diet(ranges).contains(other) })
   }
 
   test("not isEmpty") {
-    check((ranges: Seq[Range]) => !Diet.fromRanges(ranges).isEmpty)
+    check((ranges: Seq[Range]) => !Diet(ranges).isEmpty)
   }
 
   test("nonEmpty") {
-    check((ranges: Seq[Range]) => Diet.fromRanges(ranges).nonEmpty)
+    check((ranges: Seq[Range]) => Diet(ranges).nonEmpty)
   }
 
   test("size equals total of all range sizes") {
-    check((ranges: Seq[Range]) => Diet.fromRanges(ranges).size == ranges.map(_.size).sum)
+    check((ranges: Seq[Range]) => Diet(ranges).size == ranges.map(_.size).sum)
   }
 
   test("adding existing value is idempotent") {
-    check(forAll(overlappingValue) { (ranges, n) => Diet.fromRanges(ranges) + n == Diet.fromRanges(ranges) })
+    check(forAll(overlappingValue) { (ranges, n) => Diet(ranges) + n == Diet(ranges) })
   }
 
   test("adding disjoint value increases interval count") {
     check(forAll(disjointValue) { (ranges, n) =>
-      val diet = Diet.fromRanges(ranges)
+      val diet = Diet(ranges)
       (diet + n).toIntervals.size == diet.toIntervals.size + 1
     })
   }
 
   test("adding disjoint range increases interval count") {
     check(forAll(disjointRange) { (ranges, other) =>
-      val diet = Diet.fromRanges(ranges)
+      val diet = Diet(ranges)
       (diet + other).toIntervals.size == diet.toIntervals.size + 1
     })
   }
 
   test("adding overlapping range may merge intervals") {
     check(forAll(overlappingRange) { (ranges, other) =>
-      val diet = Diet.fromRanges(ranges)
+      val diet = Diet(ranges)
       (diet + other).toIntervals.size <= diet.toIntervals.size
     })
   }
 
   test("removing existing value decreases size") {
     check(forAll(overlappingValue) { (ranges, n) =>
-      val diet = Diet.fromRanges(ranges)
+      val diet = Diet(ranges)
       (diet - n).size == diet.size - 1
     })
   }
 
   test("removing disjoint value does nothing") {
-    check(forAll(disjointValue) { (ranges, n) => Diet.fromRanges(ranges) - n == Diet.fromRanges(ranges) })
+    check(forAll(disjointValue) { (ranges, n) => Diet(ranges) - n == Diet(ranges) })
   }
 
   test("removing disjoint range does nothing") {
-    check(forAll(disjointRange) { (ranges, other) => Diet.fromRanges(ranges) - other == Diet.fromRanges(ranges) })
+    check(forAll(disjointRange) { (ranges, other) => Diet(ranges) - other == Diet(ranges) })
   }
 
   test("removing overlapping range removes overlap") {
     check(forAll(overlappingRange) { (ranges, other) =>
-      val diet = Diet.fromRanges(ranges)
+      val diet = Diet(ranges)
       (diet - other).toSet == (ranges.flatMap(_.toSet).toSet -- other.toSet)
     })
   }
 
   test("union with empty is self") {
-    check((ranges: Seq[Range]) => Diet.fromRanges(ranges) ++ Diet.empty[Int] == Diet.fromRanges(ranges))
+    check((ranges: Seq[Range]) => Diet(ranges) ++ Diet.empty[Int] == Diet(ranges))
   }
 
   test("union with self is self") {
-    check((ranges: Seq[Range]) => Diet.fromRanges(ranges) ++ Diet.fromRanges(ranges) == Diet.fromRanges(ranges))
+    check((ranges: Seq[Range]) => Diet(ranges) ++ Diet(ranges) == Diet(ranges))
   }
 
   test("union with rhs contains both") {
     check((ranges: Seq[Range], rhs: Diet[Int]) => {
-      val diet = Diet.fromRanges(ranges)
+      val diet = Diet(ranges)
       val union = diet ++ rhs
       ranges.flatMap(_.toSet).toSet.forall(union.contains) && rhs.toSet.forall(union.contains)
     })
   }
 
   test("intersect with empty is empty") {
-    check((ranges: Seq[Range]) => (Diet.fromRanges(ranges) & Diet.empty[Int]) == Diet.empty[Int])
+    check((ranges: Seq[Range]) => (Diet(ranges) & Diet.empty[Int]) == Diet.empty[Int])
   }
 
   test("intersect with self is self") {
-    check((ranges: Seq[Range]) => (Diet.fromRanges(ranges) & Diet.fromRanges(ranges)) == Diet.fromRanges(ranges))
+    check((ranges: Seq[Range]) => (Diet(ranges) & Diet(ranges)) == Diet(ranges))
   }
 
   test("intersect with overlapping range gives overlap") {
     check(forAll(overlappingRange) { (ranges, other) =>
-      (Diet.fromRanges(ranges) & Diet(other)).toSet == (ranges.flatMap(_.toSet).toSet & other.toSet)
+      (Diet(ranges) & Diet(other)).toSet == (ranges.flatMap(_.toSet).toSet & other.toSet)
     })
   }
 
   test("intersect with disjoint range is empty") {
-    check(forAll(disjointRange) { (ranges, other) => (Diet.fromRanges(ranges) & Diet(other)) == Diet.empty[Int] })
+    check(forAll(disjointRange) { (ranges, other) => (Diet(ranges) & Diet(other)) == Diet.empty[Int] })
   }
 
   test("diff with empty is self") {
-    check((ranges: Seq[Range]) => Diet.fromRanges(ranges) -- Diet.empty[Int] == Diet.fromRanges(ranges))
+    check((ranges: Seq[Range]) => Diet(ranges) -- Diet.empty[Int] == Diet(ranges))
   }
 
   test("diff with self is empty") {
-    check((ranges: Seq[Range]) => (Diet.fromRanges(ranges) -- Diet.fromRanges(ranges)) == Diet.empty[Int])
+    check((ranges: Seq[Range]) => (Diet(ranges) -- Diet(ranges)) == Diet.empty[Int])
   }
 
   test("diff with overlapping range removes overlap") {
     check(forAll(overlappingRange) { (ranges, other) =>
-      (Diet.fromRanges(ranges) -- Diet(other)).toSet == (ranges.flatMap(_.toSet).toSet -- other.toSet)
+      (Diet(ranges) -- Diet(other)).toSet == (ranges.flatMap(_.toSet).toSet -- other.toSet)
     })
   }
 
   test("diff with disjoint range is self") {
     check(forAll(disjointRange) { (ranges, other) =>
-      Diet.fromRanges(ranges) -- Diet(other) == Diet.fromRanges(ranges)
+      Diet(ranges) -- Diet(other) == Diet(ranges)
     })
   }
 
   test("iterator yields all values in order") {
-    check((ranges: Seq[Range]) => Diet.fromRanges(ranges).iterator.toSeq == ranges.flatMap(_.toSet).toSet.toSeq.sorted)
+    check((ranges: Seq[Range]) => Diet(ranges).iterator.toSeq == ranges.flatMap(_.toSet).toSet.toSeq.sorted)
   }
 
   test("intervalsIterator yields all intervals") {
-    check((ranges: Seq[Range]) => Diet.fromRanges(ranges).intervalsIterator.toSeq == ranges.map(r => (r.min, r.max)))
+    check((ranges: Seq[Range]) => Diet(ranges).intervalsIterator.toSeq == ranges.map(r => Interval(r.min, r.max)))
   }
 
   test("toIntervals yields all intervals") {
-    check((ranges: Seq[Range]) => Diet.fromRanges(ranges).toIntervals == ranges.map(r => Interval(r.min, r.max)))
+    check((ranges: Seq[Range]) => Diet(ranges).toIntervals == ranges.map(r => Interval(r.min, r.max)))
   }
 
   test("toRanges yields all ranges") {
-    check((ranges: Seq[Range]) => Diet.fromRanges(ranges).toRanges == ranges.map(r => r.min to r.max))
+    check((ranges: Seq[Range]) => Diet(ranges).toRanges == ranges.map(r => r.min to r.max))
   }
 
   test("toNumericRanges yields all ranges") {
-    check((ranges: Seq[Range]) => Diet.fromRanges(ranges).toNumericRanges == ranges.map(r => r.min to r.max))
+    check((ranges: Seq[Range]) => Diet(ranges).toNumericRanges == ranges.map(r => r.min to r.max))
   }
 
   test("toSeq matches all values sorted") {
-    check((ranges: Seq[Range]) => Diet.fromRanges(ranges).toSeq == ranges.flatMap(_.toSet).toSet.toSeq.sorted)
+    check((ranges: Seq[Range]) => Diet(ranges).toSeq == ranges.flatMap(_.toSet).toSet.toSeq.sorted)
   }
 
   test("toSet matches all values") {
-    check((ranges: Seq[Range]) => Diet.fromRanges(ranges).toSet == ranges.flatMap(_.toSet).toSet)
+    check((ranges: Seq[Range]) => Diet(ranges).toSet == ranges.flatMap(_.toSet).toSet)
   }
 
   test("min is smallest value") {
-    check((ranges: Seq[Range]) => Diet.fromRanges(ranges).min == ranges.head.min)
+    check((ranges: Seq[Range]) => Diet(ranges).min == ranges.head.min)
   }
 
   test("minOption is Some(smallest value)") {
-    check((ranges: Seq[Range]) => Diet.fromRanges(ranges).minOption == Some(ranges.head.min))
+    check((ranges: Seq[Range]) => Diet(ranges).minOption == Some(ranges.head.min))
   }
 
   test("max is largest value") {
-    check((ranges: Seq[Range]) => Diet.fromRanges(ranges).max == ranges.last.max)
+    check((ranges: Seq[Range]) => Diet(ranges).max == ranges.last.max)
   }
 
   test("maxOption is Some(largest value)") {
-    check((ranges: Seq[Range]) => Diet.fromRanges(ranges).maxOption == Some(ranges.last.max))
+    check((ranges: Seq[Range]) => Diet(ranges).maxOption == Some(ranges.last.max))
   }
 
   test("toString formats all intervals") {
     check((ranges: Seq[Range]) =>
-      Diet.fromRanges(ranges).toString == ranges
+      Diet(ranges).toString == ranges
         .map(r => if r.size == 1 then r.min.toString else s"${r.min}..${r.max}")
         .mkString("Diet(", ", ", ")")
     )

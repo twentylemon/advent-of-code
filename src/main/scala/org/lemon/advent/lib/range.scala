@@ -3,6 +3,7 @@ package org.lemon.advent.lib
 import scala.math.Ordering.Implicits.*
 import scala.math.Integral.Implicits.*
 import scala.collection.immutable.{TreeMap, NumericRange}
+import scala.annotation.targetName
 
 extension (range: Range)
   def toNumericRange[N: Integral]: NumericRange[N] =
@@ -133,11 +134,19 @@ object Diet:
   def apply[N: Integral](range: NumericRange[N]): Diet[N] = empty[N].add(range)
   def apply[N: Integral](interval: Interval[N]): Diet[N] = empty[N].add(interval)
 
-  def fromIntervals[N: Integral](intervals: Iterable[(N, N)]): Diet[N] =
+  @targetName("fromIntervals")
+  def apply[N: Integral](intervals: Iterable[Interval[N]]): Diet[N] =
     intervals.iterator.foldLeft(empty[N])((diet, interval) => diet.add(interval._1, interval._2))
 
-  def fromRanges(ranges: Iterable[Range]): Diet[Int] = ranges.foldLeft(empty[Int])(_ + _)
-  def fromRanges[N: Integral](ranges: Iterable[NumericRange[N]]): Diet[N] = ranges.foldLeft(empty[N])(_ + _)
+  @targetName("fromIntervalPairs")
+  def apply[N: Integral](intervals: Iterable[(N, N)]): Diet[N] =
+    intervals.iterator.foldLeft(empty[N])((diet, interval) => diet.add(interval._1, interval._2))
+
+  @targetName("fromRanges")
+  def apply(ranges: Iterable[Range]): Diet[Int] = ranges.foldLeft(empty[Int])(_ + _)
+
+  @targetName("fromNumericRanges")
+  def apply[N: Integral](ranges: Iterable[NumericRange[N]]): Diet[N] = ranges.foldLeft(empty[N])(_ + _)
 
 /** A Discrete Interval Encoding Tree for storing sets of discrete values by encoding contiguous intervals
   *  as single entries. When new ranges are added or removed, they are merged/split with existing intervals.
@@ -310,7 +319,7 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
         Option.when(overlapStart <= overlapEnd)((overlapStart, overlapEnd))
       }
 
-    Diet.fromIntervals(intervals.flatMap(overlaps))
+    Diet(intervals.flatMap(overlaps))
 
   def &(rhs: Diet[N]): Diet[N] = intersect(rhs)
 
@@ -327,15 +336,15 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
   /** @return an iterator over all discrete values in this diet.
     */
   def iterator: Iterator[N] =
-    intervals.iterator.flatMap((start, end) => NumericRange.inclusive(start, end, `1`).iterator)
+    intervals.iterator.flatMap((start, end) => Interval(start, end).iterator)
 
   /** @return an iterator over all intervals in this diet as (start, end) pairs.
     */
-  def intervalsIterator: Iterator[(N, N)] = intervals.iterator
+  def intervalsIterator: Iterator[Interval[N]] = intervals.iterator.map(_.toInterval)
 
-  def toRanges: Seq[Range] = intervalsIterator.map(_.toInt to _.toInt).toSeq
-  def toNumericRanges: Seq[NumericRange[N]] = intervalsIterator.map(NumericRange.inclusive(_, _, `1`)).toSeq
-  def toIntervals: Seq[Interval[N]] = intervalsIterator.map(Interval(_, _)).toSeq
+  def toRanges: Seq[Range] = intervalsIterator.map(_.toRange).toSeq
+  def toNumericRanges: Seq[NumericRange[N]] = intervalsIterator.map(_.toNumericRange).toSeq
+  def toIntervals: Seq[Interval[N]] = intervalsIterator.toSeq
 
   def toSeq: Seq[N] = iterator.toSeq
   def toSet: Set[N] = iterator.toSet

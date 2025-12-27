@@ -18,4 +18,4 @@ private object Day05:
 
   def part2(input: String) =
     val (ranges, _) = parse(input)
-    Diet.fromIntervals(ranges).size
+    Diet(ranges).size
