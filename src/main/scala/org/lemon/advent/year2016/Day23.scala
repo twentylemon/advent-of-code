@@ -44,7 +44,7 @@ private object Day23:
       case Seq(Inc(a), Dec(b), Jnz(b2, o), _*) if b == b2 && valueOf(o) == -2 =>
         Some(state.copy(
           registers = state.registers.updatedWith(a)(_.map(_ + valueOf(b))).updated(b, 0),
-          pointer = state.pointer + 3
+          pointer = state.pointer + 3,
         ))
       case _ => state.program.lift(state.pointer).map {
           case Cpy(x, y) => step(y)(_.map(_ => valueOf(x)))
