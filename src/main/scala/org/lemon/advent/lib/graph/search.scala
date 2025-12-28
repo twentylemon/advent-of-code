@@ -24,13 +24,13 @@ def pathFind[N, D: Numeric](
 ): Option[Path[N, D]] =
   given Ordering[(D, Path[N, D])] = Ordering.by[(D, Path[N, D]), D](_._1).reverse
   val queue = mutable.PriorityQueue((heuristic(start), Path(Vector(start), Numeric[D].zero)))
-  val visited = mutable.Set(start)
+  val visited = mutable.Set.empty[N]
 
   while queue.nonEmpty && !ends(queue.head._2.at) do
     val (_, Path(path, g)) = queue.dequeue()
-    queue ++= adjacency(path.last)
-      .filter((neigh, _) => visited.add(neigh))
-      .map((neigh, dist) => (g + dist + heuristic(neigh), Path(path :+ neigh, g + dist)))
+    if visited.add(path.last) then
+      queue ++= adjacency(path.last)
+        .map((neigh, dist) => (g + dist + heuristic(neigh), Path(path :+ neigh, g + dist)))
 
   queue.headOption.map(_._2)
 
