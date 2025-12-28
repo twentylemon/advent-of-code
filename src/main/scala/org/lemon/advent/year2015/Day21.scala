@@ -40,6 +40,8 @@ private object Day21:
   def part2(input: String) =
     val boss = parse(input)
     loadouts
-      .filterNot(items => fight(Guy(hp = 100, damage = items.map(_.damage).sum, armour = items.map(_.armour).sum), boss))
+      .filterNot(items =>
+        fight(Guy(hp = 100, damage = items.map(_.damage).sum, armour = items.map(_.armour).sum), boss)
+      )
       .map(_.map(_.cost).sum)
       .max

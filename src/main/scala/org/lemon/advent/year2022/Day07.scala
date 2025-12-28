@@ -22,8 +22,7 @@ private object Day07:
         pwd = pwd.contents.filter(_.isInstanceOf[Directory]).map(_.asInstanceOf[Directory]).find(_.name == dir).get
       case "$ ls" => "nothing to do"
       case s"dir $dir" => pwd.contents.add(Directory(dir, pwd))
-      case s"$size $name" => pwd.contents.add(Obj(name = name, size = size.toInt))
-    )
+      case s"$size $name" => pwd.contents.add(Obj(name = name, size = size.toInt)))
     root
 
   def iterator(tree: File): Iterator[File] = tree match
