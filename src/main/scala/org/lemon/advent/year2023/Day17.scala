@@ -1,9 +1,7 @@
 package org.lemon.advent.year2023
 
-import org.lemon.advent.lib.`2d`.Coord.*
 import org.lemon.advent.lib.`2d`.*
-
-import scala.collection.mutable
+import org.lemon.advent.lib.graph.*
 
 private object Day17:
 
@@ -11,37 +9,27 @@ private object Day17:
     .map(_.toSeq.map(ch => ch.asDigit))
     .toSeq
 
-  def solve(grid: Seq[Seq[Int]], minForward: Int, maxForward: Int): Int =
+  def solve(grid: Seq[Seq[Int]], minForward: Int, maxForward: Int) =
     val end = Area(grid).bottomRight
-
-    case class Step(at: Coord, direction: Direction, heatLoss: Int, forward: Int)
-    val init = Step(at = origin, direction = Direction.Right, heatLoss = 0, forward = 0)
-    val firstSteps = Seq(init, init.copy(direction = Direction.Down))
-
-    given Ordering[Step] = Ordering[Int].on[Step](_.heatLoss).reverse
-    val queue = mutable.PriorityQueue(firstSteps*)
-
-    case class Seen(at: Coord, direction: Direction, forward: Int)
-    val seen = mutable.Set(firstSteps.map(step => Seen(step.at, step.direction, step.forward))*)
-
-    while !queue.isEmpty && queue.head.at != end do
-      val step = queue.dequeue
-      val loss = step.heatLoss + grid(step.at)
-
+    case class State(at: Coord, direction: Direction, forward: Int)
+    def adjacency(state: State) =
       val turns =
-        if step.forward < minForward then Seq()
+        if state.forward < minForward then Seq()
         else
-          Seq(step.direction.turnLeft, step.direction.turnRight)
-            .map(d => Step(step.at.move(d), d, loss, 1))
+          Seq(state.direction.turnLeft, state.direction.turnRight)
+            .map(d => State(state.at + d, d, 1))
       val forward =
-        if step.forward >= maxForward then Seq()
-        else Seq(step.copy(at = step.at.move(step.direction), heatLoss = loss, forward = step.forward + 1))
+        if state.forward >= maxForward then Seq()
+        else Seq(state.copy(at = state.at + state.direction, forward = state.forward + 1))
 
-      queue ++= (turns ++ forward)
-        .filter(step => seen.add(Seen(step.at, step.direction, step.forward)))
-        .filter(step => grid.hasCoord(step.at))
+      (turns ++ forward)
+        .filter(s => grid.hasCoord(s.at))
+        .map(s => s -> grid(s.at))
 
-    queue.dequeue.heatLoss + grid(end) - grid(origin)
+    Seq(State(Coord.origin, Direction.Right, 0), State(Coord.origin, Direction.Down, 0))
+      .flatMap(start => pathFind(adjacency, _.at.manhattan(end), start, _.at == end))
+      .map(_.distance)
+      .min
 
   def part1(input: String) = solve(parse(input), 1, 3)
 
