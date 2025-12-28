@@ -25,7 +25,7 @@ private object Day12:
     def jump(offset: Int) = state.copy(pointer = state.pointer + offset)
     def valueOf(x: String) = x.toIntOption.getOrElse(state.registers(x))
     program.lift(state.pointer).map {
-      case Cpy(x, y) => step(y)(_ => Some(valueOf(x)))
+      case Cpy(x, y) => step(y)(_.map(_ => valueOf(x)))
       case Inc(x) => step(x)(_.map(_ + 1))
       case Dec(x) => step(x)(_.map(_ - 1))
       case Jnz(x, offset) if valueOf(x) != 0 => jump(offset)
