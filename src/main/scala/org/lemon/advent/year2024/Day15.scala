@@ -19,8 +19,7 @@ private object Day15:
       case 'O' => "[]"
       case '.' => ".."
       case '@' => "@."
-      case x => x.toString
-    )
+      case x => x.toString)
     (Coord.gridToMap(wide), parseMoves(moves))
 
   def step(grid: Map[Coord, Char], robit: Coord, dir: Direction): Map[Coord, Char] =
