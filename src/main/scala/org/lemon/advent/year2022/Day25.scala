@@ -29,4 +29,3 @@ private object Day25:
   import Snafus.*
 
   def part1(in: String): Snafu = in.linesIterator.map(s => Snafu(s)).reduce(_ + _)
-
