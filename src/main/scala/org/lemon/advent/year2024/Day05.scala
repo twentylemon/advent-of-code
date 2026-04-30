@@ -1,6 +1,7 @@
 package org.lemon.advent.year2024
 
 import org.lemon.advent.lib.*
+import org.lemon.advent.lib.graph.*
 
 private object Day05:
 
@@ -12,23 +13,22 @@ private object Day05:
     val p = pages.linesIterator.map(_.csv.map(_.toInt)).toSeq
     (r, p)
 
-  @annotation.tailrec
-  def isOrdered(pages: Seq[Int], rules: Seq[Rule]): Boolean =
-    if rules.isEmpty then true
-    else
-      val rule = rules.head
-      val before = pages.indexOf(rule.before)
-      val after = pages.indexOf(rule.after)
-      if before < 0 || after < 0 || before < after then isOrdered(pages, rules.tail)
-      else false
+  /** Topologically sorts the pages according to the rules that apply to them. */
+  def order(pages: Seq[Int], rules: Seq[Rule]): Seq[Int] =
+    val pageSet = pages.toSet
+    val adjacency = rules
+      .filter(r => pageSet.contains(r.before) && pageSet.contains(r.after))
+      .groupMap(_.before)(_.after)
+      .withDefaultValue(Seq.empty)
+    topologicalSort(pages, adjacency).get
 
   def part1(input: String) =
     val (rules, pages) = parse(input)
-    pages.filter(isOrdered(_, rules)).map(p => p(p.size / 2)).sum
-
-  def fixOrder(pages: Seq[Int], rules: Seq[Rule]): Seq[Int] =
-    pages.sortWith((a, b) => rules.exists(r => r.before == a && r.after == b))
+    pages.filter(p => order(p, rules) == p).map(p => p(p.size / 2)).sum
 
   def part2(input: String) =
     val (rules, pages) = parse(input)
-    pages.filterNot(isOrdered(_, rules)).map(fixOrder(_, rules)).map(p => p(p.size / 2)).sum
+    pages.flatMap { p =>
+      val sorted = order(p, rules)
+      Option.when(sorted != p)(sorted(sorted.size / 2))
+    }.sum
