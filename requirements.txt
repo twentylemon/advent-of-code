@@ -1,4 +1,4 @@
 mip==1.17.6
-pytest==9.0.3
+pytest==9.1.1
 black==26.5.1
 isort==8.0.1
