@@ -48,8 +48,7 @@ private object Day24:
       .filterKeys(gate => gate.startsWith("z") && suffixes.exists(gate.endsWith))
       .filterNot(_._2 match
         case _: Xor => true
-        case _ => false
-      )
+        case _ => false)
       .toMap
 
   def checkCarryBit(expressions: Map[String, Expr], suffixes: Iterable[String]) =
@@ -64,8 +63,7 @@ private object Day24:
         case Xor(Reference(r), _) if r.startsWith("x") || r.startsWith("y") => false
         case Xor(_, Reference(r)) if r.startsWith("x") || r.startsWith("y") => false
         case _: Xor => true
-        case _ => false
-      )
+        case _ => false)
       .toMap
 
   extension (expressions: Map[String, Expr])
@@ -107,8 +105,7 @@ private object Day24:
             case And(Reference(x), Reference(y)) if x.endsWith(wrongBit) && y.endsWith(wrongBit) => true
             case Or(Reference(x), Reference(y)) if x.endsWith(wrongBit) && y.endsWith(wrongBit) => true
             case Xor(Reference(x), Reference(y)) if x.endsWith(wrongBit) && y.endsWith(wrongBit) => true
-            case _ => false
-          )
+            case _ => false)
         val last = swapped.swap(gongShow.head._1, gongShow.last._1)
         // display(last)
         Option.when(calc(last)("z") == calc(last)("x") + calc(last)("y"))(

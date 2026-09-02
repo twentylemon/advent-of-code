@@ -30,8 +30,7 @@ private object Day09:
     files.iterator
       .flatMap(_ match
         case File(len, id) => Iterator.fill(len)(id.toLong)
-        case Free(len) => Iterator.fill(len)(0L)
-      )
+        case Free(len) => Iterator.fill(len)(0L))
       .zipWithIndex
       .map(_ * _)
       .sum

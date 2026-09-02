@@ -5,8 +5,7 @@ import org.lemon.advent.lib.*
 private object Day09:
 
   def parse(input: String) = input.linesIterator.flatMap(_ match
-    case s"$from to $to = $d" => Seq((from, to) -> d.toInt, (to, from) -> d.toInt)
-  ).toMap
+    case s"$from to $to = $d" => Seq((from, to) -> d.toInt, (to, from) -> d.toInt)).toMap
 
   def part1(input: String) =
     val graph = parse(input)
