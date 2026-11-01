@@ -22,11 +22,11 @@ class StringsTest extends UnitTest:
   }
 
   test("csv filters out empty values") {
-    "a,,b,c".csv == Seq("a", "b", "c")
+    "a,,b,c".csv shouldBe Seq("a", "b", "c")
   }
 
   test("csv handles empty string") {
-    "".csv == Seq.empty
+    "".csv shouldBe empty
   }
 
   test("wsv splits basic space-separated string") {
@@ -43,7 +43,7 @@ class StringsTest extends UnitTest:
   }
 
   test("wsv handles empty string") {
-    "".wsv == Seq.empty
+    "".wsv shouldBe empty
   }
 
   test("chunks splits basic double-newline-separated string") {
@@ -59,7 +59,7 @@ class StringsTest extends UnitTest:
   }
 
   test("chunks handles empty string") {
-    "".chunks == Seq.empty
+    "".chunks shouldBe empty
   }
 
   test("toBigInt round trip") {
