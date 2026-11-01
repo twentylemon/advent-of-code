@@ -51,8 +51,8 @@ case class Point[N: Integral](x: N, y: N):
     dx * dx + dy * dy
 
   /** Returns an iterator of all points within `distance` of this point using the given metric.
-    * This checks all points in a square around the point, so will not be correct if
-    * `metric(point, point.shift(direction, distance)) > distance` (eg squared euclidean distance).
+    * This checks all points in a square around the point, assuming that for each row, the metric
+    * is symmetric in `dx` and grows with `|dx|` (eg manhattan, chessboard, squared euclidean).
     * @param distance the maximum distance, inclusive
     * @param metric the distance function to use
     * @return iterator of all points within `distance` of this point, including the point itself
@@ -60,9 +60,9 @@ case class Point[N: Integral](x: N, y: N):
   def within(distance: N, metric: (Point[N], Point[N]) => N): Iterator[Point[N]] =
     for
       dy <- Iterator.iterate(-distance)(_ + `1`).takeWhile(_ <= distance)
-      max = Iterator.iterate(distance)(_ - `1`).takeWhile(_ >= `0`)
+      max <- Iterator.iterate(distance)(_ - `1`).takeWhile(_ >= `0`)
         .find(dx => metric(this, Point(x + dx, y + dy)) <= distance)
-        .getOrElse(`0`)
+        .iterator
       dx <- Iterator.iterate(-max)(_ + `1`).takeWhile(_ <= max)
     yield Point(x + dx, y + dy)
 
