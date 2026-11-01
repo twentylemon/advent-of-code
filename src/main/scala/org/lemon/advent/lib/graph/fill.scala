@@ -34,6 +34,12 @@ def distanceFrom[N, D: Numeric](
     adjacency: N => Iterable[(N, D)] | Iterator[(N, D)],
     end: N,
     maxDistance: D,
+): Map[N, D] = distancesWithin(adjacency, end, Some(maxDistance))
+
+private def distancesWithin[N, D: Numeric](
+    adjacency: N => Iterable[(N, D)] | Iterator[(N, D)],
+    end: N,
+    maxDistance: Option[D],
 ): Map[N, D] =
   val distances = mutable.Map(end -> Numeric[D].zero)
   // given Ordering[(N, D)] = Ordering.by[(N, D), D](_._2).reverse
@@ -42,9 +48,10 @@ def distanceFrom[N, D: Numeric](
   while !queue.isEmpty do
     val node = queue.dequeue._1
     val dist = distances(node)
-    if dist < maxDistance then
-      queue ++= adjacency(node)
-        .filter((neigh, d) => dist + d <= maxDistance && distances.get(neigh).forall(_ > dist + d))
+    if maxDistance.forall(dist < _) then
+      // iterate lazily so each edge is checked against distances updated by the edges before it
+      queue ++= adjacency(node).iterator
+        .filter((neigh, d) => maxDistance.forall(dist + d <= _) && distances.get(neigh).forall(_ > dist + d))
         .tapEach((neigh, d) => distances(neigh) = dist + d)
   distances.toMap
 
@@ -58,7 +65,7 @@ def distanceFrom[N, D: Numeric](
   * @tparam D the distance type
   */
 def distanceFrom[N, D: Numeric](adjacency: N => Iterable[(N, D)] | Iterator[(N, D)], end: N): Map[N, D] =
-  distanceFrom(adjacency, end, Numeric[D].fromInt(Int.MaxValue))
+  distancesWithin(adjacency, end, None)
 
 /** Performs a breadth first fill of the graph from the starting node, returning
   * the distance to all reachable nodes. The distance between each node is assumed to be one.
