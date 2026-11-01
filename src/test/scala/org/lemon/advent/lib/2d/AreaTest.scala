@@ -138,6 +138,14 @@ class AreaTest extends UnitTest:
     check((area: Area) => area.quadrants.toSeq.flatMap(_.toSeq).toSet == area.toSet)
   }
 
+  test("quadrants split the area in half, with any odd middle in the top or left quadrants") {
+    check((area: Area) =>
+      val q = area.quadrants
+      q.topLeft.width == (area.width + 1) / 2 && q.topRight.width == area.width / 2 &&
+      q.topLeft.height == (area.height + 1) / 2 && q.bottomLeft.height == area.height / 2
+    )
+  }
+
   test("area encloses itself") {
     check((area: Area) => area `encloses` area)
   }

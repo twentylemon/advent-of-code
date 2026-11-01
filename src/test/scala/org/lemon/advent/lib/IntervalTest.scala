@@ -462,3 +462,17 @@ class IntervalTest extends UnitTest:
       intervals.sorted.map(i => (i.start, i.end)) == intervals.map(i => (i.start, i.end)).sorted
     })
   }
+
+  test("iterator stops at Int.MaxValue") {
+    check(forAll(Gen.choose(0, 100)) { (n: Int) =>
+      // take one extra so an iterator that wraps around fails instead of looping forever
+      Interval(Int.MaxValue - n, Int.MaxValue).iterator.take(n + 2).toSeq == (Int.MaxValue - n to Int.MaxValue)
+    })
+  }
+
+  test("reverseIterator stops at Int.MinValue") {
+    check(forAll(Gen.choose(0, 100)) { (n: Int) =>
+      Interval(Int.MinValue, Int.MinValue + n).reverseIterator.take(n + 2).toSeq ==
+        (Int.MinValue + n to Int.MinValue by -1)
+    })
+  }
