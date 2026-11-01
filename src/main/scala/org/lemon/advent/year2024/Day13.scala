@@ -12,8 +12,7 @@ private object Day13:
           s"Button A: X+$ax, Y+$ay",
           s"Button B: X+$bx, Y+$by",
           s"Prize: X=$px, Y=$py",
-        ) => (Point(ax.toLong, ay.toLong), Point(bx.toLong, by.toLong), Point(px.toLong, py.toLong))
-  ).toSeq
+        ) => (Point(ax.toLong, ay.toLong), Point(bx.toLong, by.toLong), Point(px.toLong, py.toLong))).toSeq
 
   def solve(a: Coord, b: Coord, prize: Coord) =
     val (Point(ax, ay), Point(bx, by), Point(px, py)) = (a, b, prize)
