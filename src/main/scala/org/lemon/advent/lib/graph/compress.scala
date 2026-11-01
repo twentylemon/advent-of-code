@@ -1,5 +1,9 @@
 package org.lemon.advent.lib.graph
 
+import scala.annotation.tailrec
+import scala.math.Numeric.Implicits.*
+import scala.math.Ordering.Implicits.*
+
 /** Compresses a graph by keeping only the specified important nodes and computing
   * shortest path distances between them. Only nodes that are directly connected
   * via corridor paths (through non-important nodes) will have edges in the result.
@@ -13,12 +17,27 @@ package org.lemon.advent.lib.graph
   * @tparam D the distance type
   */
 def compress[N, D: Numeric](adjacency: N => Iterable[(N, D)] | Iterator[(N, D)], nodes: Set[N]): WeightedGraph[N, D] =
-  def corridorAdjacency(target: N)(node: N): Iterator[(N, D)] =
-    adjacency(node).iterator.filter((n, _) => n == target || !nodes.contains(n))
+  // one dijkstra per important node, which records but does not walk through the other important nodes
+  def edgesFrom(start: N): Set[(N, D)] =
+    @tailrec
+    def search(queue: MinQueue[D, N], best: Map[N, D], found: Map[N, D]): Set[(N, D)] =
+      queue.dequeue match
+        case None => found.toSet
+        case Some((cost, node, rest)) if cost > best(node) => search(rest, best, found)
+        case Some((cost, node, rest)) if node != start && nodes.contains(node) =>
+          search(rest, best, found.updated(node, cost))
+        case Some((cost, node, rest)) =>
+          val (nextQueue, nextBest) = adjacency(node).iterator
+            .filter((next, _) => next != start)
+            .foldLeft((rest, best)) { case (acc @ (queue, best), (next, dist)) =>
+              val nextCost = cost + dist
+              if best.get(next).exists(_ <= nextCost) then acc
+              else (queue.enqueue(nextCost, next), best.updated(next, nextCost))
+            }
+          search(nextQueue, nextBest, found)
 
-  def edgesFrom(start: N): Iterable[(N, D)] =
-    (nodes - start)
-      .flatMap(end => pathFind(corridorAdjacency(end), start, end).map(path => (end, path.distance)))
+    val zero = Numeric[D].zero
+    search(MinQueue(zero, start), Map(start -> zero), Map.empty)
 
   nodes.map(node => node -> edgesFrom(node)).toMap
 
