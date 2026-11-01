@@ -52,7 +52,7 @@ case class Point[N: Integral](x: N, y: N):
 
   /** Returns an iterator of all points within `distance` of this point using the given metric.
     * This checks all points in a square around the point, assuming that for each row, the metric
-    * is symmetric in `dx` and grows with `|dx|` (true of manhattan, chessboard and squared euclidean).
+    * is symmetric in `dx` and grows with `|dx|` (eg manhattan, chessboard, squared euclidean).
     * @param distance the maximum distance, inclusive
     * @param metric the distance function to use
     * @return iterator of all points within `distance` of this point, including the point itself
