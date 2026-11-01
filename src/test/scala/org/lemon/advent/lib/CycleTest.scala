@@ -1,8 +1,40 @@
 package org.lemon.advent.lib
 
 import org.lemon.advent.*
+import org.scalacheck.Gen
+import org.scalacheck.Prop.*
 
 class CycleTest extends UnitTest:
+
+  // a random function from 0 until size to itself, and a state to start from
+  val functionalGraph =
+    for
+      size <- Gen.choose(1, 60)
+      next <- Gen.listOfN(size, Gen.choose(0, size - 1))
+      initial <- Gen.choose(0, size - 1)
+    yield (next.toVector, initial)
+
+  test("findCycle and findCycleBy match a brute force search over random functional graphs") {
+    check(forAll(functionalGraph) { (next: Vector[Int], initial: Int) =>
+      // pigeonhole: some state must repeat within size + 1 steps
+      val states = Iterator.iterate(initial)(next).take(next.size + 1).toVector
+      val firstRepeat = states.indices.find(i => states.indexOf(states(i)) < i).get
+      val offset = states.indexOf(states(firstRepeat))
+      Seq(findCycle(initial)(next), findCycleBy(initial)(next)).forall(cycle =>
+        cycle.offset == offset && cycle.period == firstRepeat - offset &&
+        (0 until 200).forall(n => cycle.stateAt(n) == Iterator.iterate(initial)(next).nth(n))
+      )
+    })
+  }
+
+  test("findCycleBy finds the cycle in the keys") {
+    // the step count never repeats, so the cycle is only found through the key
+    check(forAll(functionalGraph) { (next: Vector[Int], initial: Int) =>
+      val byKey = findCycleBy((initial, 0))((n, steps) => (next(n), steps + 1), _._1)
+      val plain = findCycleBy(initial)(next)
+      byKey.offset == plain.offset && byKey.period == plain.period && byKey.history.map(_._1) == plain.history
+    })
+  }
 
   test("findCycle detects simple cycle with no offset") {
     // 0 -> 1 -> 2 -> 0 -> 1 -> 2 -> ...
