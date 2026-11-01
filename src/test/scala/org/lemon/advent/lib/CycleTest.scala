@@ -1,8 +1,29 @@
 package org.lemon.advent.lib
 
 import org.lemon.advent.*
+import org.scalacheck.Gen
+import org.scalacheck.Prop.*
 
 class CycleTest extends UnitTest:
+
+  test("findCycle matches a brute force search over random functional graphs") {
+    val gen =
+      for
+        size <- Gen.choose(1, 60)
+        next <- Gen.listOfN(size, Gen.choose(0, size - 1))
+        initial <- Gen.choose(0, size - 1)
+      yield (next.toVector, initial)
+
+    check(forAll(gen) { (next: Vector[Int], initial: Int) =>
+      // pigeonhole: some state must repeat within size + 1 steps
+      val states = Iterator.iterate(initial)(next).take(next.size + 1).toVector
+      val firstRepeat = states.indices.find(i => states.indexOf(states(i)) < i).get
+      val offset = states.indexOf(states(firstRepeat))
+      val cycle = findCycle(initial)(next)
+      cycle.offset == offset && cycle.period == firstRepeat - offset &&
+      (0 until 200).forall(n => cycle.stateAt(n) == Iterator.iterate(initial)(next).nth(n))
+    })
+  }
 
   test("findCycle detects simple cycle with no offset") {
     // 0 -> 1 -> 2 -> 0 -> 1 -> 2 -> ...
