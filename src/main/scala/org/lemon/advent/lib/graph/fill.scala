@@ -30,7 +30,7 @@ def fill[N](adjacency: N => Iterable[N] | Iterator[N], start: N): Set[N] =
   * @tparam N the node type
   * @tparam D the distance type
   */
-def distanceFrom[N, D: Numeric](
+private def distanceFrom[N, D: Numeric](
     adjacency: N => Iterable[(N, D)] | Iterator[(N, D)],
     end: N,
     maxDistance: Option[D],
