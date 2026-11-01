@@ -12,14 +12,16 @@ import scala.collection.mutable
   */
 def cliques[N](nodes: Set[N], adjacency: N => Iterable[N]): Set[Set[N]] =
   val result = mutable.Set.empty[Set[N]]
+  def neighbours(node: N) = adjacency(node).toSet - node
 
   def bronKerbosch(r: Set[N], p: Set[N], x: Set[N]): Unit =
     if p.isEmpty && x.isEmpty then result.add(r)
     else
       var (xv, pv) = (x, p)
       val u = p.union(x).head
-      for v <- p.diff(adjacency(u).toSet) do
-        bronKerbosch(r + v, pv.intersect(adjacency(v).toSet), xv.intersect(adjacency(v).toSet))
+      for v <- p.diff(neighbours(u)) do
+        val nv = neighbours(v)
+        bronKerbosch(r + v, pv.intersect(nv), xv.intersect(nv))
         xv += v
         pv -= v
 

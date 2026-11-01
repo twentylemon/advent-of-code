@@ -35,6 +35,10 @@ given Shrink[Diet[Int]] = Shrink { case diet: Diet[Int] =>
   shrink(diet.toRanges).map(Diet.apply)
 }
 
+def isCanonical(diet: Diet[Int]): Boolean =
+  val intervals = diet.toIntervals
+  intervals.forall(_.nonEmpty) && intervals.sliding2.forall((a, b) => a.end.toLong + 1 < b.start.toLong)
+
 class EmptyDietTest extends UnitTest:
   test("contains nothing") {
     check((n: Int) => !Diet.empty[Int].contains(n))
@@ -82,6 +86,19 @@ class EmptyDietTest extends UnitTest:
 
   test("adding Interval produces diet with single interval") {
     check((interval: Interval[Int]) => Diet.empty[Int] + interval == Diet(interval.start to interval.end))
+  }
+
+  test("adding Int.MinValue and Int.MaxValue contains both") {
+    val diet = Diet.empty[Int] + Int.MinValue + Int.MaxValue
+    diet.contains(Int.MinValue) shouldBe true
+    diet.contains(Int.MaxValue) shouldBe true
+  }
+
+  test("adding a range up to Int.MaxValue contains all of it") {
+    check((n: Int) =>
+      val diet = Diet.empty[Int] + (n, Int.MaxValue)
+      diet.contains(n) && diet.contains(Int.MaxValue)
+    )
   }
 
   test("removing value does nothing") {
@@ -230,6 +247,26 @@ class SingletonValueDietTest extends UnitTest:
     )
   }
 
+  val nearby =
+    for
+      n <- arbitrary[Int]
+      other <- Gen.choose(n - 2, n + 2)
+    yield (n, other)
+
+  test("adding Int.MinValue and Int.MaxValue contains both") {
+    check((n: Int) =>
+      val diet = Diet(n) + Int.MinValue + Int.MaxValue
+      diet.contains(Int.MinValue) && diet.contains(Int.MaxValue) && diet.contains(n)
+    )
+  }
+
+  test("adding a range up to Int.MaxValue merges the element if it is above the start") {
+    check(forAll(nearby) { (n, start) =>
+      val added = Diet(n) + (start, Int.MaxValue)
+      isCanonical(added) && added.contains(Int.MaxValue) && added.contains(n)
+    })
+  }
+
   test("removing value gives empty diet") {
     check((n: Int) => (Diet(n) - n) == Diet.empty[Int])
   }
@@ -284,6 +321,22 @@ class SingletonValueDietTest extends UnitTest:
     check((n: Int, rhs: Diet[Int]) =>
       rhs.contains(n) ==> ((Diet(n) & rhs) == Diet(n))
     )
+  }
+
+  test("intersect with a range up to Int.MaxValue keeps the element if it is at or above the start") {
+    check(forAll(nearby) { (n, start) =>
+      val expected = if n >= start then Set(n) else Set.empty[Int]
+      (Diet(start, Int.MaxValue) & Diet(n)).toSet == expected &&
+      (Diet(n) & Diet(start, Int.MaxValue)).toSet == expected
+    })
+  }
+
+  test("intersect with a range down to Int.MinValue keeps the element if it is at or below the end") {
+    check(forAll(nearby) { (n, end) =>
+      val expected = if n <= end then Set(n) else Set.empty[Int]
+      (Diet(Int.MinValue, end) & Diet(n)).toSet == expected &&
+      (Diet(n) & Diet(Int.MinValue, end)).toSet == expected
+    })
   }
 
   test("diff with empty is self") {
@@ -493,6 +546,26 @@ class SingletonIntervalDietTest extends UnitTest:
     })
   }
 
+  val nearby =
+    for
+      range <- arbitrary[Range]
+      n <- Gen.choose(range.min - 2, range.max + 2)
+    yield (range, n)
+
+  test("adding Int.MinValue and Int.MaxValue contains both") {
+    check((range: Range) =>
+      val diet = Diet(range) + Int.MinValue + Int.MaxValue
+      diet.contains(Int.MinValue) && diet.contains(Int.MaxValue) && diet.contains(range)
+    )
+  }
+
+  test("adding a range up to Int.MaxValue merges everything above its start") {
+    check(forAll(nearby) { (range, start) =>
+      val added = Diet(range) + (start, Int.MaxValue)
+      isCanonical(added) && added.contains(Int.MaxValue) && added.contains(range)
+    })
+  }
+
   test("removing element from middle splits interval") {
     val gen =
       for
@@ -573,6 +646,22 @@ class SingletonIntervalDietTest extends UnitTest:
   test("intersect with overlapping range gives overlap") {
     check(forAll(overlappingRange) { (range, other) =>
       (Diet(range) & Diet(other)).toSet == (range.toSet & other.toSet)
+    })
+  }
+
+  test("intersect with a range up to Int.MaxValue keeps the values from its start") {
+    check(forAll(nearby) { (range, start) =>
+      val expected = range.toSet.filter(_ >= start)
+      (Diet(start, Int.MaxValue) & Diet(range)).toSet == expected &&
+      (Diet(range) & Diet(start, Int.MaxValue)).toSet == expected
+    })
+  }
+
+  test("intersect with a range down to Int.MinValue keeps the values up to its end") {
+    check(forAll(nearby) { (range, end) =>
+      val expected = range.toSet.filter(_ <= end)
+      (Diet(Int.MinValue, end) & Diet(range)).toSet == expected &&
+      (Diet(range) & Diet(Int.MinValue, end)).toSet == expected
     })
   }
 
@@ -731,6 +820,26 @@ class MultipleValueDietTest extends UnitTest:
     })
   }
 
+  val nearby =
+    for
+      values <- disjointValuesGen
+      n <- Gen.choose(values.min - 2, values.max + 2)
+    yield (values, n)
+
+  test("adding Int.MinValue and Int.MaxValue contains both") {
+    check((values: Seq[Int]) =>
+      val diet = Diet(values) + Int.MinValue + Int.MaxValue
+      diet.contains(Int.MinValue) && diet.contains(Int.MaxValue) && values.forall(diet.contains)
+    )
+  }
+
+  test("adding a range up to Int.MaxValue merges every value above its start") {
+    check(forAll(nearby) { (values, start) =>
+      val added = Diet(values) + (start, Int.MaxValue)
+      isCanonical(added) && added.contains(Int.MaxValue) && values.forall(added.contains)
+    })
+  }
+
   test("removing existing value decreases size") {
     check(forAll(overlappingValue) { (values, n) =>
       val diet = Diet(values)
@@ -779,6 +888,22 @@ class MultipleValueDietTest extends UnitTest:
   test("intersect with disjoint value is empty") {
     check(forAll(disjointValue) { (values, n) =>
       (Diet(values) & Diet(n)) == Diet.empty[Int]
+    })
+  }
+
+  test("intersect with a range up to Int.MaxValue keeps the values from its start") {
+    check(forAll(nearby) { (values, start) =>
+      val expected = values.toSet.filter(_ >= start)
+      (Diet(start, Int.MaxValue) & Diet(values)).toSet == expected &&
+      (Diet(values) & Diet(start, Int.MaxValue)).toSet == expected
+    })
+  }
+
+  test("intersect with a range down to Int.MinValue keeps the values up to its end") {
+    check(forAll(nearby) { (values, end) =>
+      val expected = values.toSet.filter(_ <= end)
+      (Diet(Int.MinValue, end) & Diet(values)).toSet == expected &&
+      (Diet(values) & Diet(Int.MinValue, end)).toSet == expected
     })
   }
 
@@ -987,6 +1112,26 @@ class MultipleIntervalDietTest extends UnitTest:
     })
   }
 
+  val nearby =
+    for
+      ranges <- disjointRangesGen
+      n <- Gen.choose(ranges.head.min - 2, ranges.last.max + 2)
+    yield (ranges, n)
+
+  test("adding Int.MinValue and Int.MaxValue contains both") {
+    check((ranges: Seq[Range]) =>
+      val diet = Diet(ranges) + Int.MinValue + Int.MaxValue
+      diet.contains(Int.MinValue) && diet.contains(Int.MaxValue) && ranges.forall(r => diet.contains(r))
+    )
+  }
+
+  test("adding a range up to Int.MaxValue merges every interval above its start") {
+    check(forAll(nearby) { (ranges, start) =>
+      val added = Diet(ranges) + (start, Int.MaxValue)
+      isCanonical(added) && added.contains(Int.MaxValue) && ranges.forall(r => added.contains(r))
+    })
+  }
+
   test("removing existing value decreases size") {
     check(forAll(overlappingValue) { (ranges, n) =>
       val diet = Diet(ranges)
@@ -1041,6 +1186,22 @@ class MultipleIntervalDietTest extends UnitTest:
 
   test("intersect with disjoint range is empty") {
     check(forAll(disjointRange) { (ranges, other) => (Diet(ranges) & Diet(other)) == Diet.empty[Int] })
+  }
+
+  test("intersect with a range up to Int.MaxValue keeps the values from its start") {
+    check(forAll(nearby) { (ranges, start) =>
+      val expected = ranges.flatMap(_.toSet).toSet.filter(_ >= start)
+      (Diet(start, Int.MaxValue) & Diet(ranges)).toSet == expected &&
+      (Diet(ranges) & Diet(start, Int.MaxValue)).toSet == expected
+    })
+  }
+
+  test("intersect with a range down to Int.MinValue keeps the values up to its end") {
+    check(forAll(nearby) { (ranges, end) =>
+      val expected = ranges.flatMap(_.toSet).toSet.filter(_ <= end)
+      (Diet(Int.MinValue, end) & Diet(ranges)).toSet == expected &&
+      (Diet(ranges) & Diet(Int.MinValue, end)).toSet == expected
+    })
   }
 
   test("diff with empty is self") {
