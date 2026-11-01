@@ -34,8 +34,7 @@ def memoize[T1, T2, T3, T4, R](f: (T1, T2, T3, T4) => R): (T1, T2, T3, T4) => R 
 
 /** Memoizes a function, keeping at most `maxCacheSize` results and evicting the least recently used.
   * An evicted result is computed again the next time it is needed, so a recursive function needs room
-  * for the results it is still using, or it can take exponential time. Can be called from several
-  * threads, though two threads may compute the same result.
+  * for the results it is still using, or it can take exponential time.
   * Use as:
   * ```scala
   * lazy val fib: BigInt => BigInt = memoize(maxCacheSize = 3) {
@@ -57,12 +56,12 @@ def memoize[T, R](maxCacheSize: Int)(f: T => R): T => R =
     override def removeEldestEntry(eldest: java.util.Map.Entry[T, R]): Boolean = size > maxCacheSize
 
   (t: T) =>
-    cache.synchronized(Option.when(cache.containsKey(t))(cache.get(t))).getOrElse {
-      // computed outside the lock, since f may call back into the cache
+    if cache.containsKey(t) then cache.get(t)
+    else
+      // not computeIfAbsent, which throws if f calls back into the cache
       val result = f(t)
-      cache.synchronized(cache.put(t, result))
+      cache.put(t, result)
       result
-    }
 
 def memoize[T1, T2, R](maxCacheSize: Int)(f: (T1, T2) => R): (T1, T2) => R =
   val cached = memoize(maxCacheSize)(f.tupled)

@@ -5,7 +5,6 @@ import org.scalacheck.Gen
 import org.scalacheck.Prop.*
 
 import scala.collection.mutable
-import scala.collection.parallel.CollectionConverters.*
 
 class MemoizeTest extends UnitTest:
 
@@ -102,9 +101,4 @@ class MemoizeTest extends UnitTest:
     }
     fib(100) shouldBe BigInt("354224848179261915075")
     paths(0, 0, 20) shouldBe 1L << 20
-  }
-
-  test("memoize with a max cache size can be called from several threads") {
-    val cached = memoize(64)((n: Int) => n * 31 + 7)
-    (0 until 100_000).par.map(n => cached(n % 100)).seq shouldBe (0 until 100_000).map(n => (n % 100) * 31 + 7)
   }
