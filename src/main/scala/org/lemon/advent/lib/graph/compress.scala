@@ -11,12 +11,15 @@ import scala.math.Ordering.Implicits.*
   * edges between junction nodes.
   *
   * @param adjacency function to return edges for a given node
-  * @param nodes the important nodes to keep in the compressed graph
+  * @param keepNodes the important nodes to keep in the compressed graph
   * @return a weighted graph containing only the important nodes with edges weighted by shortest path distances
   * @tparam N the node type
   * @tparam D the distance type
   */
-def compress[N, D: Numeric](adjacency: N => Iterable[(N, D)] | Iterator[(N, D)], nodes: Set[N]): WeightedGraph[N, D] =
+def compress[N, D: Numeric](
+    adjacency: N => Iterable[(N, D)] | Iterator[(N, D)],
+    keepNodes: Set[N],
+): WeightedGraph[N, D] =
   // one dijkstra per important node, which records but does not walk through the other important nodes
   def edgesFrom(start: N): Set[(N, D)] =
     @tailrec
@@ -24,7 +27,7 @@ def compress[N, D: Numeric](adjacency: N => Iterable[(N, D)] | Iterator[(N, D)],
       queue.dequeue match
         case None => found.toSet
         case Some((cost, node, rest)) if cost > best(node) => search(rest, best, found)
-        case Some((cost, node, rest)) if node != start && nodes.contains(node) =>
+        case Some((cost, node, rest)) if node != start && keepNodes.contains(node) =>
           search(rest, best, found.updated(node, cost))
         case Some((cost, node, rest)) =>
           val (nextQueue, nextBest) = adjacency(node).iterator
@@ -39,41 +42,41 @@ def compress[N, D: Numeric](adjacency: N => Iterable[(N, D)] | Iterator[(N, D)],
     val zero = Numeric[D].zero
     search(MinQueue(zero, start), Map(start -> zero), Map.empty)
 
-  nodes.map(node => node -> edgesFrom(node)).toMap
+  keepNodes.map(node => node -> edgesFrom(node)).toMap
 
 /** Compresses a graph by keeping only the specified important nodes and computing
   * shortest path distances between them. The distance between each node is assumed to be one.
   *
   * @param adjacency function to return edges for a given node, all with distance one
-  * @param nodes the important nodes to keep in the compressed graph
+  * @param keepNodes the important nodes to keep in the compressed graph
   * @return a weighted graph containing only the important nodes with edges weighted by shortest path distances
   * @tparam N the node type
   */
-def compress[N](adjacency: N => Iterable[N] | Iterator[N], nodes: Set[N]): WeightedGraph[N, Int] =
-  compress(unitAdjacency(adjacency), nodes)
+def compress[N](adjacency: N => Iterable[N] | Iterator[N], keepNodes: Set[N]): WeightedGraph[N, Int] =
+  compress(unitAdjacency(adjacency), keepNodes)
 
 /** Compresses a graph by keeping only the specified important nodes and computing
   * shortest path distances between them.
   *
   * @param graph the graph to compress
-  * @param nodes the important nodes to keep in the compressed graph
+  * @param keepNodes the important nodes to keep in the compressed graph
   * @return a weighted graph containing only the important nodes with edges weighted by shortest path distances
   * @tparam N the node type
   * @tparam D the distance type
   */
-def compress[N, D: Numeric](graph: WeightedGraph[N, D], nodes: Set[N]): WeightedGraph[N, D] =
-  compress(graph.apply, nodes)
+def compress[N, D: Numeric](graph: WeightedGraph[N, D], keepNodes: Set[N]): WeightedGraph[N, D] =
+  compress(graph.apply, keepNodes)
 
 /** Compresses a graph by keeping only the specified important nodes and computing
   * shortest path distances between them. The distance between each node is assumed to be one.
   *
   * @param graph the graph to compress
-  * @param nodes the important nodes to keep in the compressed graph
+  * @param keepNodes the important nodes to keep in the compressed graph
   * @return a weighted graph containing only the important nodes with edges weighted by shortest path distances
   * @tparam N the node type
   */
-def compress[N](graph: UnitGraph[N], nodes: Set[N]): WeightedGraph[N, Int] =
-  compress(graph.apply, nodes)
+def compress[N](graph: UnitGraph[N], keepNodes: Set[N]): WeightedGraph[N, Int] =
+  compress(graph.apply, keepNodes)
 
 /** Finds junction nodes in the graph - nodes with more than two connections.
   * These are typically the important nodes to keep when compressing corridor-like graphs.
