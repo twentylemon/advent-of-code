@@ -216,6 +216,27 @@ class CoordTest extends UnitTest:
     )
   }
 
+  test("within is every point in the surrounding square that is within distance") {
+    val metrics = Map[String, (Coord, Coord) => Int](
+      "manhattan" -> (_ `manhattan` _),
+      "chessboard" -> (_ `chessboard` _),
+      "euclidean" -> (_ `euclidean` _),
+    )
+    val gen =
+      for
+        coord <- Gen.resultOf((x: Byte, y: Byte) => Coord(x, y))
+        d <- Gen.chooseNum(0, 10)
+        metric <- Gen.oneOf(metrics.keys)
+      yield (coord, d, metric)
+
+    check(forAll(gen) { (coord: Coord, d: Int, name: String) =>
+      val metric = metrics(name)
+      val square = Area(coord.x - d to coord.x + d, coord.y - d to coord.y + d)
+      val within = coord.within(d, metric).toSeq
+      within.distinct == within && within.toSet == square.filter(metric(coord, _) <= d).toSet
+    })
+  }
+
   test("rotateRight four times is identity") {
     check((coord: Coord) => coord.rotateRight.rotateRight.rotateRight.rotateRight == coord)
   }
