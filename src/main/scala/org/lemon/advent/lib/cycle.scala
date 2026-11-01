@@ -48,9 +48,9 @@ def findCycle[S](initial: S)(step: S => S): Cycle[S] =
   findCycle(initial)(step, _ == _)
 
 /** Detects a cycle in the sequence of states produced by repeatedly applying `step` to `initial`,
-  * where two states are the same when they have equal keys. Calls `step` exactly `offset + period` times,
-  * about a third as often as [[findCycle]], so is faster when `step` is expensive. [[findCycle]] can be
-  * faster when `step` is cheap and comparing two states usually stops early.
+  * where two states are the same when they have equal keys. This implementation is faster when
+  * `step` is expensive. [[findCycle]] can be faster when `step` is cheap and comparing two states
+  * usually stops early.
   *
   * @param initial the starting state
   * @param step function to produce the next state
@@ -69,7 +69,7 @@ def findCycleBy[S, K](initial: S)(step: S => S, key: S => K): Cycle[S] =
   loop(initial, Map.empty, Vector.empty)
 
 /** Detects a cycle in the sequence of states produced by repeatedly applying `step` to `initial`,
-  * by hashing the states. Calls `step` exactly `offset + period` times.
+  * by hashing the states.
   *
   * @param initial the starting state
   * @param step function to produce the next state
