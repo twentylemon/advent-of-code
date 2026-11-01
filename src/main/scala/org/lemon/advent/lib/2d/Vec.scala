@@ -20,5 +20,5 @@ object VecT:
       if vec.x == `0` then (`0`, vec.y.sign)
       else if vec.y == `0` then (vec.x.sign, `0`)
       else
-        val gcd = vec.x.abs.gcd(vec.y.abs)
+        val gcd = vec.x.gcd(vec.y)
         (vec.x / gcd, vec.y / gcd)
