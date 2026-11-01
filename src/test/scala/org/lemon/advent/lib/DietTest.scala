@@ -1114,3 +1114,63 @@ class MultipleIntervalDietTest extends UnitTest:
         .mkString("Diet(", ", ", ")")
     )
   }
+
+def isCanonical(diet: Diet[Int]): Boolean =
+  val intervals = diet.toIntervals
+  intervals.forall(_.nonEmpty) && intervals.sliding2.forall((a, b) => a.end.toLong + 1 < b.start.toLong)
+
+class DietModelTest extends UnitTest:
+  // a small universe so random ranges overlap, touch and split each other often
+  val smallRange: Gen[Range] =
+    for
+      i <- Gen.choose(-50, 50)
+      j <- Gen.choose(-50, 50)
+    yield (i min j) to (i max j)
+  val smallDiet: Gen[Diet[Int]] = Gen.listOf(smallRange).map(ranges => Diet(ranges))
+
+  test("any sequence of adds and removes matches a Set and stays canonical") {
+    val op = Gen.zip(Gen.oneOf(true, false), smallRange)
+    check(forAll(Gen.listOf(op)) { ops =>
+      val (diet, set) = ops.foldLeft((Diet.empty[Int], Set.empty[Int])) { case ((diet, set), (add, range)) =>
+        if add then (diet + range, set ++ range) else (diet - range, set -- range)
+      }
+      diet.toSet == set && diet.size == set.size && isCanonical(diet)
+    })
+  }
+
+  test("union, intersect and diff match Set operations and stay canonical") {
+    check(forAll(smallDiet, smallDiet) { (a, b) =>
+      (a ++ b).toSet == (a.toSet | b.toSet) &&
+      (a & b).toSet == (a.toSet & b.toSet) &&
+      (a -- b).toSet == (a.toSet -- b.toSet) &&
+      Seq(a ++ b, a & b, a -- b).forall(isCanonical)
+    })
+  }
+
+class DietBoundaryTest extends UnitTest:
+  test("contains Int.MaxValue once added") {
+    check(forAll(Gen.choose(0, 100)) { (n: Int) =>
+      val diet = Diet(Int.MaxValue - n, Int.MaxValue)
+      diet.contains(Int.MaxValue) && diet.contains(Int.MaxValue - n, Int.MaxValue)
+    })
+  }
+
+  test("adding a range up to Int.MaxValue absorbs every interval above its start") {
+    check(forAll(arbitrary[Diet[Int]], Gen.choose(-10000, 10000)) { (diet: Diet[Int], start: Int) =>
+      val added = diet + (start, Int.MaxValue)
+      val gapsAboveStart = diet.toIntervals.map(_.end + 1).filter(_ >= start)
+      isCanonical(added) && gapsAboveStart.forall(added.contains)
+    })
+  }
+
+  test("intersect with a range up to Int.MaxValue keeps everything from its start") {
+    check(forAll(arbitrary[Diet[Int]], Gen.choose(-10000, 10000)) { (diet: Diet[Int], start: Int) =>
+      (Diet(start, Int.MaxValue) & diet).toSet == diet.toSet.filter(_ >= start)
+    })
+  }
+
+  test("intersect with a range down to Int.MinValue keeps everything up to its end") {
+    check(forAll(arbitrary[Diet[Int]], Gen.choose(-10000, 10000)) { (diet: Diet[Int], end: Int) =>
+      (Diet(Int.MinValue, end) & diet).toSet == diet.toSet.filter(_ <= end)
+    })
+  }

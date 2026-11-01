@@ -171,9 +171,10 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
   def contains(start: N, end: N): Boolean =
     if start > end then true
     else
-      intervals.maxBefore(start + `1`) match
-        case Some((s, e)) => start >= s && end <= e
-        case None => false
+      // the interval starting at or before `start`; when `start + 1` overflows, that is the last interval
+      val next = start + `1`
+      val floor = if next > start then intervals.maxBefore(next) else intervals.lastOption
+      floor.exists((s, e) => start >= s && end <= e)
 
   def contains(range: Range): Boolean = contains(range.toNumericRange)
   def contains(range: NumericRange[N]): Boolean = contains(Interval(range))
@@ -208,6 +209,9 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
   def add(start: N, end: N): Diet[N] =
     if start > end then this
     else
+      // whether an interval starting at `s` overlaps or touches one ending at `e`, without overflowing `e + 1`
+      def reaches(s: N, e: N) = s <= e || s - `1` == e
+
       // check if we can merge with an interval ending just before our start
       val (mergeStart, mergeEnd, baseIntervals) = intervals.maxBefore(start) match
         case Some((s, e)) if e >= start - `1` => (s, end max e, intervals.removed(s))
@@ -217,10 +221,10 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
       val iter = baseIntervals.iteratorFrom(mergeStart)
       iter.nextOption match
         case None => Diet(baseIntervals.updated(mergeStart, mergeEnd))
-        case Some((s, e)) if s > mergeEnd + `1` => Diet(baseIntervals.updated(mergeStart, mergeEnd))
+        case Some((s, e)) if !reaches(s, mergeEnd) => Diet(baseIntervals.updated(mergeStart, mergeEnd))
         case Some((s, e)) =>
           // at least one overlap, collect the rest
-          val rest = iter.takeWhile((s2, _) => s2 <= (mergeEnd max e) + `1`).toList
+          val rest = iter.takeWhile((s2, _) => reaches(s2, mergeEnd max e)).toList
           val absorbed = (s, e) :: rest
           val finalEnd = absorbed.last._2 max mergeEnd
           val finalIntervals = absorbed.foldLeft(baseIntervals)((m, kv) => m - kv._1)
@@ -309,15 +313,11 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
     */
   def intersect(rhs: Diet[N]): Diet[N] =
     def overlaps(start: N, end: N): Iterator[(N, N)] =
-      // intervals from rhs that start within or adjacent to [start, end]
-      val fromRange = rhs.intervals.rangeFrom(start - `1`).iterator.takeWhile((s, _) => s <= end + `1`)
       // interval that may start before but overlap
       val fromBefore = rhs.intervals.maxBefore(start).filter((_, e) => e >= start).iterator
-      (fromRange ++ fromBefore).flatMap { (otherStart, otherEnd) =>
-        val overlapStart = start max otherStart
-        val overlapEnd = end min otherEnd
-        Option.when(overlapStart <= overlapEnd)((overlapStart, overlapEnd))
-      }
+      // intervals from rhs that start within [start, end]
+      val fromRange = rhs.intervals.iteratorFrom(start).takeWhile((s, _) => s <= end)
+      (fromBefore ++ fromRange).map((otherStart, otherEnd) => (start max otherStart, end min otherEnd))
 
     Diet(intervals.flatMap(overlaps))
 
