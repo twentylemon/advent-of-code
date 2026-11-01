@@ -25,7 +25,10 @@ extension [N: Integral](a: N)
     * @param n the divisor
     * @return the result of division, rounding up if necessary
     */
-  def /^(n: N): N = (a + n - `1`) / n
+  def /^(n: N): N =
+    val (quotient, remainder) = (a / n, a % n)
+    // division truncates towards zero, which already rounded up if the true quotient is negative
+    if remainder != `0` && (remainder > `0`) == (n > `0`) then quotient + `1` else quotient
 
   /** Returns the greatest common divisor of this and `b`.
     *
