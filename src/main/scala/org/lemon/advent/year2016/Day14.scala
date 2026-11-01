@@ -9,7 +9,7 @@ private object Day14:
 
   private val instance = ThreadLocal.withInitial(() => MessageDigest.getInstance("MD5"))
 
-  def md5(input: String): Int => Seq[Int] = memoize { idx =>
+  def md5(input: String): Int => Seq[Int] = memoize(maxCacheSize = 2000) { idx =>
     instance.get()
       .digest(s"$input$idx".getBytes)
       .flatMap(b => Seq((b & 0xf0) >>> 4, b & 0x0f))
@@ -30,7 +30,7 @@ private object Day14:
   def part1(input: String) =
     run(md5(input.trim))
 
-  def stretch(input: String): Int => Seq[Int] = memoize { idx =>
+  def stretch(input: String): Int => Seq[Int] = memoize(maxCacheSize = 2000) { idx =>
     val md = instance.get()
     (0 to 2016)
       .foldLeft(s"$input$idx")((str, _) => md.digest(str.getBytes).map("%02x".format(_)).mkString)
