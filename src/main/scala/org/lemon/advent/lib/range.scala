@@ -74,10 +74,8 @@ case class Interval[N: Integral](start: N, end: N) extends Iterable[N] with Part
   def maxOption: Option[N] = if isEmpty then None else Some(end)
 
   override def iterator: Iterator[N] = steps(start, end, `1`)
-
   def reverseIterator: Iterator[N] = steps(end, start, `-1`)
 
-  // stops on reaching `stop` rather than stepping past it, which would overflow at the type's max/min
   private def steps(first: N, stop: N, step: N): Iterator[N] =
     if isEmpty then Iterator.empty
     else
