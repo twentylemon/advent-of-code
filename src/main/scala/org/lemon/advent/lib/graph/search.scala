@@ -1,5 +1,6 @@
 package org.lemon.advent.lib.graph
 
+import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.math.Numeric.Implicits.*
 import scala.math.Ordering.Implicits.*
@@ -22,17 +23,32 @@ def pathFind[N, D: Numeric](
     start: N,
     ends: N => Boolean,
 ): Option[Path[N, D]] =
-  given Ordering[(D, Path[N, D])] = Ordering.by[(D, Path[N, D]), D](_._1).reverse
-  val queue = mutable.PriorityQueue((heuristic(start), Path(Vector(start), Numeric[D].zero)))
-  val visited = mutable.Set.empty[N]
+  @tailrec
+  def search(queue: MinQueue[D, (D, N)], best: Map[N, D], parent: Map[N, N]): Option[Path[N, D]] =
+    queue.dequeue match
+      case None => None
+      case Some((_, (cost, node), rest)) if cost > best(node) => search(rest, best, parent)
+      case Some((_, (cost, node), _)) if ends(node) => Some(Path(unwind(parent, node), cost))
+      case Some((_, (cost, node), rest)) =>
+        val (nextQueue, nextBest, nextParent) = adjacency(node).iterator.foldLeft((rest, best, parent)) {
+          case (acc @ (queue, best, parent), (next, dist)) =>
+            val nextCost = cost + dist
+            if best.get(next).exists(_ <= nextCost) then acc
+            else
+              (
+                queue.enqueue(nextCost + heuristic(next), (nextCost, next)),
+                best.updated(next, nextCost),
+                parent.updated(next, node),
+              )
+        }
+        search(nextQueue, nextBest, nextParent)
 
-  while queue.nonEmpty && !ends(queue.head._2.at) do
-    val (_, Path(path, g)) = queue.dequeue()
-    if visited.add(path.last) then
-      queue ++= adjacency(path.last)
-        .map((neigh, dist) => (g + dist + heuristic(neigh), Path(path :+ neigh, g + dist)))
+  val zero = Numeric[D].zero
+  search(MinQueue(heuristic(start), (zero, start)), Map(start -> zero), Map.empty)
 
-  queue.headOption.map(_._2)
+/** @return the path from the root of the `parent` tree down to `end` */
+private def unwind[N](parent: Map[N, N], end: N): Vector[N] =
+  (end :: List.unfold(end)(node => parent.get(node).map(p => (p, p)))).reverse.toVector
 
 /** Performs an A* search of the graph from `start` to `end`, returning
   * the shortest path between them.
