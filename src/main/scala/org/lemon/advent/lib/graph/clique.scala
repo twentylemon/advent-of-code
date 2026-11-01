@@ -12,7 +12,6 @@ import scala.collection.mutable
   */
 def cliques[N](nodes: Set[N], adjacency: N => Iterable[N]): Set[Set[N]] =
   val result = mutable.Set.empty[Set[N]]
-  // a self loop would put a node in its own neighbourhood, so it would never be branched on
   def neighbours(node: N) = adjacency(node).toSet - node
 
   def bronKerbosch(r: Set[N], p: Set[N], x: Set[N]): Unit =
