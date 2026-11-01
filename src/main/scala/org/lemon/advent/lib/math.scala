@@ -27,7 +27,7 @@ extension [N: Integral](a: N)
     */
   def /^(n: N): N = (a + n - `1`) / n
 
-  /** Returns the greatest common divisor of this and `b`, which is never negative.
+  /** Returns the greatest common divisor of this and `b`.
     *
     * @param b the other number
     * @return the greatest common divisor of this and `b`
@@ -37,7 +37,7 @@ extension [N: Integral](a: N)
     def loop(a: N, b: N): N = if b == Integral[N].zero then a.abs else loop(b, a % b)
     loop(a, b)
 
-  /** Returns the least common multiple of this and `b`, which is never negative.
+  /** Returns the least common multiple of this and `b`.
     *
     * @param b the other number
     * @return the least common multiple of this and `b`
