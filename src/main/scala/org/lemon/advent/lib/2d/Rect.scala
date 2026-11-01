@@ -120,7 +120,7 @@ case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
     * @return the four quadrant areas of this area
     */
   def quadrants: Quadrants[N] =
-    val (midX, midY) = (left + width / fromInt(2), top + height / fromInt(2))
+    val (midX, midY) = (left + (width - `1`) / fromInt(2), top + (height - `1`) / fromInt(2))
     Quadrants(
       topLeft = Rect(Interval(left, midX), Interval(top, midY)),
       topRight = Rect(Interval(midX + `1`, right), Interval(top, midY)),

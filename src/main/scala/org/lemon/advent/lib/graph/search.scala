@@ -1,5 +1,6 @@
 package org.lemon.advent.lib.graph
 
+import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.math.Numeric.Implicits.*
 import scala.math.Ordering.Implicits.*
@@ -22,17 +23,32 @@ def pathFind[N, D: Numeric](
     start: N,
     ends: N => Boolean,
 ): Option[Path[N, D]] =
-  given Ordering[(D, Path[N, D])] = Ordering.by[(D, Path[N, D]), D](_._1).reverse
-  val queue = mutable.PriorityQueue((heuristic(start), Path(Vector(start), Numeric[D].zero)))
-  val visited = mutable.Set.empty[N]
+  @tailrec
+  def search(queue: MinQueue[D, (D, N)], best: Map[N, D], parent: Map[N, N]): Option[Path[N, D]] =
+    queue.dequeue match
+      case None => None
+      case Some((_, (cost, node), rest)) if cost > best(node) => search(rest, best, parent)
+      case Some((_, (cost, node), _)) if ends(node) => Some(Path(unwind(parent, node), cost))
+      case Some((_, (cost, node), rest)) =>
+        val (nextQueue, nextBest, nextParent) = adjacency(node).iterator.foldLeft((rest, best, parent)) {
+          case (acc @ (queue, best, parent), (next, dist)) =>
+            val nextCost = cost + dist
+            if best.get(next).exists(_ <= nextCost) then acc
+            else
+              (
+                queue.enqueue(nextCost + heuristic(next), (nextCost, next)),
+                best.updated(next, nextCost),
+                parent.updated(next, node),
+              )
+        }
+        search(nextQueue, nextBest, nextParent)
 
-  while queue.nonEmpty && !ends(queue.head._2.at) do
-    val (_, Path(path, g)) = queue.dequeue()
-    if visited.add(path.last) then
-      queue ++= adjacency(path.last)
-        .map((neigh, dist) => (g + dist + heuristic(neigh), Path(path :+ neigh, g + dist)))
+  val zero = Numeric[D].zero
+  search(MinQueue(heuristic(start), (zero, start)), Map(start -> zero), Map.empty)
 
-  queue.headOption.map(_._2)
+/** @return the path from the root of the `parent` tree down to `end` */
+private def unwind[N](parent: Map[N, N], end: N): Vector[N] =
+  (end :: List.unfold(end)(node => parent.get(node).map(p => (p, p)))).reverse.toVector
 
 /** Performs an A* search of the graph from `start` to `end`, returning
   * the shortest path between them.
@@ -195,7 +211,7 @@ def pathFind[N, D: Numeric](graph: WeightedGraph[N, D], start: N, end: N): Optio
 def pathFind[N](graph: UnitGraph[N], start: N, end: N): Option[Path[N, Int]] =
   pathFind(graph.apply, start, end)
 
-/** Finds all shortest paths in the graph from `start` to `end`.
+/** Finds all shortest paths in the graph from `start` to `end`. Edge weights must be positive.
   *
   * @param adjacency function to return edges for a given node
   * @param start the start node
@@ -209,26 +225,42 @@ def allShortestPaths[N, D: Numeric](
     start: N,
     ends: N => Boolean,
 ): Set[Path[N, D]] =
-  val paths = mutable.Set.empty[Path[N, D]]
-  val queue = mutable.Queue(Path(path = Vector(start), distance = Numeric[D].zero))
-  val costs = mutable.Map(start -> Numeric[D].zero)
+  // dijkstra that remembers every equally cheap parent of each node, stopping once past the closest end
+  case class Search(best: Map[N, D], parents: Map[N, Set[N]], shortest: Option[D], endsFound: Set[N])
 
-  while !queue.isEmpty do
-    val node @ Path(path, distance) = queue.dequeue
-    if ends(node.at) then
-      if paths.isEmpty || distance < paths.head.distance then paths.clear()
-      if paths.isEmpty || distance <= paths.head.distance then paths.add(node)
+  @tailrec
+  def search(queue: MinQueue[D, N], state: Search): Search =
+    queue.dequeue match
+      case Some((cost, node, rest)) if state.shortest.forall(cost <= _) =>
+        if cost > state.best(node) then search(rest, state)
+        else if ends(node) then search(rest, state.copy(shortest = Some(cost), endsFound = state.endsFound + node))
+        else
+          val (nextQueue, nextState) = adjacency(node).iterator.foldLeft((rest, state)) {
+            case (acc @ (queue, state), (next, dist)) =>
+              val nextCost = cost + dist
+              state.best.get(next) match
+                case Some(known) if nextCost > known => acc
+                case Some(known) if nextCost == known =>
+                  (queue, state.copy(parents = state.parents.updated(next, state.parents(next) + node)))
+                case _ =>
+                  (
+                    queue.enqueue(nextCost, next),
+                    state.copy(best = state.best.updated(next, nextCost), parents = state.parents.updated(next, Set(node))),
+                  )
+          }
+          search(nextQueue, nextState)
+      case _ => state
 
-    queue ++= adjacency(node.at)
-      .filter((neigh, dist) =>
-        val costTo = distance + dist
-        costs.get(neigh) match
-          case Some(known) if known < costTo => false
-          case _ => costs(neigh) = costTo; true
-      )
-      .map((neigh, dist) => Path(path :+ neigh, distance + dist))
+  val zero = Numeric[D].zero
+  val result = search(MinQueue(zero, start), Search(Map(start -> zero), Map.empty, None, Set.empty))
 
-  paths.toSet
+  def pathsTo(node: N): Iterator[Vector[N]] =
+    if node == start then Iterator(Vector(start))
+    else result.parents(node).iterator.flatMap(parent => pathsTo(parent).map(_ :+ node))
+
+  result.shortest match
+    case Some(distance) => result.endsFound.iterator.flatMap(pathsTo).map(Path(_, distance)).toSet
+    case None => Set.empty
 
 /** Finds all shortest paths in the graph from `start` to `end`.
   * The distance between each node is assumed to be one.

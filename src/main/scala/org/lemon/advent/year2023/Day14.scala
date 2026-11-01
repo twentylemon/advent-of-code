@@ -38,7 +38,7 @@ private object Day14:
 
   def part2(input: String) =
     val grid = parse(input).map(_.reverse).transpose
-    val cycle = findCycle(grid)(tiltCycle)
+    val cycle = findCycleBy(grid)(tiltCycle)
     cycle.stateAt(1_000_000_000)
       .map(load)
       .sum

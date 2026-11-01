@@ -1,5 +1,7 @@
 package org.lemon.advent.lib
 
+import scala.annotation.tailrec
+
 case class Cycle[S](offset: Int, period: Int, history: Seq[S]):
   def stateAt(n: Long): S =
     if n < history.size then history(n.toInt)
@@ -44,3 +46,35 @@ def findCycle[S](initial: S)(step: S => S, eq: (S, S) => Boolean): Cycle[S] =
   */
 def findCycle[S](initial: S)(step: S => S): Cycle[S] =
   findCycle(initial)(step, _ == _)
+
+/** Detects a cycle in the sequence of states produced by repeatedly applying `step` to `initial`,
+  * where two states are the same when they have equal keys. This implementation is faster when
+  * `step` is expensive. [[findCycle]] can be faster when `step` is cheap and comparing two states
+  * usually stops early.
+  *
+  * @param initial the starting state
+  * @param step function to produce the next state
+  * @param key function giving the part of a state that determines the states after it
+  * @return the cycle information including offset, period, and state lookup
+  * @tparam S the state type
+  * @tparam K the key type
+  */
+def findCycleBy[S, K](initial: S)(step: S => S, key: S => K): Cycle[S] =
+  @tailrec
+  def loop(state: S, seen: Map[K, Int], history: Vector[S]): Cycle[S] =
+    val k = key(state)
+    seen.get(k) match
+      case Some(offset) => Cycle(offset, history.size - offset, history)
+      case None => loop(step(state), seen.updated(k, history.size), history :+ state)
+  loop(initial, Map.empty, Vector.empty)
+
+/** Detects a cycle in the sequence of states produced by repeatedly applying `step` to `initial`,
+  * by hashing the states.
+  *
+  * @param initial the starting state
+  * @param step function to produce the next state
+  * @return the cycle information including offset, period, and state lookup
+  * @tparam S the state type
+  */
+def findCycleBy[S](initial: S)(step: S => S): Cycle[S] =
+  findCycleBy(initial)(step, identity)
