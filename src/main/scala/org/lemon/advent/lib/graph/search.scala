@@ -27,8 +27,6 @@ def pathFind[N, D: Numeric](
   def search(queue: MinQueue[D, (D, N)], best: Map[N, D], parent: Map[N, N]): Option[Path[N, D]] =
     queue.dequeue match
       case None => None
-      // a node is queued again whenever a cheaper route to it is found, which can be after it was
-      // expanded when the heuristic is admissible but not consistent. skip the stale entries
       case Some((_, (cost, node), rest)) if cost > best(node) => search(rest, best, parent)
       case Some((_, (cost, node), _)) if ends(node) => Some(Path(unwind(parent, node), cost))
       case Some((_, (cost, node), rest)) =>
