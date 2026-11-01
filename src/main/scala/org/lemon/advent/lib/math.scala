@@ -26,7 +26,7 @@ extension [N: Integral](a: N)
     * @return the result of division, rounding up if necessary
     */
   def /^(n: N): N =
-    val (quotient, remainder) = (a / n, a % n)
+    val (quotient, remainder) = a /% n
     // division truncates towards zero, which already rounded up if the true quotient is negative
     if remainder != `0` && (remainder > `0`) == (n > `0`) then quotient + `1` else quotient
 
