@@ -36,8 +36,21 @@ def findCycle[S](initial: S)(step: S => S, eq: (S, S) => Boolean): Cycle[S] =
   val history = historyPrefix ++ Iterator.iterate(cycleStart)(step).take(period).toSeq
   Cycle(offset, period, history)
 
+/** Detects a cycle in the sequence of states produced by repeatedly applying `step` to `initial`.
+  * Uses Brent's cycle detection algorithm.
+  *
+  * @param initial the starting state
+  * @param step function to produce the next state
+  * @return the cycle information including offset, period, and state lookup
+  * @tparam S the state type
+  */
+def findCycle[S](initial: S)(step: S => S): Cycle[S] =
+  findCycle(initial)(step, _ == _)
+
 /** Detects a cycle in the sequence of states produced by repeatedly applying `step` to `initial`,
-  * where two states are the same when they have equal keys. Calls `step` exactly `offset + period` times.
+  * where two states are the same when they have equal keys. Calls `step` exactly `offset + period` times,
+  * about a third as often as [[findCycle]], so is faster when `step` is expensive. [[findCycle]] can be
+  * faster when `step` is cheap and comparing two states usually stops early.
   *
   * @param initial the starting state
   * @param step function to produce the next state
@@ -55,13 +68,13 @@ def findCycleBy[S, K](initial: S)(step: S => S, key: S => K): Cycle[S] =
       case None => loop(step(state), seen.updated(k, history.size), history :+ state)
   loop(initial, Map.empty, Vector.empty)
 
-/** Detects a cycle in the sequence of states produced by repeatedly applying `step` to `initial`.
-  * Calls `step` exactly `offset + period` times.
+/** Detects a cycle in the sequence of states produced by repeatedly applying `step` to `initial`,
+  * by hashing the states. Calls `step` exactly `offset + period` times.
   *
   * @param initial the starting state
   * @param step function to produce the next state
   * @return the cycle information including offset, period, and state lookup
   * @tparam S the state type
   */
-def findCycle[S](initial: S)(step: S => S): Cycle[S] =
+def findCycleBy[S](initial: S)(step: S => S): Cycle[S] =
   findCycleBy(initial)(step, identity)
