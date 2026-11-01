@@ -27,22 +27,22 @@ extension [N: Integral](a: N)
     */
   def /^(n: N): N = (a + n - `1`) / n
 
-  /** Returns the greatest common divisor of this and `b`.
+  /** Returns the greatest common divisor of this and `b`, which is never negative.
     *
     * @param b the other number
     * @return the greatest common divisor of this and `b`
     */
   def gcd(b: N): N =
     @annotation.tailrec
-    def loop(a: N, b: N): N = if b == Integral[N].zero then a else loop(b, a % b)
+    def loop(a: N, b: N): N = if b == Integral[N].zero then a.abs else loop(b, a % b)
     loop(a, b)
 
-  /** Returns the least common multiple of this and `b`.
+  /** Returns the least common multiple of this and `b`, which is never negative.
     *
     * @param b the other number
     * @return the least common multiple of this and `b`
     */
-  def lcm(b: N): N = a * b / a.gcd(b)
+  def lcm(b: N): N = if a == `0` || b == `0` then `0` else (a / a.gcd(b) * b).abs
 
 extension [N: Integral](it: Iterable[N])
   /** @return the greatest common divisor of all elements in the iterable */
