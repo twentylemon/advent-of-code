@@ -2,6 +2,7 @@ package org.lemon.advent.lib
 
 import scala.math.Ordering.Implicits.*
 import scala.math.Integral.Implicits.*
+import scala.collection.AbstractIterator
 import scala.collection.immutable.{TreeMap, NumericRange}
 import scala.annotation.targetName
 
@@ -72,11 +73,24 @@ case class Interval[N: Integral](start: N, end: N) extends Iterable[N] with Part
   def max: N = if isEmpty then throw new UnsupportedOperationException("max of empty interval") else end
   def maxOption: Option[N] = if isEmpty then None else Some(end)
 
-  override def iterator: Iterator[N] =
-    if isEmpty then Iterator.empty else Iterator.iterate(start)(_ + `1`).takeWhile(_ <= end)
+  override def iterator: Iterator[N] = steps(start, end, `1`)
 
-  def reverseIterator: Iterator[N] =
-    if isEmpty then Iterator.empty else Iterator.iterate(end)(_ - `1`).takeWhile(_ >= start)
+  def reverseIterator: Iterator[N] = steps(end, start, `-1`)
+
+  // stops on reaching `stop` rather than stepping past it, which would overflow at the type's max/min
+  private def steps(first: N, stop: N, step: N): Iterator[N] =
+    if isEmpty then Iterator.empty
+    else
+      new AbstractIterator[N]:
+        private val num = Integral[N]
+        private var current = first
+        private var more = true
+        def hasNext: Boolean = more
+        def next(): N =
+          if !more then Iterator.empty.next()
+          val result = current
+          if num.equiv(result, stop) then more = false else current = num.plus(result, step)
+          result
 
   def indices: Interval[N] = if isEmpty then Interval.empty else Interval(`0`, length - `1`)
 
