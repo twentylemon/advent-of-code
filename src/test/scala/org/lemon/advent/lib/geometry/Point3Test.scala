@@ -93,6 +93,18 @@ class Point3Test extends UnitTest:
     check((a: Point3[Int], b: Point3[Int]) => a.euclidean(b) == (a - b).dot(a - b))
   }
 
+  test("bounding box defines opposing corners") {
+    check((a: Point3[Int], b: Point3[Int]) =>
+      val cuboid = a.bounding(b)
+      Seq(
+        Set(cuboid.topLeftFront, cuboid.bottomRightBack),
+        Set(cuboid.topRightFront, cuboid.bottomLeftBack),
+        Set(cuboid.bottomLeftFront, cuboid.topRightBack),
+        Set(cuboid.bottomRightFront, cuboid.topLeftBack),
+      ).contains(Set(a, b))
+    )
+  }
+
   test("dot is symmetric") {
     check((a: Point3[Int], b: Point3[Int]) => a.dot(b) == b.dot(a))
   }
