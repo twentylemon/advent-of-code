@@ -139,6 +139,10 @@ class EmptyIntervalTest extends UnitTest:
     check((a: Int, b: Int) => Interval.empty[Int].intersect(Interval(a, b)).isEmpty)
   }
 
+  test("shift is empty") {
+    check((n: Int) => Interval.empty[Int].shift(n).isEmpty)
+  }
+
   test("toRange is empty") {
     Interval.empty[Int].toRange.isEmpty shouldBe true
   }
@@ -475,4 +479,14 @@ class IntervalTest extends UnitTest:
       Interval(Int.MinValue, Int.MinValue + n).reverseIterator.take(n + 2).toSeq ==
         (Int.MinValue + n to Int.MinValue by -1)
     })
+  }
+
+  test("shift moves every value") {
+    val gen = for (a, b) <- intervalGen; n <- Gen.choose(-1000, 1000) yield (a, b, n)
+    check(forAll(gen) { (a, b, n) => interval(a, b).shift(n).toSeq == range(a, b).map(_ + n) })
+  }
+
+  test("shift by the opposite amount is the original") {
+    val gen = for (a, b) <- intervalGen; n <- Gen.choose(-1000, 1000) yield (a, b, n)
+    check(forAll(gen) { (a, b, n) => interval(a, b).shift(n).shift(-n) == interval(a, b) })
   }

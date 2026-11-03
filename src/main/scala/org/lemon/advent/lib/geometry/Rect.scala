@@ -142,8 +142,7 @@ case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
   def dropBottom(n: N): Rect[N] = growBottom(-n)
   def contract(n: N): Rect[N] = expand(-n)
 
-  def translate(offset: Point[N]): Rect[N] = Rect(shift(xRange, offset.x), shift(yRange, offset.y))
-  private def shift(range: Interval[N], n: N) = Interval(range.start + n, range.end + n)
+  def translate(offset: Point[N]): Rect[N] = Rect(xRange.shift(offset.x), yRange.shift(offset.y))
 
   def encloses(rhs: Rect[N]): Boolean =
     if rhs.isEmpty then true

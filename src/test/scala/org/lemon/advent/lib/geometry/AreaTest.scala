@@ -7,6 +7,8 @@ import org.scalacheck.Prop.*
 import org.scalacheck.*
 
 class AreaTest extends UnitTest:
+  val smallOffset: Gen[Coord] = Gen.resultOf((x: Byte, y: Byte) => Coord(x, y))
+
   val emptyArea: Gen[Area] =
     for
       x <- Gen.choose(-100, 100)
@@ -197,14 +199,15 @@ class AreaTest extends UnitTest:
   }
 
   test("translate moves every point") {
-    val smallOffset = Gen.resultOf((x: Byte, y: Byte) => Coord(x, y))
     check(forAll(Arbitrary.arbitrary[Area], smallOffset) { (area: Area, offset: Coord) =>
       area.translate(offset).toSet == area.map(_ + offset).toSet
     })
   }
 
   test("translate by the opposite offset is the original") {
-    check((area: Area, offset: Coord) => area.translate(offset).translate(offset * -1) == area)
+    check(forAll(Arbitrary.arbitrary[Area], smallOffset) { (area: Area, offset: Coord) =>
+      area.translate(offset).translate(offset * -1) == area
+    })
   }
 
   test("growLeft and dropLeft are inverse") {

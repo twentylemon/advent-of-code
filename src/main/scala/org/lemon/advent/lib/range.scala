@@ -127,6 +127,8 @@ case class Interval[N: Integral](start: N, end: N) extends Iterable[N] with Part
 
   def &(rhs: Interval[N]): Interval[N] = intersect(rhs)
 
+  def shift(n: N): Interval[N] = if isEmpty then this else Interval(start + n, end + n)
+
   def toRange: Range = if isEmpty then 0 until 0 else start.toInt to end.toInt
   def toNumericRange: NumericRange[N] =
     if isEmpty then NumericRange(`1`, `0`, `1`) else NumericRange.inclusive(start, end, `1`)
