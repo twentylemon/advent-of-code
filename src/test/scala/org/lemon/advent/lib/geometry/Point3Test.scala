@@ -147,29 +147,6 @@ class Point3Test extends UnitTest:
     Point3(Int.MinValue, 0, 0).reduce shouldBe Point3(-1, 0, 0)
   }
 
-  test("there are 24 distinct rotations") {
-    Point3(1, 2, 3).rotations.distinct.size shouldBe 24
-  }
-
-  test("rotations preserve every distance from the origin") {
-    val distances = Gen.oneOf[(Point3[Int], Point3[Int]) => Int](_.manhattan(_), _.chessboard(_), _.euclidean(_))
-    check(forAll(distances, Arbitrary.arbitrary[Point3[Int]]) { (distance, a) =>
-      a.rotations.forall(distance(_, Point3.origin) == distance(a, Point3.origin))
-    })
-  }
-
-  test("rotations are linear") {
-    check((a: Point3[Int], b: Point3[Int]) => (a + b).rotations == a.rotations.lazyZip(b.rotations).map(_ + _))
-  }
-
-  test("rotations preserve cross products, so none are reflections") {
-    check((a: Point3[Int], b: Point3[Int]) => a.cross(b).rotations == a.rotations.lazyZip(b.rotations).map(_ `cross` _))
-  }
-
-  test("rotations of a rotation are the same rotations") {
-    check((a: Point3[Int]) => a.rotations.forall(_.rotations.toSet == a.rotations.toSet))
-  }
-
   test("projections send the dropped axis to the origin") {
     check((n: Int) =>
       (Point3.unitZ[Int] * n).xy == Coord.origin &&

@@ -16,18 +16,6 @@ object Point3:
   def unitY[T: Integral]: Point3[T] = Point3(`0`, `1`, `0`)
   def unitZ[T: Integral]: Point3[T] = Point3(`0`, `0`, `1`)
 
-  // the 24 rotations, as the (source axis, sign) of each output component, starting with the identity
-  private val rotationMatrices: Seq[Seq[(Int, Int)]] =
-    def parity(perm: Seq[Int]) =
-      val inversions = perm.indices.combinations(2).count { case Seq(i, j) => perm(i) > perm(j) }
-      if inversions % 2 == 0 then 1 else -1
-    val signs = for a <- Seq(1, -1); b <- Seq(1, -1); c <- Seq(1, -1) yield Seq(a, b, c)
-    for
-      perm <- Seq(0, 1, 2).permutations.toSeq
-      sign <- signs
-      if parity(perm) * sign.product == 1
-    yield perm.zip(sign)
-
 /** A 3d coordinate (or vector) with any integral values.
   * @param x the x coordinate
   * @param y the y coordinate
@@ -59,17 +47,6 @@ case class Point3[N: Integral](x: N, y: N, z: N):
   def xInterval(rhs: Point3[N]): Interval[N] = Interval(x min rhs.x, x max rhs.x)
   def yInterval(rhs: Point3[N]): Interval[N] = Interval(y min rhs.y, y max rhs.y)
   def zInterval(rhs: Point3[N]): Interval[N] = Interval(z min rhs.z, z max rhs.z)
-
-  /** Returns this point under each of the 24 rotations about the origin.
-    * @return this point under each rotation
-    */
-  def rotations: Seq[Point3[N]] =
-    val axes = IndexedSeq(x, y, z)
-    def component(axis: Int, sign: Int) = if sign > 0 then axes(axis) else -axes(axis)
-    Point3.rotationMatrices.map(matrix =>
-      val components = matrix.map(component.tupled)
-      Point3(components(0), components(1), components(2))
-    )
 
   def +(rhs: Point3[N]): Point3[N] = Point3(x + rhs.x, y + rhs.y, z + rhs.z)
   def -(rhs: Point3[N]): Point3[N] = Point3(x - rhs.x, y - rhs.y, z - rhs.z)
