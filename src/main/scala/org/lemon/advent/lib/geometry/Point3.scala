@@ -34,11 +34,6 @@ object Point3:
   * @param z the z coordinate
   */
 case class Point3[N: Integral](x: N, y: N, z: N):
-  def +(rhs: Point3[N]): Point3[N] = Point3(x + rhs.x, y + rhs.y, z + rhs.z)
-  def -(rhs: Point3[N]): Point3[N] = Point3(x - rhs.x, y - rhs.y, z - rhs.z)
-  def *(n: N): Point3[N] = Point3(x * n, y * n, z * n)
-  def unary_- : Point3[N] = Point3(-x, -y, -z)
-
   def up: Point3[N] = copy(y = y - `1`)
   def down: Point3[N] = copy(y = y + `1`)
   def left: Point3[N] = copy(x = x - `1`)
@@ -70,6 +65,27 @@ case class Point3[N: Integral](x: N, y: N, z: N):
     val (dx, dy, dz) = (x - rhs.x, y - rhs.y, z - rhs.z)
     dx * dx + dy * dy + dz * dz
 
+  def xInterval(rhs: Point3[N]): Interval[N] = Interval(x min rhs.x, x max rhs.x)
+  def yInterval(rhs: Point3[N]): Interval[N] = Interval(y min rhs.y, y max rhs.y)
+  def zInterval(rhs: Point3[N]): Interval[N] = Interval(z min rhs.z, z max rhs.z)
+
+  /** Returns this point under each of the 24 rotations about the origin. The rotations are in the same order
+    * for every point, starting with the identity.
+    * @return this point under each rotation
+    */
+  def rotations: Seq[Point3[N]] =
+    val axes = IndexedSeq(x, y, z)
+    def component(axis: Int, sign: Int) = if sign > 0 then axes(axis) else -axes(axis)
+    Point3.rotationMatrices.map(matrix =>
+      val components = matrix.map(component.tupled)
+      Point3(components(0), components(1), components(2))
+    )
+
+  def +(rhs: Point3[N]): Point3[N] = Point3(x + rhs.x, y + rhs.y, z + rhs.z)
+  def -(rhs: Point3[N]): Point3[N] = Point3(x - rhs.x, y - rhs.y, z - rhs.z)
+  def *(n: N): Point3[N] = Point3(x * n, y * n, z * n)
+  def unary_- : Point3[N] = Point3(-x, -y, -z)
+
   def dot(rhs: Point3[N]): N = x * rhs.x + y * rhs.y + z * rhs.z
 
   /** Returns the cross product of the two vectors.
@@ -88,22 +104,6 @@ case class Point3[N: Integral](x: N, y: N, z: N):
       // the gcd overflows to `MinValue` when it should be `-MinValue`, which would flip the direction
       val reduced = Point3(x / gcd, y / gcd, z / gcd)
       if gcd < `0` then -reduced else reduced
-
-  /** Returns this point under each of the 24 rotations about the origin. The rotations are in the same order
-    * for every point, starting with the identity.
-    * @return this point under each rotation
-    */
-  def rotations: Seq[Point3[N]] =
-    val axes = IndexedSeq(x, y, z)
-    def component(axis: Int, sign: Int) = if sign > 0 then axes(axis) else -axes(axis)
-    Point3.rotationMatrices.map(matrix =>
-      val components = matrix.map(component.tupled)
-      Point3(components(0), components(1), components(2))
-    )
-
-  def xInterval(rhs: Point3[N]): Interval[N] = Interval(x min rhs.x, x max rhs.x)
-  def yInterval(rhs: Point3[N]): Interval[N] = Interval(y min rhs.y, y max rhs.y)
-  def zInterval(rhs: Point3[N]): Interval[N] = Interval(z min rhs.z, z max rhs.z)
 
   def xy: Point[N] = Point(x, y)
   def xz: Point[N] = Point(x, z)
