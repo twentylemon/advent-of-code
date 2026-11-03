@@ -70,17 +70,21 @@ class Point3Test extends UnitTest:
   }
 
   test("manhattan obeys the triangle inequality") {
-    check((a: Point3[Int], b: Point3[Int], c: Point3[Int]) => a.manhattan(c) <= a.manhattan(b) + b.manhattan(c))
+    check((a: Point3[Int], b: Point3[Int], c: Point3[Int]) =>
+      val (p, q, r) = (a.to[BigInt], b.to[BigInt], c.to[BigInt])
+      p.manhattan(r) <= p.manhattan(q) + q.manhattan(r)
+    )
   }
 
   test("chessboard is at most manhattan") {
-    check((a: Point3[Int], b: Point3[Int]) => a.chessboard(b) <= a.manhattan(b))
+    check((a: Point3[Int], b: Point3[Int]) =>
+      val (p, q) = (a.to[BigInt], b.to[BigInt])
+      p.chessboard(q) <= p.manhattan(q)
+    )
   }
 
   test("euclidean is the dot product of the difference") {
-    check((a: Point3[Int], b: Point3[Int]) =>
-      a.to[Long].euclidean(b.to[Long]) == (a - b).to[Long].dot((a - b).to[Long])
-    )
+    check((a: Point3[Int], b: Point3[Int]) => a.euclidean(b) == (a - b).dot(a - b))
   }
 
   test("dot is symmetric") {
@@ -89,9 +93,8 @@ class Point3Test extends UnitTest:
 
   test("cross is orthogonal to both vectors") {
     check((a: Point3[Int], b: Point3[Int]) =>
-      val (lhs, rhs) = (a.to[Long], b.to[Long])
-      val cross = lhs.cross(rhs)
-      cross.dot(lhs) == 0 && cross.dot(rhs) == 0
+      val cross = a.cross(b)
+      cross.dot(a) == 0 && cross.dot(b) == 0
     )
   }
 
@@ -126,8 +129,9 @@ class Point3Test extends UnitTest:
   }
 
   test("reduce of axis aligned vectors are unit vectors") {
-    check((n: Short) =>
-      n > 0 ==> Seq(Point3.unitX[Int], Point3.unitY[Int], Point3.unitZ[Int]).forall(unit => (unit * n).reduce == unit)
+    check((n: Int) =>
+      (n != 0 && n != Int.MinValue) ==>
+        Seq(Point3.unitX[Int], Point3.unitY[Int], Point3.unitZ[Int]).forall(unit => (unit * n).reduce == unit * n.sign)
     )
   }
 
@@ -154,10 +158,7 @@ class Point3Test extends UnitTest:
   }
 
   test("rotations preserve cross products, so none are reflections") {
-    check((a: Point3[Int], b: Point3[Int]) =>
-      val (lhs, rhs) = (a.to[Long], b.to[Long])
-      lhs.cross(rhs).rotations == lhs.rotations.lazyZip(rhs.rotations).map(_ `cross` _)
-    )
+    check((a: Point3[Int], b: Point3[Int]) => a.cross(b).rotations == a.rotations.lazyZip(b.rotations).map(_ `cross` _))
   }
 
   test("rotations of a rotation are the same rotations") {

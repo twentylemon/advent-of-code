@@ -7,9 +7,8 @@ import org.scalacheck.Shrink.*
 given Arbitrary[Coord] = Arbitrary(Gen.resultOf(Coord.apply))
 given Shrink[Coord] = Shrink { case Coord(x, y) => shrink((x, y)).map(Coord.apply) }
 
-given Arbitrary[Point3[Int]] =
-  Arbitrary(Gen.resultOf((x: Short, y: Short, z: Short) => Point3(x.toInt, y.toInt, z.toInt)))
-given Shrink[Point3[Int]] = Shrink { case Point3(x, y, z) => shrink((x, y, z)).map((x, y, z) => Point3(x, y, z)) }
+given Arbitrary[Point3[Int]] = Arbitrary(Gen.resultOf(Point3.apply[Int]))
+given Shrink[Point3[Int]] = Shrink { case Point3(x, y, z) => shrink((x, y, z)).map(Point3.apply[Int]) }
 
 given Arbitrary[Direction] = Arbitrary(Gen.oneOf(Direction.values.toSeq))
 
