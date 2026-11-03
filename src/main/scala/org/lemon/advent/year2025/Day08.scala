@@ -31,22 +31,21 @@ private object Day08:
     val all = coords.toSet
     val initialDist = all.map(_ -> Long.MaxValue).toMap.updated(coords.head, 0L)
 
-    val (_, _, parent) =
-      coords.foldLeft((Set.empty[Coord], initialDist, Map.empty[Coord, Coord])) {
-        case ((mst, minDist, parent), _) =>
-          val remaining = all -- mst
-          val u = remaining.minBy(minDist)
-          val neighbours = remaining - u
+    val (_, _, parent) = coords.foldLeft((Set.empty[Coord], initialDist, Map.empty[Coord, Coord])) {
+      case ((mst, minDist, parent), _) =>
+        val remaining = all -- mst
+        val u = remaining.minBy(minDist)
+        val neighbours = remaining - u
 
-          val (newDist, newParent) = neighbours.foldLeft((minDist, parent)) {
-            case ((dist, par), v) =>
-              val d = u.euclidean(v)
-              if d < dist(v) then (dist.updated(v, d), par.updated(v, u))
-              else (dist, par)
-          }
+        val (newDist, newParent) = neighbours.foldLeft((minDist, parent)) {
+          case ((dist, par), v) =>
+            val d = u.euclidean(v)
+            if d < dist(v) then (dist.updated(v, d), par.updated(v, u))
+            else (dist, par)
+        }
 
-          (mst + u, newDist, newParent)
-      }
+        (mst + u, newDist, newParent)
+    }
     coords.tail.map(v => (parent(v), v))
 
   def part2(input: String) =
