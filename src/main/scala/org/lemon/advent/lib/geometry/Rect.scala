@@ -1,4 +1,4 @@
-package org.lemon.advent.lib.`2d`
+package org.lemon.advent.lib.geometry
 
 import org.lemon.advent.lib.*
 import scala.math.Integral.Implicits.*

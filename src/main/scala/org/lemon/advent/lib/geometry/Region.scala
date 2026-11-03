@@ -1,4 +1,4 @@
-package org.lemon.advent.lib.`2d`
+package org.lemon.advent.lib.geometry
 
 object Region:
   given Conversion[Region, Iterator[Coord]] = _.coords.iterator
