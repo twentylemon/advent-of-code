@@ -11,12 +11,12 @@ class CuboidTest extends UnitTest:
     check((cuboid: Cuboid[Int]) => cuboid.iterator.forall(cuboid.contains))
   }
 
-  test("number of iterated points is the volume") {
-    check((cuboid: Cuboid[Int]) => cuboid.iterator.size == cuboid.volume)
+  test("number of iterated points is the size") {
+    check((cuboid: Cuboid[Int]) => cuboid.iterator.size == cuboid.size)
   }
 
   test("iterated points are distinct") {
-    check((cuboid: Cuboid[Int]) => cuboid.iterator.toSeq.distinct.size == cuboid.volume)
+    check((cuboid: Cuboid[Int]) => cuboid.iterator.toSeq.distinct.size == cuboid.size)
   }
 
   test("cuboid contains only the iterated points") {
@@ -38,9 +38,41 @@ class CuboidTest extends UnitTest:
     check(forAll(Gen.nonEmptyListOf(smallPoint3)) { (points: List[Point3[Int]]) =>
       val cuboid = Cuboid(points)
       points.forall(cuboid.contains) &&
-      cuboid.min == Point3(points.map(_.x).min, points.map(_.y).min, points.map(_.z).min) &&
-      cuboid.max == Point3(points.map(_.x).max, points.map(_.y).max, points.map(_.z).max)
+      cuboid.topLeftFront == Point3(points.map(_.x).min, points.map(_.y).min, points.map(_.z).min) &&
+      cuboid.bottomRightBack == Point3(points.map(_.x).max, points.map(_.y).max, points.map(_.z).max)
     })
+  }
+
+  test("bounds are the ends of each range") {
+    val cuboid = Cuboid(0 to 1, 2 to 3, 4 to 5)
+    (cuboid.left, cuboid.right, cuboid.top, cuboid.bottom, cuboid.front, cuboid.back) shouldBe (0, 1, 2, 3, 4, 5)
+  }
+
+  test("x and y bounds match the xy projection's") {
+    check((cuboid: Cuboid[Int]) =>
+      val xy = cuboid.xy
+      (cuboid.left, cuboid.right, cuboid.top, cuboid.bottom) == (xy.left, xy.right, xy.top, xy.bottom)
+    )
+  }
+
+  test("named corners are at their bounds") {
+    val cuboid = Cuboid(0 to 1, 2 to 3, 4 to 5)
+    cuboid.topLeftFront shouldBe Point3(0, 2, 4)
+    cuboid.topRightBack shouldBe Point3(1, 2, 5)
+    cuboid.bottomLeftBack shouldBe Point3(0, 3, 5)
+    cuboid.bottomRightFront shouldBe Point3(1, 3, 4)
+  }
+
+  test("corners are every combination of the bounds") {
+    check((cuboid: Cuboid[Int]) =>
+      val combinations =
+        for
+          x <- Seq(cuboid.left, cuboid.right)
+          y <- Seq(cuboid.top, cuboid.bottom)
+          z <- Seq(cuboid.front, cuboid.back)
+        yield Point3(x, y, z)
+      cuboid.corners.size == 8 && cuboid.corners.toSet == combinations.toSet
+    )
   }
 
   test("corners are contained, and bound every point") {
@@ -72,8 +104,8 @@ class CuboidTest extends UnitTest:
     )
   }
 
-  test("diff volume is the volume outside the intersect") {
-    check((a: Cuboid[Int], b: Cuboid[Int]) => (a -- b).map(_.volume).sum == a.volume - (a & b).volume)
+  test("diff size is the size outside the intersect") {
+    check((a: Cuboid[Int], b: Cuboid[Int]) => (a -- b).map(_.size).sum == a.size - (a & b).size)
   }
 
   test("diff points are the set difference") {
@@ -103,7 +135,7 @@ class CuboidTest extends UnitTest:
     )
     val pieces = edge -- corner
     pieces.forall(edge.encloses) shouldBe true
-    pieces.map(_.volume).sum shouldBe 15
+    pieces.map(_.size).sum shouldBe 15
     (edge -- edge) shouldBe empty
   }
 
@@ -117,8 +149,8 @@ class CuboidTest extends UnitTest:
     )
   }
 
-  test("octant volumes sum to the volume") {
-    check((cuboid: Cuboid[Int]) => cuboid.octants.map(_.volume).sum == cuboid.volume)
+  test("octant sizes sum to the size") {
+    check((cuboid: Cuboid[Int]) => cuboid.octants.map(_.size).sum == cuboid.size)
   }
 
   test("octants put the middle slice in the lower half") {
@@ -143,7 +175,8 @@ class CuboidTest extends UnitTest:
   test("expand grows each side") {
     check(forAll(Arbitrary.arbitrary[Cuboid[Int]], Gen.choose(0, 10)) { (cuboid: Cuboid[Int], n: Int) =>
       val expanded = cuboid.expand(n)
-      expanded.min == cuboid.min - Point3(n, n, n) && expanded.max == cuboid.max + Point3(n, n, n)
+      expanded.topLeftFront == cuboid.topLeftFront - Point3(n, n, n) &&
+      expanded.bottomRightBack == cuboid.bottomRightBack + Point3(n, n, n)
     })
   }
 
@@ -171,11 +204,43 @@ class CuboidTest extends UnitTest:
     )
   }
 
-  test("faces times their depth is the volume") {
+  test("faces are the points on the surface") {
     check((cuboid: Cuboid[Int]) =>
-      cuboid.xy.size * cuboid.depth == cuboid.volume &&
-        cuboid.xz.size * cuboid.height == cuboid.volume &&
-        cuboid.yz.size * cuboid.width == cuboid.volume
+      cuboid.faces.flatMap(_.iterator).toSet == cuboid.iterator.filter(_.adjacent.exists(!cuboid.contains(_))).toSet
+    )
+  }
+
+  test("faces are enclosed, and one wide along their axis") {
+    check((cuboid: Cuboid[Int]) =>
+      val faces = cuboid.faces
+      faces.size == 6 && faces.forall(cuboid.encloses) &&
+      Seq(faces(0).width, faces(1).width, faces(2).height, faces(3).height, faces(4).depth, faces(5).depth).forall(
+        _ == 1
+      )
+    )
+  }
+
+  test("face sizes sum to the surface area") {
+    check((cuboid: Cuboid[Int]) => cuboid.faces.map(_.size).sum == cuboid.surfaceArea)
+  }
+
+  test("leftFace is the points with x at left") {
+    Cuboid(0 to 2, 0 to 3, 0 to 4).leftFace shouldBe Cuboid(0 to 0, 0 to 3, 0 to 4)
+  }
+
+  test("opposite faces project to the same rect as the cuboid") {
+    check((cuboid: Cuboid[Int]) =>
+      cuboid.leftFace.yz == cuboid.yz && cuboid.rightFace.yz == cuboid.yz &&
+        cuboid.topFace.xz == cuboid.xz && cuboid.bottomFace.xz == cuboid.xz &&
+        cuboid.frontFace.xy == cuboid.xy && cuboid.backFace.xy == cuboid.xy
+    )
+  }
+
+  test("projections times the dropped length is the size") {
+    check((cuboid: Cuboid[Int]) =>
+      cuboid.xy.size * cuboid.depth == cuboid.size &&
+        cuboid.xz.size * cuboid.height == cuboid.size &&
+        cuboid.yz.size * cuboid.width == cuboid.size
     )
   }
 
@@ -183,10 +248,14 @@ class CuboidTest extends UnitTest:
     check(forAll(emptyCuboid, smallPoint3) { (cuboid: Cuboid[Int], point: Point3[Int]) => !cuboid.contains(point) })
   }
 
-  test("empty cuboid has no points, volume, or surface area") {
+  test("empty cuboid has no points, size, or surface area") {
     check(forAll(emptyCuboid) { (cuboid: Cuboid[Int]) =>
-      cuboid.isEmpty && cuboid.iterator.isEmpty && cuboid.volume == 0 && cuboid.surfaceArea == 0
+      cuboid.isEmpty && cuboid.iterator.isEmpty && cuboid.size == 0 && cuboid.surfaceArea == 0
     })
+  }
+
+  test("empty cuboid has no faces") {
+    check(forAll(emptyCuboid) { (cuboid: Cuboid[Int]) => cuboid.faces.isEmpty })
   }
 
   test("empty cuboid has no octants") {
