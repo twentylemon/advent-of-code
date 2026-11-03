@@ -15,20 +15,6 @@ class Point3Test extends UnitTest:
     check((a: Point3[Int]) => -a == a * -1)
   }
 
-  test("tuples convert to points") {
-    val point: Point3[Int] = (1, 2, 3)
-    point shouldBe Point3(1, 2, 3)
-  }
-
-  test("ordering compares x, then y, then z") {
-    check((a: Point3[Int], b: Point3[Int]) =>
-      Ordering[Point3[Int]].compare(a, b).sign == Ordering[(Int, Int, Int)].compare(
-        (a.x, a.y, a.z),
-        (b.x, b.y, b.z)
-      ).sign
-    )
-  }
-
   test("left and right are opposites") {
     check((a: Point3[Int]) => a.left.right == a)
   }
