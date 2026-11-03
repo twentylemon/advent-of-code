@@ -171,9 +171,11 @@ class Point3Test extends UnitTest:
   }
 
   test("projections send the dropped axis to the origin") {
-    Point3.unitZ[Int].xy shouldBe Coord.origin
-    Point3.unitY[Int].xz shouldBe Coord.origin
-    Point3.unitX[Int].yz shouldBe Coord.origin
+    check((n: Int) =>
+      (Point3.unitZ[Int] * n).xy == Coord.origin &&
+        (Point3.unitY[Int] * n).xz == Coord.origin &&
+        (Point3.unitX[Int] * n).yz == Coord.origin
+    )
   }
 
   test("projections are linear") {
