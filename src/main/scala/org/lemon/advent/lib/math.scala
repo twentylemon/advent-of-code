@@ -30,9 +30,7 @@ extension [N: Integral](a: N)
     // division truncates towards zero, which already rounded up if the true quotient is negative
     if remainder != `0` && (remainder > `0`) == (n > `0`) then quotient + `1` else quotient
 
-  /** Returns the greatest common divisor of this and `b`, which is never negative unless it does not fit in `N`:
-    * the gcd of `MinValue` with `0` or `MinValue` is `-MinValue`, which overflows to `MinValue` like `abs` does.
-    * That is still a divisor of the right size, so it still works as an argument to another `gcd`.
+  /** Returns the greatest common divisor of this and `b`.
     *
     * @param b the other number
     * @return the greatest common divisor of this and `b`
