@@ -180,13 +180,8 @@ class Point3Test extends UnitTest:
 
   test("projections are linear") {
     val projections = Gen.oneOf[Point3[Int] => Point[Int]](_.xy, _.xz, _.yz)
-    check(forAll(
-      projections,
-      Arbitrary.arbitrary[Point3[Int]],
-      Arbitrary.arbitrary[Point3[Int]],
-      Arbitrary.arbitrary[Int]
-    ) {
-      (project, a, b, n) => project(a + b * n) == project(a) + project(b) * n
+    check(forAll(Arbitrary.arbitrary[Point3[Int]], Arbitrary.arbitrary[Point3[Int]], projections) {
+      (a, b, project) => project(a + b) == project(a) + project(b)
     })
   }
 
