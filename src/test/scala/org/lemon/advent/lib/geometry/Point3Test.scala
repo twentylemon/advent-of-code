@@ -174,6 +174,14 @@ class Point3Test extends UnitTest:
     check((a: Point3[Int]) => a.xy == Coord(a.x, a.y) && a.xz == Coord(a.x, a.z) && a.yz == Coord(a.y, a.z))
   }
 
+  test("to[Int] is identity") {
+    check((a: Point3[Int]) => a.to[Int] == a)
+  }
+
   test("to[Long] and back is identity") {
     check((a: Point3[Int]) => a.to[Long].to[Int] == a)
+  }
+
+  test("to[Long] preserves coordinates") {
+    check((a: Point3[Int]) => a.to[Long] == Point3[Long](a.x.toLong, a.y.toLong, a.z.toLong))
   }
