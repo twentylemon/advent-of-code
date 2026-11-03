@@ -25,6 +25,10 @@ class CoordTest extends UnitTest:
     check((coord: Coord, n: Int) => coord == coord.shiftUp(n).shiftDown(n))
   }
 
+  test("unary - is * -1") {
+    check((coord: Coord) => -coord == coord * -1)
+  }
+
   test("+ unitUp is up") {
     check((coord: Coord) => coord + unitUp == coord.up)
   }
@@ -269,20 +273,6 @@ class CoordTest extends UnitTest:
     check((coord: Coord) => coord.rotateRight(Coord.origin) == coord.rotateRight)
   }
 
-  test("to[Int] is identity") {
-    check((coord: Coord) => coord.to[Int] == coord)
-  }
-
-  test("to[Long] and back is identity") {
-    check((coord: Coord) => coord.to[Long].to[Int] == coord)
-  }
-
-  test("to[Long] preserves coordinates") {
-    check((coord: Coord) => coord.to[Long] == Point[Long](coord.x.toLong, coord.y.toLong))
-  }
-
-  val smallCoord: Gen[Coord] = Gen.resultOf((x: Byte, y: Byte) => Coord(x.toInt, y.toInt))
-
   test("cross is antisymmetric") {
     check((lhs: Coord, rhs: Coord) => lhs.cross(rhs) == -rhs.cross(lhs))
   }
@@ -292,15 +282,29 @@ class CoordTest extends UnitTest:
   }
 
   test("cross with a scaled copy is zero") {
-    check(forAll(smallCoord, Gen.choose(-100, 100)) { (coord: Coord, n: Int) => coord.cross(coord * n) == 0 })
+    check((coord: Coord, n: Int) => coord.cross(coord * n) == 0)
   }
 
   test("cross with the rotateRight is positive") {
-    check(forAll(smallCoord) { (coord: Coord) => coord != Coord.origin ==> (coord.cross(coord.rotateRight) > 0) })
+    check((coord: Coord) =>
+      val big = coord.to[BigInt]
+      coord != Coord.origin ==> (big.cross(big.rotateRight) > 0)
+    )
   }
 
-  test("cross of up and right is positive") {
-    Coord.unitUp.cross(Coord.unitRight) shouldBe 1
+  test("cross with the rotateLeft is negative") {
+    check((coord: Coord) =>
+      val big = coord.to[BigInt]
+      coord != Coord.origin ==> (big.cross(big.rotateLeft) < 0)
+    )
+  }
+
+  test("cross with the turnRight is 1") {
+    check((dir: Direction) => dir.unitVector.cross(dir.turnRight.unitVector) == 1)
+  }
+
+  test("cross with the turnLeft is -1") {
+    check((dir: Direction) => dir.unitVector.cross(dir.turnLeft.unitVector) == -1)
   }
 
   test("reduce is idempotent") {
@@ -319,9 +323,7 @@ class CoordTest extends UnitTest:
   }
 
   test("reduce scales back to the original") {
-    check(forAll(smallCoord) { (coord: Coord) =>
-      coord != Coord.origin ==> (coord.reduce * coord.x.gcd(coord.y) == coord)
-    })
+    check((coord: Coord) => coord != Coord.origin ==> (coord.reduce * coord.x.gcd(coord.y) == coord))
   }
 
   test("reduce of the origin is the origin") {
@@ -329,11 +331,25 @@ class CoordTest extends UnitTest:
   }
 
   test("reduce of axis aligned vectors are unit vectors") {
-    check((dir: Direction, n: Int) => n > 0 ==> ((dir.unitVector * n).reduce == dir.unitVector))
+    check((dir: Direction, n: Int) =>
+      (n != 0 && n != Int.MinValue) ==> ((dir.unitVector * n).reduce == dir.unitVector * n.sign)
+    )
   }
 
   test("reduce at the min value keeps the direction") {
     Coord(Int.MinValue, Int.MinValue).reduce shouldBe Coord(-1, -1)
     Coord(Int.MinValue, 0).reduce shouldBe Coord(-1, 0)
     Coord(Int.MinValue, 6).reduce shouldBe Coord(Int.MinValue / 2, 3)
+  }
+
+  test("to[Int] is identity") {
+    check((coord: Coord) => coord.to[Int] == coord)
+  }
+
+  test("to[Long] and back is identity") {
+    check((coord: Coord) => coord.to[Long].to[Int] == coord)
+  }
+
+  test("to[Long] preserves coordinates") {
+    check((coord: Coord) => coord.to[Long] == Point[Long](coord.x.toLong, coord.y.toLong))
   }

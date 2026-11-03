@@ -1,21 +1,17 @@
 package org.lemon.advent.year2025
 
 import org.lemon.advent.lib.*
+import org.lemon.advent.lib.geometry.Point3
 
 private object Day08:
 
-  type Coord = (Long, Long, Long)
+  type Coord = Point3[Long]
 
   def parse(input: String) =
     input.linesIterator.map(line =>
       val Seq(x, y, z) = line.csv
-      (x.toLong, y.toLong, z.toLong)
+      Point3(x.toLong, y.toLong, z.toLong)
     ).toSeq
-
-  def euclidean(lhs: Coord, rhs: Coord) =
-    val (x1, y1, z1) = lhs
-    val (x2, y2, z2) = rhs
-    (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) + (z1 - z2) * (z1 - z2)
 
   def connectedComponents(pairs: Seq[(Coord, Coord)]): Set[Set[Coord]] =
     pairs.foldLeft(Set.empty[Set[Coord]]) { case (acc, (a, b)) =>
@@ -26,7 +22,7 @@ private object Day08:
   def part1(input: String, strands: Int = 1000) =
     val coords = parse(input)
     val closests = coords.pairs.toVector
-      .sortBy(euclidean(_, _))
+      .sortBy(_.euclidean(_))
       .take(strands)
     val circuits = connectedComponents(closests)
     circuits.toSeq.map(_.size).sorted.reverse.take(3).product
@@ -43,7 +39,7 @@ private object Day08:
 
         val (newDist, newParent) = neighbours.foldLeft((minDist, parent)) {
           case ((dist, par), v) =>
-            val d = euclidean(u, v)
+            val d = u.euclidean(v)
             if d < dist(v) then (dist.updated(v, d), par.updated(v, u))
             else (dist, par)
         }
@@ -55,5 +51,5 @@ private object Day08:
   def part2(input: String) =
     val coords = parse(input)
     val mst = minimumSpanningTree(coords)
-    val lastEdge = mst.sortBy(euclidean(_, _)).last
-    lastEdge._1._1 * lastEdge._2._1
+    val lastEdge = mst.sortBy(_.euclidean(_)).last
+    lastEdge._1.x * lastEdge._2.x
