@@ -27,24 +27,44 @@ class Point3Test extends UnitTest:
     check((a: Point3[Int]) => a.in.out == a)
   }
 
-  test("each step moves along its axis") {
-    val origin = Point3.origin[Int]
-    Seq(origin.left, origin.right, origin.up, origin.down, origin.in, origin.out) shouldBe Seq(
-      Point3(-1, 0, 0),
-      Point3(1, 0, 0),
-      Point3(0, -1, 0),
-      Point3(0, 1, 0),
-      Point3(0, 0, 1),
-      Point3(0, 0, -1),
-    )
+  test("+ unitX is right") {
+    check((a: Point3[Int]) => a + Point3.unitX[Int] == a.right)
   }
 
-  test("adjacent has 6 distinct points at manhattan distance 1") {
-    check((a: Point3[Int]) => a.adjacent.distinct.size == 6 && a.adjacent.forall(_.manhattan(a) == 1))
+  test("- unitX is left") {
+    check((a: Point3[Int]) => a - Point3.unitX[Int] == a.left)
   }
 
-  test("surrounding has 26 distinct points at chessboard distance 1") {
-    check((a: Point3[Int]) => a.surrounding.distinct.size == 26 && a.surrounding.forall(_.chessboard(a) == 1))
+  test("+ unitY is down") {
+    check((a: Point3[Int]) => a + Point3.unitY[Int] == a.down)
+  }
+
+  test("- unitY is up") {
+    check((a: Point3[Int]) => a - Point3.unitY[Int] == a.up)
+  }
+
+  test("+ unitZ is in") {
+    check((a: Point3[Int]) => a + Point3.unitZ[Int] == a.in)
+  }
+
+  test("- unitZ is out") {
+    check((a: Point3[Int]) => a - Point3.unitZ[Int] == a.out)
+  }
+
+  test("adjacent has 6 distinct points") {
+    check((a: Point3[Int]) => a.adjacent.distinct.size == 6)
+  }
+
+  test("adjacent points are at manhattan distance 1") {
+    check((a: Point3[Int]) => a.adjacent.forall(_.manhattan(a) == 1))
+  }
+
+  test("surrounding has 26 distinct points") {
+    check((a: Point3[Int]) => a.surrounding.distinct.size == 26)
+  }
+
+  test("surrounding points are at chessboard distance 1") {
+    check((a: Point3[Int]) => a.surrounding.forall(_.chessboard(a) == 1))
   }
 
   test("surrounding contains adjacent") {
@@ -131,13 +151,15 @@ class Point3Test extends UnitTest:
     Point3(1, 2, 3).rotations.distinct.size shouldBe 24
   }
 
-  test("the first rotation is the identity") {
-    check((a: Point3[Int]) => a.rotations.head == a)
-  }
-
-  test("rotations preserve the manhattan distance from the origin") {
-    check((a: Point3[Int]) => a.rotations.forall(_.manhattan(Point3.origin[Int]) == a.manhattan(Point3.origin[Int])))
-  }
+  Seq[(String, (Point3[Int], Point3[Int]) => Int)](
+    ("manhattan", _.manhattan(_)),
+    ("chessboard", _.chessboard(_)),
+    ("euclidean", _.euclidean(_)),
+  ).foreach((name, distance) =>
+    test(s"rotations preserve the $name distance from the origin") {
+      check((a: Point3[Int]) => a.rotations.forall(distance(_, Point3.origin) == distance(a, Point3.origin)))
+    }
+  )
 
   test("rotations are linear") {
     check((a: Point3[Int], b: Point3[Int]) => (a + b).rotations == a.rotations.lazyZip(b.rotations).map(_ + _))
