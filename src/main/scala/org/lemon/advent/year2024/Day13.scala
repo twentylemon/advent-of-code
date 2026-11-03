@@ -1,7 +1,7 @@
 package org.lemon.advent.year2024
 
 import org.lemon.advent.lib.*
-import org.lemon.advent.lib.`2d`.Point
+import org.lemon.advent.lib.geometry.Point
 
 private object Day13:
 

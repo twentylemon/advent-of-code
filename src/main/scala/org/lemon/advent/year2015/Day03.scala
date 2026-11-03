@@ -1,6 +1,6 @@
 package org.lemon.advent.year2015
 
-import org.lemon.advent.lib.`2d`.*
+import org.lemon.advent.lib.geometry.*
 
 private object Day03:
 
