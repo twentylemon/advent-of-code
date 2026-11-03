@@ -39,25 +39,28 @@ case class Point3[N: Integral](x: N, y: N, z: N):
   def *(n: N): Point3[N] = Point3(x * n, y * n, z * n)
   def unary_- : Point3[N] = Point3(-x, -y, -z)
 
+  def up: Point3[N] = copy(y = y - `1`)
+  def down: Point3[N] = copy(y = y + `1`)
+  def left: Point3[N] = copy(x = x - `1`)
+  def right: Point3[N] = copy(x = x + `1`)
+
+  /** @return this point moved one step along +z */
+  def in: Point3[N] = copy(z = z + `1`)
+
+  /** @return this point moved one step along -z */
+  def out: Point3[N] = copy(z = z - `1`)
+
   /** @return the 6 points that share a face with this point */
-  def adjacent: Seq[Point3[N]] = Seq(
-    copy(x = x - `1`),
-    copy(x = x + `1`),
-    copy(y = y - `1`),
-    copy(y = y + `1`),
-    copy(z = z - `1`),
-    copy(z = z + `1`),
-  )
+  def adjacent: Seq[Point3[N]] = Seq(up, down, left, right, in, out)
 
   /** @return the 26 points that share a face, edge or corner with this point */
   def surrounding: Seq[Point3[N]] =
-    val deltas = Seq[N](`-1`, `0`, `1`)
     for
-      dx <- deltas
-      dy <- deltas
-      dz <- deltas
-      if dx != `0` || dy != `0` || dz != `0`
-    yield Point3(x + dx, y + dy, z + dz)
+      vertical <- Seq(this, up, down)
+      horizontal <- Seq(vertical, vertical.left, vertical.right)
+      point <- Seq(horizontal, horizontal.in, horizontal.out)
+      if point != this
+    yield point
 
   def manhattan(rhs: Point3[N]): N = (x - rhs.x).abs + (y - rhs.y).abs + (z - rhs.z).abs
   def chessboard(rhs: Point3[N]): N = (x - rhs.x).abs max (y - rhs.y).abs max (z - rhs.z).abs

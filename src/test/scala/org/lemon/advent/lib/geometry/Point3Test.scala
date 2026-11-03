@@ -29,6 +29,30 @@ class Point3Test extends UnitTest:
     )
   }
 
+  test("left and right are opposites") {
+    check((a: Point3[Int]) => a.left.right == a)
+  }
+
+  test("up and down are opposites") {
+    check((a: Point3[Int]) => a.up.down == a)
+  }
+
+  test("in and out are opposites") {
+    check((a: Point3[Int]) => a.in.out == a)
+  }
+
+  test("each step moves along its axis") {
+    val origin = Point3.origin[Int]
+    Seq(origin.left, origin.right, origin.up, origin.down, origin.in, origin.out) shouldBe Seq(
+      Point3(-1, 0, 0),
+      Point3(1, 0, 0),
+      Point3(0, -1, 0),
+      Point3(0, 1, 0),
+      Point3(0, 0, 1),
+      Point3(0, 0, -1),
+    )
+  }
+
   test("adjacent has 6 distinct points at manhattan distance 1") {
     check((a: Point3[Int]) => a.adjacent.distinct.size == 6 && a.adjacent.forall(_.manhattan(a) == 1))
   }
