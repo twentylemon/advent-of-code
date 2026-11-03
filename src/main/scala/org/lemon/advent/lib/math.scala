@@ -18,7 +18,7 @@ extension [N: Integral](a: N)
     */
   def +%(n: N): N =
     val mod = a % n
-    if mod < Integral[N].zero then mod + n else mod
+    if mod < `0` then mod + n else mod
 
   /** Returns `this / n` rounded up.
     *
@@ -37,7 +37,7 @@ extension [N: Integral](a: N)
     */
   def gcd(b: N): N =
     @annotation.tailrec
-    def loop(a: N, b: N): N = if b == Integral[N].zero then a.abs else loop(b, a % b)
+    def loop(a: N, b: N): N = if b == `0` then a.abs else loop(b, a % b)
     loop(a, b)
 
   /** Returns the least common multiple of this and `b`.
