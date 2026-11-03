@@ -101,7 +101,6 @@ case class Point[N: Integral](x: N, y: N):
     if x == `0` then Point(`0`, y.sign)
     else if y == `0` then Point(x.sign, `0`)
     else
-      // the gcd of two `MinValue`s overflows to `MinValue`, which would flip the direction
       val gcd = x.gcd(y)
       val reduced = Point(x / gcd, y / gcd)
       if gcd < `0` then -reduced else reduced
