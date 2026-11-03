@@ -16,9 +16,7 @@ object Point3:
   def unitY[T: Integral]: Point3[T] = (`0`, `1`, `0`)
   def unitZ[T: Integral]: Point3[T] = (`0`, `0`, `1`)
 
-  /** The 24 rotations that map the axes onto the axes, as the signed permutation matrices with determinant 1.
-    * Each rotation gives the (source axis, sign) of each output component. The identity is first.
-    */
+  // the 24 rotations, as the (source axis, sign) of each output component, starting with the identity
   private val rotationMatrices: Seq[Seq[(Int, Int)]] =
     def parity(perm: Seq[Int]) =
       val inversions = perm.indices.combinations(2).count { case Seq(i, j) => perm(i) > perm(j) }
@@ -30,7 +28,7 @@ object Point3:
       if parity(perm) * sign.product == 1
     yield perm.zip(sign)
 
-/** A 3d coordinate (or vector) with any integral values. Integrates with [[Cuboid]] and [[Interval]].
+/** A 3d coordinate (or vector) with any integral values.
   * @param x the x coordinate
   * @param y the y coordinate
   * @param z the z coordinate
@@ -71,15 +69,14 @@ case class Point3[N: Integral](x: N, y: N, z: N):
 
   def dot(rhs: Point3[N]): N = x * rhs.x + y * rhs.y + z * rhs.z
 
-  /** Returns the cross product, which is perpendicular to both vectors, following the right hand rule.
+  /** Returns the cross product of the two vectors.
     * @param rhs the other vector
     * @return the cross product
     */
   def cross(rhs: Point3[N]): Point3[N] = (y * rhs.z - z * rhs.y, z * rhs.x - x * rhs.z, x * rhs.y - y * rhs.x)
 
-  /** Reduces this vector to the smallest integer step in the same direction, by dividing out the gcd
-    * of its components. Axis aligned vectors become unit vectors, and the origin stays the origin.
-    * @return the smallest integer vector in the same direction
+  /** Reduces this vector to the smallest integer vector in the same direction.
+    * @return the reduced vector
     */
   def reduce: Point3[N] =
     val gcd = x.gcd(y).gcd(z)
@@ -89,10 +86,9 @@ case class Point3[N: Integral](x: N, y: N, z: N):
       val reduced = Point3(x / gcd, y / gcd, z / gcd)
       if gcd < `0` then -reduced else reduced
 
-  /** Returns this point under each of the 24 rotations about the origin that map the axes onto the axes,
-    * ie every way to orient a cube. The order is fixed, so the rotation at index `i` is the same
-    * rotation for every point. The first rotation is the identity.
-    * @return this point under each of the 24 rotations
+  /** Returns this point under each of the 24 rotations about the origin. The rotations are in the same order
+    * for every point, starting with the identity.
+    * @return this point under each rotation
     */
   def rotations: Seq[Point3[N]] =
     val axes = IndexedSeq(x, y, z)

@@ -14,15 +14,13 @@ object Cuboid:
   def apply(xRange: Range, yRange: Range, zRange: Range): Cuboid[Int] =
     Cuboid(xRange.toInterval, yRange.toInterval, zRange.toInterval)
 
-  /** @return a cuboid of the given size, with its top left front corner at the origin */
+  /** @return a cuboid of the given size, starting at the origin */
   def apply[N: Integral](width: N, height: N, depth: N): Cuboid[N] =
     Cuboid(Interval(`0`, width - `1`), Interval(`0`, height - `1`), Interval(`0`, depth - `1`))
 
   given [N: Integral]: Conversion[Cuboid[N], Iterator[Point3[N]]] = _.iterator
 
-/** A 3d cuboid (rectangular box) with generic integral bounds. Integrates with [[Point3]] and [[Interval]].
-  * The x and y bounds are named like [[Rect]]'s, from `left` to `right` and from `top` to `bottom`, and z runs
-  * from `front` to `back`. A cuboid is empty when any of its ranges are empty.
+/** A 3d cuboid with generic integral bounds.
   * @param xRange the x bounds of the cuboid
   * @param yRange the y bounds of the cuboid
   * @param zRange the z bounds of the cuboid
@@ -45,9 +43,6 @@ case class Cuboid[N: Integral](xRange: Interval[N], yRange: Interval[N], zRange:
   def bottomLeftBack: Point3[N] = Point3(left, bottom, back)
   def bottomRightBack: Point3[N] = Point3(right, bottom, back)
 
-  /** @return the 8 corners, clockwise around the front face and then the back face like [[Rect.corners]],
-    * which repeat when the cuboid is one wide along some axis
-    */
   def corners: Seq[Point3[N]] = Seq(
     topLeftFront,
     topRightFront,
@@ -65,7 +60,7 @@ case class Cuboid[N: Integral](xRange: Interval[N], yRange: Interval[N], zRange:
 
   def size: N = width * height * depth
 
-  /** @return the total area of the 6 faces, ie the number of unit faces on the outside of the cuboid */
+  /** @return the total area of the cuboid's faces */
   def surfaceArea: N =
     if isEmpty then `0` else fromInt[N](2) * (width * height + height * depth + width * depth)
 
@@ -80,7 +75,6 @@ case class Cuboid[N: Integral](xRange: Interval[N], yRange: Interval[N], zRange:
   def iterator: Iterator[Point3[N]] =
     for z <- zRange.iterator; y <- yRange.iterator; x <- xRange.iterator yield Point3(x, y, z)
 
-  /** @return the points on the left face, as a cuboid one wide in x. The other faces are the same along their axis */
   def leftFace: Cuboid[N] = copy(xRange = Interval(left, left))
   def rightFace: Cuboid[N] = copy(xRange = Interval(right, right))
   def topFace: Cuboid[N] = copy(yRange = Interval(top, top))
@@ -88,9 +82,7 @@ case class Cuboid[N: Integral](xRange: Interval[N], yRange: Interval[N], zRange:
   def frontFace: Cuboid[N] = copy(zRange = Interval(front, front))
   def backFace: Cuboid[N] = copy(zRange = Interval(back, back))
 
-  /** @return the 6 faces as cuboids one wide along their axis: left, right, top, bottom, front, then back.
-    * Opposite faces are the same points when the cuboid is one wide along their axis
-    */
+  /** @return the 6 faces, each a cuboid one wide along its axis */
   def faces: Seq[Cuboid[N]] =
     if isEmpty then Seq.empty else Seq(leftFace, rightFace, topFace, bottomFace, frontFace, backFace)
 
@@ -106,30 +98,29 @@ case class Cuboid[N: Integral](xRange: Interval[N], yRange: Interval[N], zRange:
   def intersect(rhs: Cuboid[N]): Cuboid[N] = Cuboid(xRange & rhs.xRange, yRange & rhs.yRange, zRange & rhs.zRange)
   def &(rhs: Cuboid[N]): Cuboid[N] = intersect(rhs)
 
-  /** Returns the points in this cuboid that are not in `rhs`, as at most 6 disjoint non-empty cuboids.
+  /** Returns the points in this cuboid that are not in `rhs`, as disjoint cuboids.
     * @param rhs the cuboid to remove
-    * @return disjoint cuboids covering exactly the points in this cuboid but not in `rhs`
+    * @return the disjoint cuboids
     */
   def diff(rhs: Cuboid[N]): Seq[Cuboid[N]] =
     val common = intersect(rhs)
     if isEmpty then Seq.empty
     else if common.isEmpty then Seq(this)
     else
-      // the parts of `range` either side of `inner`, only made when there is room so the bounds cannot overflow
+      // only made when there is room, so the bounds cannot overflow
       def outside(range: Interval[N], inner: Interval[N]): Seq[Interval[N]] =
         Option.when(inner.start > range.start)(Interval(range.start, inner.start - `1`)).toSeq ++
           Option.when(inner.end < range.end)(Interval(inner.end + `1`, range.end)).toSeq
 
-      // slabs either side along x, then y within the common x, then z within the common x and y
+      // each axis stays within the overlap of the axes before it, so the slabs are disjoint
       outside(xRange, common.xRange).map(x => Cuboid(x, yRange, zRange)) ++
         outside(yRange, common.yRange).map(y => Cuboid(common.xRange, y, zRange)) ++
         outside(zRange, common.zRange).map(z => Cuboid(common.xRange, common.yRange, z))
 
   def --(rhs: Cuboid[N]): Seq[Cuboid[N]] = diff(rhs)
 
-  /** Splits this cuboid in half along each axis, in a fixed order. If the cuboid has an odd length along an axis,
-    * the middle slice is in the lower half. Halves that would be empty are left out, so a cuboid one
-    * wide along an axis is not split along it.
+  /** Returns the octants of this cuboid. If the cuboid has an odd length along an axis,
+    * the middle slice is in the lower octants.
     * @return the non-empty octants of this cuboid
     */
   def octants: Seq[Cuboid[N]] =
@@ -155,10 +146,6 @@ case class Cuboid[N: Integral](xRange: Interval[N], yRange: Interval[N], zRange:
     point.z max front min back,
   )
 
-  /** Projects this cuboid onto a plane by dropping an axis, like [[Point3.xy]]. Each projection is also the
-    * shape of the two faces across the dropped axis.
-    * @return the rectangle of the x and y ranges
-    */
   def xy: Rect[N] = Rect(xRange, yRange)
   def xz: Rect[N] = Rect(xRange, zRange)
   def yz: Rect[N] = Rect(yRange, zRange)

@@ -8,12 +8,10 @@ given Arbitrary[Point3[Int]] =
   Arbitrary(Gen.resultOf((x: Short, y: Short, z: Short) => Point3(x.toInt, y.toInt, z.toInt)))
 given Shrink[Point3[Int]] = Shrink { case Point3(x, y, z) => shrink((x, y, z)).map((x, y, z) => Point3(x, y, z)) }
 
-/** a point in or near the cuboids from `Arbitrary[Cuboid[Int]]` */
 val smallPoint3: Gen[Point3[Int]] =
   val component = Gen.choose(-8, 8)
   Gen.zip(component, component, component).map((x, y, z) => Point3(x, y, z))
 
-/** non-empty cuboids that stay small enough to check point by point */
 given Arbitrary[Cuboid[Int]] =
   val bound = Gen.choose(-6, 6)
   val interval = for a <- bound; b <- bound yield Interval(a min b, a max b)
@@ -25,7 +23,6 @@ given Shrink[Cuboid[Int]] = Shrink { case Cuboid(x, y, z) =>
     .map((x1, x2, y1, y2, z1, z2) => Cuboid(Interval(x1, x2), Interval(y1, y2), Interval(z1, z2)))
 }
 
-/** cuboids with at least one empty range */
 val emptyCuboid: Gen[Cuboid[Int]] =
   for
     cuboid <- Arbitrary.arbitrary[Cuboid[Int]]

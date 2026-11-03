@@ -83,17 +83,14 @@ case class Point[N: Integral](x: N, y: N):
   def -(direction: Direction): Point[N] = move(direction.turnAround)
   def *(n: N): Point[N] = (x * n, y * n)
 
-  /** Returns the 2d cross product, the z component of the 3d cross product of the two vectors.
-    * Positive when `rhs` is counter clockwise from this vector (in y-up axes; clockwise on a y-down grid),
-    * negative the other way, and zero when the two are collinear.
+  /** Returns the 2d cross product, which is zero when the two vectors are collinear.
     * @param rhs the other vector
     * @return the 2d cross product
     */
   def cross(rhs: Point[N]): N = x * rhs.y - y * rhs.x
 
-  /** Reduces this vector to the smallest integer step in the same direction, by dividing out the gcd
-    * of its components. Axis aligned vectors become unit vectors, and the origin stays the origin.
-    * @return the smallest integer vector in the same direction
+  /** Reduces this vector to the smallest integer vector in the same direction.
+    * @return the reduced vector
     */
   def reduce: Point[N] =
     if x == `0` then (`0`, y.sign)
