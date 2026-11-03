@@ -167,9 +167,7 @@ class CuboidTest extends UnitTest:
   }
 
   test("contract undoes expand") {
-    check(forAll(Arbitrary.arbitrary[Cuboid[Int]], Gen.choose(0, 10)) { (cuboid: Cuboid[Int], n: Int) =>
-      cuboid.expand(n).contract(n) == cuboid
-    })
+    check((cuboid: Cuboid[Int], n: Int) => cuboid.expand(n).contract(n) == cuboid)
   }
 
   test("expand grows each side") {
@@ -196,6 +194,21 @@ class CuboidTest extends UnitTest:
 
   test("clamp keeps points in the cuboid") {
     check((cuboid: Cuboid[Int]) => cuboid.iterator.forall(point => cuboid.clamp(point) == point))
+  }
+
+  test("wrap lands in the cuboid") {
+    check((cuboid: Cuboid[Int], point: Point3[Int]) => cuboid.contains(cuboid.wrap(point)))
+  }
+
+  test("wrap keeps points in the cuboid") {
+    check((cuboid: Cuboid[Int]) => cuboid.iterator.forall(point => cuboid.wrap(point) == point))
+  }
+
+  test("wrap moves a whole number of sizes along each axis") {
+    check((cuboid: Cuboid[Int], point: Point3[Int]) =>
+      val moved = point - cuboid.wrap(point)
+      moved.x % cuboid.width == 0 && moved.y % cuboid.height == 0 && moved.z % cuboid.depth == 0
+    )
   }
 
   test("surface area is the number of exposed unit faces") {

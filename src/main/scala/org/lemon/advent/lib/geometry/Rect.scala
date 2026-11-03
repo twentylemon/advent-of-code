@@ -130,17 +130,17 @@ case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
       bottomRight = Rect(Interval(midX + `1`, right), Interval(midY + `1`, bottom)),
     )
 
-  def growLeft(n: N): Rect[N] = copy(xRange = Interval(xRange.start - n, xRange.end))
-  def growRight(n: N): Rect[N] = copy(xRange = Interval(xRange.start, xRange.end + n))
-  def growTop(n: N): Rect[N] = copy(yRange = Interval(yRange.start - n, yRange.end))
-  def growBottom(n: N): Rect[N] = copy(yRange = Interval(yRange.start, yRange.end + n))
-  def expand(n: N): Rect[N] = growLeft(n).growTop(n).growRight(n).growBottom(n)
+  def growLeft(n: N): Rect[N] = copy(xRange = xRange.growStart(n))
+  def growRight(n: N): Rect[N] = copy(xRange = xRange.growEnd(n))
+  def growTop(n: N): Rect[N] = copy(yRange = yRange.growStart(n))
+  def growBottom(n: N): Rect[N] = copy(yRange = yRange.growEnd(n))
+  def expand(n: N): Rect[N] = Rect(xRange.expand(n), yRange.expand(n))
 
   def dropLeft(n: N): Rect[N] = growLeft(-n)
   def dropRight(n: N): Rect[N] = growRight(-n)
   def dropTop(n: N): Rect[N] = growTop(-n)
   def dropBottom(n: N): Rect[N] = growBottom(-n)
-  def contract(n: N): Rect[N] = expand(-n)
+  def contract(n: N): Rect[N] = Rect(xRange.contract(n), yRange.contract(n))
 
   def translate(offset: Point[N]): Rect[N] = Rect(xRange.shift(offset.x), yRange.shift(offset.y))
 
@@ -157,9 +157,9 @@ case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
 
   def &(rhs: Rect[N]): Rect[N] = intersect(rhs)
 
-  def clamp(coord: Point[N]): Point[N] = Point(x = coord.x max left min right, y = coord.y max top min bottom)
+  def clamp(coord: Point[N]): Point[N] = Point(xRange.clamp(coord.x), yRange.clamp(coord.y))
 
-  def wrap(coord: Point[N]): Point[N] = Point(x = ((coord.x - left) +% width) + left, ((coord.y - top) +% height) + top)
+  def wrap(coord: Point[N]): Point[N] = Point(xRange.wrap(coord.x), yRange.wrap(coord.y))
 
   def show(coord2Char: Point[N] => Char): String =
     import scala.collection.mutable

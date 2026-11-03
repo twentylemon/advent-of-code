@@ -130,18 +130,15 @@ case class Cuboid[N: Integral](xRange: Interval[N], yRange: Interval[N], zRange:
     if isEmpty then Seq.empty
     else for x <- halves(xRange); y <- halves(yRange); z <- halves(zRange) yield Cuboid(x, y, z)
 
-  def expand(n: N): Cuboid[N] = Cuboid(grow(xRange, n), grow(yRange, n), grow(zRange, n))
-  def contract(n: N): Cuboid[N] = expand(-n)
-  private def grow(range: Interval[N], n: N) = Interval(range.start - n, range.end + n)
+  def expand(n: N): Cuboid[N] = Cuboid(xRange.expand(n), yRange.expand(n), zRange.expand(n))
+  def contract(n: N): Cuboid[N] = Cuboid(xRange.contract(n), yRange.contract(n), zRange.contract(n))
 
   def translate(offset: Point3[N]): Cuboid[N] =
     Cuboid(xRange.shift(offset.x), yRange.shift(offset.y), zRange.shift(offset.z))
 
-  def clamp(point: Point3[N]): Point3[N] = Point3(
-    point.x max left min right,
-    point.y max top min bottom,
-    point.z max front min back,
-  )
+  def clamp(point: Point3[N]): Point3[N] = Point3(xRange.clamp(point.x), yRange.clamp(point.y), zRange.clamp(point.z))
+
+  def wrap(point: Point3[N]): Point3[N] = Point3(xRange.wrap(point.x), yRange.wrap(point.y), zRange.wrap(point.z))
 
   def xy: Rect[N] = Rect(xRange, yRange)
   def xz: Rect[N] = Rect(xRange, zRange)

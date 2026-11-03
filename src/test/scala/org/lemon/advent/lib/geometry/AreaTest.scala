@@ -205,9 +205,7 @@ class AreaTest extends UnitTest:
   }
 
   test("translate by the opposite offset is the original") {
-    check(forAll(Arbitrary.arbitrary[Area], smallOffset) { (area: Area, offset: Coord) =>
-      area.translate(offset).translate(offset * -1) == area
-    })
+    check((area: Area, offset: Coord) => area.translate(offset).translate(offset * -1) == area)
   }
 
   test("growLeft and dropLeft are inverse") {

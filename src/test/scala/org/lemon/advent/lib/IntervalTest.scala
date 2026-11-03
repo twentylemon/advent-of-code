@@ -139,8 +139,12 @@ class EmptyIntervalTest extends UnitTest:
     check((a: Int, b: Int) => Interval.empty[Int].intersect(Interval(a, b)).isEmpty)
   }
 
-  test("shift is empty") {
-    check((n: Int) => Interval.empty[Int].shift(n).isEmpty)
+  test("clamp throws") {
+    an[UnsupportedOperationException] should be thrownBy Interval.empty[Int].clamp(0)
+  }
+
+  test("wrap throws") {
+    an[UnsupportedOperationException] should be thrownBy Interval.empty[Int].wrap(0)
   }
 
   test("toRange is empty") {
@@ -487,6 +491,50 @@ class IntervalTest extends UnitTest:
   }
 
   test("shift by the opposite amount is the original") {
-    val gen = for (a, b) <- intervalGen; n <- Gen.choose(-1000, 1000) yield (a, b, n)
-    check(forAll(gen) { (a, b, n) => interval(a, b).shift(n).shift(-n) == interval(a, b) })
+    check((a: Int, b: Int, n: Int) => Interval(a, b).shift(n).shift(-n) == Interval(a, b))
+  }
+
+  test("growStart matches Range") {
+    val gen = for (a, b) <- intervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
+    check(forAll(gen) { (a, b, n) => interval(a, b).growStart(n).toSeq == range(a - n, b) })
+  }
+
+  test("growEnd matches Range") {
+    val gen = for (a, b) <- intervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
+    check(forAll(gen) { (a, b, n) => interval(a, b).growEnd(n).toSeq == range(a, b + n) })
+  }
+
+  test("expand matches Range") {
+    val gen = for (a, b) <- intervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
+    check(forAll(gen) { (a, b, n) => interval(a, b).expand(n).toSeq == range(a - n, b + n) })
+  }
+
+  test("contract matches Range") {
+    val gen = for (a, b) <- intervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
+    check(forAll(gen) { (a, b, n) => interval(a, b).contract(n).toSeq == range(a + n, b - n) })
+  }
+
+  test("clamp is the closest value in the interval") {
+    val gen = for (a, b) <- intervalGen; v <- Gen.choose(-3000, 3000) yield (a, b, v)
+    check(forAll(gen) { (a, b, v) => interval(a, b).clamp(v) == range(a, b).minBy(x => (x - v).abs) })
+  }
+
+  test("wrap is the value in the interval a whole number of lengths away") {
+    val gen = for (a, b) <- intervalGen; v <- Gen.choose(-3000, 3000) yield (a, b, v)
+    check(forAll(gen) { (a, b, v) =>
+      val wrapped = interval(a, b).wrap(v)
+      range(a, b).contains(wrapped) && (wrapped - v) % (b - a + 1) == 0
+    })
+  }
+
+  test("growStart by the opposite amount is the original") {
+    check((a: Int, b: Int, n: Int) => Interval(a, b).growStart(n).growStart(-n) == Interval(a, b))
+  }
+
+  test("growEnd by the opposite amount is the original") {
+    check((a: Int, b: Int, n: Int) => Interval(a, b).growEnd(n).growEnd(-n) == Interval(a, b))
+  }
+
+  test("contract undoes expand") {
+    check((a: Int, b: Int, n: Int) => Interval(a, b).expand(n).contract(n) == Interval(a, b))
   }
