@@ -343,7 +343,9 @@ class CoordTest extends UnitTest:
   }
 
   test("reduce of axis aligned vectors are unit vectors") {
-    check((dir: Direction, n: Int) => n > 0 ==> ((dir.unitVector * n).reduce == dir.unitVector))
+    check((dir: Direction, n: Int) =>
+      (n != 0 && n != Int.MinValue) ==> ((dir.unitVector * n).reduce == dir.unitVector * n.sign)
+    )
   }
 
   test("reduce at the min value keeps the direction") {
