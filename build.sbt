@@ -1,3 +1,7 @@
+val testParallelism = sys.env.get("TEST_PARALLELISM").map(_.toInt).getOrElse(1)
+
+Global / concurrentRestrictions += Tags.limit(Tags.Test, testParallelism)
+
 lazy val advent = (project in file("."))
   .enablePlugins(JmhPlugin)
   .settings(
@@ -16,6 +20,6 @@ lazy val advent = (project in file("."))
     libraryDependencies += "org.scalatestplus" %% "scalacheck-1-17" % "3.2.18.0" % Test,
     libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.19" % Test,
     Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oDF"),
-    Test / parallelExecution := false,
-    Test / logBuffered := false,
+    Test / parallelExecution := testParallelism > 1,
+    Test / logBuffered := testParallelism > 1,
   )
