@@ -33,8 +33,12 @@ class MathTest extends UnitTest:
     })
   }
 
-  test("gcd matches BigInt gcd") {
-    check((a: Int, b: Int) => (a != Int.MinValue && b != Int.MinValue) ==> (a.gcd(b) == BigInt(a).gcd(BigInt(b))))
+  test("gcd matches BigInt gcd for Int") {
+    check((a: Int, b: Int) => a.gcd(b) == BigInt(a).gcd(BigInt(b)).toInt)
+  }
+
+  test("gcd matches BigInt gcd for Long") {
+    check((a: Long, b: Long) => a.gcd(b) == BigInt(a).gcd(BigInt(b)).toLong)
   }
 
   Seq(2, 3, 5, 7, 11, 17).pairs.foreach((a, b) =>
