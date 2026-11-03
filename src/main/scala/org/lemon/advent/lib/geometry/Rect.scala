@@ -24,8 +24,7 @@ object Rect:
   def apply[N: Integral](width: N, height: N): Rect[N] =
     apply(`0`, width - `1`, `0`, height - `1`)
 
-  given [N: Integral]: Conversion[Rect[N], Iterator[Point[N]]] =
-    (rect: Rect[N]) => for y <- rect.yRange.iterator; x <- rect.xRange.iterator yield Point(x, y)
+  given [N: Integral]: Conversion[Rect[N], Iterator[Point[N]]] = _.iterator
 
 /** A 2d rectangle with generic integral bounds.
   * @param xRange the x bounds of the rectangle
@@ -54,6 +53,9 @@ case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
 
   def contains(coord: Point[N]): Boolean = xRange.contains(coord.x) && yRange.contains(coord.y)
   def apply(coord: Point[N]): Boolean = contains(coord)
+
+  /** @return all the points in the rectangle, row by row from the top left */
+  def iterator: Iterator[Point[N]] = for y <- yRange.iterator; x <- xRange.iterator yield Point(x, y)
 
   def col(x: N): Iterator[Point[N]] =
     require(xRange.contains(x), s"$this does not contain column $x")

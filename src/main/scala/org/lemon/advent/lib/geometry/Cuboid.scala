@@ -18,14 +18,7 @@ object Cuboid:
   def apply[N: Integral](width: N, height: N, depth: N): Cuboid[N] =
     Cuboid(Interval(`0`, width - `1`), Interval(`0`, height - `1`), Interval(`0`, depth - `1`))
 
-  /** Iterates over the points in the cuboid by z, then y, then x. */
-  given [N: Integral]: Conversion[Cuboid[N], Iterator[Point3[N]]] =
-    (cuboid: Cuboid[N]) =>
-      for
-        z <- cuboid.zRange.iterator
-        y <- cuboid.yRange.iterator
-        x <- cuboid.xRange.iterator
-      yield Point3(x, y, z)
+  given [N: Integral]: Conversion[Cuboid[N], Iterator[Point3[N]]] = _.iterator
 
 /** A 3d cuboid (rectangular box) with generic integral bounds. Integrates with [[Point3]] and [[Interval]].
   * The x and y bounds are named like [[Rect]]'s, from `left` to `right` and from `top` to `bottom`, and z runs
@@ -82,6 +75,10 @@ case class Cuboid[N: Integral](xRange: Interval[N], yRange: Interval[N], zRange:
   def contains(point: Point3[N]): Boolean =
     xRange.contains(point.x) && yRange.contains(point.y) && zRange.contains(point.z)
   def apply(point: Point3[N]): Boolean = contains(point)
+
+  /** @return all the points in the cuboid, by z, then y, then x */
+  def iterator: Iterator[Point3[N]] =
+    for z <- zRange.iterator; y <- yRange.iterator; x <- xRange.iterator yield Point3(x, y, z)
 
   /** @return the points on the left face, as a cuboid one wide in x. The other faces are the same along their axis */
   def leftFace: Cuboid[N] = copy(xRange = Interval(left, left))
