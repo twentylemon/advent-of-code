@@ -1,29 +1,17 @@
 package org.lemon.advent.year2022
 
 import org.lemon.advent.lib.*
+import org.lemon.advent.lib.geometry.Point3
 import org.lemon.advent.lib.graph.*
 
 private object Day18:
 
-  type Coord = (Int, Int, Int)
-  extension (coord: Coord)
-    def x = coord._1
-    def y = coord._2
-    def z = coord._3
-    def left = coord.copy(_1 = coord.x - 1)
-    def right = coord.copy(_1 = coord.x + 1)
-    def up = coord.copy(_2 = coord.y - 1)
-    def down = coord.copy(_2 = coord.y + 1)
-    def in = coord.copy(_3 = coord.z - 1)
-    def out = coord.copy(_3 = coord.z + 1)
-    def cardinals = Set(coord.left, coord.right, coord.up, coord.down, coord.in, coord.out)
-
   type Face = (Double, Double, Double)
 
   def parseCube(line: String) = line match
-    case s"$x,$y,$z" => (x.toInt, y.toInt, z.toInt)
+    case s"$x,$y,$z" => Point3(x.toInt, y.toInt, z.toInt)
 
-  def faces(cube: Coord): Set[Face] = Set(
+  def faces(cube: Point3[Int]): Set[Face] = Set(
     (cube.x + 0.5, cube.y, cube.z),
     (cube.x - 0.5, cube.y, cube.z),
     (cube.x, cube.y + 0.5, cube.z),
@@ -32,7 +20,7 @@ private object Day18:
     (cube.x, cube.y, cube.z - 0.5)
   )
 
-  def faces(cubes: Iterable[Coord]): Map[Face, Int] = cubes.view.flatMap(faces).frequencies
+  def faces(cubes: Iterable[Point3[Int]]): Map[Face, Int] = cubes.view.flatMap(faces).frequencies
 
   def part1(in: String) = faces(in.linesIterator.map(parseCube).toSeq).values.count(_ == 1)
 
@@ -43,11 +31,11 @@ private object Day18:
       cubes.map(_.y).min - 1 to cubes.map(_.y).max + 1,
       cubes.map(_.z).min - 1 to cubes.map(_.z).max + 1
     )
-    def inBoundingBox(coord: Coord) = xBox.contains(coord.x) && yBox.contains(coord.y) && zBox.contains(coord.z)
+    def inBoundingBox(coord: Point3[Int]) = xBox.contains(coord.x) && yBox.contains(coord.y) && zBox.contains(coord.z)
 
     val air = fill(
-      (coord: Coord) => coord.cardinals.filter(inBoundingBox).filterNot(cubes),
-      (xBox.min, yBox.min, zBox.min)
+      (coord: Point3[Int]) => coord.adjacent.filter(inBoundingBox).filterNot(cubes),
+      Point3(xBox.min, yBox.min, zBox.min)
     )
 
     (faces(air).keySet & faces(cubes).keySet).size
