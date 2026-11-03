@@ -30,17 +30,24 @@ case class Point[N: Integral](x: N, y: N):
   def left: Point[N] = copy(x = x - `1`)
   def right: Point[N] = copy(x = x + `1`)
   def move(direction: Direction): Point[N] =
-    Point(x + fromInt(direction.unitVector.x), y + fromInt(direction.unitVector.y))
+    direction match
+      case Direction.Up => up
+      case Direction.Down => down
+      case Direction.Left => left
+      case Direction.Right => right
 
   def shiftUp(n: N): Point[N] = copy(y = y - n)
   def shiftDown(n: N): Point[N] = copy(y = y + n)
   def shiftLeft(n: N): Point[N] = copy(x = x - n)
   def shiftRight(n: N): Point[N] = copy(x = x + n)
-  def shift(direction: Direction, n: N): Point[N] =
-    Point(x + fromInt(direction.unitVector.x) * n, y + fromInt(direction.unitVector.y) * n)
+  def shift(direction: Direction, n: N): Point[N] = direction match
+    case Direction.Up => shiftUp(n)
+    case Direction.Down => shiftDown(n)
+    case Direction.Left => shiftLeft(n)
+    case Direction.Right => shiftRight(n)
 
   def walk(step: Point[N]): Iterator[Point[N]] = Iterator.iterate(this)(_ + step)
-  def walk(direction: Direction): Iterator[Point[N]] = walk(direction.unitVector.to[N])
+  def walk(direction: Direction): Iterator[Point[N]] = Iterator.iterate(this)(_.move(direction))
 
   def adjacent: Seq[Point[N]] = Seq(up, down, left, right)
   def surrounding: Seq[Point[N]] = Seq(up, down, left, right, up.left, up.right, down.left, down.right)
