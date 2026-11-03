@@ -30,8 +30,7 @@ object Point3:
       if parity(perm) * sign.product == 1
     yield perm.zip(sign)
 
-/** A 3d coordinate (or vector) with any integral values. More typical to use [[Coord3]],
-  * but sometimes you need a `Long`.
+/** A 3d coordinate (or vector) with any integral values. Integrates with [[Cuboid]] and [[Interval]].
   * @param x the x coordinate
   * @param y the y coordinate
   * @param z the z coordinate

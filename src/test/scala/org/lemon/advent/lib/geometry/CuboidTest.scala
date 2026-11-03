@@ -20,13 +20,13 @@ class CuboidTest extends UnitTest:
   }
 
   test("cuboid contains only the iterated points") {
-    check(forAll(Arbitrary.arbitrary[Cuboid[Int]], smallCoord3) { (cuboid: Cuboid[Int], point: Coord3) =>
+    check(forAll(Arbitrary.arbitrary[Cuboid[Int]], smallPoint3) { (cuboid: Cuboid[Int], point: Point3[Int]) =>
       cuboid.contains(point) == cuboid.iterator.contains(point)
     })
   }
 
   test("converts to an iterator of its points") {
-    val points: Iterator[Coord3] = Cuboid(2, 3, 4)
+    val points: Iterator[Point3[Int]] = Cuboid(2, 3, 4)
     points.size shouldBe 24
   }
 
@@ -35,11 +35,11 @@ class CuboidTest extends UnitTest:
   }
 
   test("bounding cuboid is the smallest that encloses the points") {
-    check(forAll(Gen.nonEmptyListOf(smallCoord3)) { (points: List[Coord3]) =>
+    check(forAll(Gen.nonEmptyListOf(smallPoint3)) { (points: List[Point3[Int]]) =>
       val cuboid = Cuboid(points)
       points.forall(cuboid.contains) &&
-      cuboid.min == Coord3(points.map(_.x).min, points.map(_.y).min, points.map(_.z).min) &&
-      cuboid.max == Coord3(points.map(_.x).max, points.map(_.y).max, points.map(_.z).max)
+      cuboid.min == Point3(points.map(_.x).min, points.map(_.y).min, points.map(_.z).min) &&
+      cuboid.max == Point3(points.map(_.x).max, points.map(_.y).max, points.map(_.z).max)
     })
   }
 
@@ -126,11 +126,11 @@ class CuboidTest extends UnitTest:
   }
 
   test("octants of a point is the point") {
-    check((point: Coord3) => Cuboid(Seq(point)).octants == Seq(Cuboid(Seq(point))))
+    check((point: Point3[Int]) => Cuboid(Seq(point)).octants == Seq(Cuboid(Seq(point))))
   }
 
   test("octants at the max value do not wrap around") {
-    val corner = Cuboid(Seq(Coord3(Int.MaxValue, Int.MaxValue, Int.MaxValue)))
+    val corner = Cuboid(Seq(Point3(Int.MaxValue, Int.MaxValue, Int.MaxValue)))
     corner.octants shouldBe Seq(corner)
   }
 
@@ -143,22 +143,22 @@ class CuboidTest extends UnitTest:
   test("expand grows each side") {
     check(forAll(Arbitrary.arbitrary[Cuboid[Int]], Gen.choose(0, 10)) { (cuboid: Cuboid[Int], n: Int) =>
       val expanded = cuboid.expand(n)
-      expanded.min == cuboid.min - Coord3(n, n, n) && expanded.max == cuboid.max + Coord3(n, n, n)
+      expanded.min == cuboid.min - Point3(n, n, n) && expanded.max == cuboid.max + Point3(n, n, n)
     })
   }
 
   test("+ moves every point") {
-    check(forAll(Arbitrary.arbitrary[Cuboid[Int]], smallCoord3) { (cuboid: Cuboid[Int], offset: Coord3) =>
+    check(forAll(Arbitrary.arbitrary[Cuboid[Int]], smallPoint3) { (cuboid: Cuboid[Int], offset: Point3[Int]) =>
       (cuboid + offset).iterator.toSet == cuboid.iterator.map(_ + offset).toSet
     })
   }
 
   test("+ and - are opposites") {
-    check((cuboid: Cuboid[Int], offset: Coord3) => cuboid + offset - offset == cuboid)
+    check((cuboid: Cuboid[Int], offset: Point3[Int]) => cuboid + offset - offset == cuboid)
   }
 
   test("clamp lands in the cuboid") {
-    check((cuboid: Cuboid[Int], point: Coord3) => cuboid.contains(cuboid.clamp(point)))
+    check((cuboid: Cuboid[Int], point: Point3[Int]) => cuboid.contains(cuboid.clamp(point)))
   }
 
   test("clamp keeps points in the cuboid") {
@@ -180,7 +180,7 @@ class CuboidTest extends UnitTest:
   }
 
   test("empty cuboid contains nothing") {
-    check(forAll(emptyCuboid, smallCoord3) { (cuboid: Cuboid[Int], point: Coord3) => !cuboid.contains(point) })
+    check(forAll(emptyCuboid, smallPoint3) { (cuboid: Cuboid[Int], point: Point3[Int]) => !cuboid.contains(point) })
   }
 
   test("empty cuboid has no points, volume, or surface area") {

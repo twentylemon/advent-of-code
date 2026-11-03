@@ -4,13 +4,14 @@ import org.lemon.advent.lib.*
 import org.scalacheck.{Arbitrary, Gen, Shrink}
 import org.scalacheck.Shrink.*
 
-given Arbitrary[Coord3] = Arbitrary(Gen.resultOf((x: Short, y: Short, z: Short) => Coord3(x, y, z)))
-given Shrink[Coord3] = Shrink { case Point3(x, y, z) => shrink((x, y, z)).map(Coord3.apply) }
+given Arbitrary[Point3[Int]] =
+  Arbitrary(Gen.resultOf((x: Short, y: Short, z: Short) => Point3(x.toInt, y.toInt, z.toInt)))
+given Shrink[Point3[Int]] = Shrink { case Point3(x, y, z) => shrink((x, y, z)).map((x, y, z) => Point3(x, y, z)) }
 
-/** a coordinate in or near the cuboids from `Arbitrary[Cuboid[Int]]` */
-val smallCoord3: Gen[Coord3] =
+/** a point in or near the cuboids from `Arbitrary[Cuboid[Int]]` */
+val smallPoint3: Gen[Point3[Int]] =
   val component = Gen.choose(-8, 8)
-  Gen.zip(component, component, component).map(Coord3.apply)
+  Gen.zip(component, component, component).map((x, y, z) => Point3(x, y, z))
 
 /** non-empty cuboids that stay small enough to check point by point */
 given Arbitrary[Cuboid[Int]] =
