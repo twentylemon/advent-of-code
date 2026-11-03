@@ -38,17 +38,10 @@ case class Point3[N: Integral](x: N, y: N, z: N):
   def down: Point3[N] = copy(y = y + `1`)
   def left: Point3[N] = copy(x = x - `1`)
   def right: Point3[N] = copy(x = x + `1`)
-
-  /** @return this point moved one step along +z */
   def in: Point3[N] = copy(z = z + `1`)
-
-  /** @return this point moved one step along -z */
   def out: Point3[N] = copy(z = z - `1`)
 
-  /** @return the 6 points that share a face with this point */
   def adjacent: Seq[Point3[N]] = Seq(up, down, left, right, in, out)
-
-  /** @return the 26 points that share a face, edge or corner with this point */
   def surrounding: Seq[Point3[N]] =
     for
       vertical <- Seq(this, up, down)
@@ -59,8 +52,6 @@ case class Point3[N: Integral](x: N, y: N, z: N):
 
   def manhattan(rhs: Point3[N]): N = (x - rhs.x).abs + (y - rhs.y).abs + (z - rhs.z).abs
   def chessboard(rhs: Point3[N]): N = (x - rhs.x).abs max (y - rhs.y).abs max (z - rhs.z).abs
-
-  /** @return the squared euclidean distance to `rhs` */
   def euclidean(rhs: Point3[N]): N =
     val (dx, dy, dz) = (x - rhs.x, y - rhs.y, z - rhs.z)
     dx * dx + dy * dy + dz * dz
@@ -69,8 +60,7 @@ case class Point3[N: Integral](x: N, y: N, z: N):
   def yInterval(rhs: Point3[N]): Interval[N] = Interval(y min rhs.y, y max rhs.y)
   def zInterval(rhs: Point3[N]): Interval[N] = Interval(z min rhs.z, z max rhs.z)
 
-  /** Returns this point under each of the 24 rotations about the origin. The rotations are in the same order
-    * for every point, starting with the identity.
+  /** Returns this point under each of the 24 rotations about the origin.
     * @return this point under each rotation
     */
   def rotations: Seq[Point3[N]] =
@@ -87,11 +77,6 @@ case class Point3[N: Integral](x: N, y: N, z: N):
   def unary_- : Point3[N] = Point3(-x, -y, -z)
 
   def dot(rhs: Point3[N]): N = x * rhs.x + y * rhs.y + z * rhs.z
-
-  /** Returns the cross product of the two vectors.
-    * @param rhs the other vector
-    * @return the cross product
-    */
   def cross(rhs: Point3[N]): Point3[N] = Point3(y * rhs.z - z * rhs.y, z * rhs.x - x * rhs.z, x * rhs.y - y * rhs.x)
 
   /** Reduces this vector to the smallest integer vector in the same direction.
@@ -101,7 +86,6 @@ case class Point3[N: Integral](x: N, y: N, z: N):
     val gcd = x.gcd(y).gcd(z)
     if gcd == `0` then this
     else
-      // the gcd overflows to `MinValue` when it should be `-MinValue`, which would flip the direction
       val reduced = Point3(x / gcd, y / gcd, z / gcd)
       if gcd < `0` then -reduced else reduced
 
