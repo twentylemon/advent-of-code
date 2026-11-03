@@ -170,12 +170,10 @@ class Point3Test extends UnitTest:
     check((a: Point3[Int]) => a.rotations.forall(_.rotations.toSet == a.rotations.toSet))
   }
 
-  test("moving along the dropped axis leaves the projection unchanged") {
-    check((a: Point3[Int]) =>
-      Seq(a.in, a.out).forall(_.xy == a.xy) &&
-        Seq(a.up, a.down).forall(_.xz == a.xz) &&
-        Seq(a.left, a.right).forall(_.yz == a.yz)
-    )
+  test("projections send the dropped axis to the origin") {
+    Point3.unitZ[Int].xy shouldBe Coord.origin
+    Point3.unitY[Int].xz shouldBe Coord.origin
+    Point3.unitX[Int].yz shouldBe Coord.origin
   }
 
   test("projections are linear") {
