@@ -85,6 +85,7 @@ case class Point[N: Integral](x: N, y: N):
   def -(rhs: Point[N]): Point[N] = Point(x - rhs.x, y - rhs.y)
   def -(direction: Direction): Point[N] = move(direction.turnAround)
   def *(n: N): Point[N] = Point(x * n, y * n)
+  def unary_- : Point[N] = Point(-x, -y)
 
   /** Returns the 2d cross product. It is positive when `rhs` turns clockwise from this vector, negative when it
     * turns counterclockwise, and `0` when the two are collinear. Clockwise is as seen on a grid, where y points down.
@@ -102,8 +103,8 @@ case class Point[N: Integral](x: N, y: N):
     else
       // the gcd of two `MinValue`s overflows to `MinValue`, which would flip the direction
       val gcd = x.gcd(y)
-      val (dx, dy) = (x / gcd, y / gcd)
-      if gcd < `0` then Point(-dx, -dy) else Point(dx, dy)
+      val reduced = Point(x / gcd, y / gcd)
+      if gcd < `0` then -reduced else reduced
 
   def directionTo(rhs: Point[N]): Option[Direction] =
     val Point(dx, dy) = rhs - this

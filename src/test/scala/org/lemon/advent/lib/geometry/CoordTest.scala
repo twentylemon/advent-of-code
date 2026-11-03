@@ -25,6 +25,10 @@ class CoordTest extends UnitTest:
     check((coord: Coord, n: Int) => coord == coord.shiftUp(n).shiftDown(n))
   }
 
+  test("unary - is * -1") {
+    check((coord: Coord) => -coord == coord * -1)
+  }
+
   test("+ unitUp is up") {
     check((coord: Coord) => coord + unitUp == coord.up)
   }
