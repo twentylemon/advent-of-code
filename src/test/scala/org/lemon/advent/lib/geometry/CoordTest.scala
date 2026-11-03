@@ -273,18 +273,6 @@ class CoordTest extends UnitTest:
     check((coord: Coord) => coord.rotateRight(Coord.origin) == coord.rotateRight)
   }
 
-  test("to[Int] is identity") {
-    check((coord: Coord) => coord.to[Int] == coord)
-  }
-
-  test("to[Long] and back is identity") {
-    check((coord: Coord) => coord.to[Long].to[Int] == coord)
-  }
-
-  test("to[Long] preserves coordinates") {
-    check((coord: Coord) => coord.to[Long] == Point[Long](coord.x.toLong, coord.y.toLong))
-  }
-
   test("cross is antisymmetric") {
     check((lhs: Coord, rhs: Coord) => lhs.cross(rhs) == -rhs.cross(lhs))
   }
@@ -352,4 +340,16 @@ class CoordTest extends UnitTest:
     Coord(Int.MinValue, Int.MinValue).reduce shouldBe Coord(-1, -1)
     Coord(Int.MinValue, 0).reduce shouldBe Coord(-1, 0)
     Coord(Int.MinValue, 6).reduce shouldBe Coord(Int.MinValue / 2, 3)
+  }
+
+  test("to[Int] is identity") {
+    check((coord: Coord) => coord.to[Int] == coord)
+  }
+
+  test("to[Long] and back is identity") {
+    check((coord: Coord) => coord.to[Long].to[Int] == coord)
+  }
+
+  test("to[Long] preserves coordinates") {
+    check((coord: Coord) => coord.to[Long] == Point[Long](coord.x.toLong, coord.y.toLong))
   }
