@@ -18,7 +18,7 @@ extension [N: Integral](a: N)
     */
   def +%(n: N): N =
     val mod = a % n
-    if mod < Integral[N].zero then mod + n else mod
+    if mod < `0` then mod + n else mod
 
   /** Returns `this / n` rounded up.
     *
@@ -30,14 +30,16 @@ extension [N: Integral](a: N)
     // division truncates towards zero, which already rounded up if the true quotient is negative
     if remainder != `0` && (remainder > `0`) == (n > `0`) then quotient + `1` else quotient
 
-  /** Returns the greatest common divisor of this and `b`.
+  /** Returns the greatest common divisor of this and `b`, which is never negative unless it does not fit in `N`:
+    * the gcd of `MinValue` with `0` or `MinValue` is `-MinValue`, which overflows to `MinValue` like `abs` does.
+    * That is still a divisor of the right size, so it still works as an argument to another `gcd`.
     *
     * @param b the other number
     * @return the greatest common divisor of this and `b`
     */
   def gcd(b: N): N =
     @annotation.tailrec
-    def loop(a: N, b: N): N = if b == Integral[N].zero then a.abs else loop(b, a % b)
+    def loop(a: N, b: N): N = if b == `0` then a.abs else loop(b, a % b)
     loop(a, b)
 
   /** Returns the least common multiple of this and `b`.
