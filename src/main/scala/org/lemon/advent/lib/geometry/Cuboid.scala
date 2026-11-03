@@ -85,6 +85,24 @@ case class Cuboid[N: Integral](xRange: Interval[N], yRange: Interval[N], zRange:
   /** @return the 6 faces, each a cuboid one wide along its axis */
   def faces: Seq[Cuboid[N]] = Seq(leftFace, rightFace, topFace, bottomFace, frontFace, backFace)
 
+  /** Returns the octants of this cuboid. If the cuboid has an odd length along an axis,
+    * the middle slice is in the lower octants.
+    * @return the non-empty octants of this cuboid
+    */
+  def octants: Seq[Cuboid[N]] =
+    def halves(range: Interval[N]): Seq[Interval[N]] =
+      val mid = range.start + (range.length - `1`) / fromInt(2)
+      Interval(range.start, mid) +: Option.when(mid < range.end)(Interval(mid + `1`, range.end)).toSeq
+
+    if isEmpty then Seq.empty
+    else for x <- halves(xRange); y <- halves(yRange); z <- halves(zRange) yield Cuboid(x, y, z)
+
+  def expand(n: N): Cuboid[N] = Cuboid(xRange.expand(n), yRange.expand(n), zRange.expand(n))
+  def contract(n: N): Cuboid[N] = Cuboid(xRange.contract(n), yRange.contract(n), zRange.contract(n))
+
+  def translate(offset: Point3[N]): Cuboid[N] =
+    Cuboid(xRange.shift(offset.x), yRange.shift(offset.y), zRange.shift(offset.z))
+
   def encloses(rhs: Cuboid[N]): Boolean =
     rhs.isEmpty ||
       xRange.containsSlice(rhs.xRange) && yRange.containsSlice(rhs.yRange) && zRange.containsSlice(rhs.zRange)
@@ -116,24 +134,6 @@ case class Cuboid[N: Integral](xRange: Interval[N], yRange: Interval[N], zRange:
         outside(zRange, common.zRange).map(z => Cuboid(common.xRange, common.yRange, z))
 
   def --(rhs: Cuboid[N]): Seq[Cuboid[N]] = diff(rhs)
-
-  /** Returns the octants of this cuboid. If the cuboid has an odd length along an axis,
-    * the middle slice is in the lower octants.
-    * @return the non-empty octants of this cuboid
-    */
-  def octants: Seq[Cuboid[N]] =
-    def halves(range: Interval[N]): Seq[Interval[N]] =
-      val mid = range.start + (range.length - `1`) / fromInt(2)
-      Interval(range.start, mid) +: Option.when(mid < range.end)(Interval(mid + `1`, range.end)).toSeq
-
-    if isEmpty then Seq.empty
-    else for x <- halves(xRange); y <- halves(yRange); z <- halves(zRange) yield Cuboid(x, y, z)
-
-  def expand(n: N): Cuboid[N] = Cuboid(xRange.expand(n), yRange.expand(n), zRange.expand(n))
-  def contract(n: N): Cuboid[N] = Cuboid(xRange.contract(n), yRange.contract(n), zRange.contract(n))
-
-  def translate(offset: Point3[N]): Cuboid[N] =
-    Cuboid(xRange.shift(offset.x), yRange.shift(offset.y), zRange.shift(offset.z))
 
   def clamp(point: Point3[N]): Point3[N] = Point3(xRange.clamp(point.x), yRange.clamp(point.y), zRange.clamp(point.z))
 
