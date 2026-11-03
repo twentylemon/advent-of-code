@@ -19,7 +19,7 @@ private object Day16:
     case '|' if photon.velocity.x != 0 =>
       Seq(Photon(photon.position.up, unitUp), Photon(photon.position.down, unitDown))
     case '/' =>
-      val v = photon.velocity.flip * -1
+      val v = -photon.velocity.flip
       Seq(Photon(photon.position + v, v))
     case '\\' =>
       val v = photon.velocity.flip
