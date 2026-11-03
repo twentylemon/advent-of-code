@@ -84,7 +84,8 @@ case class Point[N: Integral](x: N, y: N):
   def -(direction: Direction): Point[N] = move(direction.turnAround)
   def *(n: N): Point[N] = Point(x * n, y * n)
 
-  /** Returns the 2d cross product, which is zero when the two vectors are collinear.
+  /** Returns the 2d cross product. It is positive when `rhs` turns clockwise from this vector, negative when it
+    * turns counterclockwise, and `0` when the two are collinear. Clockwise is as seen on a grid, where y points down.
     * @param rhs the other vector
     * @return the 2d cross product
     */
