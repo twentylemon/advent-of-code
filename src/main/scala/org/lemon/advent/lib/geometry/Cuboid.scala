@@ -86,9 +86,8 @@ case class Cuboid[N: Integral](xRange: Interval[N], yRange: Interval[N], zRange:
   def faces: Seq[Cuboid[N]] = Seq(leftFace, rightFace, topFace, bottomFace, frontFace, backFace)
 
   def encloses(rhs: Cuboid[N]): Boolean =
-    if rhs.isEmpty then true
-    else if isEmpty then false
-    else xRange.containsSlice(rhs.xRange) && yRange.containsSlice(rhs.yRange) && zRange.containsSlice(rhs.zRange)
+    rhs.isEmpty ||
+      xRange.containsSlice(rhs.xRange) && yRange.containsSlice(rhs.yRange) && zRange.containsSlice(rhs.zRange)
 
   def overlaps(rhs: Cuboid[N]): Boolean =
     xRange.intersects(rhs.xRange) && yRange.intersects(rhs.yRange) && zRange.intersects(rhs.zRange)

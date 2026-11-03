@@ -145,9 +145,7 @@ case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
   def translate(offset: Point[N]): Rect[N] = Rect(xRange.shift(offset.x), yRange.shift(offset.y))
 
   def encloses(rhs: Rect[N]): Boolean =
-    if rhs.isEmpty then true
-    else if isEmpty then false
-    else xRange.containsSlice(rhs.xRange) && yRange.containsSlice(rhs.yRange)
+    rhs.isEmpty || xRange.containsSlice(rhs.xRange) && yRange.containsSlice(rhs.yRange)
 
   def overlaps(rhs: Rect[N]): Boolean =
     nonEmpty && rhs.nonEmpty && left <= rhs.right && right >= rhs.left && top <= rhs.bottom && bottom >= rhs.top
