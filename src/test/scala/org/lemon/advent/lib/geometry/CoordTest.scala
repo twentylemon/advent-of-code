@@ -25,6 +25,10 @@ class CoordTest extends UnitTest:
     check((coord: Coord, n: Int) => coord == coord.shiftUp(n).shiftDown(n))
   }
 
+  test("unary - is * -1") {
+    check((coord: Coord) => -coord == coord * -1)
+  }
+
   test("+ unitUp is up") {
     check((coord: Coord) => coord + unitUp == coord.up)
   }
@@ -279,4 +283,73 @@ class CoordTest extends UnitTest:
 
   test("to[Long] preserves coordinates") {
     check((coord: Coord) => coord.to[Long] == Point[Long](coord.x.toLong, coord.y.toLong))
+  }
+
+  test("cross is antisymmetric") {
+    check((lhs: Coord, rhs: Coord) => lhs.cross(rhs) == -rhs.cross(lhs))
+  }
+
+  test("cross with itself is zero") {
+    check((coord: Coord) => coord.cross(coord) == 0)
+  }
+
+  test("cross with a scaled copy is zero") {
+    check((coord: Coord, n: Int) => coord.cross(coord * n) == 0)
+  }
+
+  test("cross with the rotateRight is positive") {
+    check((coord: Coord) =>
+      val big = coord.to[BigInt]
+      coord != Coord.origin ==> (big.cross(big.rotateRight) > 0)
+    )
+  }
+
+  test("cross with the rotateLeft is negative") {
+    check((coord: Coord) =>
+      val big = coord.to[BigInt]
+      coord != Coord.origin ==> (big.cross(big.rotateLeft) < 0)
+    )
+  }
+
+  test("cross with the turnRight is 1") {
+    check((dir: Direction) => dir.unitVector.cross(dir.turnRight.unitVector) == 1)
+  }
+
+  test("cross with the turnLeft is -1") {
+    check((dir: Direction) => dir.unitVector.cross(dir.turnLeft.unitVector) == -1)
+  }
+
+  test("reduce is idempotent") {
+    check((coord: Coord) => coord.reduce.reduce == coord.reduce)
+  }
+
+  test("reduce keeps the direction") {
+    check((coord: Coord) =>
+      val reduced = coord.reduce
+      reduced.cross(coord) == 0 && reduced.x.sign == coord.x.sign && reduced.y.sign == coord.y.sign
+    )
+  }
+
+  test("reduce leaves coprime components") {
+    check((coord: Coord) => coord != Coord.origin ==> (coord.reduce.x.gcd(coord.reduce.y) == 1))
+  }
+
+  test("reduce scales back to the original") {
+    check((coord: Coord) => coord != Coord.origin ==> (coord.reduce * coord.x.gcd(coord.y) == coord))
+  }
+
+  test("reduce of the origin is the origin") {
+    Coord.origin.reduce shouldBe Coord.origin
+  }
+
+  test("reduce of axis aligned vectors are unit vectors") {
+    check((dir: Direction, n: Int) =>
+      (n != 0 && n != Int.MinValue) ==> ((dir.unitVector * n).reduce == dir.unitVector * n.sign)
+    )
+  }
+
+  test("reduce at the min value keeps the direction") {
+    Coord(Int.MinValue, Int.MinValue).reduce shouldBe Coord(-1, -1)
+    Coord(Int.MinValue, 0).reduce shouldBe Coord(-1, 0)
+    Coord(Int.MinValue, 6).reduce shouldBe Coord(Int.MinValue / 2, 3)
   }
