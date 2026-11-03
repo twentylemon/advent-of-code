@@ -10,11 +10,11 @@ object Point:
 
   given [T: Integral]: Ordering[Point[T]] = Ordering.by[Point[T], T](_.x).orElseBy(_.y)
 
-  def origin[T: Integral]: Point[T] = (`0`, `0`)
-  def unitUp[T: Integral]: Point[T] = (`0`, `-1`)
-  def unitDown[T: Integral]: Point[T] = (`0`, `1`)
-  def unitLeft[T: Integral]: Point[T] = (`-1`, `0`)
-  def unitRight[T: Integral]: Point[T] = (`1`, `0`)
+  def origin[T: Integral]: Point[T] = Point(`0`, `0`)
+  def unitUp[T: Integral]: Point[T] = Point(`0`, `-1`)
+  def unitDown[T: Integral]: Point[T] = Point(`0`, `1`)
+  def unitLeft[T: Integral]: Point[T] = Point(`-1`, `0`)
+  def unitRight[T: Integral]: Point[T] = Point(`1`, `0`)
 
 /** A 2d coordinate (or vector) with any integral values. More typical to use [[Coord]],
   * but sometimes you need a `Long`.
@@ -29,14 +29,15 @@ case class Point[N: Integral](x: N, y: N):
   def down: Point[N] = copy(y = y + `1`)
   def left: Point[N] = copy(x = x - `1`)
   def right: Point[N] = copy(x = x + `1`)
-  def move(direction: Direction): Point[N] = (x + fromInt(direction.unitVector.x), y + fromInt(direction.unitVector.y))
+  def move(direction: Direction): Point[N] =
+    Point(x + fromInt(direction.unitVector.x), y + fromInt(direction.unitVector.y))
 
   def shiftUp(n: N): Point[N] = copy(y = y - n)
   def shiftDown(n: N): Point[N] = copy(y = y + n)
   def shiftLeft(n: N): Point[N] = copy(x = x - n)
   def shiftRight(n: N): Point[N] = copy(x = x + n)
   def shift(direction: Direction, n: N): Point[N] =
-    (x + fromInt(direction.unitVector.x) * n, y + fromInt(direction.unitVector.y) * n)
+    Point(x + fromInt(direction.unitVector.x) * n, y + fromInt(direction.unitVector.y) * n)
 
   def walk(step: Point[N]): Iterator[Point[N]] = Iterator.iterate(this)(_ + step)
   def walk(direction: Direction): Iterator[Point[N]] = walk(direction.unitVector.to[N])
@@ -77,11 +78,11 @@ case class Point[N: Integral](x: N, y: N):
   def rotateLeft: Point[N] = Point(x = y, y = -x)
   def rotateLeft(about: Point[N]): Point[N] = (this - about).rotateLeft + about
 
-  def +(rhs: Point[N]): Point[N] = (x + rhs.x, y + rhs.y)
+  def +(rhs: Point[N]): Point[N] = Point(x + rhs.x, y + rhs.y)
   def +(direction: Direction): Point[N] = move(direction)
-  def -(rhs: Point[N]): Point[N] = (x - rhs.x, y - rhs.y)
+  def -(rhs: Point[N]): Point[N] = Point(x - rhs.x, y - rhs.y)
   def -(direction: Direction): Point[N] = move(direction.turnAround)
-  def *(n: N): Point[N] = (x * n, y * n)
+  def *(n: N): Point[N] = Point(x * n, y * n)
 
   /** Returns the 2d cross product, which is zero when the two vectors are collinear.
     * @param rhs the other vector
@@ -93,13 +94,13 @@ case class Point[N: Integral](x: N, y: N):
     * @return the reduced vector
     */
   def reduce: Point[N] =
-    if x == `0` then (`0`, y.sign)
-    else if y == `0` then (x.sign, `0`)
+    if x == `0` then Point(`0`, y.sign)
+    else if y == `0` then Point(x.sign, `0`)
     else
       // the gcd of two `MinValue`s overflows to `MinValue`, which would flip the direction
       val gcd = x.gcd(y)
       val (dx, dy) = (x / gcd, y / gcd)
-      if gcd < `0` then (-dx, -dy) else (dx, dy)
+      if gcd < `0` then Point(-dx, -dy) else Point(dx, dy)
 
   def directionTo(rhs: Point[N]): Option[Direction] =
     val Point(dx, dy) = rhs - this
