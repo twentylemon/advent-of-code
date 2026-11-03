@@ -88,7 +88,7 @@ case class Point[N: Integral](x: N, y: N):
   def unary_- : Point[N] = Point(-x, -y)
 
   /** Returns the 2d cross product. It is positive when `rhs` turns clockwise from this vector, negative when it
-    * turns counterclockwise, and `0` when the two are collinear. Clockwise is as seen on a grid, where y points down.
+    * turns counterclockwise, and `0` when the two are collinear.
     * @param rhs the other vector
     * @return the 2d cross product
     */
