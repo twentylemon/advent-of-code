@@ -145,21 +145,13 @@ case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
   def encloses(rhs: Rect[N]): Boolean =
     if rhs.isEmpty then true
     else if isEmpty then false
-    else
-      left <= rhs.left && right >= rhs.right && top <= rhs.top && bottom >= rhs.bottom
+    else xRange.containsSlice(rhs.xRange) && yRange.containsSlice(rhs.yRange)
 
   def overlaps(rhs: Rect[N]): Boolean =
     nonEmpty && rhs.nonEmpty && left <= rhs.right && right >= rhs.left && top <= rhs.bottom && bottom >= rhs.top
   def intersects(rhs: Rect[N]): Boolean = overlaps(rhs)
 
-  def intersect(rhs: Rect[N]): Rect[N] =
-    if isEmpty then this
-    else if rhs.isEmpty then rhs
-    else
-      Rect(
-        xRange = Interval(left max rhs.left, right min rhs.right),
-        yRange = Interval(top max rhs.top, bottom min rhs.bottom),
-      )
+  def intersect(rhs: Rect[N]): Rect[N] = Rect(xRange & rhs.xRange, yRange & rhs.yRange)
 
   def &(rhs: Rect[N]): Rect[N] = intersect(rhs)
 
