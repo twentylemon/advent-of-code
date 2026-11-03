@@ -134,9 +134,8 @@ case class Cuboid[N: Integral](xRange: Interval[N], yRange: Interval[N], zRange:
   def contract(n: N): Cuboid[N] = expand(-n)
   private def grow(range: Interval[N], n: N) = Interval(range.start - n, range.end + n)
 
-  def +(offset: Point3[N]): Cuboid[N] =
+  def translate(offset: Point3[N]): Cuboid[N] =
     Cuboid(shift(xRange, offset.x), shift(yRange, offset.y), shift(zRange, offset.z))
-  def -(offset: Point3[N]): Cuboid[N] = this + -offset
   private def shift(range: Interval[N], n: N) = Interval(range.start + n, range.end + n)
 
   def clamp(point: Point3[N]): Point3[N] = Point3(

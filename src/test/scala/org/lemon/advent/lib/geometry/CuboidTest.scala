@@ -180,14 +180,14 @@ class CuboidTest extends UnitTest:
     })
   }
 
-  test("+ moves every point") {
+  test("translate moves every point") {
     check(forAll(Arbitrary.arbitrary[Cuboid[Int]], smallPoint3) { (cuboid: Cuboid[Int], offset: Point3[Int]) =>
-      (cuboid + offset).iterator.toSet == cuboid.iterator.map(_ + offset).toSet
+      cuboid.translate(offset).iterator.toSet == cuboid.iterator.map(_ + offset).toSet
     })
   }
 
-  test("+ and - are opposites") {
-    check((cuboid: Cuboid[Int], offset: Point3[Int]) => cuboid + offset - offset == cuboid)
+  test("translate by the opposite offset is the original") {
+    check((cuboid: Cuboid[Int], offset: Point3[Int]) => cuboid.translate(offset).translate(-offset) == cuboid)
   }
 
   test("clamp lands in the cuboid") {
