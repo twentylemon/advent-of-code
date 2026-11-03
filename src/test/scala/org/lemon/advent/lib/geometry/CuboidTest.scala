@@ -6,9 +6,19 @@ import org.scalacheck.Prop.*
 import org.scalacheck.*
 
 class CuboidTest extends UnitTest:
+  val emptyCuboid: Gen[Cuboid[Int]] =
+    for
+      cuboid <- Arbitrary.arbitrary[Cuboid[Int]]
+      axis <- Gen.choose(0, 2)
+      start <- Gen.choose(-6, 6)
+      empty = Interval(start, start - 1)
+    yield axis match
+      case 0 => cuboid.copy(xRange = empty)
+      case 1 => cuboid.copy(yRange = empty)
+      case _ => cuboid.copy(zRange = empty)
 
   test("bounding cuboid is the smallest that encloses the points") {
-    check(forAll(Gen.nonEmptyListOf(smallPoint3)) { (points: List[Point3[Int]]) =>
+    check(forAll(Gen.nonEmptyListOf(Arbitrary.arbitrary[Point3[Int]])) { (points: List[Point3[Int]]) =>
       val cuboid = Cuboid(points)
       points.forall(cuboid.contains) &&
       cuboid.topLeftFront == Point3(points.map(_.x).min, points.map(_.y).min, points.map(_.z).min) &&
@@ -16,33 +26,31 @@ class CuboidTest extends UnitTest:
     })
   }
 
-  test("size constructor starts at the origin") {
-    Cuboid(2, 3, 4) shouldBe Cuboid(0 to 1, 0 to 2, 0 to 3)
+  test("size constructor has that size, starting at the origin") {
+    val length = Gen.choose(1, Int.MaxValue)
+    check(forAll(length, length, length) { (width: Int, height: Int, depth: Int) =>
+      val cuboid = Cuboid(width, height, depth)
+      cuboid.topLeftFront == Point3.origin[Int] && (cuboid.width, cuboid.height, cuboid.depth) == (width, height, depth)
+    })
   }
 
-  test("converts to an iterator of its points") {
-    val points: Iterator[Point3[Int]] = Cuboid(2, 3, 4)
-    points.size shouldBe 24
-  }
-
-  test("bounds are the ends of each range") {
-    val cuboid = Cuboid(0 to 1, 2 to 3, 4 to 5)
-    (cuboid.left, cuboid.right, cuboid.top, cuboid.bottom, cuboid.front, cuboid.back) shouldBe (0, 1, 2, 3, 4, 5)
-  }
-
-  test("x and y bounds match the xy projection's") {
-    check((cuboid: Cuboid[Int]) =>
-      val xy = cuboid.xy
-      (cuboid.left, cuboid.right, cuboid.top, cuboid.bottom) == (xy.left, xy.right, xy.top, xy.bottom)
+  test("each named corner is the point its three steps leave the cuboid from") {
+    val corners: Seq[(Cuboid[Int] => Point3[Int], Seq[Point3[Int] => Point3[Int]])] = Seq(
+      (_.topLeftFront, Seq(_.up, _.left, _.out)),
+      (_.topRightFront, Seq(_.up, _.right, _.out)),
+      (_.bottomLeftFront, Seq(_.down, _.left, _.out)),
+      (_.bottomRightFront, Seq(_.down, _.right, _.out)),
+      (_.topLeftBack, Seq(_.up, _.left, _.in)),
+      (_.topRightBack, Seq(_.up, _.right, _.in)),
+      (_.bottomLeftBack, Seq(_.down, _.left, _.in)),
+      (_.bottomRightBack, Seq(_.down, _.right, _.in)),
     )
-  }
-
-  test("named corners are at their bounds") {
-    val cuboid = Cuboid(0 to 1, 2 to 3, 4 to 5)
-    cuboid.topLeftFront shouldBe Point3(0, 2, 4)
-    cuboid.topRightBack shouldBe Point3(1, 2, 5)
-    cuboid.bottomLeftBack shouldBe Point3(0, 3, 5)
-    cuboid.bottomRightFront shouldBe Point3(1, 3, 4)
+    check((cuboid: Cuboid[Int]) =>
+      corners.forall((corner, steps) =>
+        val points = cuboid.iterator.filter(point => steps.forall(step => !cuboid.contains(step(point))))
+        points.toSeq == Seq(corner(cuboid))
+      )
+    )
   }
 
   test("corners are every combination of the bounds") {
@@ -70,7 +78,7 @@ class CuboidTest extends UnitTest:
   }
 
   test("cuboid contains all iterated points") {
-    check((cuboid: Cuboid[Int]) => cuboid.iterator.forall(cuboid.contains))
+    check((cuboid: Cuboid[Int]) => cuboid.forall(cuboid.contains))
   }
 
   test("number of iterated points is the size") {
@@ -82,13 +90,26 @@ class CuboidTest extends UnitTest:
   }
 
   test("cuboid contains only the iterated points") {
-    check(forAll(Arbitrary.arbitrary[Cuboid[Int]], smallPoint3) { (cuboid: Cuboid[Int], point: Point3[Int]) =>
-      cuboid.contains(point) == cuboid.iterator.contains(point)
-    })
+    check((cuboid: Cuboid[Int]) =>
+      val points = cuboid.iterator.toSet
+      cuboid.expand(1).iterator.forall(point => cuboid.contains(point) == points.contains(point))
+    )
   }
 
-  test("leftFace is the points with x at left") {
-    Cuboid(0 to 2, 0 to 3, 0 to 4).leftFace shouldBe Cuboid(0 to 0, 0 to 3, 0 to 4)
+  test("each named face is the points its step leaves the cuboid from") {
+    val faces: Seq[(Cuboid[Int] => Cuboid[Int], Point3[Int] => Point3[Int])] = Seq(
+      (_.leftFace, _.left),
+      (_.rightFace, _.right),
+      (_.topFace, _.up),
+      (_.bottomFace, _.down),
+      (_.frontFace, _.out),
+      (_.backFace, _.in),
+    )
+    check((cuboid: Cuboid[Int]) =>
+      faces.forall((face, step) =>
+        face(cuboid).iterator.toSet == cuboid.iterator.filterNot(point => cuboid.contains(step(point))).toSet
+      )
+    )
   }
 
   test("opposite faces project to the same rect as the cuboid") {
@@ -133,8 +154,12 @@ class CuboidTest extends UnitTest:
     check((cuboid: Cuboid[Int]) => cuboid.octants.map(_.size).sum == cuboid.size)
   }
 
-  test("octants put the middle slice in the lower half") {
-    Cuboid(3, 1, 1).octants shouldBe Seq(Cuboid(0 to 1, 0 to 0, 0 to 0), Cuboid(2 to 2, 0 to 0, 0 to 0))
+  test("octants split the cuboid in half, with any odd middle in the lower octants") {
+    check((cuboid: Cuboid[Int]) =>
+      val low = cuboid.octants.head
+      low.topLeftFront == cuboid.topLeftFront &&
+      (low.width, low.height, low.depth) == ((cuboid.width + 1) / 2, (cuboid.height + 1) / 2, (cuboid.depth + 1) / 2)
+    )
   }
 
   test("octants of a point is the point") {
@@ -159,7 +184,9 @@ class CuboidTest extends UnitTest:
   }
 
   test("translate moves every point") {
-    check(forAll(Arbitrary.arbitrary[Cuboid[Int]], smallPoint3) { (cuboid: Cuboid[Int], offset: Point3[Int]) =>
+    val axis = Gen.choose(-1000, 1000)
+    val offsets = Gen.zip(axis, axis, axis).map((x, y, z) => Point3(x, y, z))
+    check(forAll(Arbitrary.arbitrary[Cuboid[Int]], offsets) { (cuboid: Cuboid[Int], offset: Point3[Int]) =>
       cuboid.translate(offset).iterator.toSet == cuboid.iterator.map(_ + offset).toSet
     })
   }
@@ -269,7 +296,9 @@ class CuboidTest extends UnitTest:
   }
 
   test("empty cuboid contains nothing") {
-    check(forAll(emptyCuboid, smallPoint3) { (cuboid: Cuboid[Int], point: Point3[Int]) => !cuboid.contains(point) })
+    check(forAll(emptyCuboid, Arbitrary.arbitrary[Point3[Int]]) { (cuboid: Cuboid[Int], point: Point3[Int]) =>
+      !cuboid.contains(point)
+    })
   }
 
   test("faces of an empty cuboid throws") {
