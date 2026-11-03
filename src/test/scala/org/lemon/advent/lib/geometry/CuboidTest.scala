@@ -7,33 +7,6 @@ import org.scalacheck.*
 
 class CuboidTest extends UnitTest:
 
-  test("cuboid contains all iterated points") {
-    check((cuboid: Cuboid[Int]) => cuboid.iterator.forall(cuboid.contains))
-  }
-
-  test("number of iterated points is the size") {
-    check((cuboid: Cuboid[Int]) => cuboid.iterator.size == cuboid.size)
-  }
-
-  test("iterated points are distinct") {
-    check((cuboid: Cuboid[Int]) => cuboid.iterator.toSeq.distinct.size == cuboid.size)
-  }
-
-  test("cuboid contains only the iterated points") {
-    check(forAll(Arbitrary.arbitrary[Cuboid[Int]], smallPoint3) { (cuboid: Cuboid[Int], point: Point3[Int]) =>
-      cuboid.contains(point) == cuboid.iterator.contains(point)
-    })
-  }
-
-  test("converts to an iterator of its points") {
-    val points: Iterator[Point3[Int]] = Cuboid(2, 3, 4)
-    points.size shouldBe 24
-  }
-
-  test("size constructor starts at the origin") {
-    Cuboid(2, 3, 4) shouldBe Cuboid(0 to 1, 0 to 2, 0 to 3)
-  }
-
   test("bounding cuboid is the smallest that encloses the points") {
     check(forAll(Gen.nonEmptyListOf(smallPoint3)) { (points: List[Point3[Int]]) =>
       val cuboid = Cuboid(points)
@@ -41,6 +14,15 @@ class CuboidTest extends UnitTest:
       cuboid.topLeftFront == Point3(points.map(_.x).min, points.map(_.y).min, points.map(_.z).min) &&
       cuboid.bottomRightBack == Point3(points.map(_.x).max, points.map(_.y).max, points.map(_.z).max)
     })
+  }
+
+  test("size constructor starts at the origin") {
+    Cuboid(2, 3, 4) shouldBe Cuboid(0 to 1, 0 to 2, 0 to 3)
+  }
+
+  test("converts to an iterator of its points") {
+    val points: Iterator[Point3[Int]] = Cuboid(2, 3, 4)
+    points.size shouldBe 24
   }
 
   test("bounds are the ends of each range") {
@@ -81,16 +63,121 @@ class CuboidTest extends UnitTest:
     )
   }
 
-  test("intersect contains the points in both") {
-    check((a: Cuboid[Int], b: Cuboid[Int]) => (a & b).iterator.toSet == a.iterator.filter(b.contains).toSet)
+  test("surface area is the number of exposed unit faces") {
+    check((cuboid: Cuboid[Int]) =>
+      cuboid.surfaceArea == cuboid.iterator.map(_.adjacent.count(!cuboid.contains(_))).sum
+    )
+  }
+
+  test("cuboid contains all iterated points") {
+    check((cuboid: Cuboid[Int]) => cuboid.iterator.forall(cuboid.contains))
+  }
+
+  test("number of iterated points is the size") {
+    check((cuboid: Cuboid[Int]) => cuboid.iterator.size == cuboid.size)
+  }
+
+  test("iterated points are distinct") {
+    check((cuboid: Cuboid[Int]) => cuboid.iterator.toSeq.distinct.size == cuboid.size)
+  }
+
+  test("cuboid contains only the iterated points") {
+    check(forAll(Arbitrary.arbitrary[Cuboid[Int]], smallPoint3) { (cuboid: Cuboid[Int], point: Point3[Int]) =>
+      cuboid.contains(point) == cuboid.iterator.contains(point)
+    })
+  }
+
+  test("leftFace is the points with x at left") {
+    Cuboid(0 to 2, 0 to 3, 0 to 4).leftFace shouldBe Cuboid(0 to 0, 0 to 3, 0 to 4)
+  }
+
+  test("opposite faces project to the same rect as the cuboid") {
+    check((cuboid: Cuboid[Int]) =>
+      cuboid.leftFace.yz == cuboid.yz && cuboid.rightFace.yz == cuboid.yz &&
+        cuboid.topFace.xz == cuboid.xz && cuboid.bottomFace.xz == cuboid.xz &&
+        cuboid.frontFace.xy == cuboid.xy && cuboid.backFace.xy == cuboid.xy
+    )
+  }
+
+  test("faces are the points on the surface") {
+    check((cuboid: Cuboid[Int]) =>
+      cuboid.faces.flatMap(_.iterator).toSet == cuboid.iterator.filter(_.adjacent.exists(!cuboid.contains(_))).toSet
+    )
+  }
+
+  test("faces are enclosed, and one wide along their axis") {
+    check((cuboid: Cuboid[Int]) =>
+      val faces = cuboid.faces
+      faces.size == 6 && faces.forall(cuboid.encloses) &&
+      Seq(faces(0).width, faces(1).width, faces(2).height, faces(3).height, faces(4).depth, faces(5).depth).forall(
+        _ == 1
+      )
+    )
+  }
+
+  test("face sizes sum to the surface area") {
+    check((cuboid: Cuboid[Int]) => cuboid.faces.map(_.size).sum == cuboid.surfaceArea)
+  }
+
+  test("octants are disjoint") {
+    check((cuboid: Cuboid[Int]) => cuboid.octants.pairs.forall(!_.overlaps(_)))
+  }
+
+  test("octants are at most 8, non-empty and enclosed") {
+    check((cuboid: Cuboid[Int]) =>
+      cuboid.octants.size <= 8 && cuboid.octants.forall(octant => octant.nonEmpty && cuboid.encloses(octant))
+    )
+  }
+
+  test("octant sizes sum to the size") {
+    check((cuboid: Cuboid[Int]) => cuboid.octants.map(_.size).sum == cuboid.size)
+  }
+
+  test("octants put the middle slice in the lower half") {
+    Cuboid(3, 1, 1).octants shouldBe Seq(Cuboid(0 to 1, 0 to 0, 0 to 0), Cuboid(2 to 2, 0 to 0, 0 to 0))
+  }
+
+  test("octants of a point is the point") {
+    check((point: Point3[Int]) => Cuboid(Seq(point)).octants == Seq(Cuboid(Seq(point))))
+  }
+
+  test("octants at the max value do not wrap around") {
+    val corner = Cuboid(Seq(Point3(Int.MaxValue, Int.MaxValue, Int.MaxValue)))
+    corner.octants shouldBe Seq(corner)
+  }
+
+  test("expand grows each side") {
+    check(forAll(Arbitrary.arbitrary[Cuboid[Int]], Gen.choose(0, 10)) { (cuboid: Cuboid[Int], n: Int) =>
+      val expanded = cuboid.expand(n)
+      expanded.topLeftFront == cuboid.topLeftFront - Point3(n, n, n) &&
+      expanded.bottomRightBack == cuboid.bottomRightBack + Point3(n, n, n)
+    })
+  }
+
+  test("contract undoes expand") {
+    check((cuboid: Cuboid[Int], n: Int) => cuboid.expand(n).contract(n) == cuboid)
+  }
+
+  test("translate moves every point") {
+    check(forAll(Arbitrary.arbitrary[Cuboid[Int]], smallPoint3) { (cuboid: Cuboid[Int], offset: Point3[Int]) =>
+      cuboid.translate(offset).iterator.toSet == cuboid.iterator.map(_ + offset).toSet
+    })
+  }
+
+  test("translate by the opposite offset is the original") {
+    check((cuboid: Cuboid[Int], offset: Point3[Int]) => cuboid.translate(offset).translate(-offset) == cuboid)
+  }
+
+  test("encloses when the intersect is the whole") {
+    check((a: Cuboid[Int], b: Cuboid[Int]) => a.encloses(b) == ((a & b) == b))
   }
 
   test("overlaps when the intersect is non-empty") {
     check((a: Cuboid[Int], b: Cuboid[Int]) => a.overlaps(b) == (a & b).nonEmpty)
   }
 
-  test("encloses when the intersect is the whole") {
-    check((a: Cuboid[Int], b: Cuboid[Int]) => a.encloses(b) == ((a & b) == b))
+  test("intersect contains the points in both") {
+    check((a: Cuboid[Int], b: Cuboid[Int]) => (a & b).iterator.toSet == a.iterator.filter(b.contains).toSet)
   }
 
   test("diff pieces are disjoint") {
@@ -139,55 +226,6 @@ class CuboidTest extends UnitTest:
     (edge -- edge) shouldBe empty
   }
 
-  test("octants are disjoint") {
-    check((cuboid: Cuboid[Int]) => cuboid.octants.pairs.forall(!_.overlaps(_)))
-  }
-
-  test("octants are at most 8, non-empty and enclosed") {
-    check((cuboid: Cuboid[Int]) =>
-      cuboid.octants.size <= 8 && cuboid.octants.forall(octant => octant.nonEmpty && cuboid.encloses(octant))
-    )
-  }
-
-  test("octant sizes sum to the size") {
-    check((cuboid: Cuboid[Int]) => cuboid.octants.map(_.size).sum == cuboid.size)
-  }
-
-  test("octants put the middle slice in the lower half") {
-    Cuboid(3, 1, 1).octants shouldBe Seq(Cuboid(0 to 1, 0 to 0, 0 to 0), Cuboid(2 to 2, 0 to 0, 0 to 0))
-  }
-
-  test("octants of a point is the point") {
-    check((point: Point3[Int]) => Cuboid(Seq(point)).octants == Seq(Cuboid(Seq(point))))
-  }
-
-  test("octants at the max value do not wrap around") {
-    val corner = Cuboid(Seq(Point3(Int.MaxValue, Int.MaxValue, Int.MaxValue)))
-    corner.octants shouldBe Seq(corner)
-  }
-
-  test("contract undoes expand") {
-    check((cuboid: Cuboid[Int], n: Int) => cuboid.expand(n).contract(n) == cuboid)
-  }
-
-  test("expand grows each side") {
-    check(forAll(Arbitrary.arbitrary[Cuboid[Int]], Gen.choose(0, 10)) { (cuboid: Cuboid[Int], n: Int) =>
-      val expanded = cuboid.expand(n)
-      expanded.topLeftFront == cuboid.topLeftFront - Point3(n, n, n) &&
-      expanded.bottomRightBack == cuboid.bottomRightBack + Point3(n, n, n)
-    })
-  }
-
-  test("translate moves every point") {
-    check(forAll(Arbitrary.arbitrary[Cuboid[Int]], smallPoint3) { (cuboid: Cuboid[Int], offset: Point3[Int]) =>
-      cuboid.translate(offset).iterator.toSet == cuboid.iterator.map(_ + offset).toSet
-    })
-  }
-
-  test("translate by the opposite offset is the original") {
-    check((cuboid: Cuboid[Int], offset: Point3[Int]) => cuboid.translate(offset).translate(-offset) == cuboid)
-  }
-
   test("clamp lands in the cuboid") {
     check((cuboid: Cuboid[Int], point: Point3[Int]) => cuboid.contains(cuboid.clamp(point)))
   }
@@ -216,44 +254,6 @@ class CuboidTest extends UnitTest:
     })
   }
 
-  test("surface area is the number of exposed unit faces") {
-    check((cuboid: Cuboid[Int]) =>
-      cuboid.surfaceArea == cuboid.iterator.map(_.adjacent.count(!cuboid.contains(_))).sum
-    )
-  }
-
-  test("faces are the points on the surface") {
-    check((cuboid: Cuboid[Int]) =>
-      cuboid.faces.flatMap(_.iterator).toSet == cuboid.iterator.filter(_.adjacent.exists(!cuboid.contains(_))).toSet
-    )
-  }
-
-  test("faces are enclosed, and one wide along their axis") {
-    check((cuboid: Cuboid[Int]) =>
-      val faces = cuboid.faces
-      faces.size == 6 && faces.forall(cuboid.encloses) &&
-      Seq(faces(0).width, faces(1).width, faces(2).height, faces(3).height, faces(4).depth, faces(5).depth).forall(
-        _ == 1
-      )
-    )
-  }
-
-  test("face sizes sum to the surface area") {
-    check((cuboid: Cuboid[Int]) => cuboid.faces.map(_.size).sum == cuboid.surfaceArea)
-  }
-
-  test("leftFace is the points with x at left") {
-    Cuboid(0 to 2, 0 to 3, 0 to 4).leftFace shouldBe Cuboid(0 to 0, 0 to 3, 0 to 4)
-  }
-
-  test("opposite faces project to the same rect as the cuboid") {
-    check((cuboid: Cuboid[Int]) =>
-      cuboid.leftFace.yz == cuboid.yz && cuboid.rightFace.yz == cuboid.yz &&
-        cuboid.topFace.xz == cuboid.xz && cuboid.bottomFace.xz == cuboid.xz &&
-        cuboid.frontFace.xy == cuboid.xy && cuboid.backFace.xy == cuboid.xy
-    )
-  }
-
   test("projections times the dropped length is the size") {
     check((cuboid: Cuboid[Int]) =>
       cuboid.xy.size * cuboid.depth == cuboid.size &&
@@ -262,14 +262,14 @@ class CuboidTest extends UnitTest:
     )
   }
 
-  test("empty cuboid contains nothing") {
-    check(forAll(emptyCuboid, smallPoint3) { (cuboid: Cuboid[Int], point: Point3[Int]) => !cuboid.contains(point) })
-  }
-
   test("empty cuboid has no points, size, or surface area") {
     check(forAll(emptyCuboid) { (cuboid: Cuboid[Int]) =>
       cuboid.isEmpty && cuboid.iterator.isEmpty && cuboid.size == 0 && cuboid.surfaceArea == 0
     })
+  }
+
+  test("empty cuboid contains nothing") {
+    check(forAll(emptyCuboid, smallPoint3) { (cuboid: Cuboid[Int], point: Point3[Int]) => !cuboid.contains(point) })
   }
 
   test("faces of an empty cuboid throws") {
@@ -282,6 +282,12 @@ class CuboidTest extends UnitTest:
     check(forAll(emptyCuboid) { (cuboid: Cuboid[Int]) => cuboid.octants.isEmpty })
   }
 
+  test("everything encloses an empty cuboid, and an empty cuboid encloses nothing") {
+    check(forAll(Arbitrary.arbitrary[Cuboid[Int]], emptyCuboid) { (cuboid: Cuboid[Int], empty: Cuboid[Int]) =>
+      cuboid.encloses(empty) && !empty.encloses(cuboid)
+    })
+  }
+
   test("diff of an empty cuboid is empty") {
     check(forAll(emptyCuboid, Arbitrary.arbitrary[Cuboid[Int]]) { (empty: Cuboid[Int], cuboid: Cuboid[Int]) =>
       (empty -- cuboid).isEmpty
@@ -291,11 +297,5 @@ class CuboidTest extends UnitTest:
   test("diff by an empty cuboid is the whole") {
     check(forAll(Arbitrary.arbitrary[Cuboid[Int]], emptyCuboid) { (cuboid: Cuboid[Int], empty: Cuboid[Int]) =>
       (cuboid -- empty) == Seq(cuboid)
-    })
-  }
-
-  test("everything encloses an empty cuboid, and an empty cuboid encloses nothing") {
-    check(forAll(Arbitrary.arbitrary[Cuboid[Int]], emptyCuboid) { (cuboid: Cuboid[Int], empty: Cuboid[Int]) =>
-      cuboid.encloses(empty) && !empty.encloses(cuboid)
     })
   }
