@@ -304,8 +304,19 @@ class CoordTest extends UnitTest:
     )
   }
 
-  test("cross of up and right is positive") {
-    Coord.unitUp.cross(Coord.unitRight) shouldBe 1
+  test("cross with the rotateLeft is negative") {
+    check((coord: Coord) =>
+      val big = coord.to[BigInt]
+      coord != Coord.origin ==> (big.cross(big.rotateLeft) < 0)
+    )
+  }
+
+  test("cross with the turnRight is 1") {
+    check((dir: Direction) => dir.unitVector.cross(dir.turnRight.unitVector) == 1)
+  }
+
+  test("cross with the turnLeft is -1") {
+    check((dir: Direction) => dir.unitVector.cross(dir.turnLeft.unitVector) == -1)
   }
 
   test("reduce is idempotent") {
