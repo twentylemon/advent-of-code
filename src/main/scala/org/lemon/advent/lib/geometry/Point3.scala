@@ -11,10 +11,10 @@ object Point3:
 
   given [T: Integral]: Ordering[Point3[T]] = Ordering.by[Point3[T], T](_.x).orElseBy(_.y).orElseBy(_.z)
 
-  def origin[T: Integral]: Point3[T] = (`0`, `0`, `0`)
-  def unitX[T: Integral]: Point3[T] = (`1`, `0`, `0`)
-  def unitY[T: Integral]: Point3[T] = (`0`, `1`, `0`)
-  def unitZ[T: Integral]: Point3[T] = (`0`, `0`, `1`)
+  def origin[T: Integral]: Point3[T] = Point3(`0`, `0`, `0`)
+  def unitX[T: Integral]: Point3[T] = Point3(`1`, `0`, `0`)
+  def unitY[T: Integral]: Point3[T] = Point3(`0`, `1`, `0`)
+  def unitZ[T: Integral]: Point3[T] = Point3(`0`, `0`, `1`)
 
   // the 24 rotations, as the (source axis, sign) of each output component, starting with the identity
   private val rotationMatrices: Seq[Seq[(Int, Int)]] =
@@ -34,10 +34,10 @@ object Point3:
   * @param z the z coordinate
   */
 case class Point3[N: Integral](x: N, y: N, z: N):
-  def +(rhs: Point3[N]): Point3[N] = (x + rhs.x, y + rhs.y, z + rhs.z)
-  def -(rhs: Point3[N]): Point3[N] = (x - rhs.x, y - rhs.y, z - rhs.z)
-  def *(n: N): Point3[N] = (x * n, y * n, z * n)
-  def unary_- : Point3[N] = (-x, -y, -z)
+  def +(rhs: Point3[N]): Point3[N] = Point3(x + rhs.x, y + rhs.y, z + rhs.z)
+  def -(rhs: Point3[N]): Point3[N] = Point3(x - rhs.x, y - rhs.y, z - rhs.z)
+  def *(n: N): Point3[N] = Point3(x * n, y * n, z * n)
+  def unary_- : Point3[N] = Point3(-x, -y, -z)
 
   /** @return the 6 points that share a face with this point */
   def adjacent: Seq[Point3[N]] = Seq(
@@ -73,7 +73,7 @@ case class Point3[N: Integral](x: N, y: N, z: N):
     * @param rhs the other vector
     * @return the cross product
     */
-  def cross(rhs: Point3[N]): Point3[N] = (y * rhs.z - z * rhs.y, z * rhs.x - x * rhs.z, x * rhs.y - y * rhs.x)
+  def cross(rhs: Point3[N]): Point3[N] = Point3(y * rhs.z - z * rhs.y, z * rhs.x - x * rhs.z, x * rhs.y - y * rhs.x)
 
   /** Reduces this vector to the smallest integer vector in the same direction.
     * @return the reduced vector
