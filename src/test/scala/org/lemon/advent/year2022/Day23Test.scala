@@ -1,7 +1,7 @@
 package org.lemon.advent.year2022
 
 import org.lemon.advent.*
-import org.lemon.advent.lib.`2d`.*
+import org.lemon.advent.lib.geometry.*
 import org.lemon.advent.year2022.Day23.*
 
 class Day23Test extends UnitTest:

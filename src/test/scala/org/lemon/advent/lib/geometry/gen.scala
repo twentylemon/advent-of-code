@@ -1,6 +1,6 @@
-package org.lemon.advent.lib.`2d`
+package org.lemon.advent.lib.geometry
 
-import org.lemon.advent.lib.`2d`.*
+import org.lemon.advent.lib.geometry.*
 import org.scalacheck.{Arbitrary, Shrink, Gen}
 import org.scalacheck.Shrink.*
 
