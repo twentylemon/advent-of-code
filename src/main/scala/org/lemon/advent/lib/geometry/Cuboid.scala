@@ -83,8 +83,7 @@ case class Cuboid[N: Integral](xRange: Interval[N], yRange: Interval[N], zRange:
   def backFace: Cuboid[N] = copy(zRange = Interval(back, back))
 
   /** @return the 6 faces, each a cuboid one wide along its axis */
-  def faces: Seq[Cuboid[N]] =
-    if isEmpty then Seq.empty else Seq(leftFace, rightFace, topFace, bottomFace, frontFace, backFace)
+  def faces: Seq[Cuboid[N]] = Seq(leftFace, rightFace, topFace, bottomFace, frontFace, backFace)
 
   def encloses(rhs: Cuboid[N]): Boolean =
     rhs.isEmpty ||

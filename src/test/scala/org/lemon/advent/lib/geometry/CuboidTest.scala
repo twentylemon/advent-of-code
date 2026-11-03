@@ -254,8 +254,10 @@ class CuboidTest extends UnitTest:
     })
   }
 
-  test("empty cuboid has no faces") {
-    check(forAll(emptyCuboid) { (cuboid: Cuboid[Int]) => cuboid.faces.isEmpty })
+  test("faces of an empty cuboid throws") {
+    check(forAll(emptyCuboid) { (cuboid: Cuboid[Int]) =>
+      Prop.throws(classOf[UnsupportedOperationException])(cuboid.faces)
+    })
   }
 
   test("empty cuboid has no octants") {
