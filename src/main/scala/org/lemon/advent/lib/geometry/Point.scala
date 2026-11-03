@@ -11,10 +11,10 @@ object Point:
   given [T: Integral]: Ordering[Point[T]] = Ordering.by[Point[T], T](_.x).orElseBy(_.y)
 
   def origin[T: Integral]: Point[T] = Point(`0`, `0`)
-  def unitUp[T: Integral]: Point[T] = Point(`0`, `-1`)
-  def unitDown[T: Integral]: Point[T] = Point(`0`, `1`)
-  def unitLeft[T: Integral]: Point[T] = Point(`-1`, `0`)
-  def unitRight[T: Integral]: Point[T] = Point(`1`, `0`)
+  def unitUp[T: Integral]: Point[T] = origin[T].up
+  def unitDown[T: Integral]: Point[T] = origin[T].down
+  def unitLeft[T: Integral]: Point[T] = origin[T].left
+  def unitRight[T: Integral]: Point[T] = origin[T].right
 
 /** A 2d coordinate (or vector) with any integral values. More typical to use [[Coord]],
   * but sometimes you need a `Long`.
@@ -25,16 +25,11 @@ case class Point[N: Integral](x: N, y: N):
   def row = y
   def col = x
 
-  def up: Point[N] = copy(y = y - `1`)
-  def down: Point[N] = copy(y = y + `1`)
-  def left: Point[N] = copy(x = x - `1`)
-  def right: Point[N] = copy(x = x + `1`)
-  def move(direction: Direction): Point[N] =
-    direction match
-      case Direction.Up => up
-      case Direction.Down => down
-      case Direction.Left => left
-      case Direction.Right => right
+  def up: Point[N] = shiftUp(`1`)
+  def down: Point[N] = shiftDown(`1`)
+  def left: Point[N] = shiftLeft(`1`)
+  def right: Point[N] = shiftRight(`1`)
+  def move(direction: Direction): Point[N] = shift(direction, `1`)
 
   def shiftUp(n: N): Point[N] = copy(y = y - n)
   def shiftDown(n: N): Point[N] = copy(y = y + n)
