@@ -170,8 +170,31 @@ class Point3Test extends UnitTest:
     check((a: Point3[Int]) => a.rotations.forall(_.rotations.toSet == a.rotations.toSet))
   }
 
-  test("projections drop an axis") {
-    check((a: Point3[Int]) => a.xy == Coord(a.x, a.y) && a.xz == Coord(a.x, a.z) && a.yz == Coord(a.y, a.z))
+  test("moving along the dropped axis leaves the projection unchanged") {
+    check((a: Point3[Int]) =>
+      Seq(a.in, a.out).forall(_.xy == a.xy) &&
+        Seq(a.up, a.down).forall(_.xz == a.xz) &&
+        Seq(a.left, a.right).forall(_.yz == a.yz)
+    )
+  }
+
+  test("projections are linear") {
+    val projections = Gen.oneOf[Point3[Int] => Point[Int]](_.xy, _.xz, _.yz)
+    check(forAll(
+      projections,
+      Arbitrary.arbitrary[Point3[Int]],
+      Arbitrary.arbitrary[Point3[Int]],
+      Arbitrary.arbitrary[Int]
+    ) {
+      (project, a, b, n) => project(a + b * n) == project(a) + project(b) * n
+    })
+  }
+
+  test("the cross products of the projections are the components of the cross product") {
+    check((a: Point3[Int], b: Point3[Int]) =>
+      val cross = a.cross(b)
+      a.yz.cross(b.yz) == cross.x && a.xz.cross(b.xz) == -cross.y && a.xy.cross(b.xy) == cross.z
+    )
   }
 
   test("to[Int] is identity") {
