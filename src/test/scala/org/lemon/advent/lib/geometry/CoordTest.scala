@@ -285,8 +285,6 @@ class CoordTest extends UnitTest:
     check((coord: Coord) => coord.to[Long] == Point[Long](coord.x.toLong, coord.y.toLong))
   }
 
-  val smallCoord: Gen[Coord] = Gen.resultOf((x: Byte, y: Byte) => Coord(x.toInt, y.toInt))
-
   test("cross is antisymmetric") {
     check((lhs: Coord, rhs: Coord) => lhs.cross(rhs) == -rhs.cross(lhs))
   }
@@ -296,11 +294,14 @@ class CoordTest extends UnitTest:
   }
 
   test("cross with a scaled copy is zero") {
-    check(forAll(smallCoord, Gen.choose(-100, 100)) { (coord: Coord, n: Int) => coord.cross(coord * n) == 0 })
+    check((coord: Coord, n: Int) => coord.cross(coord * n) == 0)
   }
 
   test("cross with the rotateRight is positive") {
-    check(forAll(smallCoord) { (coord: Coord) => coord != Coord.origin ==> (coord.cross(coord.rotateRight) > 0) })
+    check((coord: Coord) =>
+      val big = coord.to[BigInt]
+      coord != Coord.origin ==> (big.cross(big.rotateRight) > 0)
+    )
   }
 
   test("cross of up and right is positive") {
@@ -323,9 +324,7 @@ class CoordTest extends UnitTest:
   }
 
   test("reduce scales back to the original") {
-    check(forAll(smallCoord) { (coord: Coord) =>
-      coord != Coord.origin ==> (coord.reduce * coord.x.gcd(coord.y) == coord)
-    })
+    check((coord: Coord) => coord != Coord.origin ==> (coord.reduce * coord.x.gcd(coord.y) == coord))
   }
 
   test("reduce of the origin is the origin") {
