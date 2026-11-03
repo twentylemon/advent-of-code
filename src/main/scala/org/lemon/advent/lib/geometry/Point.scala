@@ -83,6 +83,27 @@ case class Point[N: Integral](x: N, y: N):
   def -(direction: Direction): Point[N] = move(direction.turnAround)
   def *(n: N): Point[N] = (x * n, y * n)
 
+  /** Returns the 2d cross product, the z component of the 3d cross product of the two vectors.
+    * Positive when `rhs` is counter clockwise from this vector (in y-up axes; clockwise on a y-down grid),
+    * negative the other way, and zero when the two are collinear.
+    * @param rhs the other vector
+    * @return the 2d cross product
+    */
+  def cross(rhs: Point[N]): N = x * rhs.y - y * rhs.x
+
+  /** Reduces this vector to the smallest integer step in the same direction, by dividing out the gcd
+    * of its components. Axis aligned vectors become unit vectors, and the origin stays the origin.
+    * @return the smallest integer vector in the same direction
+    */
+  def reduce: Point[N] =
+    if x == `0` then (`0`, y.sign)
+    else if y == `0` then (x.sign, `0`)
+    else
+      // the gcd of two `MinValue`s overflows to `MinValue`, which would flip the direction
+      val gcd = x.gcd(y)
+      val (dx, dy) = (x / gcd, y / gcd)
+      if gcd < `0` then (-dx, -dy) else (dx, dy)
+
   def directionTo(rhs: Point[N]): Option[Direction] =
     val Point(dx, dy) = rhs - this
     if dx == `0` && dy < `0` then Some(Direction.Up)
@@ -90,8 +111,6 @@ case class Point[N: Integral](x: N, y: N):
     else if dx < `0` && dy == `0` then Some(Direction.Left)
     else if dx > `0` && dy == `0` then Some(Direction.Right)
     else None
-
-  def asVec: VecT[N] = VecT[N](this)
 
   def to[M: Integral]: Point[M] = Point[M](fromString[M](x.toString), fromString[M](y.toString))
 
@@ -101,6 +120,6 @@ extension [N: Integral](vertices: Seq[Point[N]])
     */
   def shoelaceArea: N = vertices
     .lazyZip(vertices.tail :+ vertices.head)
-    .map((a, b) => a.x * b.y - a.y * b.x)
+    .map(_ `cross` _)
     .reduce(_ + _)
     .abs / Integral[N].fromInt(2)
