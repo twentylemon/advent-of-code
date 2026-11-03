@@ -151,15 +151,12 @@ class Point3Test extends UnitTest:
     Point3(1, 2, 3).rotations.distinct.size shouldBe 24
   }
 
-  Seq[(String, (Point3[Int], Point3[Int]) => Int)](
-    ("manhattan", _.manhattan(_)),
-    ("chessboard", _.chessboard(_)),
-    ("euclidean", _.euclidean(_)),
-  ).foreach((name, distance) =>
-    test(s"rotations preserve the $name distance from the origin") {
-      check((a: Point3[Int]) => a.rotations.forall(distance(_, Point3.origin) == distance(a, Point3.origin)))
-    }
-  )
+  test("rotations preserve every distance from the origin") {
+    val distances = Gen.oneOf[(Point3[Int], Point3[Int]) => Int](_.manhattan(_), _.chessboard(_), _.euclidean(_))
+    check(forAll(distances, Arbitrary.arbitrary[Point3[Int]]) { (distance, a) =>
+      a.rotations.forall(distance(_, Point3.origin) == distance(a, Point3.origin))
+    })
+  }
 
   test("rotations are linear") {
     check((a: Point3[Int], b: Point3[Int]) => (a + b).rotations == a.rotations.lazyZip(b.rotations).map(_ + _))
