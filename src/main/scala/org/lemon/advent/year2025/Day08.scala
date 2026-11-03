@@ -5,14 +5,16 @@ import org.lemon.advent.lib.geometry.Point3
 
 private object Day08:
 
+  type Coord = Point3[Long]
+
   def parse(input: String) =
     input.linesIterator.map(line =>
       val Seq(x, y, z) = line.csv
       Point3(x.toLong, y.toLong, z.toLong)
     ).toSeq
 
-  def connectedComponents(pairs: Seq[(Point3[Long], Point3[Long])]): Set[Set[Point3[Long]]] =
-    pairs.foldLeft(Set.empty[Set[Point3[Long]]]) { case (acc, (a, b)) =>
+  def connectedComponents(pairs: Seq[(Coord, Coord)]): Set[Set[Coord]] =
+    pairs.foldLeft(Set.empty[Set[Coord]]) { case (acc, (a, b)) =>
       val (connected, rest) = acc.partition(c => c.contains(a) || c.contains(b))
       rest + connected.foldLeft(Set(a, b))(_ ++ _)
     }
@@ -25,12 +27,12 @@ private object Day08:
     val circuits = connectedComponents(closests)
     circuits.toSeq.map(_.size).sorted.reverse.take(3).product
 
-  def minimumSpanningTree(coords: Seq[Point3[Long]]): Seq[(Point3[Long], Point3[Long])] =
+  def minimumSpanningTree(coords: Seq[Coord]): Seq[(Coord, Coord)] =
     val all = coords.toSet
     val initialDist = all.map(_ -> Long.MaxValue).toMap.updated(coords.head, 0L)
 
     val (_, _, parent) =
-      coords.foldLeft((Set.empty[Point3[Long]], initialDist, Map.empty[Point3[Long], Point3[Long]])) {
+      coords.foldLeft((Set.empty[Coord], initialDist, Map.empty[Coord, Coord])) {
         case ((mst, minDist, parent), _) =>
           val remaining = all -- mst
           val u = remaining.minBy(minDist)
