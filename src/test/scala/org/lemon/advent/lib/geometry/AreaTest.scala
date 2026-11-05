@@ -96,13 +96,13 @@ class AreaTest extends UnitTest:
   }
 
   test("rows includes all coords in same iteration order as overall area") {
-    check((area: Area) => area.rows.flatMap(identity).sameElements(area))
+    check((area: Area) => area.rows.flatMap(_.iterator).sameElements(area))
   }
 
   test("cols includes all coords in same iteration order as transposed area") {
     check((area: Area) =>
       val transposed = Area(xRange = area.yRange, yRange = area.xRange)
-      transposed.cols.flatMap(identity).sameElements(area.map(_.flip))
+      transposed.cols.flatMap(_.iterator).sameElements(area.map(_.flip))
     )
   }
 

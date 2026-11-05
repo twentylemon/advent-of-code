@@ -60,33 +60,35 @@ case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
   /** @return all the points in the rectangle, row by row from the top left */
   def iterator: Iterator[Point[N]] = for y <- yRange.iterator; x <- xRange.iterator yield Point(x, y)
 
-  def col(x: N): Iterator[Point[N]] =
+  def col(x: N): Rect[N] =
     require(xRange.contains(x), s"$this does not contain column $x")
-    for y <- yRange.iterator yield Point(x, y)
+    copy(xRange = Interval(x, x))
 
   def reverseCol(x: N): Iterator[Point[N]] =
     require(xRange.contains(x), s"$this does not contain column $x")
     for y <- yRange.reverseIterator yield Point(x, y)
 
-  def leftCol: Iterator[Point[N]] = col(left)
-  def rightCol: Iterator[Point[N]] = col(right)
+  def leftCol: Rect[N] = col(left)
+  def rightCol: Rect[N] = col(right)
 
-  def row(y: N): Iterator[Point[N]] =
+  def row(y: N): Rect[N] =
     require(yRange.contains(y), s"$this does not contain row $y")
-    for x <- xRange.iterator yield Point(x, y)
+    copy(yRange = Interval(y, y))
 
   def reverseRow(y: N): Iterator[Point[N]] =
     require(yRange.contains(y), s"$this does not contain row $y")
     for x <- xRange.reverseIterator yield Point(x, y)
 
-  def topRow: Iterator[Point[N]] = row(top)
-  def bottomRow: Iterator[Point[N]] = row(bottom)
+  def topRow: Rect[N] = row(top)
+  def bottomRow: Rect[N] = row(bottom)
 
   def boundary: Iterator[Point[N]] =
     if isEmpty then Iterator.empty
-    else if width == `1` then leftCol
-    else if height == `1` then topRow
-    else topRow ++ rightCol.drop(1) ++ reverseRow(bottom).drop(1) ++ reverseCol(left).drop(1).take(height.toInt - 2)
+    else if width == `1` then leftCol.iterator
+    else if height == `1` then topRow.iterator
+    else
+      topRow.iterator ++ rightCol.iterator.drop(1) ++ reverseRow(bottom).drop(1) ++
+        reverseCol(left).drop(1).take(height.toInt - 2)
 
   def upDiagonal(startAt: Point[N]): Iterator[Point[N]] =
     require(contains(startAt), s"$this does not contain startAt $startAt")
@@ -96,8 +98,8 @@ case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
     require(contains(startAt), s"$this does not contain startAt $startAt")
     Iterator.iterate(startAt)(_.down.right).takeWhile(contains)
 
-  def rows: Iterator[Iterator[Point[N]]] = yRange.iterator.map(row)
-  def cols: Iterator[Iterator[Point[N]]] = xRange.iterator.map(col)
+  def rows: Iterator[Rect[N]] = yRange.iterator.map(row)
+  def cols: Iterator[Rect[N]] = xRange.iterator.map(col)
   def upDiagonals: Iterator[Iterator[Point[N]]] =
     xRange.iterator.map(x => upDiagonal(Point(x, bottom))) ++
       yRange.reverseIterator.drop(1).map(y => upDiagonal(Point(left, y)))
