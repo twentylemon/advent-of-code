@@ -166,9 +166,15 @@ class EmptyIntervalTest extends UnitTest:
 class IntervalTest extends UnitTest:
   val intervalGen =
     for
-      a <- Gen.choose(-1000, 1000)
-      b <- Gen.choose(a, a + 1000)
+      a <- Gen.choose(Int.MinValue + 1, Int.MaxValue)
+      b <- Gen.choose(a, Int.MaxValue)
     yield (a, b)
+
+  val shortIntervalGen =
+    for
+      start <- Gen.choose(Int.MinValue + 10000, Int.MaxValue - 20000)
+      size <- Gen.choose(1, 10000)
+    yield (start, start + size - 1)
 
   def interval(a: Int, b: Int) = Interval(a, b)
   def range(a: Int, b: Int) = a to b
@@ -205,25 +211,25 @@ class IntervalTest extends UnitTest:
   }
 
   test("isEmpty matches Range") {
-    check(forAll(intervalGen) { (a, b) => interval(a, b).isEmpty == range(a, b).isEmpty })
+    check(forAll(shortIntervalGen) { (a, b) => interval(a, b).isEmpty == range(a, b).isEmpty })
   }
 
   test("nonEmpty matches Range") {
-    check(forAll(intervalGen) { (a, b) => interval(a, b).nonEmpty == range(a, b).nonEmpty })
+    check(forAll(shortIntervalGen) { (a, b) => interval(a, b).nonEmpty == range(a, b).nonEmpty })
   }
 
   test("size matches Range") {
-    check(forAll(intervalGen) { (a, b) => interval(a, b).size == range(a, b).size })
+    check(forAll(shortIntervalGen) { (a, b) => interval(a, b).size == range(a, b).size })
   }
 
   test("length matches Range") {
-    check(forAll(intervalGen) { (a, b) => interval(a, b).length == range(a, b).length })
+    check(forAll(shortIntervalGen) { (a, b) => interval(a, b).length == range(a, b).length })
   }
 
   test("contains matches Range") {
     val gen =
       for
-        (a, b) <- intervalGen
+        (a, b) <- shortIntervalGen
         x <- Gen.choose(a - 10, b + 10)
       yield (a, b, x)
     check(forAll(gen) { (a, b, x) => interval(a, b).contains(x) == range(a, b).contains(x) })
@@ -232,7 +238,7 @@ class IntervalTest extends UnitTest:
   test("containsSlice matches Range") {
     val gen =
       for
-        (a, b) <- intervalGen
+        (a, b) <- shortIntervalGen
         c <- Gen.choose(a - 10, b + 10)
         d <- Gen.choose(c, b + 10)
       yield (a, b, c, d)
@@ -244,56 +250,56 @@ class IntervalTest extends UnitTest:
   test("apply matches Range") {
     val gen =
       for
-        (a, b) <- intervalGen
+        (a, b) <- shortIntervalGen
         i <- Gen.choose(0, b - a)
       yield (a, b, i)
     check(forAll(gen) { (a, b, i) => interval(a, b)(i) == range(a, b)(i) })
   }
 
   test("head matches Range") {
-    check(forAll(intervalGen) { (a, b) => interval(a, b).head == range(a, b).head })
+    check(forAll(shortIntervalGen) { (a, b) => interval(a, b).head == range(a, b).head })
   }
 
   test("headOption matches Range") {
-    check(forAll(intervalGen) { (a, b) => interval(a, b).headOption == range(a, b).headOption })
+    check(forAll(shortIntervalGen) { (a, b) => interval(a, b).headOption == range(a, b).headOption })
   }
 
   test("last matches Range") {
-    check(forAll(intervalGen) { (a, b) => interval(a, b).last == range(a, b).last })
+    check(forAll(shortIntervalGen) { (a, b) => interval(a, b).last == range(a, b).last })
   }
 
   test("lastOption matches Range") {
-    check(forAll(intervalGen) { (a, b) => interval(a, b).lastOption == range(a, b).lastOption })
+    check(forAll(shortIntervalGen) { (a, b) => interval(a, b).lastOption == range(a, b).lastOption })
   }
 
   test("min matches Range") {
-    check(forAll(intervalGen) { (a, b) => interval(a, b).min == range(a, b).min })
+    check(forAll(shortIntervalGen) { (a, b) => interval(a, b).min == range(a, b).min })
   }
 
   test("minOption matches Range") {
-    check(forAll(intervalGen) { (a, b) => interval(a, b).minOption == range(a, b).minOption })
+    check(forAll(shortIntervalGen) { (a, b) => interval(a, b).minOption == range(a, b).minOption })
   }
 
   test("max matches Range") {
-    check(forAll(intervalGen) { (a, b) => interval(a, b).max == range(a, b).max })
+    check(forAll(shortIntervalGen) { (a, b) => interval(a, b).max == range(a, b).max })
   }
 
   test("maxOption matches Range") {
-    check(forAll(intervalGen) { (a, b) => interval(a, b).maxOption == range(a, b).maxOption })
+    check(forAll(shortIntervalGen) { (a, b) => interval(a, b).maxOption == range(a, b).maxOption })
   }
 
   test("iterator matches Range") {
-    check(forAll(intervalGen) { (a, b) => interval(a, b).iterator.toSeq == range(a, b).iterator.toSeq })
+    check(forAll(shortIntervalGen) { (a, b) => interval(a, b).iterator.toSeq == range(a, b).iterator.toSeq })
   }
 
   test("indices matches Range") {
-    check(forAll(intervalGen) { (a, b) => interval(a, b).indices.toSeq == range(a, b).indices.toSeq })
+    check(forAll(shortIntervalGen) { (a, b) => interval(a, b).indices.toSeq == range(a, b).indices.toSeq })
   }
 
   test("slice matches Range") {
     val gen =
       for
-        (a, b) <- intervalGen
+        (a, b) <- shortIntervalGen
         from <- Gen.choose(-5, b - a + 5)
         until <- Gen.choose(from, b - a + 5)
       yield (a, b, from, until)
@@ -305,7 +311,7 @@ class IntervalTest extends UnitTest:
   test("take matches Range") {
     val gen =
       for
-        (a, b) <- intervalGen
+        (a, b) <- shortIntervalGen
         n <- Gen.choose(-5, b - a + 5)
       yield (a, b, n)
     check(forAll(gen) { (a, b, n) => interval(a, b).take(n).toSeq == range(a, b).take(n).toSeq })
@@ -314,7 +320,7 @@ class IntervalTest extends UnitTest:
   test("takeRight matches Range") {
     val gen =
       for
-        (a, b) <- intervalGen
+        (a, b) <- shortIntervalGen
         n <- Gen.choose(-5, b - a + 5)
       yield (a, b, n)
     check(forAll(gen) { (a, b, n) => interval(a, b).takeRight(n).toSeq == range(a, b).takeRight(n).toSeq })
@@ -323,7 +329,7 @@ class IntervalTest extends UnitTest:
   test("drop matches Range") {
     val gen =
       for
-        (a, b) <- intervalGen
+        (a, b) <- shortIntervalGen
         n <- Gen.choose(-5, b - a + 5)
       yield (a, b, n)
     check(forAll(gen) { (a, b, n) => interval(a, b).drop(n).toSeq == range(a, b).drop(n).toSeq })
@@ -332,7 +338,7 @@ class IntervalTest extends UnitTest:
   test("dropRight matches Range") {
     val gen =
       for
-        (a, b) <- intervalGen
+        (a, b) <- shortIntervalGen
         n <- Gen.choose(-5, b - a + 5)
       yield (a, b, n)
     check(forAll(gen) { (a, b, n) => interval(a, b).dropRight(n).toSeq == range(a, b).dropRight(n).toSeq })
@@ -341,7 +347,7 @@ class IntervalTest extends UnitTest:
   test("splitAt matches Range") {
     val gen =
       for
-        (a, b) <- intervalGen
+        (a, b) <- shortIntervalGen
         n <- Gen.choose(-5, b - a + 5)
       yield (a, b, n)
     check(forAll(gen) { (a, b, n) =>
@@ -352,17 +358,17 @@ class IntervalTest extends UnitTest:
   }
 
   test("tail matches Range") {
-    check(forAll(intervalGen) { (a, b) => interval(a, b).tail.toSeq == range(a, b).tail.toSeq })
+    check(forAll(shortIntervalGen) { (a, b) => interval(a, b).tail.toSeq == range(a, b).tail.toSeq })
   }
 
   test("init matches Range") {
-    check(forAll(intervalGen) { (a, b) => interval(a, b).init.toSeq == range(a, b).init.toSeq })
+    check(forAll(shortIntervalGen) { (a, b) => interval(a, b).init.toSeq == range(a, b).init.toSeq })
   }
 
   test("indexOf matches Range") {
     val gen =
       for
-        (a, b) <- intervalGen
+        (a, b) <- shortIntervalGen
         x <- Gen.choose(a - 10, b + 10)
       yield (a, b, x)
     check(forAll(gen) { (a, b, x) => interval(a, b).indexOf(x) == range(a, b).indexOf(x) })
@@ -371,7 +377,7 @@ class IntervalTest extends UnitTest:
   test("lastIndexOf matches Range") {
     val gen =
       for
-        (a, b) <- intervalGen
+        (a, b) <- shortIntervalGen
         x <- Gen.choose(a - 10, b + 10)
       yield (a, b, x)
     check(forAll(gen) { (a, b, x) => interval(a, b).lastIndexOf(x) == range(a, b).lastIndexOf(x) })
@@ -380,18 +386,18 @@ class IntervalTest extends UnitTest:
   test("isDefinedAt matches Range") {
     val gen =
       for
-        (a, b) <- intervalGen
+        (a, b) <- shortIntervalGen
         i <- Gen.choose(-5, b - a + 5)
       yield (a, b, i)
     check(forAll(gen) { (a, b, i) => interval(a, b).isDefinedAt(i) == range(a, b).isDefinedAt(i) })
   }
 
   test("toRange roundtrips") {
-    check(forAll(intervalGen) { (a, b) => interval(a, b).toRange == range(a, b) })
+    check(forAll(shortIntervalGen) { (a, b) => interval(a, b).toRange == range(a, b) })
   }
 
   test("toNumericRange roundtrips") {
-    check(forAll(intervalGen) { (a, b) => interval(a, b).toNumericRange == range(a, b).toNumericRange[Int] })
+    check(forAll(shortIntervalGen) { (a, b) => interval(a, b).toNumericRange == range(a, b).toNumericRange[Int] })
   }
 
   test("isInclusive is always true") {
@@ -416,7 +422,7 @@ class IntervalTest extends UnitTest:
   test("intersects when overlapping") {
     val gen =
       for
-        (a, b) <- intervalGen
+        (a, b) <- shortIntervalGen
         c <- Gen.choose(a, b)
         d <- Gen.choose(c, b + 100)
       yield (a, b, c, d)
@@ -426,7 +432,7 @@ class IntervalTest extends UnitTest:
   test("does not intersect when disjoint") {
     val gen =
       for
-        (a, b) <- intervalGen
+        (a, b) <- shortIntervalGen
         gap <- Gen.choose(1, 100)
         len <- Gen.choose(1, 100)
       yield (a, b, b + gap, b + gap + len)
@@ -447,7 +453,7 @@ class IntervalTest extends UnitTest:
   test("intersect of overlapping intervals") {
     val gen =
       for
-        (a, b) <- intervalGen
+        (a, b) <- shortIntervalGen
         c <- Gen.choose(a, b)
         d <- Gen.choose(c, b + 100)
       yield (a, b, c, d)
@@ -457,7 +463,7 @@ class IntervalTest extends UnitTest:
   test("intersect of disjoint intervals is empty") {
     val gen =
       for
-        (a, b) <- intervalGen
+        (a, b) <- shortIntervalGen
         gap <- Gen.choose(1, 100)
         len <- Gen.choose(1, 100)
       yield (a, b, b + gap, b + gap + len)
@@ -504,7 +510,7 @@ class IntervalTest extends UnitTest:
   }
 
   test("wrap is the value in the interval a whole number of lengths away") {
-    val gen = for (a, b) <- intervalGen; v <- Gen.choose(-3000, 3000) yield (a, b, v)
+    val gen = for (a, b) <- shortIntervalGen; v <- Gen.choose(a - 10000, b + 10000) yield (a, b, v)
     check(forAll(gen) { (a, b, v) =>
       val wrapped = interval(a, b).wrap(v)
       range(a, b).contains(wrapped) && (wrapped - v) % (b - a + 1) == 0
@@ -512,14 +518,14 @@ class IntervalTest extends UnitTest:
   }
 
 class IntervalExtensionsTest extends UnitTest:
-  val intervalGen =
+  val shortIntervalGen =
     for
-      a <- Gen.choose(-1000, 1000)
-      b <- Gen.choose(a, a + 1000)
-    yield (a, b)
+      start <- Gen.choose(Int.MinValue + 10000, Int.MaxValue - 20000)
+      size <- Gen.choose(1, 10000)
+    yield (start, start + size - 1)
 
   test("shift moves every value") {
-    val gen = for (a, b) <- intervalGen; n <- Gen.choose(-1000, 1000) yield (a, b, n)
+    val gen = for (a, b) <- shortIntervalGen; n <- Gen.choose(-1000, 1000) yield (a, b, n)
     check(forAll(gen) { (a, b, n) => Interval(a, b).shift(n).toSeq == (a to b).map(_ + n) })
   }
 
@@ -528,7 +534,7 @@ class IntervalExtensionsTest extends UnitTest:
   }
 
   test("growStart matches Range") {
-    val gen = for (a, b) <- intervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
+    val gen = for (a, b) <- shortIntervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
     check(forAll(gen) { (a, b, n) => Interval(a, b).growStart(n).toSeq == (a - n to b) })
   }
 
@@ -537,7 +543,7 @@ class IntervalExtensionsTest extends UnitTest:
   }
 
   test("growEnd matches Range") {
-    val gen = for (a, b) <- intervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
+    val gen = for (a, b) <- shortIntervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
     check(forAll(gen) { (a, b, n) => Interval(a, b).growEnd(n).toSeq == (a to b + n) })
   }
 
@@ -546,12 +552,12 @@ class IntervalExtensionsTest extends UnitTest:
   }
 
   test("expand matches Range") {
-    val gen = for (a, b) <- intervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
+    val gen = for (a, b) <- shortIntervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
     check(forAll(gen) { (a, b, n) => Interval(a, b).expand(n).toSeq == (a - n to b + n) })
   }
 
   test("contract matches Range") {
-    val gen = for (a, b) <- intervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
+    val gen = for (a, b) <- shortIntervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
     check(forAll(gen) { (a, b, n) => Interval(a, b).contract(n).toSeq == (a + n to b - n) })
   }
 
