@@ -12,9 +12,12 @@ object Point3:
   given [T: Integral]: Ordering[Point3[T]] = Ordering.by[Point3[T], T](_.x).orElseBy(_.y).orElseBy(_.z)
 
   def origin[T: Integral]: Point3[T] = Point3(`0`, `0`, `0`)
-  def unitX[T: Integral]: Point3[T] = Point3(`1`, `0`, `0`)
-  def unitY[T: Integral]: Point3[T] = Point3(`0`, `1`, `0`)
-  def unitZ[T: Integral]: Point3[T] = Point3(`0`, `0`, `1`)
+  def unitUp[T: Integral]: Point3[T] = origin[T].up
+  def unitDown[T: Integral]: Point3[T] = origin[T].down
+  def unitLeft[T: Integral]: Point3[T] = origin[T].left
+  def unitRight[T: Integral]: Point3[T] = origin[T].right
+  def unitIn[T: Integral]: Point3[T] = origin[T].in
+  def unitOut[T: Integral]: Point3[T] = origin[T].out
 
 /** A 3d coordinate (or vector) with any integral values.
   * @param x the x coordinate
