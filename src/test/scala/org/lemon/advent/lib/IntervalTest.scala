@@ -503,11 +503,20 @@ class IntervalTest extends UnitTest:
     })
   }
 
-  test("wrap is the value in the interval a whole number of lengths away") {
-    val gen = for (a, b) <- shortIntervalGen; v <- Gen.choose(a - 10000, b + 10000) yield (a, b, v)
-    check(forAll(gen) { (a, b, v) =>
-      val wrapped = interval(a, b).wrap(v)
-      range(a, b).contains(wrapped) && (wrapped - v) % (b - a + 1) == 0
+  test("wrap lands in the interval") {
+    val gen = for (a, b) <- rangeIntervalGen; value <- arbitrary[Int] yield (a, b, value)
+    check(forAll(gen) { (a, b, value) => interval(a, b).contains(interval(a, b).wrap(value)) })
+  }
+
+  test("wrap keeps the value's remainder modulo the length") {
+    val gen =
+      for
+        (a, b) <- rangeIntervalGen
+        value <- Gen.choose((a.toLong + Int.MinValue).max(Int.MinValue), (a.toLong + Int.MaxValue).min(Int.MaxValue))
+      yield (a, b, value.toInt)
+    check(forAll(gen) { (a, b, value) =>
+      val length = interval(a, b).length
+      interval(a, b).wrap(value) +% length == value +% length
     })
   }
 
