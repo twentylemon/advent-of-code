@@ -111,7 +111,7 @@ private object Day22:
     def face = (at, facing.up)
 
   def step(cube: Cuboid[Int])(state: CubeState): CubeState =
-    val next = state.at.move(state.facing)
+    val next = state.at + state.facing
     if cube.contains(next) then state.copy(at = next) else state.copy(facing = state.facing.turnDown)
 
   @annotation.tailrec

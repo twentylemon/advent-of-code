@@ -69,7 +69,9 @@ case class Point3[N: Integral](x: N, y: N, z: N):
     Cuboid(xRange = xInterval(rhs), yRange = yInterval(rhs), zRange = zInterval(rhs))
 
   def +(rhs: Point3[N]): Point3[N] = Point3(x + rhs.x, y + rhs.y, z + rhs.z)
+  def +(orientation: Orientation): Point3[N] = move(orientation)
   def -(rhs: Point3[N]): Point3[N] = Point3(x - rhs.x, y - rhs.y, z - rhs.z)
+  def -(orientation: Orientation): Point3[N] = move(orientation.turnAround)
   def *(n: N): Point3[N] = Point3(x * n, y * n, z * n)
   def unary_- : Point3[N] = Point3(-x, -y, -z)
 
