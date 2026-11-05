@@ -3,9 +3,14 @@ package org.lemon.advent.lib.geometry
 import Point3.*
 
 object Orientation:
-  private lazy val byAxes = values.map(orientation => ((orientation.facing, orientation.up), orientation)).toMap
+  private val all = IArray.from(values)
+  private def of(facing: Point3[Int], up: Point3[Int]) = all.find(o => o.facing == facing && o.up == up).get
 
-  private def of(facing: Point3[Int], up: Point3[Int]): Orientation = byAxes((facing, up))
+  private val lefts = all.map(o => of(o.up.cross(o.facing), o.up))
+  private val rights = all.map(o => of(o.facing.cross(o.up), o.up))
+  private val ups = all.map(o => of(o.up, -o.facing))
+  private val downs = all.map(o => of(-o.up, o.facing))
+  private val arounds = all.map(o => of(-o.facing, o.up))
 
 /** A facing and an up direction along the 3d axes.
   * @param facing the unit vector the orientation faces
@@ -37,8 +42,8 @@ enum Orientation(val facing: Point3[Int], val up: Point3[Int]):
   case OutLeft extends Orientation(unitOut, unitLeft)
   case OutRight extends Orientation(unitOut, unitRight)
 
-  def turnLeft: Orientation = Orientation.of(up.cross(facing), up)
-  def turnRight: Orientation = Orientation.of(facing.cross(up), up)
-  def turnUp: Orientation = Orientation.of(up, -facing)
-  def turnDown: Orientation = Orientation.of(-up, facing)
-  def turnAround: Orientation = Orientation.of(-facing, up)
+  def turnLeft: Orientation = Orientation.lefts(ordinal)
+  def turnRight: Orientation = Orientation.rights(ordinal)
+  def turnUp: Orientation = Orientation.ups(ordinal)
+  def turnDown: Orientation = Orientation.downs(ordinal)
+  def turnAround: Orientation = Orientation.arounds(ordinal)
