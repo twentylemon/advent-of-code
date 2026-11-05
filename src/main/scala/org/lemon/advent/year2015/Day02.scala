@@ -5,19 +5,13 @@ import org.lemon.advent.lib.geometry.*
 private object Day02:
 
   def parse(input: String) = input.linesIterator.map {
-    case s"${l}x${w}x${h}" => (l.toInt, w.toInt, h.toInt)
+    case s"${l}x${w}x${h}" => Cuboid(l.toInt, w.toInt, h.toInt)
   }.toSeq
 
   def part1(input: String) =
     val boxes = parse(input)
-    boxes.map((l, w, h) =>
-      val (lw, lh, wh) = (Area(l, w), Area(l, h), Area(w, h))
-      2 * (lw.size + lh.size + wh.size) + (lw.size `min` lh.size `min` wh.size)
-    ).sum
+    boxes.map(box => box.surfaceArea + Seq(box.xy, box.xz, box.yz).map(_.size).min).sum
 
   def part2(input: String) =
     val boxes = parse(input)
-    boxes.map((l, w, h) =>
-      val (lw, lh, wh) = (Area(l, w), Area(l, h), Area(w, h))
-      2 * (lw.boundary.size `min` lh.boundary.size `min` wh.boundary.size) + l * w * h
-    ).sum
+    boxes.map(box => 2 * Seq(box.xy, box.xz, box.yz).map(face => face.width + face.height).min + box.size).sum
