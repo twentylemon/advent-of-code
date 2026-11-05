@@ -10,7 +10,7 @@ private object Day04:
     val lines = input.linesIterator.toSeq
     val area = Area(lines)
 
-    (area.rows ++ area.cols ++ area.diagonals)
+    (area.rows.map(_.iterator) ++ area.cols.map(_.iterator) ++ area.diagonals)
       .map(
         _.sliding(4)
           .map(phrase(lines, _))
