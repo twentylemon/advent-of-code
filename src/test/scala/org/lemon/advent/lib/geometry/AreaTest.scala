@@ -204,6 +204,18 @@ class AreaTest extends UnitTest:
     check((a1: Area, a2: Area) => a1.intersect(a2).forall(c => a1.contains(c) && a2.contains(c)))
   }
 
+  test("translate moves every point") {
+    val axis = Gen.choose(-1000, 1000)
+    val offsets = Gen.zip(axis, axis).map((x, y) => Coord(x, y))
+    check(forAll(Arbitrary.arbitrary[Area], offsets) { (area: Area, offset: Coord) =>
+      area.translate(offset).toSet == area.map(_ + offset).toSet
+    })
+  }
+
+  test("translate by the opposite offset is the original") {
+    check((area: Area, offset: Coord) => area.translate(offset).translate(-offset) == area)
+  }
+
   test("growLeft and dropLeft are inverse") {
     check((area: Area, n: Int) => area.growLeft(n).dropLeft(n) == area)
   }

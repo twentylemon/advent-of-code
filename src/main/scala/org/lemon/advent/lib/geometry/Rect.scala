@@ -24,8 +24,7 @@ object Rect:
   def apply[N: Integral](width: N, height: N): Rect[N] =
     apply(`0`, width - `1`, `0`, height - `1`)
 
-  given [N: Integral]: Conversion[Rect[N], Iterator[Point[N]]] =
-    (rect: Rect[N]) => for y <- rect.yRange.iterator; x <- rect.xRange.iterator yield Point(x, y)
+  given [N: Integral]: Conversion[Rect[N], Iterator[Point[N]]] = _.iterator
 
 /** A 2d rectangle with generic integral bounds.
   * @param xRange the x bounds of the rectangle
@@ -54,6 +53,9 @@ case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
 
   def contains(coord: Point[N]): Boolean = xRange.contains(coord.x) && yRange.contains(coord.y)
   def apply(coord: Point[N]): Boolean = contains(coord)
+
+  /** @return all the points in the rectangle, row by row from the top left */
+  def iterator: Iterator[Point[N]] = for y <- yRange.iterator; x <- xRange.iterator yield Point(x, y)
 
   def col(x: N): Iterator[Point[N]] =
     require(xRange.contains(x), s"$this does not contain column $x")
@@ -140,23 +142,15 @@ case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
   def dropBottom(n: N): Rect[N] = growBottom(-n)
   def contract(n: N): Rect[N] = Rect(xRange.contract(n), yRange.contract(n))
 
+  def translate(offset: Point[N]): Rect[N] = Rect(xRange.shift(offset.x), yRange.shift(offset.y))
+
   def encloses(rhs: Rect[N]): Boolean =
-    if rhs.isEmpty then true
-    else if isEmpty then false
-    else
-      left <= rhs.left && right >= rhs.right && top <= rhs.top && bottom >= rhs.bottom
+    rhs.isEmpty || xRange.containsSlice(rhs.xRange) && yRange.containsSlice(rhs.yRange)
 
   def overlaps(rhs: Rect[N]): Boolean = xRange.intersects(rhs.xRange) && yRange.intersects(rhs.yRange)
   def intersects(rhs: Rect[N]): Boolean = overlaps(rhs)
 
-  def intersect(rhs: Rect[N]): Rect[N] =
-    if isEmpty then this
-    else if rhs.isEmpty then rhs
-    else
-      Rect(
-        xRange = Interval(left max rhs.left, right min rhs.right),
-        yRange = Interval(top max rhs.top, bottom min rhs.bottom),
-      )
+  def intersect(rhs: Rect[N]): Rect[N] = Rect(xRange & rhs.xRange, yRange & rhs.yRange)
 
   def &(rhs: Rect[N]): Rect[N] = intersect(rhs)
 
