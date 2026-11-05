@@ -117,18 +117,17 @@ case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
         startY <- yRange.take(this.height - height + `1`).iterator
       yield Rect(Interval(startX, startX + width - `1`), Interval(startY, startY + height - `1`))
 
-  /** Returns the four quadrants of this area. If the area has an odd width or height,
-    * the middle row or column will be in the top or left quadrants.
-    * @return the four quadrant areas of this area
+  /** Returns the quadrants of this rectangle, row by row from the top left. If the rectangle
+    * has an odd width or height, the middle column or row is in the left or top quadrants.
+    * @return the non-empty quadrants of this rectangle
     */
-  def quadrants: Quadrants[N] =
-    val (midX, midY) = (left + (width - `1`) / fromInt(2), top + (height - `1`) / fromInt(2))
-    Quadrants(
-      topLeft = Rect(Interval(left, midX), Interval(top, midY)),
-      topRight = Rect(Interval(midX + `1`, right), Interval(top, midY)),
-      bottomLeft = Rect(Interval(left, midX), Interval(midY + `1`, bottom)),
-      bottomRight = Rect(Interval(midX + `1`, right), Interval(midY + `1`, bottom)),
-    )
+  def quadrants: Seq[Rect[N]] =
+    def halves(range: Interval[N]): Seq[Interval[N]] =
+      val mid = range.start + (range.length - `1`) / fromInt(2)
+      Interval(range.start, mid) +: Option.when(mid < range.end)(Interval(mid + `1`, range.end)).toSeq
+
+    if isEmpty then Seq.empty
+    else for y <- halves(yRange); x <- halves(xRange) yield Rect(x, y)
 
   def growLeft(n: N): Rect[N] = copy(xRange = xRange.growStart(n))
   def growRight(n: N): Rect[N] = copy(xRange = xRange.growEnd(n))
@@ -166,6 +165,3 @@ case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
       if coord.col == right then builder.append('\n')
     )
     builder.toString
-
-case class Quadrants[N: Integral](topLeft: Rect[N], topRight: Rect[N], bottomLeft: Rect[N], bottomRight: Rect[N]):
-  def toSeq: Seq[Rect[N]] = Seq(topLeft, topRight, bottomLeft, bottomRight)

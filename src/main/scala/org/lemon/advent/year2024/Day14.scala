@@ -13,12 +13,9 @@ private object Day14:
     robits.map((pos, vel) => (area.wrap(pos + vel), vel))
 
   def quads(robits: Seq[(Coord, Coord)], area: Area) =
-    val quadrants = area.quadrants
-    quadrants.copy(
-      topLeft = quadrants.topLeft.dropRight(1).dropBottom(1),
-      topRight = quadrants.topRight.dropBottom(1),
-      bottomLeft = quadrants.bottomLeft.dropRight(1),
-    ).toSeq.map(quad => robits.count(r => quad.contains(r._1)))
+    val (midX, midY) = (area.width / 2, area.height / 2)
+    val counted = robits.map(_._1).filter(pos => pos.x != midX && pos.y != midY)
+    area.quadrants.map(quad => counted.count(quad.contains))
 
   def part1(input: String, example: Boolean) =
     val area = if example then Area(11, 7) else Area(101, 103)
