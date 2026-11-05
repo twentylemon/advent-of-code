@@ -177,6 +177,14 @@ class AreaTest extends UnitTest:
     check((area: Area) => !area.overlaps(Area(area.right + 1 to area.right + 2, area.yRange)))
   }
 
+  test("empty area overlaps nothing") {
+    check(forAll(emptyArea, Arbitrary.arbitrary[Area])((empty, area) => !empty.overlaps(area) && !area.overlaps(empty)))
+  }
+
+  test("area overlaps when the intersection is non-empty") {
+    check((a1: Area, a2: Area) => a1.overlaps(a2) == a1.intersect(a2).nonEmpty)
+  }
+
   test("intersect with self is self") {
     check((area: Area) => area.intersect(area) == area)
   }
@@ -194,6 +202,18 @@ class AreaTest extends UnitTest:
 
   test("intersect contains only points in both areas") {
     check((a1: Area, a2: Area) => a1.intersect(a2).forall(c => a1.contains(c) && a2.contains(c)))
+  }
+
+  test("translate moves every point") {
+    val axis = Gen.choose(-1000, 1000)
+    val offsets = Gen.zip(axis, axis).map((x, y) => Coord(x, y))
+    check(forAll(Arbitrary.arbitrary[Area], offsets) { (area: Area, offset: Coord) =>
+      area.translate(offset).toSet == area.map(_ + offset).toSet
+    })
+  }
+
+  test("translate by the opposite offset is the original") {
+    check((area: Area, offset: Coord) => area.translate(offset).translate(-offset) == area)
   }
 
   test("growLeft and dropLeft are inverse") {
