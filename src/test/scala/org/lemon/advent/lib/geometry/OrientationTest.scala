@@ -70,39 +70,3 @@ class OrientationTest extends UnitTest:
   test("turnAround with up out is the 2d turnAround") {
     check((d: Direction) => onGrid(d).turnAround == onGrid(d.turnAround))
   }
-
-  Seq[(String, Orientation => Orientation)](
-    ("turnLeft", _.turnLeft),
-    ("turnRight", _.turnRight),
-    ("turnUp", _.turnUp),
-    ("turnDown", _.turnDown),
-    ("turnAround", _.turnAround)
-  ).foreach((name, turn) =>
-    test(s"$name turns about the orientation's own axes") {
-      check((o: Orientation, p: Point3[Int]) => turn(o)(p) == o(turn(RightOut)(p)))
-    }
-  )
-
-  test("RightOut is the identity") {
-    check((p: Point3[Int]) => RightOut(p) == p)
-  }
-
-  test("apply takes unitRight to facing") {
-    check((o: Orientation) => o(Point3.unitRight[Int]) == o.facing)
-  }
-
-  test("apply takes unitOut to up") {
-    check((o: Orientation) => o(Point3.unitOut[Int]) == o.up)
-  }
-
-  test("apply is linear") {
-    check((o: Orientation, a: Point3[Int], b: Point3[Int]) => o(a + b) == o(a) + o(b))
-  }
-
-  test("apply preserves dot products") {
-    check((o: Orientation, a: Point3[Int], b: Point3[Int]) => o(a).dot(o(b)) == a.dot(b))
-  }
-
-  test("apply preserves cross products") {
-    check((o: Orientation, a: Point3[Int], b: Point3[Int]) => o(a.cross(b)) == o(a).cross(o(b)))
-  }

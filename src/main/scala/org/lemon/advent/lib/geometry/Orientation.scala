@@ -1,9 +1,5 @@
 package org.lemon.advent.lib.geometry
 
-import org.lemon.advent.lib.*
-
-import scala.math.Integral.Implicits.*
-
 import Point3.*
 
 object Orientation:
@@ -11,8 +7,7 @@ object Orientation:
 
   private def of(facing: Point3[Int], up: Point3[Int]): Orientation = byAxes((facing, up))
 
-/** A facing and an up direction along the 3d axes. Applied to a point, it is the rotation that takes `unitRight` to
-  * `facing` and `unitOut` to `up`.
+/** A facing and an up direction along the 3d axes.
   * @param facing the unit vector the orientation faces
   * @param up the unit vector pointing up, perpendicular to `facing`
   */
@@ -47,7 +42,3 @@ enum Orientation(val facing: Point3[Int], val up: Point3[Int]):
   def turnUp: Orientation = Orientation.of(up, -facing)
   def turnDown: Orientation = Orientation.of(-up, facing)
   def turnAround: Orientation = Orientation.of(-facing, up)
-
-  def apply[N: Integral](point: Point3[N]): Point3[N] =
-    def along(axis: Point3[Int], n: N) = Point3(fromInt[N](axis.x) * n, fromInt[N](axis.y) * n, fromInt[N](axis.z) * n)
-    along(facing, point.x) + along(facing.cross(up), point.y) + along(-up, point.z)
