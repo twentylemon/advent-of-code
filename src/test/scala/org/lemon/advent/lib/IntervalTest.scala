@@ -521,6 +521,12 @@ class IntervalTest extends UnitTest:
   }
 
 class IntervalExtensionsTest extends UnitTest:
+  val intervalGen =
+    for
+      start <- Gen.choose(Int.MinValue + 1000, Int.MaxValue - 1000)
+      size <- Gen.choose(1, (Int.MaxValue.toLong - 1000 - start + 1).min(Int.MaxValue - 2000).toInt)
+    yield (start, start + size - 1)
+
   val shortIntervalGen =
     for
       start <- Gen.choose(Int.MinValue + 10000, Int.MaxValue - 20000)
@@ -533,7 +539,7 @@ class IntervalExtensionsTest extends UnitTest:
   }
 
   test("shift keeps the length") {
-    val gen = for (a, b) <- shortIntervalGen; n <- Gen.choose(-1000, 1000) yield (a, b, n)
+    val gen = for (a, b) <- intervalGen; n <- Gen.choose(-1000, 1000) yield (a, b, n)
     check(forAll(gen) { (a, b, n) => Interval(a, b).shift(n).length == Interval(a, b).length })
   }
 
@@ -542,7 +548,7 @@ class IntervalExtensionsTest extends UnitTest:
   }
 
   test("growStart lowers the start and keeps the end") {
-    val gen = for (a, b) <- shortIntervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
+    val gen = for (a, b) <- intervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
     check(forAll(gen) { (a, b, n) =>
       val grown = Interval(a, b).growStart(n)
       grown.start == a - n && grown.end == b
@@ -550,12 +556,12 @@ class IntervalExtensionsTest extends UnitTest:
   }
 
   test("growStart adds to the length") {
-    val gen = for (a, b) <- shortIntervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
+    val gen = for (a, b) <- intervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
     check(forAll(gen) { (a, b, n) => Interval(a, b).growStart(n).length == Interval(a, b).length + n })
   }
 
   test("growStart encloses the original") {
-    val gen = for (a, b) <- shortIntervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
+    val gen = for (a, b) <- intervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
     check(forAll(gen) { (a, b, n) => Interval(a, b).growStart(n).containsSlice(Interval(a, b)) })
   }
 
@@ -564,7 +570,7 @@ class IntervalExtensionsTest extends UnitTest:
   }
 
   test("growEnd raises the end and keeps the start") {
-    val gen = for (a, b) <- shortIntervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
+    val gen = for (a, b) <- intervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
     check(forAll(gen) { (a, b, n) =>
       val grown = Interval(a, b).growEnd(n)
       grown.start == a && grown.end == b + n
@@ -572,12 +578,12 @@ class IntervalExtensionsTest extends UnitTest:
   }
 
   test("growEnd adds to the length") {
-    val gen = for (a, b) <- shortIntervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
+    val gen = for (a, b) <- intervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
     check(forAll(gen) { (a, b, n) => Interval(a, b).growEnd(n).length == Interval(a, b).length + n })
   }
 
   test("growEnd encloses the original") {
-    val gen = for (a, b) <- shortIntervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
+    val gen = for (a, b) <- intervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
     check(forAll(gen) { (a, b, n) => Interval(a, b).growEnd(n).containsSlice(Interval(a, b)) })
   }
 
@@ -586,7 +592,7 @@ class IntervalExtensionsTest extends UnitTest:
   }
 
   test("expand lowers the start and raises the end") {
-    val gen = for (a, b) <- shortIntervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
+    val gen = for (a, b) <- intervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
     check(forAll(gen) { (a, b, n) =>
       val expanded = Interval(a, b).expand(n)
       expanded.start == a - n && expanded.end == b + n
@@ -594,12 +600,12 @@ class IntervalExtensionsTest extends UnitTest:
   }
 
   test("expand adds to the length at both ends") {
-    val gen = for (a, b) <- shortIntervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
+    val gen = for (a, b) <- intervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
     check(forAll(gen) { (a, b, n) => Interval(a, b).expand(n).length == Interval(a, b).length + 2 * n })
   }
 
   test("expand encloses the original") {
-    val gen = for (a, b) <- shortIntervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
+    val gen = for (a, b) <- intervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
     check(forAll(gen) { (a, b, n) => Interval(a, b).expand(n).containsSlice(Interval(a, b)) })
   }
 
@@ -608,7 +614,7 @@ class IntervalExtensionsTest extends UnitTest:
   }
 
   test("contract raises the start and lowers the end") {
-    val gen = for (a, b) <- shortIntervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
+    val gen = for (a, b) <- intervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
     check(forAll(gen) { (a, b, n) =>
       val contracted = Interval(a, b).contract(n)
       contracted.start == a + n && contracted.end == b - n
