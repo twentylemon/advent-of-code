@@ -140,11 +140,10 @@ class AreaTest extends UnitTest:
 
   test("quadrants split the area in half, with any odd middle in the top or left quadrants") {
     check((area: Area) =>
-      (area.width > 1 && area.height > 1) ==> {
-        val (topLeft, bottomRight) = (area.quadrants.head, area.quadrants.last)
-        (topLeft.width, topLeft.height) == ((area.width + 1) / 2, (area.height + 1) / 2) &&
-        (bottomRight.width, bottomRight.height) == (area.width / 2, area.height / 2)
-      }
+      area.quadrants.forall(q =>
+        q.width == (if q.left == area.left then (area.width + 1) / 2 else area.width / 2) &&
+          q.height == (if q.top == area.top then (area.height + 1) / 2 else area.height / 2)
+      )
     )
   }
 

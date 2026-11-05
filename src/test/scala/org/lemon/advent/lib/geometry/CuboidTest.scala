@@ -104,12 +104,11 @@ class CuboidTest extends UnitTest:
 
   test("octants split the cuboid in half, with any odd middle in the lower octants") {
     check((cuboid: Cuboid[Int]) =>
-      val (w, h, d) = (cuboid.width, cuboid.height, cuboid.depth)
-      (w > 1 && h > 1 && d > 1) ==> {
-        val (low, high) = (cuboid.octants.head, cuboid.octants.last)
-        (low.width, low.height, low.depth) == ((w + 1) / 2, (h + 1) / 2, (d + 1) / 2) &&
-        (high.width, high.height, high.depth) == (w / 2, h / 2, d / 2)
-      }
+      cuboid.octants.forall(o =>
+        o.width == (if o.left == cuboid.left then (cuboid.width + 1) / 2 else cuboid.width / 2) &&
+          o.height == (if o.top == cuboid.top then (cuboid.height + 1) / 2 else cuboid.height / 2) &&
+          o.depth == (if o.front == cuboid.front then (cuboid.depth + 1) / 2 else cuboid.depth / 2)
+      )
     )
   }
 
