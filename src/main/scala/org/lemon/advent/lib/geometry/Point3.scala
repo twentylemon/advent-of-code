@@ -47,6 +47,8 @@ case class Point3[N: Integral](x: N, y: N, z: N):
   def xInterval(rhs: Point3[N]): Interval[N] = Interval(x min rhs.x, x max rhs.x)
   def yInterval(rhs: Point3[N]): Interval[N] = Interval(y min rhs.y, y max rhs.y)
   def zInterval(rhs: Point3[N]): Interval[N] = Interval(z min rhs.z, z max rhs.z)
+  def bounding(rhs: Point3[N]): Cuboid[N] =
+    Cuboid(xRange = xInterval(rhs), yRange = yInterval(rhs), zRange = zInterval(rhs))
 
   def +(rhs: Point3[N]): Point3[N] = Point3(x + rhs.x, y + rhs.y, z + rhs.z)
   def -(rhs: Point3[N]): Point3[N] = Point3(x - rhs.x, y - rhs.y, z - rhs.z)

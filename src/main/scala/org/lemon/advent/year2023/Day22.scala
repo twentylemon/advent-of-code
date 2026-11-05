@@ -1,30 +1,29 @@
 package org.lemon.advent.year2023
 
-import org.lemon.advent.lib.Interval
+import org.lemon.advent.lib.geometry.*
 
 import scala.collection.mutable
 
 private object Day22:
 
-  case class Brick(x: Interval[Int], y: Interval[Int], z: Interval[Int])
+  type Brick = Cuboid[Int]
 
   def parse(input: String) = input.linesIterator.map {
-    case s"$x1,$y1,$z1~$x2,$y2,$z2" => Brick(x1.toInt to x2.toInt, y1.toInt to y2.toInt, z1.toInt to z2.toInt)
+    case s"$x1,$y1,$z1~$x2,$y2,$z2" => Cuboid(x1.toInt to x2.toInt, y1.toInt to y2.toInt, z1.toInt to z2.toInt)
   }.toVector
 
   def fall(brick: Brick, bricks: Seq[Brick]): Brick =
     val supportHeight = bricks
-      .filter(below => brick.x.intersects(below.x))
-      .filter(below => brick.y.intersects(below.y))
-      .map(_.z.max + 1)
+      .filter(below => brick.xy.overlaps(below.xy))
+      .map(_.back + 1)
       .maxOption.getOrElse(1)
-    brick.copy(z = supportHeight to supportHeight + brick.z.size - 1)
+    brick.translate(Point3(0, 0, supportHeight - brick.front))
 
   def fall(bricks: Seq[Brick]): Seq[Brick] =
     bricks.foldLeft(Vector.empty[Brick])((stable, brick) => stable :+ fall(brick, stable))
 
   def supports(lhs: Brick, rhs: Brick) =
-    lhs.z.min - 1 == rhs.z.max && lhs.x.intersects(rhs.x) && lhs.y.intersects(rhs.y)
+    lhs.front - 1 == rhs.back && lhs.xy.overlaps(rhs.xy)
 
   def supporting(bricks: Seq[Brick]) =
     bricks.map(brick => (brick, bricks.filter(supports(_, brick)))).toMap
@@ -33,7 +32,7 @@ private object Day22:
     bricks.map(brick => (brick, bricks.filter(supports(brick, _)))).toMap
 
   def part1(input: String) =
-    val bricks = parse(input).sortBy(_.z.min)
+    val bricks = parse(input).sortBy(_.front)
     val stable = fall(bricks)
     val supports = supporting(stable)
     val supported = supportedBy(stable)
@@ -56,7 +55,7 @@ private object Day22:
     falling.size - 1
 
   def part2(input: String) =
-    val bricks = parse(input).sortBy(_.z.min)
+    val bricks = parse(input).sortBy(_.front)
     val stable = fall(bricks)
     val supports = supporting(stable)
     val supported = supportedBy(stable)
