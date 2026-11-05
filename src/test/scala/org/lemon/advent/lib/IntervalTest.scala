@@ -547,12 +547,13 @@ class IntervalExtensionsTest extends UnitTest:
     check((a: Int, b: Int, n: Int) => Interval(a, b).shift(n).shift(-n) == Interval(a, b))
   }
 
-  test("growStart lowers the start and keeps the end") {
+  test("growStart lowers the start") {
     val gen = for (a, b) <- intervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
-    check(forAll(gen) { (a, b, n) =>
-      val grown = Interval(a, b).growStart(n)
-      grown.start == a - n && grown.end == b
-    })
+    check(forAll(gen) { (a, b, n) => Interval(a, b).growStart(n).start == a - n })
+  }
+
+  test("growStart keeps the end") {
+    check((a: Int, b: Int, n: Int) => Interval(a, b).growStart(n).end == b)
   }
 
   test("growStart adds to the length") {
@@ -565,16 +566,18 @@ class IntervalExtensionsTest extends UnitTest:
     check(forAll(gen) { (a, b, n) => Interval(a, b).growStart(n).containsSlice(Interval(a, b)) })
   }
 
-  test("growStart by the opposite amount is the original") {
-    check((a: Int, b: Int, n: Int) => Interval(a, b).growStart(n).growStart(-n) == Interval(a, b))
+  test("drop undoes growStart") {
+    val gen = for (a, b) <- intervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
+    check(forAll(gen) { (a, b, n) => Interval(a, b).growStart(n).drop(n) == Interval(a, b) })
   }
 
-  test("growEnd raises the end and keeps the start") {
+  test("growEnd raises the end") {
     val gen = for (a, b) <- intervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
-    check(forAll(gen) { (a, b, n) =>
-      val grown = Interval(a, b).growEnd(n)
-      grown.start == a && grown.end == b + n
-    })
+    check(forAll(gen) { (a, b, n) => Interval(a, b).growEnd(n).end == b + n })
+  }
+
+  test("growEnd keeps the start") {
+    check((a: Int, b: Int, n: Int) => Interval(a, b).growEnd(n).start == a)
   }
 
   test("growEnd adds to the length") {
@@ -587,16 +590,19 @@ class IntervalExtensionsTest extends UnitTest:
     check(forAll(gen) { (a, b, n) => Interval(a, b).growEnd(n).containsSlice(Interval(a, b)) })
   }
 
-  test("growEnd by the opposite amount is the original") {
-    check((a: Int, b: Int, n: Int) => Interval(a, b).growEnd(n).growEnd(-n) == Interval(a, b))
+  test("dropRight undoes growEnd") {
+    val gen = for (a, b) <- intervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
+    check(forAll(gen) { (a, b, n) => Interval(a, b).growEnd(n).dropRight(n) == Interval(a, b) })
   }
 
-  test("expand lowers the start and raises the end") {
+  test("expand lowers the start") {
     val gen = for (a, b) <- intervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
-    check(forAll(gen) { (a, b, n) =>
-      val expanded = Interval(a, b).expand(n)
-      expanded.start == a - n && expanded.end == b + n
-    })
+    check(forAll(gen) { (a, b, n) => Interval(a, b).expand(n).start == a - n })
+  }
+
+  test("expand raises the end") {
+    val gen = for (a, b) <- intervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
+    check(forAll(gen) { (a, b, n) => Interval(a, b).expand(n).end == b + n })
   }
 
   test("expand adds to the length at both ends") {
@@ -613,12 +619,19 @@ class IntervalExtensionsTest extends UnitTest:
     check((a: Int, b: Int, n: Int) => Interval(a, b).expand(n) == Interval(a, b).growStart(n).growEnd(n))
   }
 
-  test("contract raises the start and lowers the end") {
+  test("drop and dropRight undo expand") {
     val gen = for (a, b) <- intervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
-    check(forAll(gen) { (a, b, n) =>
-      val contracted = Interval(a, b).contract(n)
-      contracted.start == a + n && contracted.end == b - n
-    })
+    check(forAll(gen) { (a, b, n) => Interval(a, b).expand(n).drop(n).dropRight(n) == Interval(a, b) })
+  }
+
+  test("contract raises the start") {
+    val gen = for (a, b) <- intervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
+    check(forAll(gen) { (a, b, n) => Interval(a, b).contract(n).start == a + n })
+  }
+
+  test("contract lowers the end") {
+    val gen = for (a, b) <- intervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
+    check(forAll(gen) { (a, b, n) => Interval(a, b).contract(n).end == b - n })
   }
 
   test("contract takes from the length at both ends, down to empty") {
