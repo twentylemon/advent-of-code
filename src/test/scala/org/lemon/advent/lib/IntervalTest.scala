@@ -139,6 +139,14 @@ class EmptyIntervalTest extends UnitTest:
     check((a: Int, b: Int) => Interval.empty[Int].intersect(Interval(a, b)).isEmpty)
   }
 
+  test("clamp throws UnsupportedOperationException") {
+    an[UnsupportedOperationException] should be thrownBy Interval.empty[Int].clamp(0)
+  }
+
+  test("wrap throws UnsupportedOperationException") {
+    an[UnsupportedOperationException] should be thrownBy Interval.empty[Int].wrap(0)
+  }
+
   test("toRange is empty") {
     Interval.empty[Int].toRange.isEmpty shouldBe true
   }
@@ -478,12 +486,11 @@ class IntervalTest extends UnitTest:
   }
 
   test("clamp is the closest value in the interval") {
-    val gen = for (a, b) <- intervalGen; v <- Gen.choose(-3000, 3000) yield (a, b, v)
-    check(forAll(gen) { (a, b, v) => interval(a, b).clamp(v) == range(a, b).minBy(x => (x - v).abs) })
-  }
-
-  test("clamp of an empty interval throws") {
-    an[UnsupportedOperationException] should be thrownBy Interval.empty[Int].clamp(0)
+    check((a: Int, b: Int, c: Int, value: Int) =>
+      val Seq(start, inside, end) = Seq(a, b, c).sorted
+      val clamped = Interval(start, end).clamp(value)
+      Interval(start, end).contains(clamped) && (BigInt(clamped) - value).abs <= (BigInt(inside) - value).abs
+    )
   }
 
   test("wrap is the value in the interval a whole number of lengths away") {
@@ -492,10 +499,6 @@ class IntervalTest extends UnitTest:
       val wrapped = interval(a, b).wrap(v)
       range(a, b).contains(wrapped) && (wrapped - v) % (b - a + 1) == 0
     })
-  }
-
-  test("wrap of an empty interval throws") {
-    an[UnsupportedOperationException] should be thrownBy Interval.empty[Int].wrap(0)
   }
 
 class IntervalExtensionsTest extends UnitTest:
