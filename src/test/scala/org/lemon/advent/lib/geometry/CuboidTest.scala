@@ -94,6 +94,10 @@ class CuboidTest extends UnitTest:
     )
   }
 
+  test("face sizes sum to the surface area") {
+    check((cuboid: Cuboid[Int]) => cuboid.faces.map(_.size).sum == cuboid.surfaceArea)
+  }
+
   test("octants cover the cuboid") {
     check((cuboid: Cuboid[Int]) => cuboid.octants.flatMap(_.toSeq).toSet == cuboid.toSet)
   }
@@ -275,10 +279,22 @@ class CuboidTest extends UnitTest:
     check((cuboid: Cuboid[Int]) => cuboid.xy.toSet == cuboid.map(_.xy).toSet)
   }
 
+  test("xy size times depth is size") {
+    check((cuboid: Cuboid[Int]) => cuboid.xy.size * cuboid.depth == cuboid.size)
+  }
+
   test("xz projects every point") {
     check((cuboid: Cuboid[Int]) => cuboid.xz.toSet == cuboid.map(_.xz).toSet)
   }
 
+  test("xz size times height is size") {
+    check((cuboid: Cuboid[Int]) => cuboid.xz.size * cuboid.height == cuboid.size)
+  }
+
   test("yz projects every point") {
     check((cuboid: Cuboid[Int]) => cuboid.yz.toSet == cuboid.map(_.yz).toSet)
+  }
+
+  test("yz size times width is size") {
+    check((cuboid: Cuboid[Int]) => cuboid.yz.size * cuboid.width == cuboid.size)
   }
