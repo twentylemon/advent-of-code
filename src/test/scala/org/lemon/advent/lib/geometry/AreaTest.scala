@@ -21,6 +21,10 @@ class AreaTest extends UnitTest:
     check((area: Area) => area.size == area.iterator.size)
   }
 
+  test("perimeter is the number of exposed unit edges") {
+    check((area: Area) => area.perimeter == area.map(_.adjacent.count(!area.contains(_))).sum)
+  }
+
   test("topRow contains width points") {
     check((area: Area) => area.topRow.size == area.width)
   }
@@ -202,6 +206,30 @@ class AreaTest extends UnitTest:
 
   test("intersect contains only points in both areas") {
     check((a1: Area, a2: Area) => a1.intersect(a2).forall(c => a1.contains(c) && a2.contains(c)))
+  }
+
+  test("diff with self is empty") {
+    check((area: Area) => area.diff(area).isEmpty)
+  }
+
+  test("diff of disjoint area is the original area") {
+    check((area: Area) => area.diff(Area(area.right + 1 to area.right + 2, area.yRange)) == Seq(area))
+  }
+
+  test("diff is enclosed by original area") {
+    check((a1: Area, a2: Area) => a1.diff(a2).forall(a1.encloses))
+  }
+
+  test("diff does not overlap the removed area") {
+    check((a1: Area, a2: Area) => a1.diff(a2).forall(!_.overlaps(a2)))
+  }
+
+  test("diff areas do not overlap each other") {
+    check((a1: Area, a2: Area) => a1.diff(a2).pairs.forall(!_.overlaps(_)))
+  }
+
+  test("diff contains the points not in the removed area") {
+    check((a1: Area, a2: Area) => a1.diff(a2).flatMap(_.toSeq).toSet == a1.filterNot(a2.contains).toSet)
   }
 
   test("translate moves every point") {

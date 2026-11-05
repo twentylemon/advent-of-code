@@ -48,6 +48,9 @@ case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
 
   def size: N = width * height
 
+  /** @return the total length of the rectangle's edges */
+  def perimeter: N = if isEmpty then `0` else fromInt[N](2) * (width + height)
+
   def isEmpty: Boolean = xRange.isEmpty || yRange.isEmpty
   def nonEmpty: Boolean = xRange.nonEmpty && yRange.nonEmpty
 
@@ -153,6 +156,24 @@ case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
   def intersect(rhs: Rect[N]): Rect[N] = Rect(xRange & rhs.xRange, yRange & rhs.yRange)
 
   def &(rhs: Rect[N]): Rect[N] = intersect(rhs)
+
+  /** Returns the points in this rectangle that are not in `rhs`, as disjoint rectangles.
+    * @param rhs the rectangle to remove
+    * @return the disjoint rectangles
+    */
+  def diff(rhs: Rect[N]): Seq[Rect[N]] =
+    val common = intersect(rhs)
+    if isEmpty then Seq.empty
+    else if common.isEmpty then Seq(this)
+    else
+      def outside(range: Interval[N], inner: Interval[N]): Seq[Interval[N]] =
+        Option.when(inner.start > range.start)(Interval(range.start, inner.start - `1`)).toSeq ++
+          Option.when(inner.end < range.end)(Interval(inner.end + `1`, range.end)).toSeq
+
+      outside(xRange, common.xRange).map(x => Rect(x, yRange)) ++
+        outside(yRange, common.yRange).map(y => Rect(common.xRange, y))
+
+  def --(rhs: Rect[N]): Seq[Rect[N]] = diff(rhs)
 
   def clamp(coord: Point[N]): Point[N] = Point(xRange.clamp(coord.x), yRange.clamp(coord.y))
 
