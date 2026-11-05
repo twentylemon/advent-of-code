@@ -14,4 +14,4 @@ private object Day02:
 
   def part2(input: String) =
     val boxes = parse(input)
-    boxes.map(box => 2 * Seq(box.xy, box.xz, box.yz).map(face => face.width + face.height).min + box.size).sum
+    boxes.map(box => Seq(box.xy, box.xz, box.yz).map(_.perimeter).min + box.size).sum
