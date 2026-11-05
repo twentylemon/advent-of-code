@@ -490,7 +490,7 @@ class IntervalTest extends UnitTest:
     check(forAll(gen) { (a, b, value) => interval(a, b).contains(interval(a, b).clamp(value)) })
   }
 
-  test("clamp is at least as close as any value in the interval") {
+  test("clamp is between the clamped value and any value in the interval") {
     val gen =
       for
         (a, b) <- intervalGen
@@ -498,7 +498,8 @@ class IntervalTest extends UnitTest:
         value <- arbitrary[Int]
       yield (a, b, inside, value)
     check(forAll(gen) { (a, b, inside, value) =>
-      (BigInt(interval(a, b).clamp(value)) - value).abs <= (BigInt(inside) - value).abs
+      val clamped = interval(a, b).clamp(value)
+      (inside min value) <= clamped && clamped <= (inside max value)
     })
   }
 
