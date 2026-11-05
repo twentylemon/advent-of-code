@@ -485,12 +485,23 @@ class IntervalTest extends UnitTest:
     })
   }
 
-  test("clamp is the closest value in the interval") {
-    check((a: Int, b: Int, c: Int, value: Int) =>
-      val Seq(start, inside, end) = Seq(a, b, c).sorted
-      val clamped = Interval(start, end).clamp(value)
-      Interval(start, end).contains(clamped) && (BigInt(clamped) - value).abs <= (BigInt(inside) - value).abs
+  test("clamp lands in the interval") {
+    check((a: Int, b: Int, value: Int) =>
+      val interval = Interval(a min b, a max b)
+      interval.contains(interval.clamp(value))
     )
+  }
+
+  test("clamp is at least as close as any value in the interval") {
+    val gen =
+      for
+        interval <- Gen.resultOf((a: Int, b: Int) => Interval(a min b, a max b))
+        inside <- Gen.choose(interval.start, interval.end)
+        value <- arbitrary[Int]
+      yield (interval, inside, value)
+    check(forAll(gen) { (interval, inside, value) =>
+      (BigInt(interval.clamp(value)) - value).abs <= (BigInt(inside) - value).abs
+    })
   }
 
   test("wrap is the value in the interval a whole number of lengths away") {
