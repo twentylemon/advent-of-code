@@ -532,36 +532,97 @@ class IntervalExtensionsTest extends UnitTest:
     check(forAll(gen) { (a, b, n) => Interval(a, b).shift(n).toSeq == (a to b).map(_ + n) })
   }
 
+  test("shift keeps the length") {
+    val gen = for (a, b) <- shortIntervalGen; n <- Gen.choose(-1000, 1000) yield (a, b, n)
+    check(forAll(gen) { (a, b, n) => Interval(a, b).shift(n).length == Interval(a, b).length })
+  }
+
   test("shift by the opposite amount is the original") {
     check((a: Int, b: Int, n: Int) => Interval(a, b).shift(n).shift(-n) == Interval(a, b))
   }
 
-  test("growStart matches Range") {
+  test("growStart lowers the start and keeps the end") {
     val gen = for (a, b) <- shortIntervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
-    check(forAll(gen) { (a, b, n) => Interval(a, b).growStart(n).toSeq == (a - n to b) })
+    check(forAll(gen) { (a, b, n) =>
+      val grown = Interval(a, b).growStart(n)
+      grown.start == a - n && grown.end == b
+    })
+  }
+
+  test("growStart adds to the length") {
+    val gen = for (a, b) <- shortIntervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
+    check(forAll(gen) { (a, b, n) => Interval(a, b).growStart(n).length == Interval(a, b).length + n })
+  }
+
+  test("growStart encloses the original") {
+    val gen = for (a, b) <- shortIntervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
+    check(forAll(gen) { (a, b, n) => Interval(a, b).growStart(n).containsSlice(Interval(a, b)) })
   }
 
   test("growStart by the opposite amount is the original") {
     check((a: Int, b: Int, n: Int) => Interval(a, b).growStart(n).growStart(-n) == Interval(a, b))
   }
 
-  test("growEnd matches Range") {
+  test("growEnd raises the end and keeps the start") {
     val gen = for (a, b) <- shortIntervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
-    check(forAll(gen) { (a, b, n) => Interval(a, b).growEnd(n).toSeq == (a to b + n) })
+    check(forAll(gen) { (a, b, n) =>
+      val grown = Interval(a, b).growEnd(n)
+      grown.start == a && grown.end == b + n
+    })
+  }
+
+  test("growEnd adds to the length") {
+    val gen = for (a, b) <- shortIntervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
+    check(forAll(gen) { (a, b, n) => Interval(a, b).growEnd(n).length == Interval(a, b).length + n })
+  }
+
+  test("growEnd encloses the original") {
+    val gen = for (a, b) <- shortIntervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
+    check(forAll(gen) { (a, b, n) => Interval(a, b).growEnd(n).containsSlice(Interval(a, b)) })
   }
 
   test("growEnd by the opposite amount is the original") {
     check((a: Int, b: Int, n: Int) => Interval(a, b).growEnd(n).growEnd(-n) == Interval(a, b))
   }
 
-  test("expand matches Range") {
+  test("expand lowers the start and raises the end") {
     val gen = for (a, b) <- shortIntervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
-    check(forAll(gen) { (a, b, n) => Interval(a, b).expand(n).toSeq == (a - n to b + n) })
+    check(forAll(gen) { (a, b, n) =>
+      val expanded = Interval(a, b).expand(n)
+      expanded.start == a - n && expanded.end == b + n
+    })
   }
 
-  test("contract matches Range") {
+  test("expand adds to the length at both ends") {
     val gen = for (a, b) <- shortIntervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
-    check(forAll(gen) { (a, b, n) => Interval(a, b).contract(n).toSeq == (a + n to b - n) })
+    check(forAll(gen) { (a, b, n) => Interval(a, b).expand(n).length == Interval(a, b).length + 2 * n })
+  }
+
+  test("expand encloses the original") {
+    val gen = for (a, b) <- shortIntervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
+    check(forAll(gen) { (a, b, n) => Interval(a, b).expand(n).containsSlice(Interval(a, b)) })
+  }
+
+  test("expand is growStart then growEnd") {
+    check((a: Int, b: Int, n: Int) => Interval(a, b).expand(n) == Interval(a, b).growStart(n).growEnd(n))
+  }
+
+  test("contract raises the start and lowers the end") {
+    val gen = for (a, b) <- shortIntervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
+    check(forAll(gen) { (a, b, n) =>
+      val contracted = Interval(a, b).contract(n)
+      contracted.start == a + n && contracted.end == b - n
+    })
+  }
+
+  test("contract takes from the length at both ends, down to empty") {
+    val gen = for (a, b) <- shortIntervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
+    check(forAll(gen) { (a, b, n) => Interval(a, b).contract(n).length == (Interval(a, b).length - 2 * n).max(0) })
+  }
+
+  test("contract is enclosed by the original") {
+    val gen = for (a, b) <- shortIntervalGen; n <- Gen.choose(0, 1000) yield (a, b, n)
+    check(forAll(gen) { (a, b, n) => Interval(a, b).containsSlice(Interval(a, b).contract(n)) })
   }
 
   test("contract undoes expand") {
