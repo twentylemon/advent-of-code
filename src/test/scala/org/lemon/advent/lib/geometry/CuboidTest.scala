@@ -253,21 +253,12 @@ class CuboidTest extends UnitTest:
     check((cuboid: Cuboid[Int]) => cuboid.forall(p => cuboid.wrap(p) == p))
   }
 
-  test("wrap x coordinate wraps toroidally") {
+  test("wrap wraps each coordinate toroidally") {
     check((cuboid: Cuboid[Int], point: Point3[Int]) =>
-      ((cuboid.wrap(point).x - cuboid.left) +% cuboid.width) == ((point.x - cuboid.left) +% cuboid.width)
-    )
-  }
-
-  test("wrap y coordinate wraps toroidally") {
-    check((cuboid: Cuboid[Int], point: Point3[Int]) =>
-      ((cuboid.wrap(point).y - cuboid.top) +% cuboid.height) == ((point.y - cuboid.top) +% cuboid.height)
-    )
-  }
-
-  test("wrap z coordinate wraps toroidally") {
-    check((cuboid: Cuboid[Int], point: Point3[Int]) =>
-      ((cuboid.wrap(point).z - cuboid.front) +% cuboid.depth) == ((point.z - cuboid.front) +% cuboid.depth)
+      val wrapped = cuboid.wrap(point)
+      ((wrapped.x - cuboid.left) +% cuboid.width) == ((point.x - cuboid.left) +% cuboid.width) &&
+      ((wrapped.y - cuboid.top) +% cuboid.height) == ((point.y - cuboid.top) +% cuboid.height) &&
+      ((wrapped.z - cuboid.front) +% cuboid.depth) == ((point.z - cuboid.front) +% cuboid.depth)
     )
   }
 
