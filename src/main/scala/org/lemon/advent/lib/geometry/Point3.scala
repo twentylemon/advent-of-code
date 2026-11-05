@@ -12,9 +12,12 @@ object Point3:
   given [T: Integral]: Ordering[Point3[T]] = Ordering.by[Point3[T], T](_.x).orElseBy(_.y).orElseBy(_.z)
 
   def origin[T: Integral]: Point3[T] = Point3(`0`, `0`, `0`)
-  def unitX[T: Integral]: Point3[T] = Point3(`1`, `0`, `0`)
-  def unitY[T: Integral]: Point3[T] = Point3(`0`, `1`, `0`)
-  def unitZ[T: Integral]: Point3[T] = Point3(`0`, `0`, `1`)
+  def unitUp[T: Integral]: Point3[T] = origin[T].up
+  def unitDown[T: Integral]: Point3[T] = origin[T].down
+  def unitLeft[T: Integral]: Point3[T] = origin[T].left
+  def unitRight[T: Integral]: Point3[T] = origin[T].right
+  def unitIn[T: Integral]: Point3[T] = origin[T].in
+  def unitOut[T: Integral]: Point3[T] = origin[T].out
 
 /** A 3d coordinate (or vector) with any integral values.
   * @param x the x coordinate
@@ -22,12 +25,27 @@ object Point3:
   * @param z the z coordinate
   */
 case class Point3[N: Integral](x: N, y: N, z: N):
-  def up: Point3[N] = copy(y = y - `1`)
-  def down: Point3[N] = copy(y = y + `1`)
-  def left: Point3[N] = copy(x = x - `1`)
-  def right: Point3[N] = copy(x = x + `1`)
-  def in: Point3[N] = copy(z = z + `1`)
-  def out: Point3[N] = copy(z = z - `1`)
+  def up: Point3[N] = shiftUp(`1`)
+  def down: Point3[N] = shiftDown(`1`)
+  def left: Point3[N] = shiftLeft(`1`)
+  def right: Point3[N] = shiftRight(`1`)
+  def in: Point3[N] = shiftIn(`1`)
+  def out: Point3[N] = shiftOut(`1`)
+  def move(orientation: Orientation): Point3[N] = shift(orientation, `1`)
+
+  def shiftUp(n: N): Point3[N] = copy(y = y - n)
+  def shiftDown(n: N): Point3[N] = copy(y = y + n)
+  def shiftLeft(n: N): Point3[N] = copy(x = x - n)
+  def shiftRight(n: N): Point3[N] = copy(x = x + n)
+  def shiftIn(n: N): Point3[N] = copy(z = z + n)
+  def shiftOut(n: N): Point3[N] = copy(z = z - n)
+  def shift(orientation: Orientation, n: N): Point3[N] = (orientation.facing: @unchecked) match
+    case Point3(0, -1, 0) => shiftUp(n)
+    case Point3(0, 1, 0) => shiftDown(n)
+    case Point3(-1, 0, 0) => shiftLeft(n)
+    case Point3(1, 0, 0) => shiftRight(n)
+    case Point3(0, 0, 1) => shiftIn(n)
+    case Point3(0, 0, -1) => shiftOut(n)
 
   def adjacent: Seq[Point3[N]] = Seq(up, down, left, right, in, out)
   def surrounding: Seq[Point3[N]] =

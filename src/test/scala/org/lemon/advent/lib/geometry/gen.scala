@@ -13,6 +13,8 @@ given Shrink[Point3[Int]] = Shrink { case Point3(x, y, z) => shrink((x, y, z)).m
 
 given Arbitrary[Direction] = Arbitrary(Gen.oneOf(Direction.values.toSeq))
 
+given Arbitrary[Orientation] = Arbitrary(Gen.oneOf(Orientation.values.toSeq))
+
 given Arbitrary[Range] = Arbitrary(
   for
     i <- Gen.chooseNum(0, 100)

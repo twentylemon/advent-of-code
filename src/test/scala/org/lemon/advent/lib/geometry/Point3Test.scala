@@ -19,36 +19,80 @@ class Point3Test extends UnitTest:
     check((a: Point3[Int]) => a.left.right == a)
   }
 
+  test("shiftLeft(n) and shiftRight(n) are opposites") {
+    check((a: Point3[Int], n: Int) => a.shiftLeft(n).shiftRight(n) == a)
+  }
+
   test("up and down are opposites") {
     check((a: Point3[Int]) => a.up.down == a)
+  }
+
+  test("shiftUp(n) and shiftDown(n) are opposites") {
+    check((a: Point3[Int], n: Int) => a.shiftUp(n).shiftDown(n) == a)
   }
 
   test("in and out are opposites") {
     check((a: Point3[Int]) => a.in.out == a)
   }
 
-  test("+ unitX is right") {
-    check((a: Point3[Int]) => a + Point3.unitX[Int] == a.right)
+  test("shiftIn(n) and shiftOut(n) are opposites") {
+    check((a: Point3[Int], n: Int) => a.shiftIn(n).shiftOut(n) == a)
   }
 
-  test("- unitX is left") {
-    check((a: Point3[Int]) => a - Point3.unitX[Int] == a.left)
+  test("+ unitUp is up") {
+    check((a: Point3[Int]) => a + Point3.unitUp[Int] == a.up)
   }
 
-  test("+ unitY is down") {
-    check((a: Point3[Int]) => a + Point3.unitY[Int] == a.down)
+  test("+ unitDown is down") {
+    check((a: Point3[Int]) => a + Point3.unitDown[Int] == a.down)
   }
 
-  test("- unitY is up") {
-    check((a: Point3[Int]) => a - Point3.unitY[Int] == a.up)
+  test("+ unitLeft is left") {
+    check((a: Point3[Int]) => a + Point3.unitLeft[Int] == a.left)
   }
 
-  test("+ unitZ is in") {
-    check((a: Point3[Int]) => a + Point3.unitZ[Int] == a.in)
+  test("+ unitRight is right") {
+    check((a: Point3[Int]) => a + Point3.unitRight[Int] == a.right)
   }
 
-  test("- unitZ is out") {
-    check((a: Point3[Int]) => a - Point3.unitZ[Int] == a.out)
+  test("+ unitIn is in") {
+    check((a: Point3[Int]) => a + Point3.unitIn[Int] == a.in)
+  }
+
+  test("+ unitOut is out") {
+    check((a: Point3[Int]) => a + Point3.unitOut[Int] == a.out)
+  }
+
+  test("- unitUp is down") {
+    check((a: Point3[Int]) => a - Point3.unitUp[Int] == a.down)
+  }
+
+  test("- unitDown is up") {
+    check((a: Point3[Int]) => a - Point3.unitDown[Int] == a.up)
+  }
+
+  test("- unitLeft is right") {
+    check((a: Point3[Int]) => a - Point3.unitLeft[Int] == a.right)
+  }
+
+  test("- unitRight is left") {
+    check((a: Point3[Int]) => a - Point3.unitRight[Int] == a.left)
+  }
+
+  test("- unitIn is out") {
+    check((a: Point3[Int]) => a - Point3.unitIn[Int] == a.out)
+  }
+
+  test("- unitOut is in") {
+    check((a: Point3[Int]) => a - Point3.unitOut[Int] == a.in)
+  }
+
+  test("move(orientation) is + facing") {
+    check((a: Point3[Int], o: Orientation) => a.move(o) == a + o.facing)
+  }
+
+  test("shift(orientation, n) is + facing * n") {
+    check((a: Point3[Int], o: Orientation, n: Int) => a.shift(o, n) == a + o.facing * n)
   }
 
   test("adjacent has 6 distinct points") {
@@ -121,9 +165,9 @@ class Point3Test extends UnitTest:
   }
 
   test("cross follows the right hand rule") {
-    Point3.unitX[Int].cross(Point3.unitY[Int]) shouldBe Point3.unitZ[Int]
-    Point3.unitY[Int].cross(Point3.unitZ[Int]) shouldBe Point3.unitX[Int]
-    Point3.unitZ[Int].cross(Point3.unitX[Int]) shouldBe Point3.unitY[Int]
+    Point3.unitRight[Int].cross(Point3.unitDown[Int]) shouldBe Point3.unitIn[Int]
+    Point3.unitDown[Int].cross(Point3.unitIn[Int]) shouldBe Point3.unitRight[Int]
+    Point3.unitIn[Int].cross(Point3.unitRight[Int]) shouldBe Point3.unitDown[Int]
   }
 
   test("reduce is idempotent") {
@@ -149,7 +193,9 @@ class Point3Test extends UnitTest:
   test("reduce of axis aligned vectors are unit vectors") {
     check((n: Int) =>
       (n != 0 && n != Int.MinValue) ==>
-        Seq(Point3.unitX[Int], Point3.unitY[Int], Point3.unitZ[Int]).forall(unit => (unit * n).reduce == unit * n.sign)
+        Seq(Point3.unitRight[Int], Point3.unitDown[Int], Point3.unitIn[Int]).forall(unit =>
+          (unit * n).reduce == unit * n.sign
+        )
     )
   }
 
@@ -161,9 +207,9 @@ class Point3Test extends UnitTest:
 
   test("projections send the dropped axis to the origin") {
     check((n: Int) =>
-      (Point3.unitZ[Int] * n).xy == Coord.origin &&
-        (Point3.unitY[Int] * n).xz == Coord.origin &&
-        (Point3.unitX[Int] * n).yz == Coord.origin
+      (Point3.unitIn[Int] * n).xy == Coord.origin &&
+        (Point3.unitDown[Int] * n).xz == Coord.origin &&
+        (Point3.unitRight[Int] * n).yz == Coord.origin
     )
   }
 
