@@ -127,11 +127,29 @@ case class Interval[N: Integral](start: N, end: N) extends Iterable[N] with Part
 
   def &(rhs: Interval[N]): Interval[N] = intersect(rhs)
 
+  /** @return the value in this interval closest to `value` */
+  def clamp(value: N): N =
+    if isEmpty then throw new UnsupportedOperationException("clamp of empty interval")
+    else value max start min end
+
+  /** @return where `value` lands when this interval repeats forever in both directions */
+  def wrap(value: N): N =
+    if isEmpty then throw new UnsupportedOperationException("wrap of empty interval")
+    else ((value - start) +% length) + start
+
   def toRange: Range = if isEmpty then 0 until 0 else start.toInt to end.toInt
   def toNumericRange: NumericRange[N] =
     if isEmpty then NumericRange(`1`, `0`, `1`) else NumericRange.inclusive(start, end, `1`)
 
   override def toString: String = if isEmpty then "Interval.empty" else s"Interval($start..$end)"
+
+// private due to moving bounds on empty intervals not being well defined
+extension [N: Integral](interval: Interval[N])
+  private[lib] def shift(n: N): Interval[N] = Interval(interval.start + n, interval.end + n)
+  private[lib] def growStart(n: N): Interval[N] = Interval(interval.start - n, interval.end)
+  private[lib] def growEnd(n: N): Interval[N] = Interval(interval.start, interval.end + n)
+  private[lib] def expand(n: N): Interval[N] = Interval(interval.start - n, interval.end + n)
+  private[lib] def contract(n: N): Interval[N] = interval.expand(-n)
 
 object Diet:
   def empty[N: Integral]: Diet[N] = Diet(TreeMap.empty[N, N])
