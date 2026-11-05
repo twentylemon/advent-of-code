@@ -5,11 +5,11 @@ import Point3.*
 object Orientation:
   private def of(facing: Point3[Int], up: Point3[Int]) = values.find(o => o.facing == facing && o.up == up).get
 
-  private val lefts = values.map(o => of(o.up.cross(o.facing), o.up)).map(_.ordinal)
-  private val rights = values.map(o => of(o.facing.cross(o.up), o.up)).map(_.ordinal)
-  private val ups = values.map(o => of(o.up, -o.facing)).map(_.ordinal)
-  private val downs = values.map(o => of(-o.up, o.facing)).map(_.ordinal)
-  private val arounds = values.map(o => of(-o.facing, o.up)).map(_.ordinal)
+  private val lefts = values.map(o => of(o.up.cross(o.facing), o.up))
+  private val rights = values.map(o => of(o.facing.cross(o.up), o.up))
+  private val ups = values.map(o => of(o.up, -o.facing))
+  private val downs = values.map(o => of(-o.up, o.facing))
+  private val arounds = values.map(o => of(-o.facing, o.up))
 
 /** A facing and an up direction along the 3d axes.
   * @param facing the unit vector the orientation faces
@@ -41,8 +41,8 @@ enum Orientation(val facing: Point3[Int], val up: Point3[Int]):
   case OutLeft extends Orientation(unitOut, unitLeft)
   case OutRight extends Orientation(unitOut, unitRight)
 
-  def turnLeft: Orientation = Orientation.fromOrdinal(Orientation.lefts(ordinal))
-  def turnRight: Orientation = Orientation.fromOrdinal(Orientation.rights(ordinal))
-  def turnUp: Orientation = Orientation.fromOrdinal(Orientation.ups(ordinal))
-  def turnDown: Orientation = Orientation.fromOrdinal(Orientation.downs(ordinal))
-  def turnAround: Orientation = Orientation.fromOrdinal(Orientation.arounds(ordinal))
+  def turnLeft: Orientation = Orientation.lefts(ordinal)
+  def turnRight: Orientation = Orientation.rights(ordinal)
+  def turnUp: Orientation = Orientation.ups(ordinal)
+  def turnDown: Orientation = Orientation.downs(ordinal)
+  def turnAround: Orientation = Orientation.arounds(ordinal)

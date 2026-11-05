@@ -5,9 +5,9 @@ import Coord.*
 object Direction:
   given Ordering[Direction] = Ordering.by(_.ordinal)
 
-  private val lefts = values.map(d => (d.ordinal + 1) % values.size)
-  private val arounds = values.map(d => (d.ordinal + 2) % values.size)
-  private val rights = values.map(d => (d.ordinal + 3) % values.size)
+  private val lefts = values.map(d => fromOrdinal((d.ordinal + 1) % values.size))
+  private val arounds = values.map(d => fromOrdinal((d.ordinal + 2) % values.size))
+  private val rights = values.map(d => fromOrdinal((d.ordinal + 3) % values.size))
 
   def apply(ch: String | Char): Direction =
     unapply(ch).getOrElse(throw IllegalArgumentException(s"unknown direction character: $ch"))
@@ -29,6 +29,6 @@ enum Direction(val unitVector: Coord):
   case Down extends Direction(unitDown)
   case Right extends Direction(unitRight)
 
-  def turnLeft = Direction.fromOrdinal(Direction.lefts(ordinal))
-  def turnAround = Direction.fromOrdinal(Direction.arounds(ordinal))
-  def turnRight = Direction.fromOrdinal(Direction.rights(ordinal))
+  def turnLeft = Direction.lefts(ordinal)
+  def turnAround = Direction.arounds(ordinal)
+  def turnRight = Direction.rights(ordinal)
