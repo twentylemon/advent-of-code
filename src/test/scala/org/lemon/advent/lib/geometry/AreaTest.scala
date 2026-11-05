@@ -25,6 +25,10 @@ class AreaTest extends UnitTest:
     check((area: Area) => area.perimeter == area.map(_.adjacent.count(!area.contains(_))).sum)
   }
 
+  test("perimeter is the region's perimeterLength") {
+    check((area: Area) => area.perimeter == Region(area.toSet).perimeterLength)
+  }
+
   test("topRow contains width points") {
     check((area: Area) => area.topRow.size == area.width)
   }
@@ -80,7 +84,7 @@ class AreaTest extends UnitTest:
     check((area: Area) => area.boundary.forall(c => c.adjacent.exists(!area.contains(_))))
   }
 
-  test("boundary size is perimeter") {
+  test("boundary size is the size of the region's perimeter") {
     check((area: Area) => area.boundary.size == Region(area.toSet).perimeter.size)
   }
 
