@@ -143,7 +143,7 @@ case class Interval[N: Integral](start: N, end: N) extends Iterable[N] with Part
 
   override def toString: String = if isEmpty then "Interval.empty" else s"Interval($start..$end)"
 
-// shared by Rect and Cuboid, but not public until moving the bounds of an empty interval is well defined
+// private due to moving bounds on empty intervals not being well defined
 extension [N: Integral](interval: Interval[N])
   private[lib] def shift(n: N): Interval[N] = Interval(interval.start + n, interval.end + n)
   private[lib] def growStart(n: N): Interval[N] = Interval(interval.start - n, interval.end)
