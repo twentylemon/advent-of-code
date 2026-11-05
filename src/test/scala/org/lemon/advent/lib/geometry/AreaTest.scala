@@ -177,6 +177,14 @@ class AreaTest extends UnitTest:
     check((area: Area) => !area.overlaps(Area(area.right + 1 to area.right + 2, area.yRange)))
   }
 
+  test("area overlaps when the intersect is non-empty") {
+    check((a1: Area, a2: Area) => a1.overlaps(a2) == a1.intersect(a2).nonEmpty)
+  }
+
+  test("empty area overlaps nothing") {
+    check(forAll(emptyArea, Arbitrary.arbitrary[Area])((empty, area) => !empty.overlaps(area) && !area.overlaps(empty)))
+  }
+
   test("intersect with self is self") {
     check((area: Area) => area.intersect(area) == area)
   }

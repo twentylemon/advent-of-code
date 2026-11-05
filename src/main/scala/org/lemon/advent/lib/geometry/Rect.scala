@@ -146,8 +146,7 @@ case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
     else
       left <= rhs.left && right >= rhs.right && top <= rhs.top && bottom >= rhs.bottom
 
-  def overlaps(rhs: Rect[N]): Boolean =
-    nonEmpty && rhs.nonEmpty && left <= rhs.right && right >= rhs.left && top <= rhs.bottom && bottom >= rhs.top
+  def overlaps(rhs: Rect[N]): Boolean = xRange.intersects(rhs.xRange) && yRange.intersects(rhs.yRange)
   def intersects(rhs: Rect[N]): Boolean = overlaps(rhs)
 
   def intersect(rhs: Rect[N]): Rect[N] =
