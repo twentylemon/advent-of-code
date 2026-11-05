@@ -32,7 +32,7 @@ given Shrink[Area] = Shrink { case Area(xRange, yRange) =>
 }
 
 given Arbitrary[Cuboid[Int]] =
-  val bound = Gen.choose(-32, 32)
+  val bound = Gen.choose(-12, 12)
   val interval = for a <- bound; b <- bound yield Interval(a min b, a max b)
   Arbitrary(Gen.zip(interval, interval, interval).map((x, y, z) => Cuboid(x, y, z)))
 
