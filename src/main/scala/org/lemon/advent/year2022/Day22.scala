@@ -2,6 +2,7 @@ package org.lemon.advent.year2022
 
 import org.lemon.advent.lib.*
 import org.lemon.advent.lib.geometry.*
+import org.lemon.advent.lib.graph.*
 import scala.collection.mutable
 
 private object Day22:
@@ -107,72 +108,39 @@ private object Day22:
     1000 * end.at.location.y + 4 * end.at.location.x + facingValue(end.facing)
 
   def part2(in: String) =
-    case class State(at: Coord, facing: Direction)
-
     val split = in.chunks
-    val walls = Coord.gridToMap(split(0)).filter(_._2 == '#').keySet
-    val actions = parseActions(split(1)) :+ null.asInstanceOf[Action]
+    val net = Coord.gridToMap(split(0)).filter(_._2 != ' ')
+    val actions = parseActions(split(1))
+    val size = math.sqrt(net.size / 6).toInt
+    val cube = Cuboid(size, size, size)
 
-    val startNodeLoc = parseBoard(split(0).linesIterator.toSeq)(0).walk(Right).dropWhile(isWall).head.location
-    val start = State(at = (startNodeLoc.x - 1, startNodeLoc.y - 1), facing = Right)
+    case class Walker(at: Point3[Int], orientation: Orientation):
+      def face = (at, orientation.up)
+      def step =
+        val next = at.move(orientation)
+        if cube.contains(next) then copy(at = next) else copy(orientation = orientation.turnDown)
 
-    val end = actions.grouped(2).foldLeft(start)((state, moveAndTurn) =>
-      val move = moveAndTurn(0).asInstanceOf[Walk]
+    def turn(orientation: Orientation, from: Direction, to: Direction) =
+      Iterator.iterate((from, orientation))((d, o) => (d.turnRight, o.turnRight)).find(_._1 == to).get._2
 
-      val nextState = (1 to move.steps).foldLeft(state)((it, _) =>
-        val State(at, facing) = it
-        val (faceX, faceY) = (at.x / 50, at.y / 50)
-        val (modX, modY) = (at.x % 50, at.y % 50)
-        val next = at + facing
-        val nextX = if next.x > 0 then next.x / 50 else next.x
-        val nextY = if next.y > 0 then next.y / 50 else next.y
-
-        val (nextAt, nextFacing): (Coord, Direction) =
-          (faceX, faceY, nextX, nextY) match
-            case (a, b, c, d) if a == c && b == d => (next, facing) // staying on same face
-
-            // _AB
-            // _C_
-            // ED_
-            // F__
-            case (1, 0, 2, 0) => (next, facing) // A -> B
-            case (1, 0, 1, 1) => (next, facing) // A -> C
-            case (1, 0, 0, 0) => (Coord(0, 149 - modY), Right) // A -> E
-            case (1, 0, 1, -1) => (Coord(0, 150 + modX), Right) // A -> F
-
-            case (2, 0, 1, 0) => (next, facing) // B -> A
-            case (2, 0, 2, 1) => (Coord(99, 50 + modX), Left) // B -> C
-            case (2, 0, 3, 0) => (Coord(99, 149 - modY), Left) // B -> D
-            case (2, 0, 2, -1) => (Coord(modX, 199), facing) // B -> F
-
-            case (1, 1, 1, 0) => (next, facing) // C -> A
-            case (1, 1, 2, 1) => (Coord(100 + modY, 49), Up) // C -> B
-            case (1, 1, 1, 2) => (next, facing) // C -> D
-            case (1, 1, 0, 1) => (Coord(modY, 100), Down) // C -> E
-
-            case (1, 2, 2, 2) => (Coord(149, 49 - modY), Left) // D -> B
-            case (1, 2, 1, 1) => (next, facing) // D -> C
-            case (1, 2, 0, 2) => (next, facing) // D -> E
-            case (1, 2, 1, 3) => (Coord(49, 150 + modX), Left) // D -> F
-
-            case (0, 2, -1, 2) => (Coord(50, 49 - modY), Right) // E -> A
-            case (0, 2, 0, 1) => (Coord(50, 50 + modX), Right) // E -> C
-            case (0, 2, 1, 2) => (next, facing) // E -> D
-            case (0, 2, 0, 3) => (next, facing) // E -> F
-
-            case (0, 3, -1, 3) => (Coord(50 + modY, 0), Down) // F -> A
-            case (0, 3, 0, 4) => (Coord(100 + modX, 0), facing) // F -> B
-            case (0, 3, 1, 3) => (Coord(50 + modY, 149), Up) // F -> D
-            case (0, 3, 0, 2) => (next, facing) // F -> E
-            case _ =>
-              throw new IllegalStateException(s"unexpected face transition: ($faceX, $faceY) -> ($nextX, $nextY)")
-
-        if walls(nextAt) then it else State(at = nextAt, facing = nextFacing)
-      )
-
-      moveAndTurn(1) match
-        case TurnLeft => nextState.copy(facing = nextState.facing.turnLeft)
-        case TurnRight => nextState.copy(facing = nextState.facing.turnRight)
-        case _ => nextState
+    case class Tile(coord: Coord, walker: Walker)
+    def adjacent(tile: Tile) = Direction.values.filter(d => net.contains(tile.coord + d)).map(d =>
+      val walker = tile.walker.copy(orientation = turn(tile.walker.orientation, Right, d)).step
+      Tile(tile.coord + d, walker.copy(orientation = turn(walker.orientation, d, Right)))
     )
-    1000 * (end.at.y + 1) + 4 * (end.at.x + 1) + facingValue(end.facing)
+
+    val corner = net.keys.filter(_.y == 0).minBy(_.x)
+    val tiles = fill(adjacent, Tile(corner, Walker(Point3.origin, Orientation.RightOut)))
+    val byFace = tiles.map(tile => (tile.walker.face, tile)).toMap
+    def blocked(walker: Walker) = net(byFace(walker.face).coord) == '#'
+
+    val start = tiles.filter(tile => tile.coord.y == 0 && net(tile.coord) == '.').minBy(_.coord.x).walker
+    val end = actions.foldLeft(start) {
+      case (walker, TurnLeft) => walker.copy(orientation = walker.orientation.turnLeft)
+      case (walker, TurnRight) => walker.copy(orientation = walker.orientation.turnRight)
+      case (walker, Walk(steps)) => Iterator.iterate(walker)(_.step).take(steps + 1).takeWhile(!blocked(_)).last
+    }
+
+    val tile = byFace(end.face)
+    val facing = Direction.values.find(d => turn(tile.walker.orientation, Right, d) == end.orientation).get
+    1000 * (tile.coord.y + 1) + 4 * (tile.coord.x + 1) + facingValue(facing)
