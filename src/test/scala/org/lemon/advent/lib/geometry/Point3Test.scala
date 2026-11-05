@@ -19,12 +19,24 @@ class Point3Test extends UnitTest:
     check((a: Point3[Int]) => a.left.right == a)
   }
 
+  test("shiftLeft(n) and shiftRight(n) are opposites") {
+    check((a: Point3[Int], n: Int) => a.shiftLeft(n).shiftRight(n) == a)
+  }
+
   test("up and down are opposites") {
     check((a: Point3[Int]) => a.up.down == a)
   }
 
+  test("shiftUp(n) and shiftDown(n) are opposites") {
+    check((a: Point3[Int], n: Int) => a.shiftUp(n).shiftDown(n) == a)
+  }
+
   test("in and out are opposites") {
     check((a: Point3[Int]) => a.in.out == a)
+  }
+
+  test("shiftIn(n) and shiftOut(n) are opposites") {
+    check((a: Point3[Int], n: Int) => a.shiftIn(n).shiftOut(n) == a)
   }
 
   test("+ unitUp is up") {
@@ -77,6 +89,10 @@ class Point3Test extends UnitTest:
 
   test("move(orientation) is + facing") {
     check((a: Point3[Int], o: Orientation) => a.move(o) == a + o.facing)
+  }
+
+  test("shift(orientation, n) is + facing * n") {
+    check((a: Point3[Int], o: Orientation, n: Int) => a.shift(o, n) == a + o.facing * n)
   }
 
   test("adjacent has 6 distinct points") {

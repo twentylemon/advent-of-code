@@ -25,15 +25,23 @@ object Point3:
   * @param z the z coordinate
   */
 case class Point3[N: Integral](x: N, y: N, z: N):
-  def up: Point3[N] = copy(y = y - `1`)
-  def down: Point3[N] = copy(y = y + `1`)
-  def left: Point3[N] = copy(x = x - `1`)
-  def right: Point3[N] = copy(x = x + `1`)
-  def in: Point3[N] = copy(z = z + `1`)
-  def out: Point3[N] = copy(z = z - `1`)
-  def move(orientation: Orientation): Point3[N] =
+  def up: Point3[N] = shiftUp(`1`)
+  def down: Point3[N] = shiftDown(`1`)
+  def left: Point3[N] = shiftLeft(`1`)
+  def right: Point3[N] = shiftRight(`1`)
+  def in: Point3[N] = shiftIn(`1`)
+  def out: Point3[N] = shiftOut(`1`)
+  def move(orientation: Orientation): Point3[N] = shift(orientation, `1`)
+
+  def shiftUp(n: N): Point3[N] = copy(y = y - n)
+  def shiftDown(n: N): Point3[N] = copy(y = y + n)
+  def shiftLeft(n: N): Point3[N] = copy(x = x - n)
+  def shiftRight(n: N): Point3[N] = copy(x = x + n)
+  def shiftIn(n: N): Point3[N] = copy(z = z + n)
+  def shiftOut(n: N): Point3[N] = copy(z = z - n)
+  def shift(orientation: Orientation, n: N): Point3[N] =
     val facing = orientation.facing
-    Point3(x + fromInt(facing.x), y + fromInt(facing.y), z + fromInt(facing.z))
+    Point3(x + fromInt[N](facing.x) * n, y + fromInt[N](facing.y) * n, z + fromInt[N](facing.z) * n)
 
   def adjacent: Seq[Point3[N]] = Seq(up, down, left, right, in, out)
   def surrounding: Seq[Point3[N]] =
