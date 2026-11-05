@@ -39,9 +39,13 @@ case class Point3[N: Integral](x: N, y: N, z: N):
   def shiftRight(n: N): Point3[N] = copy(x = x + n)
   def shiftIn(n: N): Point3[N] = copy(z = z + n)
   def shiftOut(n: N): Point3[N] = copy(z = z - n)
-  def shift(orientation: Orientation, n: N): Point3[N] =
-    val facing = orientation.facing
-    Point3(x + fromInt[N](facing.x) * n, y + fromInt[N](facing.y) * n, z + fromInt[N](facing.z) * n)
+  def shift(orientation: Orientation, n: N): Point3[N] = (orientation.facing: @unchecked) match
+    case Point3(0, -1, 0) => shiftUp(n)
+    case Point3(0, 1, 0) => shiftDown(n)
+    case Point3(-1, 0, 0) => shiftLeft(n)
+    case Point3(1, 0, 0) => shiftRight(n)
+    case Point3(0, 0, 1) => shiftIn(n)
+    case Point3(0, 0, -1) => shiftOut(n)
 
   def adjacent: Seq[Point3[N]] = Seq(up, down, left, right, in, out)
   def surrounding: Seq[Point3[N]] =
