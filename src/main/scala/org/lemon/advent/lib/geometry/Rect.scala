@@ -117,8 +117,8 @@ case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
         startY <- yRange.take(this.height - height + `1`).iterator
       yield Rect(Interval(startX, startX + width - `1`), Interval(startY, startY + height - `1`))
 
-  /** Returns the quadrants of this rectangle, row by row from the top left. If the rectangle
-    * has an odd width or height, the middle column or row is in the left or top quadrants.
+  /** Returns the quadrants of this rectangle, in the order top left, top right, bottom left, bottom right.
+    * If the rectangle has an odd width or height, the middle column or row is in the left or top quadrants.
     * @return the non-empty quadrants of this rectangle
     */
   def quadrants: Seq[Rect[N]] =
