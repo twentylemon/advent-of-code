@@ -107,6 +107,33 @@ private object Day22:
 
     1000 * end.at.location.y + 4 * end.at.location.x + facingValue(end.facing)
 
+  case class CubeState(at: Point3[Int], facing: Orientation):
+    def face = (at, facing.up)
+
+  def step(cube: Cuboid[Int])(state: CubeState): CubeState =
+    val next = state.at.move(state.facing)
+    if cube.contains(next) then state.copy(at = next) else state.copy(facing = state.facing.turnDown)
+
+  @annotation.tailrec
+  def turn(orientation: Orientation, from: Direction, to: Direction): Orientation =
+    if from == to then orientation else turn(orientation.turnRight, from.turnRight, to)
+
+  def fold(net: Map[Coord, Char], cube: Cuboid[Int]): Map[Coord, CubeState] =
+    def adjacency(tile: (Coord, CubeState)) =
+      val (coord, state) = tile
+      Direction.values.filter(d => net.contains(coord + d)).map { d =>
+        val next = step(cube)(state.copy(facing = turn(state.facing, Right, d)))
+        (coord + d, next.copy(facing = turn(next.facing, d, Right)))
+      }
+    val corner = net.keys.filter(_.y == 0).minBy(_.x)
+    fill(adjacency, (corner, CubeState(at = Point3.origin, facing = Orientation.RightOut))).toMap
+
+  def walkCube(cube: Cuboid[Int], isWall: CubeState => Boolean)(state: CubeState, action: Action): CubeState =
+    action match
+      case TurnLeft => state.copy(facing = state.facing.turnLeft)
+      case TurnRight => state.copy(facing = state.facing.turnRight)
+      case Walk(steps) => Iterator.iterate(state)(step(cube)).take(steps + 1).takeWhile(!isWall(_)).last
+
   def part2(in: String) =
     val split = in.chunks
     val net = Coord.gridToMap(split(0)).filter(_._2 != ' ')
@@ -114,33 +141,13 @@ private object Day22:
     val size = math.sqrt(net.size / 6).toInt
     val cube = Cuboid(size, size, size)
 
-    case class Walker(at: Point3[Int], orientation: Orientation):
-      def face = (at, orientation.up)
-      def step =
-        val next = at.move(orientation)
-        if cube.contains(next) then copy(at = next) else copy(orientation = orientation.turnDown)
+    val tiles = fold(net, cube)
+    val coords = tiles.map((coord, state) => (state.face, coord))
+    def isWall(state: CubeState) = net(coords(state.face)) == '#'
 
-    def turn(orientation: Orientation, from: Direction, to: Direction) =
-      Iterator.iterate((from, orientation))((d, o) => (d.turnRight, o.turnRight)).find(_._1 == to).get._2
+    val start = net.keys.filter(coord => coord.y == 0 && net(coord) == '.').minBy(_.x)
+    val end = actions.foldLeft(tiles(start))(walkCube(cube, isWall))
 
-    case class Tile(coord: Coord, walker: Walker)
-    def adjacent(tile: Tile) = Direction.values.filter(d => net.contains(tile.coord + d)).map(d =>
-      val walker = tile.walker.copy(orientation = turn(tile.walker.orientation, Right, d)).step
-      Tile(tile.coord + d, walker.copy(orientation = turn(walker.orientation, d, Right)))
-    )
-
-    val corner = net.keys.filter(_.y == 0).minBy(_.x)
-    val tiles = fill(adjacent, Tile(corner, Walker(Point3.origin, Orientation.RightOut)))
-    val byFace = tiles.map(tile => (tile.walker.face, tile)).toMap
-    def blocked(walker: Walker) = net(byFace(walker.face).coord) == '#'
-
-    val start = tiles.filter(tile => tile.coord.y == 0 && net(tile.coord) == '.').minBy(_.coord.x).walker
-    val end = actions.foldLeft(start) {
-      case (walker, TurnLeft) => walker.copy(orientation = walker.orientation.turnLeft)
-      case (walker, TurnRight) => walker.copy(orientation = walker.orientation.turnRight)
-      case (walker, Walk(steps)) => Iterator.iterate(walker)(_.step).take(steps + 1).takeWhile(!blocked(_)).last
-    }
-
-    val tile = byFace(end.face)
-    val facing = Direction.values.find(d => turn(tile.walker.orientation, Right, d) == end.orientation).get
-    1000 * (tile.coord.y + 1) + 4 * (tile.coord.x + 1) + facingValue(facing)
+    val at = coords(end.face)
+    val facing = Direction.values.find(d => turn(tiles(at).facing, Right, d) == end.facing).get
+    1000 * (at.y + 1) + 4 * (at.x + 1) + facingValue(facing)
