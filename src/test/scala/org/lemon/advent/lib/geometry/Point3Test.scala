@@ -75,6 +75,10 @@ class Point3Test extends UnitTest:
     check((a: Point3[Int]) => a - Point3.unitOut[Int] == a.in)
   }
 
+  test("move(orientation) is + facing") {
+    check((a: Point3[Int], o: Orientation) => a.move(o) == a + o.facing)
+  }
+
   test("adjacent has 6 distinct points") {
     check((a: Point3[Int]) => a.adjacent.distinct.size == 6)
   }

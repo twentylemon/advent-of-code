@@ -31,6 +31,9 @@ case class Point3[N: Integral](x: N, y: N, z: N):
   def right: Point3[N] = copy(x = x + `1`)
   def in: Point3[N] = copy(z = z + `1`)
   def out: Point3[N] = copy(z = z - `1`)
+  def move(orientation: Orientation): Point3[N] =
+    val facing = orientation.facing
+    Point3(x + fromInt(facing.x), y + fromInt(facing.y), z + fromInt(facing.z))
 
   def adjacent: Seq[Point3[N]] = Seq(up, down, left, right, in, out)
   def surrounding: Seq[Point3[N]] =
