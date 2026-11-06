@@ -44,4 +44,5 @@ jobs:
       env:
         GIT_CRYPT_KEY: ${{ secrets.GIT_CRYPT_KEY }}
     - run: pip install -r requirements.txt
+    - run: black --check .
     - run: pytest
