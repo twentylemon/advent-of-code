@@ -66,11 +66,11 @@ private object Day22:
   def fold(net: Map[Coord, Char], cube: Cuboid[Int]): Map[CubeState, NetState] =
     def adjacency(state: (NetState, CubeState)) =
       val ((coord, dir), (at, facing)) = state
-      val turns = Seq(((coord, dir.turnLeft), (at, facing.turnLeft)), ((coord, dir.turnRight), (at, facing.turnRight)))
-      val forward = Option.when(net.contains(coord + dir))(((coord + dir, dir), step(cube)((at, facing))))
+      val turns = Seq((coord, dir.turnLeft) -> (at, facing.turnLeft), (coord, dir.turnRight) -> (at, facing.turnRight))
+      val forward = Option.when(net.contains(coord + dir))((coord + dir, dir) -> step(cube)((at, facing)))
       turns ++ forward
     val corner = net.keys.filter(_.y == 0).minBy(_.x)
-    fill(adjacency, ((corner, Right), (cube.topLeftFront.out, Orientation.RightOut))).map(_.swap).toMap
+    fill(adjacency, (corner, Right) -> (cube.topLeftFront.out, Orientation.RightOut)).map(_.swap).toMap
 
   def walkCube(cube: Cuboid[Int], surface: Map[Point3[Int], Char])(state: CubeState, action: Action): CubeState =
     val (at, facing) = state
