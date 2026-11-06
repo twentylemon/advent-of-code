@@ -13,7 +13,6 @@ private object Day22:
   import Direction.*, Action.*
 
   type NetState = (Coord, Direction)
-  type CubeState = (Point3[Int], Orientation)
 
   def parseActions(path: String): Seq[Action] =
     @annotation.tailrec
@@ -40,10 +39,6 @@ private object Day22:
       case Left => 2
       case Up => 3
 
-  def password(state: NetState) =
-    val (at, facing) = state
-    1000 * (at.y + 1) + 4 * (at.x + 1) + facingValue(facing)
-
   def wrap(board: Map[Coord, Char], facing: Direction)(at: Coord): Coord =
     val next = at + facing
     if board.contains(next) then next else at.walk(facing.turnAround).takeWhile(board.contains).last
@@ -58,7 +53,10 @@ private object Day22:
 
   def part1(in: String) =
     val (board, actions) = parse(in)
-    password(actions.foldLeft(start(board))(walk(board)))
+    val (at, facing) = actions.foldLeft(start(board))(walk(board))
+    1000 * (at.y + 1) + 4 * (at.x + 1) + facingValue(facing)
+
+  type CubeState = (Point3[Int], Orientation)
 
   def step(cube: Cuboid[Int])(state: CubeState): CubeState =
     val (at, facing) = state
@@ -91,4 +89,5 @@ private object Day22:
     val onCube = onNet.map(_.swap)
     val surface = onNet.map { case ((at, _), (coord, _)) => (at, net(coord)) }
 
-    password(onNet(actions.foldLeft(onCube(start(net)))(walkCube(cube, surface))))
+    val (at, facing) = onNet(actions.foldLeft(onCube(start(net)))(walkCube(cube, surface)))
+    1000 * (at.y + 1) + 4 * (at.x + 1) + facingValue(facing)
