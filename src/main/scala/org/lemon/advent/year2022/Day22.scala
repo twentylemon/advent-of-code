@@ -3,6 +3,7 @@ package org.lemon.advent.year2022
 import org.lemon.advent.lib.*
 import org.lemon.advent.lib.geometry.*
 import org.lemon.advent.lib.graph.*
+import scala.collection.mutable
 
 private object Day22:
 
@@ -15,11 +16,26 @@ private object Day22:
   type NetState = (Coord, Direction)
   type CubeState = (Point3[Int], Orientation)
 
-  def parseActions(path: String): Seq[Action] = """\d+|[LR]""".r.findAllIn(path).map {
-    case "L" => TurnLeft
-    case "R" => TurnRight
-    case steps => Walk(steps.toInt)
-  }.toSeq
+  def parseActions(in: String): Seq[Action] =
+    val actions = mutable.Buffer.empty[Action]
+    var (num, tail) = in.span(_.isDigit)
+    while !num.isEmpty do
+      actions += Walk(num.toInt)
+      val turn =
+        tail match
+          case s if s.startsWith("R") => TurnRight
+          case s if s.startsWith("L") => TurnLeft
+          case _ => null
+
+      if turn != null then actions += turn
+      if tail.isEmpty then
+        num = ""
+      else
+        val (num2, tail2) = tail.tail.span(_.isDigit)
+        num = num2
+        tail = tail2
+
+    actions.toSeq
 
   def parse(in: String): (Map[Coord, Char], Seq[Action]) =
     val Seq(board, path) = in.chunks
