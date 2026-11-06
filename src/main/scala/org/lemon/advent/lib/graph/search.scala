@@ -245,7 +245,10 @@ def allShortestPaths[N, D: Numeric](
                 case _ =>
                   (
                     queue.enqueue(nextCost, next),
-                    state.copy(best = state.best.updated(next, nextCost), parents = state.parents.updated(next, Set(node))),
+                    state.copy(
+                      best = state.best.updated(next, nextCost),
+                      parents = state.parents.updated(next, Set(node))
+                    ),
                   )
           }
           search(nextQueue, nextState)

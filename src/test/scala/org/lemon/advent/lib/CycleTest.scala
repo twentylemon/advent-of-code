@@ -22,7 +22,7 @@ class CycleTest extends UnitTest:
       val offset = states.indexOf(states(firstRepeat))
       Seq(findCycle(initial)(next), findCycleBy(initial)(next)).forall(cycle =>
         cycle.offset == offset && cycle.period == firstRepeat - offset &&
-        (0 until 200).forall(n => cycle.stateAt(n) == Iterator.iterate(initial)(next).nth(n))
+          (0 until 200).forall(n => cycle.stateAt(n) == Iterator.iterate(initial)(next).nth(n))
       )
     })
   }
