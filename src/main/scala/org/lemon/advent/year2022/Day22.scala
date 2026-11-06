@@ -63,14 +63,14 @@ private object Day22:
     val next = at + facing
     if cube.contains(next - facing.up) then (next, facing) else (next - facing.up, facing.turnDown)
 
-  def fold(net: Map[Coord, Char], cube: Cuboid[Int]): Map[CubeState, NetState] =
+  def fold(net: Map[Coord, Char], cube: Cuboid[Int]): Map[NetState, CubeState] =
     def adjacency(state: (NetState, CubeState)) =
       val ((coord, dir), (at, facing)) = state
       val turns = Seq((coord, dir.turnLeft) -> (at, facing.turnLeft), (coord, dir.turnRight) -> (at, facing.turnRight))
       val forward = Option.when(net.contains(coord + dir))((coord + dir, dir) -> step(cube)((at, facing)))
       turns ++ forward
     val corner = net.keys.filter(_.y == 0).minBy(_.x)
-    fill(adjacency, (corner, Right) -> (cube.topLeftFront.out, Orientation.RightOut)).map(_.swap).toMap
+    fill(adjacency, (corner, Right) -> (cube.topLeftFront.out, Orientation.RightOut)).toMap
 
   def walkCube(cube: Cuboid[Int], surface: Map[Point3[Int], Char])(state: CubeState, action: Action): CubeState =
     val (at, facing) = state
@@ -85,9 +85,9 @@ private object Day22:
     val size = math.sqrt(net.size / 6).toInt
     val cube = Cuboid(size, size, size)
 
-    val onNet = fold(net, cube)
-    val onCube = onNet.map(_.swap)
-    val surface = onNet.map { case ((at, _), (coord, _)) => (at, net(coord)) }
+    val onCube = fold(net, cube)
+    val onNet = onCube.map(_.swap)
+    val surface = onCube.map { case ((coord, _), (at, _)) => (at, net(coord)) }
 
     val (at, facing) = onNet(actions.foldLeft(onCube(start(net)))(walkCube(cube, surface)))
     1000 * (at.y + 1) + 4 * (at.x + 1) + facingValue(facing)
