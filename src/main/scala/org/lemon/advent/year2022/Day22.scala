@@ -3,7 +3,6 @@ package org.lemon.advent.year2022
 import org.lemon.advent.lib.*
 import org.lemon.advent.lib.geometry.*
 import org.lemon.advent.lib.graph.*
-import scala.collection.mutable
 
 private object Day22:
 
@@ -13,6 +12,22 @@ private object Day22:
 
   import Direction.*, Action.*
 
+  type NetState = (Coord, Direction)
+  type CubeState = (Point3[Int], Orientation)
+
+  def parseActions(path: String): Seq[Action] = """\d+|[LR]""".r.findAllIn(path).map {
+    case "L" => TurnLeft
+    case "R" => TurnRight
+    case steps => Walk(steps.toInt)
+  }.toSeq
+
+  def parse(in: String): (Map[Coord, Char], Seq[Action]) =
+    val Seq(board, path) = in.chunks
+    (Coord.gridToMap(board).filter(_._2 != ' '), parseActions(path))
+
+  def start(board: Map[Coord, Char]): NetState =
+    (board.keys.filter(coord => coord.y == 0 && board(coord) == '.').minBy(_.x), Right)
+
   def facingValue(d: Direction) =
     d match
       case Right => 0
@@ -20,134 +35,55 @@ private object Day22:
       case Left => 2
       case Up => 3
 
-  class Node(val location: Coord, val contents: Char):
-    var east: Node = null
-    var west: Node = null
-    var north: Node = null
-    var south: Node = null
+  def password(state: NetState) =
+    val (at, facing) = state
+    1000 * (at.y + 1) + 4 * (at.x + 1) + facingValue(facing)
 
-    def neighbour(facing: Direction) =
-      facing match
-        case Right => east
-        case Down => south
-        case Left => west
-        case Up => north
+  def wrap(board: Map[Coord, Char], facing: Direction)(at: Coord): Coord =
+    val next = at + facing
+    if board.contains(next) then next else at.walk(facing.turnAround).takeWhile(board.contains).last
 
-    def connect(facing: Direction, node: Node) =
-      facing match
-        case Right => node.west = this; this.east = node
-        case Down => node.north = this; this.south = node
-        case Left => node.east = this; this.west = node
-        case Up => node.south = this; this.north = node
-
-    def walk(facing: Direction): LazyList[Node] = LazyList.iterate(this)(_ `neighbour` facing)
-
-    override def toString = s"Node(location=$location, contents=$contents)"
-
-  def parseBoard(in: Seq[String]) =
-    def parseRow(line: String, y: Int): Node =
-      val nodes =
-        line.zipWithIndex.filter((c, _) => !c.isWhitespace).map((c, x) =>
-          Node(location = (x + 1, y + 1), contents = c)
-        )
-      (nodes :+ nodes.head).sliding2.foreach((a, b) => a.connect(Right, b))
-      nodes.head
-
-    val rows = in.zipWithIndex.map(parseRow)
-    val width = in.map(_.size).max
-    rows.foreach(topHead =>
-      topHead.walk(Right).takeWhile(_.neighbour(Down) == null).foreach(top =>
-        val bottom = (0 until rows.size).iterator
-          .map(offset => rows((top.location.y + offset) % rows.size))
-          .map(head => head.walk(Right).take(width).find(_.location.x == top.location.x))
-          .flatten
-          .next
-        top.connect(Down, bottom)
-      )
-    )
-    rows
-
-  def parseActions(in: String): Seq[Action] =
-    val actions = mutable.Buffer.empty[Action]
-    var (num, tail) = in.span(_.isDigit)
-    while !num.isEmpty do
-      actions += Walk(num.toInt)
-      val turn =
-        tail match
-          case s if s.startsWith("R") => TurnRight
-          case s if s.startsWith("L") => TurnLeft
-          case _ => null
-
-      if turn != null then actions += turn
-      if tail.isEmpty then
-        num = ""
-      else
-        val (num2, tail2) = tail.tail.span(_.isDigit)
-        num = num2
-        tail = tail2
-
-    actions.toSeq
-
-  def isWall(node: Node) = node.contents == '#'
-
-  case class State(at: Node, facing: Direction)
-
-  def walk(state: State, action: Action): State = action match
-    case TurnLeft => state.copy(facing = state.facing.turnLeft)
-    case TurnRight => state.copy(facing = state.facing.turnRight)
-    case Walk(steps) => state.copy(at = state.at.walk(state.facing).take(steps + 1).takeWhile(!isWall(_)).last)
+  def walk(board: Map[Coord, Char])(state: NetState, action: Action): NetState =
+    val (at, facing) = state
+    action match
+      case TurnLeft => (at, facing.turnLeft)
+      case TurnRight => (at, facing.turnRight)
+      case Walk(steps) =>
+        (Iterator.iterate(at)(wrap(board, facing)).take(steps + 1).takeWhile(board(_) != '#').last, facing)
 
   def part1(in: String) =
-    val split = in.chunks
-    val rows = parseBoard(split(0).linesIterator.toSeq)
-    val actions = parseActions(split(1))
-
-    val start = State(at = rows(0).walk(Right).dropWhile(isWall).head, facing = Right)
-    val end = actions.foldLeft(start)(walk)
-
-    1000 * end.at.location.y + 4 * end.at.location.x + facingValue(end.facing)
-
-  case class CubeState(at: Point3[Int], facing: Orientation):
-    def face = (at, facing.up)
+    val (board, actions) = parse(in)
+    password(actions.foldLeft(start(board))(walk(board)))
 
   def step(cube: Cuboid[Int])(state: CubeState): CubeState =
-    val next = state.at + state.facing
-    if cube.contains(next) then state.copy(at = next) else state.copy(facing = state.facing.turnDown)
+    val (at, facing) = state
+    val next = at + facing
+    if cube.contains(next - facing.up) then (next, facing) else (next - facing.up, facing.turnDown)
 
-  @annotation.tailrec
-  def turn(orientation: Orientation, from: Direction, to: Direction): Orientation =
-    if from == to then orientation else turn(orientation.turnRight, from.turnRight, to)
-
-  def fold(net: Map[Coord, Char], cube: Cuboid[Int]): Map[Coord, CubeState] =
-    def adjacency(tile: (Coord, CubeState)) =
-      val (coord, state) = tile
-      Direction.values.filter(d => net.contains(coord + d)).map { d =>
-        val next = step(cube)(state.copy(facing = turn(state.facing, Right, d)))
-        (coord + d, next.copy(facing = turn(next.facing, d, Right)))
-      }
+  def fold(net: Map[Coord, Char], cube: Cuboid[Int]): Map[CubeState, NetState] =
+    def adjacency(state: (NetState, CubeState)) =
+      val ((coord, dir), (at, facing)) = state
+      val turns = Seq(((coord, dir.turnLeft), (at, facing.turnLeft)), ((coord, dir.turnRight), (at, facing.turnRight)))
+      val forward = Option.when(net.contains(coord + dir))(((coord + dir, dir), step(cube)((at, facing))))
+      turns ++ forward
     val corner = net.keys.filter(_.y == 0).minBy(_.x)
-    fill(adjacency, (corner, CubeState(at = Point3.origin, facing = Orientation.RightOut))).toMap
+    fill(adjacency, ((corner, Right), (cube.topLeftFront.out, Orientation.RightOut))).map(_.swap).toMap
 
-  def walkCube(cube: Cuboid[Int], isWall: CubeState => Boolean)(state: CubeState, action: Action): CubeState =
+  def walkCube(cube: Cuboid[Int], surface: Map[Point3[Int], Char])(state: CubeState, action: Action): CubeState =
+    val (at, facing) = state
     action match
-      case TurnLeft => state.copy(facing = state.facing.turnLeft)
-      case TurnRight => state.copy(facing = state.facing.turnRight)
-      case Walk(steps) => Iterator.iterate(state)(step(cube)).take(steps + 1).takeWhile(!isWall(_)).last
+      case TurnLeft => (at, facing.turnLeft)
+      case TurnRight => (at, facing.turnRight)
+      case Walk(steps) =>
+        Iterator.iterate(state)(step(cube)).take(steps + 1).takeWhile((p, _) => surface(p) != '#').last
 
   def part2(in: String) =
-    val split = in.chunks
-    val net = Coord.gridToMap(split(0)).filter(_._2 != ' ')
-    val actions = parseActions(split(1))
+    val (net, actions) = parse(in)
     val size = math.sqrt(net.size / 6).toInt
     val cube = Cuboid(size, size, size)
 
-    val tiles = fold(net, cube)
-    val coords = tiles.map((coord, state) => (state.face, coord))
-    def isWall(state: CubeState) = net(coords(state.face)) == '#'
+    val onNet = fold(net, cube)
+    val onCube = onNet.map(_.swap)
+    val surface = onNet.map { case ((at, _), (coord, _)) => (at, net(coord)) }
 
-    val start = net.keys.filter(coord => coord.y == 0 && net(coord) == '.').minBy(_.x)
-    val end = actions.foldLeft(tiles(start))(walkCube(cube, isWall))
-
-    val at = coords(end.face)
-    val facing = Direction.values.find(d => turn(tiles(at).facing, Right, d) == end.facing).get
-    1000 * (at.y + 1) + 4 * (at.x + 1) + facingValue(facing)
+    password(onNet(actions.foldLeft(onCube(start(net)))(walkCube(cube, surface))))
