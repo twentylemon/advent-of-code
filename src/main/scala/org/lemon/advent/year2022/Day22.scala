@@ -15,14 +15,16 @@ private object Day22:
   type NetState = (Coord, Direction)
   type CubeState = (Point3[Int], Orientation)
 
-  @annotation.tailrec
-  def parseActions(path: String, actions: Seq[Action] = Vector()): Seq[Action] =
-    val (steps, rest) = path.span(_.isDigit)
-    val walked = actions :+ Walk(steps.toInt)
-    rest.headOption match
-      case Some('L') => parseActions(rest.tail, walked :+ TurnLeft)
-      case Some('R') => parseActions(rest.tail, walked :+ TurnRight)
-      case _ => walked
+  def parseActions(path: String): Seq[Action] =
+    @annotation.tailrec
+    def loop(path: String, actions: Seq[Action]): Seq[Action] =
+      val (steps, rest) = path.span(_.isDigit)
+      val walked = actions :+ Walk(steps.toInt)
+      rest.headOption match
+        case Some('L') => loop(rest.tail, walked :+ TurnLeft)
+        case Some('R') => loop(rest.tail, walked :+ TurnRight)
+        case _ => walked
+    loop(path, Vector())
 
   def parse(in: String): (Map[Coord, Char], Seq[Action]) =
     val Seq(board, path) = in.chunks
