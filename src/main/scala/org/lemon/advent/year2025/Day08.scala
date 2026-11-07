@@ -2,6 +2,7 @@ package org.lemon.advent.year2025
 
 import org.lemon.advent.lib.*
 import org.lemon.advent.lib.geometry.Point3
+import org.lemon.advent.lib.graph.DisjointSet
 
 private object Day08:
 
@@ -13,19 +14,13 @@ private object Day08:
       Point3(x.toLong, y.toLong, z.toLong)
     ).toSeq
 
-  def connectedComponents(pairs: Seq[(Coord, Coord)]): Set[Set[Coord]] =
-    pairs.foldLeft(Set.empty[Set[Coord]]) { case (acc, (a, b)) =>
-      val (connected, rest) = acc.partition(c => c.contains(a) || c.contains(b))
-      rest + connected.foldLeft(Set(a, b))(_ ++ _)
-    }
-
   def part1(input: String, strands: Int = 1000) =
     val coords = parse(input)
     val closests = coords.pairs.toVector
       .sortBy(_.euclidean(_))
       .take(strands)
-    val circuits = connectedComponents(closests)
-    circuits.toSeq.map(_.size).sorted.reverse.take(3).product
+    val circuits = closests.foldLeft(DisjointSet(coords)) { case (circuits, (a, b)) => circuits.union(a, b) }
+    circuits.components.map(_.size).toSeq.sorted.reverse.take(3).product
 
   def minimumSpanningTree(coords: Seq[Coord]): Seq[(Coord, Coord)] =
     val all = coords.toSet
