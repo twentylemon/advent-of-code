@@ -17,6 +17,11 @@ private object Day12:
 
   def perimeter(region: Set[Coord]) = region.iterator.map(_.adjacent.count(!region(_))).sum
 
+  def part1(input: String) =
+    regions(parse(input))
+      .map(region => region.size * perimeter(region))
+      .sum
+
   def sides(region: Set[Coord]) =
     def in(coord: Coord) = region(coord)
     def out(coord: Coord) = !region(coord)
@@ -37,11 +42,6 @@ private object Day12:
         .count(identity)
 
     region.iterator.map(corners).sum
-
-  def part1(input: String) =
-    regions(parse(input))
-      .map(region => region.size * perimeter(region))
-      .sum
 
   def part2(input: String) =
     regions(parse(input))
