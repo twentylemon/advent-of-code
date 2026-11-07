@@ -32,11 +32,9 @@ extension (coord: Coord)
 extension [T](seq: Seq[Seq[T]])
   def apply(coord: Coord): T = seq(coord.row)(coord.col)
 
-  def hasCoord(coord: Coord): Boolean =
-    seq.indices.contains(coord.row) && seq(coord.row).indices.contains(coord.col)
+  def hasCoord(coord: Coord): Boolean = seq.isDefinedAt(coord.row) && seq(coord.row).isDefinedAt(coord.col)
 
 extension (seq: Seq[String])(using String => WrappedString)
   def apply(coord: Coord): Char = seq(coord.row)(coord.col)
 
-  def hasCoord(coord: Coord): Boolean =
-    seq.indices.contains(coord.row) && seq(coord.row).indices.contains(coord.col)
+  def hasCoord(coord: Coord): Boolean = seq.isDefinedAt(coord.row) && seq(coord.row).isDefinedAt(coord.col)
