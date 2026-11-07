@@ -114,6 +114,9 @@ case class Interval[N: Integral](start: N, end: N) extends Iterable[N] with Part
     if isEmpty then throw new UnsupportedOperationException("init of empty interval")
     else dropRight(`1`)
 
+  override def tails: Iterator[Interval[N]] = Interval(`0`, length).iterator.map(drop)
+  override def inits: Iterator[Interval[N]] = Interval(`0`, length).iterator.map(dropRight)
+
   def indexOf(elem: N): N = if contains(elem) then elem - start else - `1`
   def lastIndexOf(elem: N): N = indexOf(elem)
 

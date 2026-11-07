@@ -111,6 +111,14 @@ class EmptyIntervalTest extends UnitTest:
     an[UnsupportedOperationException] should be thrownBy Interval.empty[Int].init
   }
 
+  test("tails only contains the empty interval") {
+    Interval.empty[Int].tails.toSeq shouldBe Seq(Interval.empty[Int])
+  }
+
+  test("inits only contains the empty interval") {
+    Interval.empty[Int].inits.toSeq shouldBe Seq(Interval.empty[Int])
+  }
+
   test("slice returns empty") {
     check((from: Int, until: Int) => Interval.empty[Int].slice(from, until).isEmpty)
   }
@@ -371,6 +379,14 @@ class IntervalTest extends UnitTest:
 
   test("init matches Range") {
     check(forAll(shortIntervalGen) { (a, b) => interval(a, b).init.toSeq == range(a, b).init.toSeq })
+  }
+
+  test("tails matches Range") {
+    check(forAll(shortIntervalGen) { (a, b) => interval(a, b).tails.map(_.toRange).toSeq == range(a, b).tails.toSeq })
+  }
+
+  test("inits matches Range") {
+    check(forAll(shortIntervalGen) { (a, b) => interval(a, b).inits.map(_.toRange).toSeq == range(a, b).inits.toSeq })
   }
 
   test("indexOf matches Range") {
