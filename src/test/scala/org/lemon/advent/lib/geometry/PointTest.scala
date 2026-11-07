@@ -9,7 +9,7 @@ import org.scalacheck.*
 
 import scala.util.Try
 
-class CoordTest extends UnitTest:
+class PointTest extends UnitTest:
 
   test("left and right are opposites") {
     check((coord: Coord) => coord == coord.left.right)
