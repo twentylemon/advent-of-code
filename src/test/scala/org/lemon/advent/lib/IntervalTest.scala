@@ -208,6 +208,10 @@ class IntervalTest extends UnitTest:
     check((range: Range) => Interval(range).toRange == (range.min to range.max))
   }
 
+  test("Interval of Longs from Range preserves values") {
+    check((range: Range) => Interval[Long](range) == Interval(range.min.toLong, range.max.toLong))
+  }
+
   test("Interval from empty Range is empty") {
     Interval(5 until 5).isEmpty shouldBe true
   }

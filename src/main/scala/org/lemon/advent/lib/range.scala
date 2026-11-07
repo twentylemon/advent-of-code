@@ -24,13 +24,17 @@ extension [N: Integral](tuple: (N, N))
 object Interval:
   def empty[N: Integral]: Interval[N] = Interval(`1`, `0`)
 
-  def apply(range: Range): Interval[Int] = apply(range.toNumericRange[Int])
+  def apply[N](range: Range)(using DefaultsTo[N, Int], Integral[N]): Interval[N] =
+    if range.isEmpty then empty
+    else
+      require(range.step == 1 || range.step == -1, "Range must have step 1 or -1")
+      Interval[N](fromInt(range.min), fromInt(range.max))
 
   def apply[N: Integral](range: NumericRange[N]): Interval[N] =
-    require(range.step == 1 || range.step == -1, "Range must have step 1 or -1")
-    if range.isEmpty then empty[N]
-    else if range.step == 1 then Interval(range.head, range.last)
-    else Interval(range.last, range.head)
+    if range.isEmpty then empty
+    else
+      require(range.step == 1 || range.step == -1, "Range must have step 1 or -1")
+      Interval(range.min, range.max)
 
   given [N: Integral]: Ordering[Interval[N]] = Ordering.by[Interval[N], N](_.start).orElseBy(_.end)
 
@@ -205,7 +209,7 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
       val floor = if next > start then intervals.maxBefore(next) else intervals.lastOption
       floor.exists((s, e) => start >= s && end <= e)
 
-  def contains(range: Range): Boolean = contains(range.toNumericRange)
+  def contains(range: Range): Boolean = contains(Interval[N](range))
   def contains(range: NumericRange[N]): Boolean = contains(Interval(range))
   def contains(interval: Interval[N]): Boolean = contains(interval.start, interval.end)
 
@@ -265,7 +269,7 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
     * @return a new diet containing all values in the range
     * @throws IllegalArgumentException if the range has a step other than 1
     */
-  def add(range: Range): Diet[N] = add(range.toNumericRange)
+  def add(range: Range): Diet[N] = add(Interval[N](range))
   def add(range: NumericRange[N]): Diet[N] = add(Interval(range))
   def add(interval: Interval[N]): Diet[N] = add(interval.start, interval.end)
 
@@ -315,7 +319,7 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
     * @return a new diet with the range removed
     * @throws IllegalArgumentException if the range has a step other than 1
     */
-  def remove(range: Range): Diet[N] = remove(range.toNumericRange)
+  def remove(range: Range): Diet[N] = remove(Interval[N](range))
   def remove(range: NumericRange[N]): Diet[N] = remove(Interval(range))
   def remove(interval: Interval[N]): Diet[N] = remove(interval.start, interval.end)
 
