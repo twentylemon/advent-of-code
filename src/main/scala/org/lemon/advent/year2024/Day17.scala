@@ -61,11 +61,11 @@ private object Day17:
     pointer = state.pointer + 2,
   )
   def bdv(state: State) = state.copy(
-    registerB = state.registerA / (1 << state.combo),
+    registerB = state.registerA / (1L << state.combo),
     pointer = state.pointer + 2,
   )
   def cdv(state: State) = state.copy(
-    registerC = state.registerA / (1 << state.combo),
+    registerC = state.registerA / (1L << state.combo),
     pointer = state.pointer + 2,
   )
 

@@ -33,7 +33,7 @@ private object Day06:
           .find(coord => !grid.contains(coord) || grid(coord) == '#')
           .get
         start -> (dir -> (if !grid.contains(end) then end else end - dir))
-    paths.toSeq.groupBy(_._1).mapValues(_.map(_._2).toMap).toMap
+    paths.toSeq.groupBy(_._1).view.mapValues(_.map(_._2).toMap).toMap
 
   @annotation.tailrec
   def isLoop(paths: Paths, wall: Coord)(at: Coord, dir: Direction, seen: Set[(Coord, Direction)] = Set()): Boolean =
