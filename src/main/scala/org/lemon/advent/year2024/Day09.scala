@@ -28,10 +28,10 @@ private object Day09:
 
   def checksum(files: Seq[Segment]) =
     files.iterator
-      .flatMap(_ match
+      .flatMap {
         case File(len, id) => Iterator.fill(len)(id.toLong)
         case Free(len) => Iterator.fill(len)(0L)
-      )
+      }
       .zipWithIndex
       .map(_ * _)
       .sum

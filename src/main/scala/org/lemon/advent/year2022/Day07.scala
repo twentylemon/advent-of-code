@@ -15,7 +15,7 @@ private object Day07:
   def buildTree(lines: Iterator[String]) =
     val root = Directory("/", parent = null)
     var pwd = root
-    lines.foreach(_ match
+    lines.foreach {
       case "$ cd .." => pwd = pwd.parent
       case "$ cd /" => pwd = root
       case s"$$ cd $dir" =>
@@ -23,7 +23,7 @@ private object Day07:
       case "$ ls" => "nothing to do"
       case s"dir $dir" => pwd.contents.add(Directory(dir, pwd))
       case s"$size $name" => pwd.contents.add(Obj(name = name, size = size.toInt))
-    )
+    }
     root
 
   def iterator(tree: File): Iterator[File] = tree match
