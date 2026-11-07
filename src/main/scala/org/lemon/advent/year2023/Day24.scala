@@ -1,7 +1,7 @@
 package org.lemon.advent.year2023
 
+import org.lemon.advent.lib.*
 import org.lemon.advent.lib.geometry.Point3
-import org.lemon.advent.lib.{pairs, toBigInt}
 
 import scala.collection.parallel.CollectionConverters.*
 
