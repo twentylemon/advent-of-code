@@ -21,7 +21,7 @@ final class DisjointSet[A] private (parent: Map[A, A], rank: Map[A, Int]):
 
   def connected(a: A, b: A): Boolean = find(a) == find(b)
 
-  def components: Seq[Set[A]] = parent.keys.groupBy(find).values.map(_.toSet).toSeq
+  def components: Iterator[Set[A]] = parent.keySet.groupBy(find).valuesIterator
 
   @tailrec private def find(a: A): A =
     val p = parent(a)
