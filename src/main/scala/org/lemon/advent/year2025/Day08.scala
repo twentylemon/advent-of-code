@@ -23,13 +23,25 @@ private object Day08:
     circuits.components.map(_.size).toSeq.sorted.reverse.take(3).product
 
   def minimumSpanningTree(coords: Seq[Coord]): Seq[(Coord, Coord)] =
-    val (_, tree) = coords.pairs.toVector
-      .sortBy(_.euclidean(_))
-      .foldLeft((DisjointSet(coords), Vector.empty[(Coord, Coord)])) { case ((circuits, tree), (a, b)) =>
-        if circuits.connected(a, b) then (circuits, tree)
-        else (circuits.union(a, b), tree :+ (a, b))
-      }
-    tree
+    val all = coords.toSet
+    val initialDist = all.map(_ -> Long.MaxValue).toMap.updated(coords.head, 0L)
+
+    val (_, _, parent) = coords.foldLeft((Set.empty[Coord], initialDist, Map.empty[Coord, Coord])) {
+      case ((mst, minDist, parent), _) =>
+        val remaining = all -- mst
+        val u = remaining.minBy(minDist)
+        val neighbours = remaining - u
+
+        val (newDist, newParent) = neighbours.foldLeft((minDist, parent)) {
+          case ((dist, par), v) =>
+            val d = u.euclidean(v)
+            if d < dist(v) then (dist.updated(v, d), par.updated(v, u))
+            else (dist, par)
+        }
+
+        (mst + u, newDist, newParent)
+    }
+    coords.tail.map(v => (parent(v), v))
 
   def part2(input: String) =
     val coords = parse(input)
