@@ -1,13 +1,10 @@
 package org.lemon.advent.year2023
 
 import org.lemon.advent.lib.*
-import org.lemon.advent.lib.graph.Path
-import org.lemon.advent.lib.graph.pathFind
-import org.lemon.advent.lib.graph.fill
+import org.lemon.advent.lib.graph.DisjointSet
 
 import scala.annotation.tailrec
-import scala.collection.mutable
-import scala.collection.parallel.CollectionConverters.*
+import scala.util.Random
 
 private object Day25:
 
@@ -22,33 +19,23 @@ private object Day25:
     .toSeq
     .groupMap(_._1)(_._2)
 
-  def maxFlow[T](graph: Map[T, Seq[T]], edgeWeights: Map[(T, T), Int], source: T, sink: T) =
-    Iterator.unfold(edgeWeights)(flowByEdge =>
-      def adjacency(node: T) = graph(node).filter(next => flowByEdge((node, next)) > 0)
-      pathFind(adjacency, source, sink) match
-        case None => None
-        case Some(Path(path, _)) =>
-          val route = path.reverse.zip(path.reverse.tail).map(_.swap)
-          val pathFlow = route.map(flowByEdge).min
-          val nextFlows = route.foldLeft(flowByEdge) { case (flow, (from, to)) =>
-            flow
-              .updatedWith((from, to))(_.map(w => w - pathFlow))
-              .updatedWith((to, from))(_.map(w => w + pathFlow))
-          }
-          Some((pathFlow, nextFlows))
-    ).sum
-
-  def size[T](graph: Map[T, Seq[T]]) = fill(graph, graph.head._1).size
+  def contract(nodes: Seq[String], edges: Seq[(String, String)]) =
+    @tailrec
+    def loop(groups: DisjointSet[String], edges: List[(String, String)], merges: Int): DisjointSet[String] =
+      if merges == nodes.size - 2 then groups
+      else
+        val (a, b) = edges.head
+        if groups.connected(a, b) then loop(groups, edges.tail, merges)
+        else loop(groups.union(a, b), edges.tail, merges + 1)
+    loop(DisjointSet(nodes), edges.toList, 0)
 
   def part1(input: String) =
     val graph = parse(input)
-    val edges = graph.toSeq.flatMap((from, tos) => tos.map(to => (from, to).sorted)).toSet
-    val flowByEdge =
-      graph.toSeq.flatMap((from, tos) => tos.flatMap(to => Seq((from, to), (to, from)))).map((_, 1)).toMap
+    val edges = graph.toSeq.flatMap((from, tos) => tos.map(to => (from, to).sorted)).distinct
 
-    val threeCut = edges.par.filter(maxFlow(graph, flowByEdge, _, _) == 3)
-    val cutGraph = threeCut.foldLeft(graph) { case (graph, (from, to)) =>
-      graph.updated(from, graph(from).filter(_ != to)).updated(to, graph(to).filter(_ != from))
-    }
-    val cutSize = size(cutGraph)
-    cutSize * (graph.size - cutSize)
+    @tailrec
+    def cut: DisjointSet[String] =
+      val groups = contract(graph.keys.toSeq, Random.shuffle(edges))
+      if edges.count(!groups.connected(_, _)) == 3 then groups else cut
+
+    cut.components.map(_.size).product
