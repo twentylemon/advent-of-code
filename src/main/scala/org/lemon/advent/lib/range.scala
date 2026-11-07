@@ -80,14 +80,13 @@ case class Interval[N: Integral](start: N, end: N) extends Iterable[N] with Part
     if isEmpty then Iterator.empty
     else
       new AbstractIterator[N]:
-        private val num = Integral[N]
         private var current = first
         private var more = true
         def hasNext: Boolean = more
         def next(): N =
           if !more then Iterator.empty.next()
           val result = current
-          if num.equiv(result, stop) then more = false else current = num.plus(result, step)
+          if result == stop then more = false else current = result + step
           result
 
   def indices: Interval[N] = if isEmpty then Interval.empty else Interval(`0`, length - `1`)
