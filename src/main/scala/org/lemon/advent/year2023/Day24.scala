@@ -1,7 +1,7 @@
 package org.lemon.advent.year2023
 
 import org.lemon.advent.lib.geometry.Point3
-import org.lemon.advent.lib.pairs
+import org.lemon.advent.lib.{pairs, toBigInt}
 
 import scala.collection.parallel.CollectionConverters.*
 
@@ -11,8 +11,8 @@ private object Day24:
 
   def parse(input: String) = input.linesIterator.map {
     case s"$x, $y, $z @ $vx, $vy, $vz" => Hail(
-        position = Point3(BigInt(x.trim), BigInt(y.trim), BigInt(z.trim)),
-        velocity = Point3(BigInt(vx.trim), BigInt(vy.trim), BigInt(vz.trim))
+        position = Point3(x.toBigInt, y.toBigInt, z.toBigInt),
+        velocity = Point3(vx.toBigInt, vy.toBigInt, vz.toBigInt)
       )
   }.toSeq
 

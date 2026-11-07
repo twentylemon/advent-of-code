@@ -29,14 +29,14 @@ extension (str: String)
     */
   def chunks: Seq[String] = str.split("\n\n").filter(_.trim.nonEmpty).toSeq
 
-  /** Parses the string into a BigInt.
+  /** Parses the string into a BigInt, ignoring surrounding whitespace.
     *
     * @return the string as a BigInt
     */
-  def toBigInt: BigInt = BigInt(str)
+  def toBigInt: BigInt = BigInt(str.trim)
 
-  /** Tris to parse the string into a BigInt, returning None if it fails.
+  /** Tries to parse the string into a BigInt, ignoring surrounding whitespace, returning None if it fails.
     *
     * @return the string as a BigInt, or None on failure
     */
-  def toBigIntOption: Option[BigInt] = Try(BigInt(str)).toOption
+  def toBigIntOption: Option[BigInt] = Try(BigInt(str.trim)).toOption
