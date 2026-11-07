@@ -6,11 +6,11 @@ import org.lemon.advent.lib.graph.*
 private object Day23:
 
   def parse(input: String) = input.linesIterator
-      .flatMap {
-        case s"$a-$b" => Seq((a, b), (b, a))
-      }
-      .toSeq
-      .groupMapReduce(_._1)(x => Set(x._2))(_ ++ _)
+    .flatMap {
+      case s"$a-$b" => Seq((a, b), (b, a))
+    }
+    .toSeq
+    .groupMapReduce(_._1)(x => Set(x._2))(_ ++ _)
 
   def part1(input: String) =
     val graph = parse(input)
