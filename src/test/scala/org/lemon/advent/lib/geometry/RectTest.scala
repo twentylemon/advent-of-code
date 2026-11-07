@@ -25,10 +25,6 @@ class RectTest extends UnitTest:
     check((area: Area) => area.perimeter == area.map(_.adjacent.count(!area.contains(_))).sum)
   }
 
-  test("perimeter is the region's perimeterLength") {
-    check((area: Area) => area.perimeter == Region(area.toSet).perimeterLength)
-  }
-
   test("topRow contains width points") {
     check((area: Area) => area.topRow.size == area.width)
   }
@@ -84,8 +80,8 @@ class RectTest extends UnitTest:
     check((area: Area) => area.boundary.forall(c => c.adjacent.exists(!area.contains(_))))
   }
 
-  test("boundary size is the size of the region's perimeter") {
-    check((area: Area) => area.boundary.size == Region(area.toSet).perimeter.size)
+  test("boundary size is the number of edge coords") {
+    check((area: Area) => area.boundary.size == area.count(_.adjacent.exists(!area.contains(_))))
   }
 
   test("map with coord keys cover area") {

@@ -2,7 +2,7 @@ package org.lemon.advent.lib.geometry
 
 import scala.collection.immutable.WrappedString
 
-/** A 2d coordinate (or vector) with integer values. Integrates with [[Area]] and [[Region]],
+/** A 2d coordinate (or vector) with integer values. Integrates with [[Area]]
   * and contains some integer specific extensions over [[Point]]. Extensions are
   * also provided for [[Seq]] and [[Map]] which represent grids.
   */
