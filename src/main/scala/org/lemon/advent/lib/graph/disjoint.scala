@@ -44,6 +44,7 @@ final class DisjointSet[A] private (parent: Map[A, A], rank: Map[A, Int]):
     */
   def components: Iterator[Set[A]] = parent.keySet.groupBy(find).valuesIterator
 
-  @tailrec private def find(a: A): A =
+  @tailrec
+  private def find(a: A): A =
     val p = parent(a)
     if p == a then a else find(p)
