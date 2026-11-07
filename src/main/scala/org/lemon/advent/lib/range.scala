@@ -69,9 +69,9 @@ case class Interval[N: Integral](start: N, end: N) extends Iterable[N] with Part
   override def lastOption: Option[N] = if isEmpty then None else Some(end)
 
   def min: N = if isEmpty then throw new UnsupportedOperationException("min of empty interval") else start
-  def minOption: Option[N] = if isEmpty then None else Some(start)
+  def minOption: Option[N] = headOption
   def max: N = if isEmpty then throw new UnsupportedOperationException("max of empty interval") else end
-  def maxOption: Option[N] = if isEmpty then None else Some(end)
+  def maxOption: Option[N] = lastOption
 
   override def iterator: Iterator[N] = steps(start, end, `1`)
   def reverseIterator: Iterator[N] = steps(end, start, `-1`)
