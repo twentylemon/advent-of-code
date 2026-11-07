@@ -32,11 +32,10 @@ private object Day25:
   def part1(input: String) =
     val graph = parse(input)
     val edges = graph.toSeq.flatMap((from, tos) => tos.map(to => (from, to).sorted)).distinct
-    val random = Random(25)
 
     @tailrec
     def cut: DisjointSet[String] =
-      val groups = contract(graph.keys.toSeq, random.shuffle(edges))
+      val groups = contract(graph.keys.toSeq, Random.shuffle(edges))
       if edges.count((a, b) => !groups.connected(a, b)) == 3 then groups else cut
 
     cut.components.map(_.size).product
