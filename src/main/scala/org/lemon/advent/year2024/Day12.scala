@@ -1,36 +1,26 @@
 package org.lemon.advent.year2024
 
-import scala.collection.mutable
-
-import org.lemon.advent.lib.`2d`.*
+import org.lemon.advent.lib.geometry.*
 import org.lemon.advent.lib.graph.*
 
 private object Day12:
 
   def parse = Coord.gridToMap
 
-  def adjacency(grid: Map[Coord, Char], start: Coord) =
-    (c: Coord) => c.adjacent.filter(grid.contains).filter(grid(_) == grid(start))
+  def join(grid: Map[Coord, Char])(plots: DisjointSet[Coord], coord: Coord) =
+    Seq(coord.right, coord.down)
+      .filter(grid.get(_).contains(grid(coord)))
+      .foldLeft(plots)(_.union(coord, _))
 
-  def region(grid: Map[Coord, Char], start: Coord) =
-    Region(fill(adjacency(grid, start), start))
+  def regions(grid: Map[Coord, Char]) =
+    grid.keys.foldLeft(DisjointSet(grid.keys))(join(grid)).components.map(Region(_))
 
   def part1(input: String) =
-    val grid = parse(input)
-    val seen = mutable.Set.empty[Coord]
-    grid.keys.iterator
-      .filter(!seen.contains(_))
-      .map(region(grid, _))
-      .tapEach(region => seen.addAll(region.coords))
+    regions(parse(input))
       .map(region => region.area * region.perimeterLength)
       .sum
 
   def part2(input: String) =
-    val grid = parse(input)
-    val seen = mutable.Set.empty[Coord]
-    grid.keys.iterator
-      .filter(!seen.contains(_))
-      .map(region(grid, _))
-      .tapEach(region => seen.addAll(region.coords))
+    regions(parse(input))
       .map(region => region.area * region.sides)
       .sum

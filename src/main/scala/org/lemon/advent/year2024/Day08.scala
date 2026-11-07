@@ -1,14 +1,14 @@
 package org.lemon.advent.year2024
 
 import org.lemon.advent.lib.*
-import org.lemon.advent.lib.`2d`.*
+import org.lemon.advent.lib.geometry.*
 
 private object Day08:
 
   def parse = Coord.gridToMap
 
   def antinodes(grid: Map[Coord, Char])(lhs: Coord, rhs: Coord): Iterator[Coord] =
-    def it(d: Coord) = Iterator.iterate(lhs)(_ + d.asVec.reduce).takeWhile(grid.contains)
+    def it(d: Coord) = Iterator.iterate(lhs)(_ + d.reduce).takeWhile(grid.contains)
     it(lhs - rhs) ++ it(rhs - lhs)
 
   def count(grid: Map[Coord, Char], cond: (Coord, Coord, Coord) => Boolean) =

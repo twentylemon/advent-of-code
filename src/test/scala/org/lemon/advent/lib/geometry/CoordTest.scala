@@ -1,9 +1,9 @@
-package org.lemon.advent.lib.`2d`
+package org.lemon.advent.lib.geometry
 
 import org.lemon.advent.*
 import org.lemon.advent.lib.*
-import org.lemon.advent.lib.`2d`.Coord.*
-import org.lemon.advent.lib.`2d`.*
+import org.lemon.advent.lib.geometry.Coord.*
+import org.lemon.advent.lib.geometry.*
 import org.scalacheck.Prop.*
 import org.scalacheck.*
 
@@ -23,6 +23,10 @@ class CoordTest extends UnitTest:
 
   test("shiftUp(n) and shiftDown(n) are opposites") {
     check((coord: Coord, n: Int) => coord == coord.shiftUp(n).shiftDown(n))
+  }
+
+  test("unary - is * -1") {
+    check((coord: Coord) => -coord == coord * -1)
   }
 
   test("+ unitUp is up") {
@@ -216,6 +220,27 @@ class CoordTest extends UnitTest:
     )
   }
 
+  test("within is every point in the surrounding square that is within distance") {
+    val metrics = Map[String, (Coord, Coord) => Int](
+      "manhattan" -> (_ `manhattan` _),
+      "chessboard" -> (_ `chessboard` _),
+      "euclidean" -> (_ `euclidean` _),
+    )
+    val gen =
+      for
+        coord <- Gen.resultOf((x: Byte, y: Byte) => Coord(x, y))
+        d <- Gen.chooseNum(0, 10)
+        metric <- Gen.oneOf(metrics.keys)
+      yield (coord, d, metric)
+
+    check(forAll(gen) { (coord: Coord, d: Int, name: String) =>
+      val metric = metrics(name)
+      val square = Area(coord.x - d to coord.x + d, coord.y - d to coord.y + d)
+      val within = coord.within(d, metric).toSeq
+      within.distinct == within && within.toSet == square.filter(metric(coord, _) <= d).toSet
+    })
+  }
+
   test("rotateRight four times is identity") {
     check((coord: Coord) => coord.rotateRight.rotateRight.rotateRight.rotateRight == coord)
   }
@@ -246,6 +271,75 @@ class CoordTest extends UnitTest:
 
   test("rotateRight around origin is same as rotateRight") {
     check((coord: Coord) => coord.rotateRight(Coord.origin) == coord.rotateRight)
+  }
+
+  test("cross is antisymmetric") {
+    check((lhs: Coord, rhs: Coord) => lhs.cross(rhs) == -rhs.cross(lhs))
+  }
+
+  test("cross with itself is zero") {
+    check((coord: Coord) => coord.cross(coord) == 0)
+  }
+
+  test("cross with a scaled copy is zero") {
+    check((coord: Coord, n: Int) => coord.cross(coord * n) == 0)
+  }
+
+  test("cross with the rotateRight is positive") {
+    check((coord: Coord) =>
+      val big = coord.to[BigInt]
+      coord != Coord.origin ==> (big.cross(big.rotateRight) > 0)
+    )
+  }
+
+  test("cross with the rotateLeft is negative") {
+    check((coord: Coord) =>
+      val big = coord.to[BigInt]
+      coord != Coord.origin ==> (big.cross(big.rotateLeft) < 0)
+    )
+  }
+
+  test("cross with the turnRight is 1") {
+    check((dir: Direction) => dir.unitVector.cross(dir.turnRight.unitVector) == 1)
+  }
+
+  test("cross with the turnLeft is -1") {
+    check((dir: Direction) => dir.unitVector.cross(dir.turnLeft.unitVector) == -1)
+  }
+
+  test("reduce is idempotent") {
+    check((coord: Coord) => coord.reduce.reduce == coord.reduce)
+  }
+
+  test("reduce keeps the direction") {
+    check((coord: Coord) =>
+      val reduced = coord.reduce
+      reduced.cross(coord) == 0 && reduced.x.sign == coord.x.sign && reduced.y.sign == coord.y.sign
+    )
+  }
+
+  test("reduce leaves coprime components") {
+    check((coord: Coord) => coord != Coord.origin ==> (coord.reduce.x.gcd(coord.reduce.y) == 1))
+  }
+
+  test("reduce scales back to the original") {
+    check((coord: Coord) => coord != Coord.origin ==> (coord.reduce * coord.x.gcd(coord.y) == coord))
+  }
+
+  test("reduce of the origin is the origin") {
+    Coord.origin.reduce shouldBe Coord.origin
+  }
+
+  test("reduce of axis aligned vectors are unit vectors") {
+    check((dir: Direction, n: Int) =>
+      (n != 0 && n != Int.MinValue) ==> ((dir.unitVector * n).reduce == dir.unitVector * n.sign)
+    )
+  }
+
+  test("reduce at the min value keeps the direction") {
+    Coord(Int.MinValue, Int.MinValue).reduce shouldBe Coord(-1, -1)
+    Coord(Int.MinValue, 0).reduce shouldBe Coord(-1, 0)
+    Coord(Int.MinValue, 6).reduce shouldBe Coord(Int.MinValue / 2, 3)
   }
 
   test("to[Int] is identity") {

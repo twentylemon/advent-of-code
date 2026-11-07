@@ -1,4 +1,4 @@
-package org.lemon.advent.lib.`2d`
+package org.lemon.advent.lib.geometry
 
 import org.lemon.advent.lib.*
 import scala.math.Integral.Implicits.*
@@ -24,8 +24,7 @@ object Rect:
   def apply[N: Integral](width: N, height: N): Rect[N] =
     apply(`0`, width - `1`, `0`, height - `1`)
 
-  given [N: Integral]: Conversion[Rect[N], Iterator[Point[N]]] =
-    (rect: Rect[N]) => for y <- rect.yRange.iterator; x <- rect.xRange.iterator yield Point(x, y)
+  given [N: Integral]: Conversion[Rect[N], Iterator[Point[N]]] = _.iterator
 
 /** A 2d rectangle with generic integral bounds.
   * @param xRange the x bounds of the rectangle
@@ -49,39 +48,47 @@ case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
 
   def size: N = width * height
 
+  /** @return the total length of the rectangle's edges */
+  def perimeter: N = if isEmpty then `0` else fromInt[N](2) * (width + height)
+
   def isEmpty: Boolean = xRange.isEmpty || yRange.isEmpty
   def nonEmpty: Boolean = xRange.nonEmpty && yRange.nonEmpty
 
   def contains(coord: Point[N]): Boolean = xRange.contains(coord.x) && yRange.contains(coord.y)
   def apply(coord: Point[N]): Boolean = contains(coord)
 
-  def col(x: N): Iterator[Point[N]] =
+  /** @return all the points in the rectangle, row by row from the top left */
+  def iterator: Iterator[Point[N]] = for y <- yRange.iterator; x <- xRange.iterator yield Point(x, y)
+
+  def col(x: N): Rect[N] =
     require(xRange.contains(x), s"$this does not contain column $x")
-    for y <- yRange.iterator yield Point(x, y)
+    copy(xRange = Interval(x, x))
 
   def reverseCol(x: N): Iterator[Point[N]] =
     require(xRange.contains(x), s"$this does not contain column $x")
     for y <- yRange.reverseIterator yield Point(x, y)
 
-  def leftCol: Iterator[Point[N]] = col(left)
-  def rightCol: Iterator[Point[N]] = col(right)
+  def leftCol: Rect[N] = col(left)
+  def rightCol: Rect[N] = col(right)
 
-  def row(y: N): Iterator[Point[N]] =
+  def row(y: N): Rect[N] =
     require(yRange.contains(y), s"$this does not contain row $y")
-    for x <- xRange.iterator yield Point(x, y)
+    copy(yRange = Interval(y, y))
 
   def reverseRow(y: N): Iterator[Point[N]] =
     require(yRange.contains(y), s"$this does not contain row $y")
     for x <- xRange.reverseIterator yield Point(x, y)
 
-  def topRow: Iterator[Point[N]] = row(top)
-  def bottomRow: Iterator[Point[N]] = row(bottom)
+  def topRow: Rect[N] = row(top)
+  def bottomRow: Rect[N] = row(bottom)
 
   def boundary: Iterator[Point[N]] =
     if isEmpty then Iterator.empty
-    else if width == `1` then leftCol
-    else if height == `1` then topRow
-    else topRow ++ rightCol.drop(1) ++ reverseRow(bottom).drop(1) ++ reverseCol(left).drop(1).take(height.toInt - 2)
+    else if width == `1` then leftCol.iterator
+    else if height == `1` then topRow.iterator
+    else
+      topRow.iterator ++ rightCol.iterator.drop(1) ++ reverseRow(bottom).drop(1) ++
+        reverseCol(left).drop(1).take(height.toInt - 2)
 
   def upDiagonal(startAt: Point[N]): Iterator[Point[N]] =
     require(contains(startAt), s"$this does not contain startAt $startAt")
@@ -91,8 +98,8 @@ case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
     require(contains(startAt), s"$this does not contain startAt $startAt")
     Iterator.iterate(startAt)(_.down.right).takeWhile(contains)
 
-  def rows: Iterator[Iterator[Point[N]]] = yRange.iterator.map(row)
-  def cols: Iterator[Iterator[Point[N]]] = xRange.iterator.map(col)
+  def rows: Iterator[Rect[N]] = yRange.iterator.map(row)
+  def cols: Iterator[Rect[N]] = xRange.iterator.map(col)
   def upDiagonals: Iterator[Iterator[Point[N]]] =
     xRange.iterator.map(x => upDiagonal(Point(x, bottom))) ++
       yRange.reverseIterator.drop(1).map(y => upDiagonal(Point(left, y)))
@@ -115,55 +122,63 @@ case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
         startY <- yRange.take(this.height - height + `1`).iterator
       yield Rect(Interval(startX, startX + width - `1`), Interval(startY, startY + height - `1`))
 
-  /** Returns the four quadrants of this area. If the area has an odd width or height,
-    * the middle row or column will be in the top or left quadrants.
-    * @return the four quadrant areas of this area
+  /** Returns the quadrants of this rectangle. If the rectangle has an odd width or height,
+    * the middle column or row is in the left or top quadrants.
+    * @return the non-empty quadrants of this rectangle
     */
-  def quadrants: Quadrants[N] =
-    val (midX, midY) = (left + width / fromInt(2), top + height / fromInt(2))
-    Quadrants(
-      topLeft = Rect(Interval(left, midX), Interval(top, midY)),
-      topRight = Rect(Interval(midX + `1`, right), Interval(top, midY)),
-      bottomLeft = Rect(Interval(left, midX), Interval(midY + `1`, bottom)),
-      bottomRight = Rect(Interval(midX + `1`, right), Interval(midY + `1`, bottom)),
-    )
+  def quadrants: Seq[Rect[N]] =
+    def halves(range: Interval[N]): Seq[Interval[N]] =
+      val mid = range.start + (range.length - `1`) / fromInt(2)
+      Interval(range.start, mid) +: Option.when(mid < range.end)(Interval(mid + `1`, range.end)).toSeq
 
-  def growLeft(n: N): Rect[N] = copy(xRange = Interval(xRange.start - n, xRange.end))
-  def growRight(n: N): Rect[N] = copy(xRange = Interval(xRange.start, xRange.end + n))
-  def growTop(n: N): Rect[N] = copy(yRange = Interval(yRange.start - n, yRange.end))
-  def growBottom(n: N): Rect[N] = copy(yRange = Interval(yRange.start, yRange.end + n))
-  def expand(n: N): Rect[N] = growLeft(n).growTop(n).growRight(n).growBottom(n)
+    if isEmpty then Seq.empty
+    else for y <- halves(yRange); x <- halves(xRange) yield Rect(x, y)
+
+  def growLeft(n: N): Rect[N] = copy(xRange = xRange.growStart(n))
+  def growRight(n: N): Rect[N] = copy(xRange = xRange.growEnd(n))
+  def growTop(n: N): Rect[N] = copy(yRange = yRange.growStart(n))
+  def growBottom(n: N): Rect[N] = copy(yRange = yRange.growEnd(n))
+  def expand(n: N): Rect[N] = Rect(xRange.expand(n), yRange.expand(n))
 
   def dropLeft(n: N): Rect[N] = growLeft(-n)
   def dropRight(n: N): Rect[N] = growRight(-n)
   def dropTop(n: N): Rect[N] = growTop(-n)
   def dropBottom(n: N): Rect[N] = growBottom(-n)
-  def contract(n: N): Rect[N] = expand(-n)
+  def contract(n: N): Rect[N] = Rect(xRange.contract(n), yRange.contract(n))
+
+  def translate(offset: Point[N]): Rect[N] = Rect(xRange.shift(offset.x), yRange.shift(offset.y))
 
   def encloses(rhs: Rect[N]): Boolean =
-    if rhs.isEmpty then true
-    else if isEmpty then false
-    else
-      left <= rhs.left && right >= rhs.right && top <= rhs.top && bottom >= rhs.bottom
+    rhs.isEmpty || xRange.containsSlice(rhs.xRange) && yRange.containsSlice(rhs.yRange)
 
-  def overlaps(rhs: Rect[N]): Boolean =
-    nonEmpty && rhs.nonEmpty && left <= rhs.right && right >= rhs.left && top <= rhs.bottom && bottom >= rhs.top
+  def overlaps(rhs: Rect[N]): Boolean = xRange.intersects(rhs.xRange) && yRange.intersects(rhs.yRange)
   def intersects(rhs: Rect[N]): Boolean = overlaps(rhs)
 
-  def intersect(rhs: Rect[N]): Rect[N] =
-    if isEmpty then this
-    else if rhs.isEmpty then rhs
-    else
-      Rect(
-        xRange = Interval(left max rhs.left, right min rhs.right),
-        yRange = Interval(top max rhs.top, bottom min rhs.bottom),
-      )
+  def intersect(rhs: Rect[N]): Rect[N] = Rect(xRange & rhs.xRange, yRange & rhs.yRange)
 
   def &(rhs: Rect[N]): Rect[N] = intersect(rhs)
 
-  def clamp(coord: Point[N]): Point[N] = Point(x = coord.x max left min right, y = coord.y max top min bottom)
+  /** Returns the points in this rectangle that are not in `rhs`, as disjoint rectangles.
+    * @param rhs the rectangle to remove
+    * @return the disjoint rectangles
+    */
+  def diff(rhs: Rect[N]): Seq[Rect[N]] =
+    val common = intersect(rhs)
+    if isEmpty then Seq.empty
+    else if common.isEmpty then Seq(this)
+    else
+      def outside(range: Interval[N], inner: Interval[N]): Seq[Interval[N]] =
+        Option.when(inner.start > range.start)(Interval(range.start, inner.start - `1`)).toSeq ++
+          Option.when(inner.end < range.end)(Interval(inner.end + `1`, range.end)).toSeq
 
-  def wrap(coord: Point[N]): Point[N] = Point(x = ((coord.x - left) +% width) + left, ((coord.y - top) +% height) + top)
+      outside(xRange, common.xRange).map(x => Rect(x, yRange)) ++
+        outside(yRange, common.yRange).map(y => Rect(common.xRange, y))
+
+  def --(rhs: Rect[N]): Seq[Rect[N]] = diff(rhs)
+
+  def clamp(coord: Point[N]): Point[N] = Point(xRange.clamp(coord.x), yRange.clamp(coord.y))
+
+  def wrap(coord: Point[N]): Point[N] = Point(xRange.wrap(coord.x), yRange.wrap(coord.y))
 
   def show(coord2Char: Point[N] => Char): String =
     import scala.collection.mutable
@@ -173,6 +188,3 @@ case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
       if coord.col == right then builder.append('\n')
     )
     builder.toString
-
-case class Quadrants[N: Integral](topLeft: Rect[N], topRight: Rect[N], bottomLeft: Rect[N], bottomRight: Rect[N]):
-  def toSeq: Seq[Rect[N]] = Seq(topLeft, topRight, bottomLeft, bottomRight)

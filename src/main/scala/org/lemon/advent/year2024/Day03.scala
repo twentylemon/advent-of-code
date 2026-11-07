@@ -15,5 +15,6 @@ private object Day03:
       .filter(_._1.startsWith("mul"))
       .filter((_, i) => matches.lastIndexOf("do()", i) >= matches.lastIndexOf("don't()", i))
       .map(_._1 match
-        case s"mul($a,$b)" => a.toInt * b.toInt)
+        case s"mul($a,$b)" => a.toInt * b.toInt
+      )
       .sum

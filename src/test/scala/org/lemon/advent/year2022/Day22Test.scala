@@ -28,8 +28,7 @@ class Day22Test extends UnitTest:
     part1(read(file(2022)(22))) shouldBe 29408
   }
 
-  // I hard coded the cube. sue me.
-  ignore("part 2 example") {
+  test("part 2 example") {
     val in = """|        ...#
                 |        .#..
                 |        #...

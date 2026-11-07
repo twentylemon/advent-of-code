@@ -1,6 +1,6 @@
 package org.lemon.advent.year2024
 
-import org.lemon.advent.lib.`2d`.*
+import org.lemon.advent.lib.geometry.*
 
 private object Day04:
 
@@ -10,7 +10,7 @@ private object Day04:
     val lines = input.linesIterator.toSeq
     val area = Area(lines)
 
-    (area.rows ++ area.cols ++ area.diagonals)
+    (area.rows.map(_.iterator) ++ area.cols.map(_.iterator) ++ area.diagonals)
       .map(
         _.sliding(4)
           .map(phrase(lines, _))

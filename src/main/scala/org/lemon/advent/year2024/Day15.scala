@@ -1,7 +1,7 @@
 package org.lemon.advent.year2024
 
 import org.lemon.advent.lib.*
-import org.lemon.advent.lib.`2d`.*
+import org.lemon.advent.lib.geometry.*
 
 private object Day15:
 
@@ -19,7 +19,8 @@ private object Day15:
       case 'O' => "[]"
       case '.' => ".."
       case '@' => "@."
-      case x => x.toString)
+      case x => x.toString
+    )
     (Coord.gridToMap(wide), parseMoves(moves))
 
   def step(grid: Map[Coord, Char], robit: Coord, dir: Direction): Map[Coord, Char] =

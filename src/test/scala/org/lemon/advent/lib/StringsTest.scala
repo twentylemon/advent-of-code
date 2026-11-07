@@ -22,11 +22,11 @@ class StringsTest extends UnitTest:
   }
 
   test("csv filters out empty values") {
-    "a,,b,c".csv == Seq("a", "b", "c")
+    "a,,b,c".csv shouldBe Seq("a", "b", "c")
   }
 
   test("csv handles empty string") {
-    "".csv == Seq.empty
+    "".csv shouldBe empty
   }
 
   test("wsv splits basic space-separated string") {
@@ -43,7 +43,7 @@ class StringsTest extends UnitTest:
   }
 
   test("wsv handles empty string") {
-    "".wsv == Seq.empty
+    "".wsv shouldBe empty
   }
 
   test("chunks splits basic double-newline-separated string") {
@@ -59,7 +59,7 @@ class StringsTest extends UnitTest:
   }
 
   test("chunks handles empty string") {
-    "".chunks == Seq.empty
+    "".chunks shouldBe empty
   }
 
   test("toBigInt round trip") {
@@ -74,8 +74,20 @@ class StringsTest extends UnitTest:
     check((n: BigInt) => ("-" + n.abs.toString).toBigInt == -n.abs)
   }
 
+  test("toBigInt ignores surrounding whitespace") {
+    val whitespace = Gen.listOf(Gen.oneOf(' ', '\t', '\n')).map(_.mkString)
+    check(forAll(arbitrary[BigInt], whitespace, whitespace) { (n, pre, post) => s"$pre$n$post".toBigInt == n })
+  }
+
   test("toBigIntOption round trip") {
     check((n: BigInt) => n.toString.toBigIntOption == Some(n))
+  }
+
+  test("toBigIntOption ignores surrounding whitespace") {
+    val whitespace = Gen.listOf(Gen.oneOf(' ', '\t', '\n')).map(_.mkString)
+    check(forAll(arbitrary[BigInt], whitespace, whitespace) { (n, pre, post) =>
+      s"$pre$n$post".toBigIntOption == Some(n)
+    })
   }
 
   test("toBigIntOption returns None for invalid strings") {

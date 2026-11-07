@@ -1,8 +1,8 @@
-package org.lemon.advent.lib.`2d`
+package org.lemon.advent.lib.geometry
 
 import org.lemon.advent.*
 import org.lemon.advent.lib.*
-import org.lemon.advent.lib.`2d`.*
+import org.lemon.advent.lib.geometry.*
 import org.scalacheck.Prop.*
 import org.scalacheck.*
 
@@ -19,6 +19,14 @@ class AreaTest extends UnitTest:
 
   test("number of enclosed points is equal to size") {
     check((area: Area) => area.size == area.iterator.size)
+  }
+
+  test("perimeter is the number of exposed unit edges") {
+    check((area: Area) => area.perimeter == area.map(_.adjacent.count(!area.contains(_))).sum)
+  }
+
+  test("perimeter is the region's perimeterLength") {
+    check((area: Area) => area.perimeter == Region(area.toSet).perimeterLength)
   }
 
   test("topRow contains width points") {
@@ -76,7 +84,7 @@ class AreaTest extends UnitTest:
     check((area: Area) => area.boundary.forall(c => c.adjacent.exists(!area.contains(_))))
   }
 
-  test("boundary size is perimeter") {
+  test("boundary size is the size of the region's perimeter") {
     check((area: Area) => area.boundary.size == Region(area.toSet).perimeter.size)
   }
 
@@ -88,13 +96,13 @@ class AreaTest extends UnitTest:
   }
 
   test("rows includes all coords in same iteration order as overall area") {
-    check((area: Area) => area.rows.flatMap(identity).sameElements(area))
+    check((area: Area) => area.rows.flatMap(_.iterator).sameElements(area))
   }
 
   test("cols includes all coords in same iteration order as transposed area") {
     check((area: Area) =>
       val transposed = Area(xRange = area.yRange, yRange = area.xRange)
-      transposed.cols.flatMap(identity).sameElements(area.map(_.flip))
+      transposed.cols.flatMap(_.iterator).sameElements(area.map(_.flip))
     )
   }
 
@@ -135,7 +143,20 @@ class AreaTest extends UnitTest:
   }
 
   test("quadrants cover the area") {
-    check((area: Area) => area.quadrants.toSeq.flatMap(_.toSeq).toSet == area.toSet)
+    check((area: Area) => area.quadrants.flatMap(_.toSeq).toSet == area.toSet)
+  }
+
+  test("quadrants split the area in half, with any odd middle in the top or left quadrants") {
+    check((area: Area) =>
+      area.quadrants.forall(q =>
+        q.width == (if q.left == area.left then (area.width + 1) / 2 else area.width / 2) &&
+          q.height == (if q.top == area.top then (area.height + 1) / 2 else area.height / 2)
+      )
+    )
+  }
+
+  test("quadrants are non-empty") {
+    check((area: Area) => area.quadrants.forall(_.nonEmpty))
   }
 
   test("area encloses itself") {
@@ -169,6 +190,14 @@ class AreaTest extends UnitTest:
     check((area: Area) => !area.overlaps(Area(area.right + 1 to area.right + 2, area.yRange)))
   }
 
+  test("empty area overlaps nothing") {
+    check(forAll(emptyArea, Arbitrary.arbitrary[Area])((empty, area) => !empty.overlaps(area) && !area.overlaps(empty)))
+  }
+
+  test("area overlaps when the intersection is non-empty") {
+    check((a1: Area, a2: Area) => a1.overlaps(a2) == a1.intersect(a2).nonEmpty)
+  }
+
   test("intersect with self is self") {
     check((area: Area) => area.intersect(area) == area)
   }
@@ -186,6 +215,42 @@ class AreaTest extends UnitTest:
 
   test("intersect contains only points in both areas") {
     check((a1: Area, a2: Area) => a1.intersect(a2).forall(c => a1.contains(c) && a2.contains(c)))
+  }
+
+  test("diff with self is empty") {
+    check((area: Area) => area.diff(area).isEmpty)
+  }
+
+  test("diff of disjoint area is the original area") {
+    check((area: Area) => area.diff(Area(area.right + 1 to area.right + 2, area.yRange)) == Seq(area))
+  }
+
+  test("diff is enclosed by original area") {
+    check((a1: Area, a2: Area) => a1.diff(a2).forall(a1.encloses))
+  }
+
+  test("diff does not overlap the removed area") {
+    check((a1: Area, a2: Area) => a1.diff(a2).forall(!_.overlaps(a2)))
+  }
+
+  test("diff areas do not overlap each other") {
+    check((a1: Area, a2: Area) => a1.diff(a2).pairs.forall(!_.overlaps(_)))
+  }
+
+  test("diff contains the points not in the removed area") {
+    check((a1: Area, a2: Area) => a1.diff(a2).flatMap(_.toSeq).toSet == a1.filterNot(a2.contains).toSet)
+  }
+
+  test("translate moves every point") {
+    val axis = Gen.choose(-1000, 1000)
+    val offsets = Gen.zip(axis, axis).map((x, y) => Coord(x, y))
+    check(forAll(Arbitrary.arbitrary[Area], offsets) { (area: Area, offset: Coord) =>
+      area.translate(offset).toSet == area.map(_ + offset).toSet
+    })
+  }
+
+  test("translate by the opposite offset is the original") {
+    check((area: Area, offset: Coord) => area.translate(offset).translate(-offset) == area)
   }
 
   test("growLeft and dropLeft are inverse") {

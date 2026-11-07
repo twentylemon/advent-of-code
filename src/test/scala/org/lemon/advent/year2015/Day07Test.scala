@@ -5,7 +5,8 @@ import org.lemon.advent.year2015.Day07.*
 
 class Day07Test extends UnitTest:
 
-  for (wire, expected) <- Seq(
+  for
+    (wire, expected) <- Seq(
       "d" -> 72,
       "e" -> 507,
       "f" -> 492,
