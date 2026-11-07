@@ -24,8 +24,8 @@ private object Day18:
   def part2(input: String, example: Boolean = false) =
     val area = if example then Area(0 to 6, 0 to 6) else Area(0 to 70, 0 to 70)
     val bytes = parse(input)
-    val open = area.iterator.toSet -- bytes
-    val cells = open.foldLeft(DisjointSet(area.iterator.toSeq))(join(open))
+    val open = area.toSet -- bytes
+    val cells = open.foldLeft(DisjointSet(area.toSeq))(join(open))
 
     @annotation.tailrec
     def loop(cells: DisjointSet[Coord], open: Set[Coord], fallen: List[Coord]): Coord =
