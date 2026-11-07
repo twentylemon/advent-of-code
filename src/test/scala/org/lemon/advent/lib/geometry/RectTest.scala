@@ -6,7 +6,7 @@ import org.lemon.advent.lib.geometry.*
 import org.scalacheck.Prop.*
 import org.scalacheck.*
 
-class AreaTest extends UnitTest:
+class RectTest extends UnitTest:
   val emptyArea: Gen[Area] =
     for
       x <- Gen.choose(-100, 100)
