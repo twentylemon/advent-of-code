@@ -22,7 +22,7 @@ extension [N: Integral](tuple: (N, N))
   def toInterval: Interval[N] = Interval(tuple._1, tuple._2)
 
 object Interval:
-  def empty[N: Integral]: Interval[N] = Interval(Integral[N].one, Integral[N].zero)
+  def empty[N: Integral]: Interval[N] = Interval(`1`, `0`)
 
   def apply(range: Range): Interval[Int] = apply(range.toNumericRange[Int])
 
