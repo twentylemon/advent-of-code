@@ -13,8 +13,8 @@ private object Day06:
 
   def quadratic(time: Long, dist: Long) =
     val (a, b, c) = (-1, time, -(dist + 1)) // dist+1 because we need to beat them
-    val t1 = (-b + math.sqrt(b * b - 4 * a * c)) / (2 * a)
-    val t2 = (-b - math.sqrt(b * b - 4 * a * c)) / (2 * a)
+    val t1 = (-b + math.sqrt((b * b - 4 * a * c).toDouble)) / (2 * a)
+    val t2 = (-b - math.sqrt((b * b - 4 * a * c).toDouble)) / (2 * a)
     if t1.isNaN || t2.isNaN then 0
     else (math.floor(math.max(t1, t2)) - math.ceil(math.min(t1, t2)) + 1).toLong
 

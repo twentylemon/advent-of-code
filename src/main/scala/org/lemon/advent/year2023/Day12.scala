@@ -30,7 +30,7 @@ private object Day12:
                 if notes.headOption.contains(chunkSize) then loop(springs.tail, notes.tail, 0)
                 else if chunkSize == 0 then loop(springs.tail, notes, 0)
                 else 0
-              case '?' => loop('#' + springs.tail, notes, chunkSize) + loop('.' + springs.tail, notes, chunkSize)
+              case '?' => loop("#" + springs.tail, notes, chunkSize) + loop("." + springs.tail, notes, chunkSize)
       memory += ((springs, notes, chunkSize) -> result)
       result
 

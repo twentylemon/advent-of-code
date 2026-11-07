@@ -30,7 +30,7 @@ private object Day24:
 
   def calc(expressions: Map[String, Expr])(wire: String) =
     val context = ExpressionContext(expressions)
-    expressions
+    expressions.view
       .filterKeys(_.startsWith(wire))
       .toSeq
       .sortBy(_._1)
@@ -44,7 +44,7 @@ private object Day24:
 
   def checkAdditionBit(expressions: Map[String, Expr], suffixes: Iterable[String]) =
     // add bit is x_i ^ y_i ^ carry_{i-1}, so output must be XOR
-    expressions
+    expressions.view
       .filterKeys(gate => gate.startsWith("z") && suffixes.exists(gate.endsWith))
       .filterNot {
         case (_, _: Xor) => true
@@ -54,7 +54,7 @@ private object Day24:
 
   def checkCarryBit(expressions: Map[String, Expr], suffixes: Iterable[String]) =
     // carry bit is (a & b | a ^ b) & carry_{i-1}, so carry must be AND or OR
-    expressions
+    expressions.view
       .filterKeys(!_.startsWith("z"))
       .filter {
         case (_, And(Reference(r), _)) if r.startsWith("x") || r.startsWith("y") => false

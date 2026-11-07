@@ -34,7 +34,7 @@ private object Day23:
     val grid = parse(input)
     val possibleSteps =
       grid.map((coord, _) => (coord, neighbours(coord, grid).filter(c => grid.getOrElse(c, '#') != '#')))
-    scenicRoute(startOf(grid), endOf(grid), possibleSteps.mapValues(s => s.map((_, 1))).toMap)
+    scenicRoute(startOf(grid), endOf(grid), possibleSteps.view.mapValues(s => s.map((_, 1))).toMap)
 
   def part2(input: String) =
     val grid = parse(input)

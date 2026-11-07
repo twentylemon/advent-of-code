@@ -49,7 +49,6 @@ object Interval:
 case class Interval[N: Integral](start: N, end: N) extends Iterable[N] with PartialFunction[N, N]:
   def isInclusive: Boolean = true
   override def isEmpty: Boolean = start > end
-  override def nonEmpty: Boolean = start <= end
 
   @deprecated("use length instead")
   override def size: Int = length.toInt

@@ -22,6 +22,7 @@ private object Day02:
   def getMaxPerColour(game: Game) = game.pulls
     .flatten
     .groupBy(_.colour)
+    .view
     .mapValues(_.maxBy(dice => dice.num))
     .mapValues(_.num)
 

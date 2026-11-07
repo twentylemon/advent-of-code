@@ -13,6 +13,7 @@ private object Day14:
     instance.get()
       .digest(s"$input$idx".getBytes)
       .flatMap(b => Seq((b & 0xf0) >>> 4, b & 0x0f))
+      .toSeq
   }
 
   def triple(hash: Seq[Int]) = hash.sliding3.find((a, b, c) => a == b && b == c).map(_._1)
