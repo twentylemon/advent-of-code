@@ -46,26 +46,26 @@ private object Day24:
     // add bit is x_i ^ y_i ^ carry_{i-1}, so output must be XOR
     expressions
       .filterKeys(gate => gate.startsWith("z") && suffixes.exists(gate.endsWith))
-      .filterNot(_._2 match
-        case _: Xor => true
+      .filterNot {
+        case (_, _: Xor) => true
         case _ => false
-      )
+      }
       .toMap
 
   def checkCarryBit(expressions: Map[String, Expr], suffixes: Iterable[String]) =
     // carry bit is (a & b | a ^ b) & carry_{i-1}, so carry must be AND or OR
     expressions
       .filterKeys(!_.startsWith("z"))
-      .filter(_._2 match
-        case And(Reference(r), _) if r.startsWith("x") || r.startsWith("y") => false
-        case And(_, Reference(r)) if r.startsWith("x") || r.startsWith("y") => false
-        case Or(Reference(r), _) if r.startsWith("x") || r.startsWith("y") => false
-        case Or(_, Reference(r)) if r.startsWith("x") || r.startsWith("y") => false
-        case Xor(Reference(r), _) if r.startsWith("x") || r.startsWith("y") => false
-        case Xor(_, Reference(r)) if r.startsWith("x") || r.startsWith("y") => false
-        case _: Xor => true
+      .filter {
+        case (_, And(Reference(r), _)) if r.startsWith("x") || r.startsWith("y") => false
+        case (_, And(_, Reference(r))) if r.startsWith("x") || r.startsWith("y") => false
+        case (_, Or(Reference(r), _)) if r.startsWith("x") || r.startsWith("y") => false
+        case (_, Or(_, Reference(r))) if r.startsWith("x") || r.startsWith("y") => false
+        case (_, Xor(Reference(r), _)) if r.startsWith("x") || r.startsWith("y") => false
+        case (_, Xor(_, Reference(r))) if r.startsWith("x") || r.startsWith("y") => false
+        case (_, _: Xor) => true
         case _ => false
-      )
+      }
       .toMap
 
   extension (expressions: Map[String, Expr])
@@ -103,12 +103,12 @@ private object Day24:
         val wrongBit = (diff.toBinaryString.size - 1).toString.padLeft(2, '0')
         // found by :eyes: at input... not sure how else this would be done
         val gongShow = swapped
-          .filter(_._2 match
-            case And(Reference(x), Reference(y)) if x.endsWith(wrongBit) && y.endsWith(wrongBit) => true
-            case Or(Reference(x), Reference(y)) if x.endsWith(wrongBit) && y.endsWith(wrongBit) => true
-            case Xor(Reference(x), Reference(y)) if x.endsWith(wrongBit) && y.endsWith(wrongBit) => true
+          .filter {
+            case (_, And(Reference(x), Reference(y))) if x.endsWith(wrongBit) && y.endsWith(wrongBit) => true
+            case (_, Or(Reference(x), Reference(y))) if x.endsWith(wrongBit) && y.endsWith(wrongBit) => true
+            case (_, Xor(Reference(x), Reference(y))) if x.endsWith(wrongBit) && y.endsWith(wrongBit) => true
             case _ => false
-          )
+          }
         val last = swapped.swap(gongShow.head._1, gongShow.last._1)
         // display(last)
         Option.when(calc(last)("z") == calc(last)("x") + calc(last)("y"))(

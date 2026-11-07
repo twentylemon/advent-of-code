@@ -14,13 +14,13 @@ private object Day15:
 
   def parseWide(input: String): (Map[Coord, Char], Seq[Direction]) =
     val Seq(grid, moves) = input.chunks
-    val wide = grid.flatMap(_ match
+    val wide = grid.flatMap {
       case '#' => "##"
       case 'O' => "[]"
       case '.' => ".."
       case '@' => "@."
       case x => x.toString
-    )
+    }
     (Coord.gridToMap(wide), parseMoves(moves))
 
   def step(grid: Map[Coord, Char], robit: Coord, dir: Direction): Map[Coord, Char] =

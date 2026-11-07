@@ -7,13 +7,13 @@ private object Day13:
 
   type Coord = Point[Long]
 
-  def parse(input: String): Seq[(Coord, Coord, Coord)] = input.chunks.map(_.linesIterator.toSeq match
+  def parse(input: String): Seq[(Coord, Coord, Coord)] = input.chunks.map(_.linesIterator.toSeq).map {
     case Seq(
           s"Button A: X+$ax, Y+$ay",
           s"Button B: X+$bx, Y+$by",
           s"Prize: X=$px, Y=$py",
         ) => (Point(ax.toLong, ay.toLong), Point(bx.toLong, by.toLong), Point(px.toLong, py.toLong))
-  ).toSeq
+  }.toSeq
 
   def solve(a: Coord, b: Coord, prize: Coord) =
     val (Point(ax, ay), Point(bx, by), Point(px, py)) = (a, b, prize)
