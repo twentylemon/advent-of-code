@@ -36,6 +36,6 @@ private object Day25:
     @tailrec
     def cut: DisjointSet[String] =
       val groups = contract(graph.keys.toSeq, Random.shuffle(edges))
-      if edges.count((a, b) => !groups.connected(a, b)) == 3 then groups else cut
+      if edges.count(!groups.connected(_, _)) == 3 then groups else cut
 
     cut.components.map(_.size).product
