@@ -7,6 +7,8 @@ import org.lemon.advent.lib.geometry.*
 import org.scalacheck.Prop.*
 import org.scalacheck.*
 
+import scala.util.Try
+
 class CoordTest extends UnitTest:
 
   test("left and right are opposites") {
@@ -352,4 +354,16 @@ class CoordTest extends UnitTest:
 
   test("to[Long] preserves coordinates") {
     check((coord: Coord) => coord.to[Long] == Point[Long](coord.x.toLong, coord.y.toLong))
+  }
+
+  test("hasCoord is true exactly when the grid has a value at coord") {
+    check(forAll(Gen.listOf(Gen.listOf(Gen.const(0))), Gen.choose(-1, 10), Gen.choose(-1, 10)) { (grid, x, y) =>
+      grid.hasCoord(Coord(x, y)) == Try(grid(Coord(x, y))).isSuccess
+    })
+  }
+
+  test("hasCoord on lines is true exactly when the lines have a char at coord") {
+    check(forAll(Gen.listOf(Gen.alphaStr), Gen.choose(-1, 10), Gen.choose(-1, 10)) { (lines, x, y) =>
+      lines.hasCoord(Coord(x, y)) == Try(lines(Coord(x, y))).isSuccess
+    })
   }
