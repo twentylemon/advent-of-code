@@ -164,7 +164,7 @@ class DietTest extends UnitTest:
     case object ToSeq extends Query(_.toSeq, _.toSeq.sorted)
     case object Size extends Query(_.size, _.size * blockSize)
 
-  test("operations match a Set and keep the diet canonical") {
+  test("operations match a Set and keep the diet valid") {
     val nearZeroAndTheLimits = Gen.oneOf(
       Gen.choose(-50, 50),
       Gen.choose(Int.MinValue, Int.MinValue + 50),
@@ -173,6 +173,6 @@ class DietTest extends UnitTest:
     check(DietCommands(1, nearZeroAndTheLimits).property())
   }
 
-  test("operations on huge diets match a Set of blocks and keep the diet canonical") {
+  test("operations on huge diets match a Set of blocks and keep the diet valid") {
     check(DietCommands(1 << 24, Gen.chooseNum(-128, 127)).property())
   }
