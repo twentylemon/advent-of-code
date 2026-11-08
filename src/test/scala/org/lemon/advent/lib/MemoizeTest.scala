@@ -9,8 +9,8 @@ class MemoizeTest extends UnitTest:
   test("memoize calls the function once for each distinct argument") {
     check((xs: List[Byte]) =>
       var calls = 0
-      val f = memoize((a: Byte) => { calls += 1; a * 2 })
-      xs.map(f) == xs.map(_ * 2) && calls == xs.distinct.size
+      val f = memoize((a: Byte) => { calls += 1; s"$a" })
+      xs.map(f) == xs.map(a => s"$a") && calls == xs.distinct.size
     )
   }
 
