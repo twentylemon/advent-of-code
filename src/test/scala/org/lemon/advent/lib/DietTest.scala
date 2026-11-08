@@ -63,8 +63,8 @@ class DietTest extends UnitTest:
     type State = Set[Int]
     final class Sut(var diet: Diet[Int])
 
-    def first(b: Int) = (b.toLong * blockSize).toInt
-    def last(b: Int) = ((b + 1L) * blockSize - 1).toInt
+    def first(b: Int) = b * blockSize
+    def last(b: Int) = first(b + 1) - 1
     def values(blocks: Range) =
       if blocks.isEmpty then blocks
       else if blocks.step > 0 then first(blocks.min) to last(blocks.max)
