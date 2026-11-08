@@ -1,10 +1,13 @@
 package org.lemon.advent.lib
 
 import org.lemon.advent.*
-import org.scalacheck.{Arbitrary, Shrink, Gen}
+import org.scalacheck.{Arbitrary, Shrink, Gen, Prop}
 import org.scalacheck.Prop.*
 import org.scalacheck.Shrink.*
 import org.scalacheck.Arbitrary.*
+import org.scalacheck.commands.Commands
+
+import scala.util.Try
 
 given Arbitrary[Range] = Arbitrary(for
   i <- Gen.choose(-10000, 10000)
@@ -1272,4 +1275,81 @@ class MultipleIntervalDietTest extends UnitTest:
         .map(r => if r.size == 1 then r.min.toString else s"${r.min}..${r.max}")
         .mkString("Diet(", ", ", ")")
     )
+  }
+
+class DietCommandsTest extends UnitTest:
+  object DietCommands extends Commands:
+    type State = Set[Int]
+    final class Sut(var diet: Diet[Int])
+
+    val value = Gen.oneOf(
+      Gen.choose(-50, 50),
+      Gen.choose(Int.MinValue, Int.MinValue + 50),
+      Gen.choose(Int.MaxValue - 50, Int.MaxValue),
+    )
+    val range =
+      for
+        start <- value
+        length <- Gen.choose(0, 20)
+        ascending = start to (start.toLong + length).min(Int.MaxValue).toInt
+        range <- Gen.oneOf(ascending, ascending.reverse, start until start)
+      yield range
+    val ranges = Gen.listOf(range)
+
+    def canCreateNewSut(newState: State, initSuts: Iterable[State], runningSuts: Iterable[Sut]) = true
+    def newSut(state: State) = Sut(Diet(state))
+    def destroySut(sut: Sut) = ()
+    def initialPreCondition(state: State) = true
+    def genInitialState = Gen.const(Set.empty[Int])
+    def genCommand(state: State) = Gen.oneOf(
+      value.map(AddValue(_)),
+      range.map(Add(_)),
+      value.map(RemoveValue(_)),
+      range.map(Remove(_)),
+      ranges.map(Union(_)),
+      ranges.map(Intersect(_)),
+      ranges.map(Diff(_)),
+      value.map(Contains(_)),
+      range.map(ContainsRange(_)),
+      Gen.const(IsEmpty),
+      Gen.const(Size),
+      Gen.const(Min),
+      Gen.const(Max),
+      Gen.const(ToSeq),
+    )
+
+    abstract class Update(f: Diet[Int] => Diet[Int], model: State => State) extends SuccessCommand:
+      type Result = Diet[Int]
+      def run(sut: Sut) =
+        sut.diet = f(sut.diet)
+        sut.diet
+      def nextState(state: State) = model(state)
+      def preCondition(state: State) = true
+      def postCondition(state: State, diet: Diet[Int]): Prop = isCanonical(diet) && diet.toSet == model(state)
+
+    case class AddValue(n: Int) extends Update(_ + n, _ + n)
+    case class Add(range: Range) extends Update(_ + range, _ ++ range)
+    case class RemoveValue(n: Int) extends Update(_ - n, _ - n)
+    case class Remove(range: Range) extends Update(_ - range, _ -- range)
+    case class Union(rhs: List[Range]) extends Update(_ ++ Diet(rhs), _ ++ rhs.flatten)
+    case class Intersect(rhs: List[Range]) extends Update(_ & Diet(rhs), _ & rhs.flatten.toSet)
+    case class Diff(rhs: List[Range]) extends Update(_ -- Diet(rhs), _ -- rhs.flatten)
+
+    abstract class Query[R](f: Diet[Int] => R, model: State => R) extends Command:
+      type Result = R
+      def run(sut: Sut) = f(sut.diet)
+      def nextState(state: State) = state
+      def preCondition(state: State) = true
+      def postCondition(state: State, result: Try[R]): Prop = result.toOption == Try(model(state)).toOption
+
+    case class Contains(n: Int) extends Query(_.contains(n), _.contains(n))
+    case class ContainsRange(range: Range) extends Query(_.contains(range), state => range.forall(state.contains))
+    case object IsEmpty extends Query(_.isEmpty, _.isEmpty)
+    case object Size extends Query(_.size, _.size)
+    case object Min extends Query(_.min, _.min)
+    case object Max extends Query(_.max, _.max)
+    case object ToSeq extends Query(_.toSeq, _.toSeq.sorted)
+
+  test("operations match a Set and keep the diet canonical") {
+    check(DietCommands.property())
   }
