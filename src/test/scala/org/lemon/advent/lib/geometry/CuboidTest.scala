@@ -24,12 +24,10 @@ class CuboidTest extends UnitTest:
     check((cuboid: Cuboid[Int]) => cuboid.forall(cuboid.contains))
   }
 
-  test("corners are the points on a bound of every axis") {
+  test("corners are the surface points the surface doesn't pass straight through") {
     check((cuboid: Cuboid[Int]) =>
-      cuboid.corners.toSet == cuboid.filter(p =>
-        Set(cuboid.left, cuboid.right)(p.x) && Set(cuboid.top, cuboid.bottom)(p.y) &&
-          Set(cuboid.front, cuboid.back)(p.z)
-      ).toSet
+      val surface = cuboid.faces.flatMap(_.iterator).toSet
+      cuboid.corners.toSet == surface.filterNot(p => Orientation.values.exists(o => surface(p + o) && surface(p - o)))
     )
   }
 
