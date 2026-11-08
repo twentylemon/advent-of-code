@@ -11,6 +11,10 @@ import scala.util.Try
 
 class PointTest extends UnitTest:
 
+  test("ordering matches tuple ordering") {
+    check((points: List[Coord]) => points.sorted.map(p => (p.x, p.y)) == points.map(p => (p.x, p.y)).sorted)
+  }
+
   test("left and right are opposites") {
     check((coord: Coord) => coord == coord.left.right)
   }
@@ -83,16 +87,24 @@ class PointTest extends UnitTest:
     check((coord: Coord, n: Int) => coord.shift(Direction.Up, n) == coord.shiftUp(n))
   }
 
-  test("shift(Down, n) is shiftUp(n)") {
+  test("shift(Down, n) is shiftDown(n)") {
     check((coord: Coord, n: Int) => coord.shift(Direction.Down, n) == coord.shiftDown(n))
   }
 
-  test("shift(Left, n) is shiftUp(n)") {
+  test("shift(Left, n) is shiftLeft(n)") {
     check((coord: Coord, n: Int) => coord.shift(Direction.Left, n) == coord.shiftLeft(n))
   }
 
-  test("shift(Right, n) is shiftUp(n)") {
+  test("shift(Right, n) is shiftRight(n)") {
     check((coord: Coord, n: Int) => coord.shift(Direction.Right, n) == coord.shiftRight(n))
+  }
+
+  test("+ direction is move(direction)") {
+    check((coord: Coord, dir: Direction) => coord + dir == coord.move(dir))
+  }
+
+  test("- direction is move(direction.turnAround)") {
+    check((coord: Coord, dir: Direction) => coord - dir == coord.move(dir.turnAround))
   }
 
   test("walk nth element is shift by n") {
@@ -275,6 +287,16 @@ class PointTest extends UnitTest:
     check((coord: Coord) => coord.rotateRight(Coord.origin) == coord.rotateRight)
   }
 
+  test("rotateLeft around center four times is identity") {
+    check((coord: Coord, about: Coord) =>
+      coord.rotateLeft(about).rotateLeft(about).rotateLeft(about).rotateLeft(about) == coord
+    )
+  }
+
+  test("rotateLeft around origin is same as rotateLeft") {
+    check((coord: Coord) => coord.rotateLeft(Coord.origin) == coord.rotateLeft)
+  }
+
   test("cross is antisymmetric") {
     check((lhs: Coord, rhs: Coord) => lhs.cross(rhs) == -rhs.cross(lhs))
   }
@@ -365,5 +387,12 @@ class PointTest extends UnitTest:
   test("hasCoord on lines is true exactly when the lines have a char at coord") {
     check(forAll(Gen.listOf(Gen.alphaStr), Gen.choose(-1, 10), Gen.choose(-1, 10)) { (lines, x, y) =>
       lines.hasCoord(Coord(x, y)) == Try(lines(Coord(x, y))).isSuccess
+    })
+  }
+
+  test("gridToMap maps each coord to its char in the lines") {
+    check(forAll(Gen.listOf(Gen.alphaStr)) { lines =>
+      val grid = Coord.gridToMap(lines.mkString("\n"))
+      grid.forall((coord, c) => lines(coord) == c) && grid.size == lines.map(_.length).sum
     })
   }
