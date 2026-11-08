@@ -55,10 +55,6 @@ class DietTest extends UnitTest:
     })
   }
 
-  def isCanonical(diet: Diet[Int]): Boolean =
-    val intervals = diet.toIntervals
-    intervals.forall(_.nonEmpty) && intervals.sliding2.forall((a, b) => a.end.toLong + 1 < b.start.toLong)
-
   class DietCommands(blockSize: Int, block: Gen[Int]) extends Commands:
     type State = Set[Int]
     final class Sut(var diet: Diet[Int])
@@ -130,7 +126,9 @@ class DietTest extends UnitTest:
       override def nextState(state: State) = model(state)
       override def preCondition(state: State) = true
       override def postCondition(state: State, diet: Diet[Int]): Prop =
-        isCanonical(diet) && diet.toIntervals.map(i => (i.start, i.end)) == runs(model(state))
+        val intervals = diet.toIntervals
+        intervals.forall(_.nonEmpty) && intervals.sliding2.forall((a, b) => a.end.toLong + 1 < b.start.toLong) &&
+        intervals.map(i => (i.start, i.end)) == runs(model(state))
 
     case class AddValue(n: Int) extends Update(_ + n, _ + n)
     case class Add(blocks: Range) extends Update(_ + values(blocks), _ ++ blocks)
