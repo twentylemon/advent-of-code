@@ -277,24 +277,22 @@ class PointTest extends UnitTest:
     check((dir: Direction) => dir.unitVector.rotateLeft == dir.turnLeft.unitVector)
   }
 
-  test("rotateRight around center four times is identity") {
-    check((coord: Coord, about: Coord) =>
-      coord.rotateRight(about).rotateRight(about).rotateRight(about).rotateRight(about) == coord
-    )
+  val rotations = Gen.oneOf(
+    ((coord: Coord) => coord.rotateLeft, (coord: Coord, about: Coord) => coord.rotateLeft(about)),
+    ((coord: Coord) => coord.rotateRight, (coord: Coord, about: Coord) => coord.rotateRight(about)),
+  )
+
+  test("rotating around a center four times is identity") {
+    check(forAll(rotations, Arbitrary.arbitrary[Coord], Arbitrary.arbitrary[Coord]) {
+      case ((_, rotate), coord, about) =>
+        Iterator.iterate(coord)(rotate(_, about)).nth(4) == coord
+    })
   }
 
-  test("rotateRight around origin is same as rotateRight") {
-    check((coord: Coord) => coord.rotateRight(Coord.origin) == coord.rotateRight)
-  }
-
-  test("rotateLeft around center four times is identity") {
-    check((coord: Coord, about: Coord) =>
-      coord.rotateLeft(about).rotateLeft(about).rotateLeft(about).rotateLeft(about) == coord
-    )
-  }
-
-  test("rotateLeft around origin is same as rotateLeft") {
-    check((coord: Coord) => coord.rotateLeft(Coord.origin) == coord.rotateLeft)
+  test("rotating around the origin is the same as rotating") {
+    check(forAll(rotations, Arbitrary.arbitrary[Coord]) { case ((rotate, rotateAround), coord) =>
+      rotateAround(coord, Coord.origin) == rotate(coord)
+    })
   }
 
   test("cross is antisymmetric") {
