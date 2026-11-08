@@ -312,6 +312,10 @@ class IntervalTest extends UnitTest:
     check(forAll(shortIntervalGen) { (a, b) => interval(a, b).iterator.toSeq == range(a, b).iterator.toSeq })
   }
 
+  test("reverseIterator matches Range") {
+    check(forAll(shortIntervalGen) { (a, b) => interval(a, b).reverseIterator.toSeq == range(a, b).reverse })
+  }
+
   test("indices matches Range") {
     check(forAll(shortIntervalGen) { (a, b) => interval(a, b).indices.toSeq == range(a, b).indices.toSeq })
   }
