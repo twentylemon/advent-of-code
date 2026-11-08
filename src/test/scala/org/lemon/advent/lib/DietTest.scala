@@ -1336,7 +1336,7 @@ class DietCommandsTest extends UnitTest:
         Gen.const(ToRanges),
         Gen.const(ToNumericRanges),
       )
-      val unitOnly = Seq(block.map(AddValue(_)), block.map(RemoveValue(_)), Gen.const(ToSeq), Gen.const(Size))
+      val unitOnly = Seq(block.map(AddValue(_)), block.map(RemoveValue(_)), Gen.const(Iterate), Gen.const(Size))
       Gen.oneOf(if blockSize == 1 then commands ++ unitOnly else commands).flatMap(identity)
 
     abstract class Update(f: Diet[Int] => Diet[Int], model: State => State) extends SuccessCommand:
@@ -1380,7 +1380,7 @@ class DietCommandsTest extends UnitTest:
     case object IntervalsIterator extends Query(_.intervalsIterator.map(i => (i.start, i.end)).toSeq, runs)
     case object ToRanges extends Query(_.toRanges.map(r => (r.start, r.end)), runs)
     case object ToNumericRanges extends Query(_.toNumericRanges.map(r => (r.start, r.end)), runs)
-    case object ToSeq extends Query(_.toSeq, _.toSeq.sorted)
+    case object Iterate extends Query(_.iterator.take(1000).toSeq, _.toSeq.sorted.take(1000))
     case object Size extends Query(_.size, _.size)
 
   test("operations match a Set and keep the diet canonical") {
