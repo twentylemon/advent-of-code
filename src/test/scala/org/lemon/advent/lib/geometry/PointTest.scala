@@ -305,6 +305,18 @@ class PointTest extends UnitTest:
     check((coord: Coord) => coord.rotateLeft(Coord.origin) == coord.rotateLeft)
   }
 
+  test("rotateRight around center three times is rotateLeft around center") {
+    check((coord: Coord, about: Coord) =>
+      coord.rotateRight(about).rotateRight(about).rotateRight(about) == coord.rotateLeft(about)
+    )
+  }
+
+  test("rotateLeft around center three times is rotateRight around center") {
+    check((coord: Coord, about: Coord) =>
+      coord.rotateLeft(about).rotateLeft(about).rotateLeft(about) == coord.rotateRight(about)
+    )
+  }
+
   test("cross is antisymmetric") {
     check((lhs: Coord, rhs: Coord) => lhs.cross(rhs) == -rhs.cross(lhs))
   }
