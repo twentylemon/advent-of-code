@@ -394,25 +394,23 @@ class RectTest extends UnitTest:
   }
 
   test("grid(area) is the grid's cells in the area, row by row") {
-    import Area.*
     val gen =
       for
         area <- Arbitrary.arbitrary[Area]
         grid <- Gen.listOfN(area.bottom + 1, Gen.listOfN(area.right + 1, Arbitrary.arbitrary[Int]))
       yield (grid, area)
     check(forAll(gen) { (grid, area) =>
-      grid(area) == area.rows.map(_.map(c => grid(c.row)(c.col)).toSeq).toSeq
+      grid(area) == area.rows.map(_.map(grid(_)).toSeq).toSeq
     })
   }
 
   test("lines(area) is the lines' chars in the area, row by row") {
-    import Area.*
     val gen =
       for
         area <- Arbitrary.arbitrary[Area]
         lines <- Gen.listOfN(area.bottom + 1, Gen.stringOfN(area.right + 1, Gen.alphaNumChar))
       yield (lines, area)
     check(forAll(gen) { (lines, area) =>
-      lines(area) == area.rows.map(_.map(c => lines(c.row)(c.col)).toSeq).toSeq
+      lines(area) == area.rows.map(_.map(lines(_)).toSeq).toSeq
     })
   }
