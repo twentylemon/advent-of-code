@@ -7,6 +7,12 @@ import org.scalacheck.*
 
 class Point3Test extends UnitTest:
 
+  test("ordering matches tuple ordering") {
+    check((points: List[Point3[Int]]) =>
+      points.sorted.map(p => (p.x, p.y, p.z)) == points.map(p => (p.x, p.y, p.z)).sorted
+    )
+  }
+
   test("+ and - are opposites") {
     check((a: Point3[Int], b: Point3[Int]) => a + b - b == a)
   }

@@ -9,6 +9,12 @@ class StringsTest extends UnitTest:
 
   given Arbitrary[Seq[String]] = Arbitrary(Gen.nonEmptyListOf(Gen.alphaNumStr.suchThat(_.nonEmpty)))
 
+  test("padLeft matches padTo on the reversed string") {
+    check(forAll(arbitrary[String], Gen.choose(-10, 100), arbitrary[Char]) { (str, len, c) =>
+      str.padLeft(len, c) == str.reverse.padTo(len, c).reverse
+    })
+  }
+
   test("csv splits basic comma-separated string") {
     check((xs: Seq[String]) => xs.mkString(",").csv == xs)
   }
