@@ -24,8 +24,21 @@ class CuboidTest extends UnitTest:
     check((cuboid: Cuboid[Int]) => cuboid.forall(cuboid.contains))
   }
 
+  test("corners are the points on a bound of every axis") {
+    check((cuboid: Cuboid[Int]) =>
+      cuboid.corners.toSet == cuboid.filter(p =>
+        Set(cuboid.left, cuboid.right)(p.x) && Set(cuboid.top, cuboid.bottom)(p.y) &&
+          Set(cuboid.front, cuboid.back)(p.z)
+      ).toSet
+    )
+  }
+
   test("number of enclosed points is equal to size") {
     check((cuboid: Cuboid[Int]) => cuboid.size == cuboid.iterator.size)
+  }
+
+  test("iterator goes by z, then y, then x") {
+    check((cuboid: Cuboid[Int]) => cuboid.iterator.toSeq == cuboid.iterator.toSeq.sortBy(p => (p.z, p.y, p.x)))
   }
 
   test("surface area is the number of exposed unit faces") {

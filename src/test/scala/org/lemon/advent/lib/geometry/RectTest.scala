@@ -21,8 +21,18 @@ class RectTest extends UnitTest:
     check((area: Area) => area.size == area.iterator.size)
   }
 
+  test("iterator goes row by row from the top left") {
+    check((area: Area) => area.iterator.toSeq == area.iterator.toSeq.sortBy(c => (c.y, c.x)))
+  }
+
   test("perimeter is the number of exposed unit edges") {
     check((area: Area) => area.perimeter == area.map(_.adjacent.count(!area.contains(_))).sum)
+  }
+
+  test("corners are the coords on both an x and a y bound") {
+    check((area: Area) =>
+      area.corners.toSet == area.filter(c => Set(area.left, area.right)(c.x) && Set(area.top, area.bottom)(c.y)).toSet
+    )
   }
 
   test("topRow contains width points") {
@@ -57,12 +67,36 @@ class RectTest extends UnitTest:
     check((area: Area) => area.rightCol.forall(area.contains))
   }
 
-  test("reverseRow contains same points as row") {
-    check((area: Area) => area.reverseRow(area.top).toSet == area.topRow.toSet)
+  test("row contains the coords in that row") {
+    val gen = for area <- Arbitrary.arbitrary[Area]; y <- Gen.choose(area.top, area.bottom) yield (area, y)
+    check(forAll(gen) { (area, y) => area.row(y).iterator.toSeq == area.iterator.filter(_.y == y).toSeq })
   }
 
-  test("reverseCol contains same points as col") {
-    check((area: Area) => area.reverseCol(area.left).toSet == area.leftCol.toSet)
+  test("row throws IllegalArgumentException outside the area") {
+    check((area: Area, y: Int) =>
+      !area.yRange.contains(y) ==> Prop.throws(classOf[IllegalArgumentException])(area.row(y))
+    )
+  }
+
+  test("reverseRow is row in reverse") {
+    val gen = for area <- Arbitrary.arbitrary[Area]; y <- Gen.choose(area.top, area.bottom) yield (area, y)
+    check(forAll(gen) { (area, y) => area.reverseRow(y).toSeq == area.row(y).iterator.toSeq.reverse })
+  }
+
+  test("col contains the coords in that column") {
+    val gen = for area <- Arbitrary.arbitrary[Area]; x <- Gen.choose(area.left, area.right) yield (area, x)
+    check(forAll(gen) { (area, x) => area.col(x).iterator.toSeq == area.iterator.filter(_.x == x).toSeq })
+  }
+
+  test("col throws IllegalArgumentException outside the area") {
+    check((area: Area, x: Int) =>
+      !area.xRange.contains(x) ==> Prop.throws(classOf[IllegalArgumentException])(area.col(x))
+    )
+  }
+
+  test("reverseCol is col in reverse") {
+    val gen = for area <- Arbitrary.arbitrary[Area]; x <- Gen.choose(area.left, area.right) yield (area, x)
+    check(forAll(gen) { (area, x) => area.reverseCol(x).toSeq == area.col(x).iterator.toSeq.reverse })
   }
 
   test("boundary contains only coords in area") {
@@ -91,6 +125,35 @@ class RectTest extends UnitTest:
     )
   }
 
+  test("Area of lines covers every char") {
+    val gen =
+      for
+        width <- Gen.choose(1, 20)
+        height <- Gen.choose(1, 20)
+        lines <- Gen.listOfN(height, Gen.stringOfN(width, Gen.alphaNumChar))
+      yield lines
+    check(forAll(gen) { lines => Area(lines).forall(lines.hasCoord) && Area(lines).size == lines.map(_.length).sum })
+  }
+
+  test("Area of a grid covers every cell") {
+    val gen =
+      for
+        width <- Gen.choose(1, 20)
+        height <- Gen.choose(1, 20)
+        grid <- Gen.listOfN(height, Gen.listOfN(width, Arbitrary.arbitrary[Int]))
+      yield grid
+    check(forAll(gen) { grid => Area(grid).forall(grid.hasCoord) && Area(grid).size == grid.map(_.size).sum })
+  }
+
+  test("Area(width, height) starts at the origin") {
+    check((width: Int, height: Int) =>
+      (width > 0 && height > 0) ==> {
+        val area = Area(width, height)
+        area.topLeft == Coord.origin && area.width == width && area.height == height
+      }
+    )
+  }
+
   test("rows includes all coords in same iteration order as overall area") {
     check((area: Area) => area.rows.flatMap(_.iterator).sameElements(area))
   }
@@ -103,11 +166,19 @@ class RectTest extends UnitTest:
   }
 
   test("upDiagonals contains all coords once") {
-    check((area: Area) => area.upDiagonals.flatMap(identity).toSeq.diff(area.toSeq).isEmpty)
+    check((area: Area) => area.upDiagonals.flatten.toSeq.sorted == area.toSeq.sorted)
+  }
+
+  test("upDiagonals step up and right") {
+    check((area: Area) => area.upDiagonals.forall(_.sliding2.forall((a, b) => b == a.up.right)))
   }
 
   test("downDiagonals contains all coords once") {
-    check((area: Area) => area.downDiagonals.flatMap(identity).toSeq.diff(area.toSeq).isEmpty)
+    check((area: Area) => area.downDiagonals.flatten.toSeq.sorted == area.toSeq.sorted)
+  }
+
+  test("downDiagonals step down and right") {
+    check((area: Area) => area.downDiagonals.forall(_.sliding2.forall((a, b) => b == a.down.right)))
   }
 
   test("rectangles are all correct dimension") {
@@ -297,6 +368,10 @@ class RectTest extends UnitTest:
     check((area: Area, coord: Coord) => area.contains(area.clamp(coord)))
   }
 
+  test("clamp of coord inside area is identity") {
+    check((area: Area) => area.forall(c => area.clamp(c) == c))
+  }
+
   test("wrap returns a coord in the area") {
     check((area: Area, coord: Coord) => area.contains(area.wrap(coord)))
   }
@@ -315,4 +390,39 @@ class RectTest extends UnitTest:
     check((area: Area, coord: Coord) =>
       ((area.wrap(coord).y - area.top) +% area.height) == ((coord.y - area.top) +% area.height)
     )
+  }
+
+  test("show has a line of coord2Char for each row") {
+    val gen =
+      for
+        area <- Arbitrary.arbitrary[Area]
+        chars <- Gen.listOfN(area.size, Gen.alphaNumChar)
+      yield (area, area.iterator.zip(chars).toMap)
+    check(forAll(gen) { (area, draw) =>
+      area.show(draw) == area.rows.map(_.iterator.map(draw).mkString + "\n").mkString
+    })
+  }
+
+  test("a sub-grid read by area matches each coord in its rows") {
+    import Area.*
+    val gen =
+      for
+        area <- Arbitrary.arbitrary[Area]
+        grid <- Gen.listOfN(area.bottom + 1, Gen.listOfN(area.right + 1, Arbitrary.arbitrary[Int]))
+      yield (grid, area)
+    check(forAll(gen) { (grid, area) =>
+      grid(area) == area.rows.map(_.iterator.map(c => grid(c.row)(c.col)).toSeq).toSeq
+    })
+  }
+
+  test("a sub-grid of lines read by area matches each coord in its rows") {
+    import Area.*
+    val gen =
+      for
+        area <- Arbitrary.arbitrary[Area]
+        lines <- Gen.listOfN(area.bottom + 1, Gen.stringOfN(area.right + 1, Gen.alphaNumChar))
+      yield (lines, area)
+    check(forAll(gen) { (lines, area) =>
+      lines(area) == area.rows.map(_.iterator.map(c => lines(c.row)(c.col)).toSeq).toSeq
+    })
   }
