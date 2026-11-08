@@ -18,4 +18,7 @@ lazy val advent = (project in file("."))
     Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oDF"),
     Test / parallelExecution := false,
     Test / logBuffered := false,
+    coverageExcludedPackages := "org\\.lemon\\.advent\\.(?!lib(\\.|$)).*;org\\.lemon\\.advent\\.lib\\.Bench",
   )
+
+addCommandAlias("libCoverage", "; coverage; testOnly org.lemon.advent.lib.*; coverageReport; coverageOff")
