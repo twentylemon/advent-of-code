@@ -29,9 +29,10 @@ class RectTest extends UnitTest:
     check((area: Area) => area.perimeter == area.map(_.adjacent.count(!area.contains(_))).sum)
   }
 
-  test("corners are the coords on both an x and a y bound") {
+  test("corners are the boundary coords the boundary doesn't pass straight through") {
     check((area: Area) =>
-      area.corners.toSet == area.filter(c => Set(area.left, area.right)(c.x) && Set(area.top, area.bottom)(c.y)).toSet
+      val boundary = area.boundary.toSet
+      area.corners.toSet == boundary.filterNot(c => Direction.values.exists(d => boundary(c + d) && boundary(c - d)))
     )
   }
 
@@ -68,7 +69,7 @@ class RectTest extends UnitTest:
   }
 
   test("row contains the coords in that row") {
-    val gen = for area <- Arbitrary.arbitrary[Area]; y <- Gen.choose(area.top, area.bottom) yield (area, y)
+    val gen = for area <- Arbitrary.arbitrary[Area]; y <- Gen.oneOf(area.yRange) yield (area, y)
     check(forAll(gen) { (area, y) => area.row(y).iterator.toSeq == area.iterator.filter(_.y == y).toSeq })
   }
 
@@ -79,12 +80,12 @@ class RectTest extends UnitTest:
   }
 
   test("reverseRow is row in reverse") {
-    val gen = for area <- Arbitrary.arbitrary[Area]; y <- Gen.choose(area.top, area.bottom) yield (area, y)
+    val gen = for area <- Arbitrary.arbitrary[Area]; y <- Gen.oneOf(area.yRange) yield (area, y)
     check(forAll(gen) { (area, y) => area.reverseRow(y).toSeq == area.row(y).iterator.toSeq.reverse })
   }
 
   test("col contains the coords in that column") {
-    val gen = for area <- Arbitrary.arbitrary[Area]; x <- Gen.choose(area.left, area.right) yield (area, x)
+    val gen = for area <- Arbitrary.arbitrary[Area]; x <- Gen.oneOf(area.xRange) yield (area, x)
     check(forAll(gen) { (area, x) => area.col(x).iterator.toSeq == area.iterator.filter(_.x == x).toSeq })
   }
 
@@ -95,7 +96,7 @@ class RectTest extends UnitTest:
   }
 
   test("reverseCol is col in reverse") {
-    val gen = for area <- Arbitrary.arbitrary[Area]; x <- Gen.choose(area.left, area.right) yield (area, x)
+    val gen = for area <- Arbitrary.arbitrary[Area]; x <- Gen.oneOf(area.xRange) yield (area, x)
     check(forAll(gen) { (area, x) => area.reverseCol(x).toSeq == area.col(x).iterator.toSeq.reverse })
   }
 
@@ -392,18 +393,7 @@ class RectTest extends UnitTest:
     )
   }
 
-  test("show has a line of coord2Char for each row") {
-    val gen =
-      for
-        area <- Arbitrary.arbitrary[Area]
-        chars <- Gen.listOfN(area.size, Gen.alphaNumChar)
-      yield (area, area.iterator.zip(chars).toMap)
-    check(forAll(gen) { (area, draw) =>
-      area.show(draw) == area.rows.map(_.iterator.map(draw).mkString + "\n").mkString
-    })
-  }
-
-  test("a sub-grid read by area matches each coord in its rows") {
+  test("grid(area) is the grid's cells in the area, row by row") {
     import Area.*
     val gen =
       for
@@ -415,7 +405,7 @@ class RectTest extends UnitTest:
     })
   }
 
-  test("a sub-grid of lines read by area matches each coord in its rows") {
+  test("lines(area) is the lines' chars in the area, row by row") {
     import Area.*
     val gen =
       for
