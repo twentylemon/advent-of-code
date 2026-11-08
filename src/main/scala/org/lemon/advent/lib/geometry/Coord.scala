@@ -32,9 +32,13 @@ extension (coord: Coord)
 extension [T](seq: Seq[Seq[T]])
   def apply(coord: Coord): T = seq(coord.row)(coord.col)
 
+  def apply(area: Area): Seq[Seq[T]] = seq.slice(area.top, area.bottom + 1).map(_.slice(area.left, area.right + 1))
+
   def hasCoord(coord: Coord): Boolean = seq.isDefinedAt(coord.row) && seq(coord.row).isDefinedAt(coord.col)
 
 extension (seq: Seq[String])(using String => WrappedString)
   def apply(coord: Coord): Char = seq(coord.row)(coord.col)
+
+  def apply(area: Area): Seq[Seq[Char]] = seq.slice(area.top, area.bottom + 1).map(_.slice(area.left, area.right + 1))
 
   def hasCoord(coord: Coord): Boolean = seq.isDefinedAt(coord.row) && seq(coord.row).isDefinedAt(coord.col)

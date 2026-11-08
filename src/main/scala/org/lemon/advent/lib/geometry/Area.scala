@@ -18,11 +18,3 @@ object Area:
   def apply(xRange: Interval[Int], yRange: Range): Area = Rect(xRange, yRange.toInterval)
   def apply(left: Int, right: Int, top: Int, bottom: Int): Area = Rect(left, right, top, bottom)
   def apply(width: Int, height: Int): Area = Rect(width, height)
-
-  extension [T](seq: Seq[String])(using String => WrappedString)
-    def apply(area: Area): Seq[Seq[Char]] =
-      seq.slice(area.top, area.bottom + 1).map(_.slice(area.left, area.right + 1))
-
-  extension [T](seq: Seq[Seq[T]])
-    def apply(area: Area): Seq[Seq[T]] =
-      seq.slice(area.top, area.bottom + 1).map(_.slice(area.left, area.right + 1))
