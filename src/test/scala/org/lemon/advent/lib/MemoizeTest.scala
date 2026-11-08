@@ -6,16 +6,6 @@ import org.scalacheck.Prop.*
 
 class MemoizeTest extends UnitTest:
 
-  test("sanity: no memorize does not cache repeated calls") {
-    var x = 0
-    val f: Int => Int = _ => {
-      x = x + 1
-      x
-    }
-    f(0) shouldBe 1
-    f(0) shouldBe 2
-  }
-
   test("memoize calls the function once for each distinct argument") {
     check((xs: List[Byte]) =>
       var calls = 0
