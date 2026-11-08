@@ -6,6 +6,29 @@ import org.lemon.advent.*
 
 class CollectionsTest extends UnitTest:
 
+  test("iterator nth is the element at that index") {
+    val gen = for xs <- Gen.nonEmptyListOf(Arbitrary.arbitrary[Int]); n <- Gen.choose(0, xs.size - 1) yield (xs, n)
+    check(forAll(gen) { (xs, n) => xs.iterator.nth(n) == xs(n) })
+  }
+
+  test("iterator nth throws IndexOutOfBoundsException for a negative index") {
+    check((xs: List[Int], n: Int) => n < 0 ==> Prop.throws(classOf[IndexOutOfBoundsException])(xs.iterator.nth(n)))
+  }
+
+  test("iterator nthOption matches lift") {
+    check(forAll(Arbitrary.arbitrary[List[Int]], Gen.choose(-10, 100)) { (xs, n) =>
+      xs.iterator.nthOption(n) == xs.lift(n)
+    })
+  }
+
+  test("iterator last is the last element") {
+    check((xs: List[Int]) => xs.nonEmpty ==> (xs.iterator.last == xs.last))
+  }
+
+  test("cartesianProduct pairs every element of one with every element of the other") {
+    check((xs: List[Int], ys: List[String]) => xs.cartesianProduct(ys).toSeq == xs.flatMap(x => ys.map((x, _))))
+  }
+
   test("pairs is equal to stdlib combinations(2) of a set") {
     check((xs: Set[Int]) =>
       val pair = xs.pairs.toSeq.sorted
@@ -73,6 +96,10 @@ class CollectionsTest extends UnitTest:
 
   test("frequencies keys are exactly the distinct elements") {
     check(forAll { (it: Iterable[Int]) => it.frequencies.keySet == it.toSet })
+  }
+
+  test("findValue finds a key mapped to the value") {
+    check((map: Map[Int, Boolean], value: Boolean) => map.findValue(value).map(map) == map.values.find(_ == value))
   }
 
   test("split matches String#split") {
