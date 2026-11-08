@@ -93,13 +93,13 @@ class DietTest extends UnitTest:
         range <- Gen.oneOf((a min b) to (a max b), (a max b) to (a min b) by -1, a until a)
       yield range
 
-    def canCreateNewSut(newState: State, initSuts: Iterable[State], runningSuts: Iterable[Sut]) = true
-    def newSut(state: State) =
+    override def canCreateNewSut(newState: State, initSuts: Iterable[State], runningSuts: Iterable[Sut]) = true
+    override def newSut(state: State) =
       Sut(if blockSize == 1 then Diet(state) else Diet(state.toList.map(b => values(b to b))))
-    def destroySut(sut: Sut) = ()
-    def initialPreCondition(state: State) = true
-    def genInitialState = Gen.containerOf[Set, Int](block)
-    def genCommand(state: State) =
+    override def destroySut(sut: Sut) = ()
+    override def initialPreCondition(state: State) = true
+    override def genInitialState = Gen.containerOf[Set, Int](block)
+    override def genCommand(state: State) =
       val commands = Seq(
         blocks.map(Add(_)),
         blocks.map(Remove(_)),
@@ -123,12 +123,12 @@ class DietTest extends UnitTest:
 
     abstract class Update(f: Diet[Int] => Diet[Int], model: State => State) extends SuccessCommand:
       type Result = Diet[Int]
-      def run(sut: Sut) =
+      override def run(sut: Sut) =
         sut.diet = f(sut.diet)
         sut.diet
-      def nextState(state: State) = model(state)
-      def preCondition(state: State) = true
-      def postCondition(state: State, diet: Diet[Int]): Prop =
+      override def nextState(state: State) = model(state)
+      override def preCondition(state: State) = true
+      override def postCondition(state: State, diet: Diet[Int]): Prop =
         isCanonical(diet) && diet.toIntervals.map(i => (i.start, i.end)) == runs(model(state))
 
     case class AddValue(n: Int) extends Update(_ + n, _ + n)
@@ -141,10 +141,10 @@ class DietTest extends UnitTest:
 
     abstract class Query[R](f: Diet[Int] => R, model: State => R) extends Command:
       type Result = R
-      def run(sut: Sut) = f(sut.diet)
-      def nextState(state: State) = state
-      def preCondition(state: State) = true
-      def postCondition(state: State, result: Try[R]): Prop = result.toOption == Try(model(state)).toOption
+      override def run(sut: Sut) = f(sut.diet)
+      override def nextState(state: State) = state
+      override def preCondition(state: State) = true
+      override def postCondition(state: State, result: Try[R]): Prop = result.toOption == Try(model(state)).toOption
 
     case class Contains(n: Int) extends Query(_.contains(n), _.contains(Math.floorDiv(n, blockSize)))
     case class ContainsRange(range: Range)
