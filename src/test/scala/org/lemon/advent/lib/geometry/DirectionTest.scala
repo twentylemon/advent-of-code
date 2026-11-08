@@ -14,17 +14,26 @@ class DirectionTest extends UnitTest:
   }
 
   Seq("Uu^" -> Up, "Ddv" -> Down, "Ll<" -> Left, "Rr>" -> Right).foreach((chars, dir) =>
-    test(s"Direction parses each of $chars as $dir") {
-      chars.foreach(c => Direction(c) shouldBe dir)
-    }
+    chars.foreach(c =>
+      test(s"Direction parses '$c' as $dir") {
+        Direction(c) shouldBe dir
+      }
+
+      test(s"Direction parses \"$c\" as $dir") {
+        Direction(c.toString) shouldBe dir
+      }
+    )
   )
 
-  test("Direction parses a String the same as a Char") {
-    check((c: Char) => Direction.unapply(c.toString) == Direction.unapply(c))
+  test("Direction throws IllegalArgumentException for any other Char") {
+    check((c: Char) => !"UuDdLlRr^v<>".contains(c) ==> Prop.throws(classOf[IllegalArgumentException])(Direction(c)))
   }
 
-  test("Direction throws IllegalArgumentException for any other character") {
-    check((c: Char) => !"UuDdLlRr^v<>".contains(c) ==> Prop.throws(classOf[IllegalArgumentException])(Direction(c)))
+  test("Direction throws IllegalArgumentException for any other String") {
+    check((str: String) =>
+      !(str.length == 1 && "UuDdLlRr^v<>".contains(str)) ==>
+        Prop.throws(classOf[IllegalArgumentException])(Direction(str))
+    )
   }
 
   for
