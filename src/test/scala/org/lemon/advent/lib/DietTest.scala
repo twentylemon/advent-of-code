@@ -298,10 +298,10 @@ class SingletonValueDietTest extends UnitTest:
     check((n: Int) => (Diet(n) ++ Diet(n)) == Diet(n))
   }
 
-  test("union with rhs contains both") {
+  test("union with rhs contains exactly the values of both") {
     check((n: Int, rhs: Diet[Int]) => {
       val union = Diet(n) ++ rhs
-      union.contains(n) && rhs.toSet.forall(union.contains)
+      isCanonical(union) && union.toSet == rhs.toSet + n
     })
   }
 
@@ -624,10 +624,10 @@ class SingletonIntervalDietTest extends UnitTest:
     check((range: Range) => (Diet(range) ++ Diet(range)) == Diet(range))
   }
 
-  test("union with rhs contains both") {
+  test("union with rhs contains exactly the values of both") {
     check((range: Range, rhs: Diet[Int]) => {
       val union = Diet(range) ++ rhs
-      range.forall(union.contains) && rhs.toSet.forall(union.contains)
+      isCanonical(union) && union.toSet == range.toSet ++ rhs.toSet
     })
   }
 
@@ -859,11 +859,10 @@ class MultipleValueDietTest extends UnitTest:
     check((values: Seq[Int]) => Diet(values) ++ Diet(values) == Diet(values))
   }
 
-  test("union with rhs contains both") {
+  test("union with rhs contains exactly the values of both") {
     check((values: Seq[Int], rhs: Diet[Int]) => {
-      val diet = Diet(values)
-      val union = diet ++ rhs
-      values.forall(union.contains) && rhs.toSet.forall(union.contains)
+      val union = Diet(values) ++ rhs
+      isCanonical(union) && union.toSet == values.toSet ++ rhs.toSet
     })
   }
 
@@ -1105,10 +1104,10 @@ class MultipleIntervalDietTest extends UnitTest:
     })
   }
 
-  test("adding overlapping range may merge intervals") {
+  test("adding overlapping range merges the intervals it touches") {
     check(forAll(overlappingRange) { (ranges, other) =>
-      val diet = Diet(ranges)
-      (diet + other).toIntervals.size <= diet.toIntervals.size
+      val added = Diet(ranges) + other
+      isCanonical(added) && added.toSet == ranges.flatMap(_.toSet).toSet ++ other.toSet
     })
   }
 
@@ -1162,11 +1161,10 @@ class MultipleIntervalDietTest extends UnitTest:
     check((ranges: Seq[Range]) => Diet(ranges) ++ Diet(ranges) == Diet(ranges))
   }
 
-  test("union with rhs contains both") {
+  test("union with rhs contains exactly the values of both") {
     check((ranges: Seq[Range], rhs: Diet[Int]) => {
-      val diet = Diet(ranges)
-      val union = diet ++ rhs
-      ranges.flatMap(_.toSet).toSet.forall(union.contains) && rhs.toSet.forall(union.contains)
+      val union = Diet(ranges) ++ rhs
+      isCanonical(union) && union.toSet == ranges.flatMap(_.toSet).toSet ++ rhs.toSet
     })
   }
 
