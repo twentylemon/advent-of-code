@@ -24,8 +24,19 @@ class CuboidTest extends UnitTest:
     check((cuboid: Cuboid[Int]) => cuboid.forall(cuboid.contains))
   }
 
+  test("corners are the surface points the surface doesn't pass straight through") {
+    check((cuboid: Cuboid[Int]) =>
+      val surface = cuboid.faces.flatMap(_.toSeq).toSet
+      cuboid.corners.toSet == surface.filterNot(p => Orientation.values.exists(o => surface(p + o) && surface(p - o)))
+    )
+  }
+
   test("number of enclosed points is equal to size") {
     check((cuboid: Cuboid[Int]) => cuboid.size == cuboid.iterator.size)
+  }
+
+  test("iterator goes by z, then y, then x") {
+    check((cuboid: Cuboid[Int]) => cuboid.toSeq == cuboid.toSeq.sortBy(p => (p.z, p.y, p.x)))
   }
 
   test("surface area is the number of exposed unit faces") {
