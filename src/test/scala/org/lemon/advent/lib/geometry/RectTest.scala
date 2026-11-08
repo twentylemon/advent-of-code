@@ -22,7 +22,7 @@ class RectTest extends UnitTest:
   }
 
   test("iterator goes row by row from the top left") {
-    check((area: Area) => area.iterator.toSeq == area.iterator.toSeq.sortBy(c => (c.y, c.x)))
+    check((area: Area) => area.toSeq == area.toSeq.sortBy(c => (c.y, c.x)))
   }
 
   test("perimeter is the number of exposed unit edges") {
@@ -70,7 +70,7 @@ class RectTest extends UnitTest:
 
   test("row contains the coords in that row") {
     val gen = for area <- Arbitrary.arbitrary[Area]; y <- Gen.oneOf(area.yRange) yield (area, y)
-    check(forAll(gen) { (area, y) => area.row(y).iterator.toSeq == area.iterator.filter(_.y == y).toSeq })
+    check(forAll(gen) { (area, y) => area.row(y).toSeq == area.filter(_.y == y).toSeq })
   }
 
   test("row throws IllegalArgumentException outside the area") {
@@ -81,12 +81,12 @@ class RectTest extends UnitTest:
 
   test("reverseRow is row in reverse") {
     val gen = for area <- Arbitrary.arbitrary[Area]; y <- Gen.oneOf(area.yRange) yield (area, y)
-    check(forAll(gen) { (area, y) => area.reverseRow(y).toSeq == area.row(y).iterator.toSeq.reverse })
+    check(forAll(gen) { (area, y) => area.reverseRow(y).toSeq == area.row(y).toSeq.reverse })
   }
 
   test("col contains the coords in that column") {
     val gen = for area <- Arbitrary.arbitrary[Area]; x <- Gen.oneOf(area.xRange) yield (area, x)
-    check(forAll(gen) { (area, x) => area.col(x).iterator.toSeq == area.iterator.filter(_.x == x).toSeq })
+    check(forAll(gen) { (area, x) => area.col(x).toSeq == area.filter(_.x == x).toSeq })
   }
 
   test("col throws IllegalArgumentException outside the area") {
@@ -97,7 +97,7 @@ class RectTest extends UnitTest:
 
   test("reverseCol is col in reverse") {
     val gen = for area <- Arbitrary.arbitrary[Area]; x <- Gen.oneOf(area.xRange) yield (area, x)
-    check(forAll(gen) { (area, x) => area.reverseCol(x).toSeq == area.col(x).iterator.toSeq.reverse })
+    check(forAll(gen) { (area, x) => area.reverseCol(x).toSeq == area.col(x).toSeq.reverse })
   }
 
   test("boundary contains only coords in area") {
@@ -401,7 +401,7 @@ class RectTest extends UnitTest:
         grid <- Gen.listOfN(area.bottom + 1, Gen.listOfN(area.right + 1, Arbitrary.arbitrary[Int]))
       yield (grid, area)
     check(forAll(gen) { (grid, area) =>
-      grid(area) == area.rows.map(_.iterator.map(c => grid(c.row)(c.col)).toSeq).toSeq
+      grid(area) == area.rows.map(_.map(c => grid(c.row)(c.col)).toSeq).toSeq
     })
   }
 
@@ -413,6 +413,6 @@ class RectTest extends UnitTest:
         lines <- Gen.listOfN(area.bottom + 1, Gen.stringOfN(area.right + 1, Gen.alphaNumChar))
       yield (lines, area)
     check(forAll(gen) { (lines, area) =>
-      lines(area) == area.rows.map(_.iterator.map(c => lines(c.row)(c.col)).toSeq).toSeq
+      lines(area) == area.rows.map(_.map(c => lines(c.row)(c.col)).toSeq).toSeq
     })
   }
