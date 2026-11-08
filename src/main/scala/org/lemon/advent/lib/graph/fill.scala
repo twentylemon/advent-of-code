@@ -42,10 +42,9 @@ private def distanceFrom[N, D: Numeric](
   while !queue.isEmpty do
     val node = queue.dequeue._1
     val dist = distances(node)
-    if maxDistance.forall(dist < _) then
-      queue ++= adjacency(node).iterator
-        .filter((neigh, d) => maxDistance.forall(dist + d <= _) && distances.get(neigh).forall(_ > dist + d))
-        .tapEach((neigh, d) => distances(neigh) = dist + d)
+    queue ++= adjacency(node).iterator
+      .filter((neigh, d) => maxDistance.forall(dist + d <= _) && distances.get(neigh).forall(_ > dist + d))
+      .tapEach((neigh, d) => distances(neigh) = dist + d)
   distances.toMap
 
 /** Performs a breadth first fill of the graph from the starting node up to a maximum distance,

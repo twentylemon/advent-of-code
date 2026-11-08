@@ -47,3 +47,19 @@ class PathFindTest extends UnitTest:
       pathFind(graph.adjacency, heuristic, start, end).map(_.distance.toLong) == graph.distancesFrom(start).get(end)
     })
   }
+
+  test("pathFind to several ends finds the closest one") {
+    val gen = for query <- queryGen(); ends <- Gen.someOf(query.graph.nodes) yield (query, ends.toSet)
+    check(forAll(gen) { case (Query(graph, start, _), ends) =>
+      val distances = graph.distancesFrom(start)
+      val found = pathFind(graph.adjacency, start, ends)
+      found.map(_.distance.toLong) == ends.flatMap(distances.get).minOption && found.forall(p => ends(p.at))
+    })
+  }
+
+  test("pathFind with unit adjacency counts the steps") {
+    check(forAll(queryGen()) { case Query(graph, start, end) =>
+      val steps = graph.copy(edges = graph.edges.map((from, to, _) => (from, to, 1)))
+      pathFind(graph.unitAdjacency, start, end).map(_.distance.toLong) == steps.distancesFrom(start).get(end)
+    })
+  }
