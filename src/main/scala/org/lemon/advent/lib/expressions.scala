@@ -2,14 +2,9 @@ package org.lemon.advent.lib
 
 import scala.collection.mutable
 
-object ExpressionContext:
-  def apply[T](expressions: Map[String, Expression[T]]): ExpressionContext[T] =
-    ExpressionContext(expressions, mutable.Map.empty[String, Option[Option[T]]])
+case class ExpressionContext[T](expressions: Map[String, Expression[T]]):
+  private val cache = mutable.Map.empty[String, Option[Option[T]]]
 
-case class ExpressionContext[T](
-    expressions: Map[String, Expression[T]],
-    cache: mutable.Map[String, Option[Option[T]]],
-):
   def resolve(name: String): Option[T] =
     cache.get(name) match
       case Some(Some(result)) => result
