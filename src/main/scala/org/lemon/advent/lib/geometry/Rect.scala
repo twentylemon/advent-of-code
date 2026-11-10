@@ -115,12 +115,10 @@ case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
     * @return iterator of all sub-areas of the given size in this area
     */
   def rectangles(width: N, height: N): Iterator[Rect[N]] =
-    if isEmpty then Iterator.empty
-    else
-      for
-        startX <- xRange.take(this.width - width + `1`).iterator
-        startY <- yRange.take(this.height - height + `1`).iterator
-      yield Rect(Interval(startX, startX + width - `1`), Interval(startY, startY + height - `1`))
+    for
+      startX <- xRange.take(this.width - width + `1`).iterator
+      startY <- yRange.take(this.height - height + `1`).iterator
+    yield Rect(Interval(startX, startX + width - `1`), Interval(startY, startY + height - `1`))
 
   /** Returns the quadrants of this rectangle. If the rectangle has an odd width or height,
     * the middle column or row is in the left or top quadrants.
