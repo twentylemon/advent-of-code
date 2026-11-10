@@ -1,7 +1,7 @@
 lazy val advent = (project in file("."))
   .enablePlugins(JmhPlugin)
   .settings(
-    scalaVersion := "3.7.4",
+    scalaVersion := "3.10.0",
     scalacOptions ++= Seq("-language:implicitConversions"),
     // scalacOptions ++= Seq("-rewrite", "-source:future-migration"),
     libraryDependencies += "org.scala-lang.modules" %% "scala-parallel-collections" % "1.3.0",
