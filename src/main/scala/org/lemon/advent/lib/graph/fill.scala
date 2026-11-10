@@ -18,7 +18,7 @@ def fill[N](adjacency: N => Iterable[N] | Iterator[N], start: N): Set[N] =
   def loop(stack: List[N], nodes: Set[N]): Set[N] = stack match
     case Nil => nodes
     case node :: rest =>
-      val (nextStack, nextNodes) = adjacency(node).iterator.foldLeft((rest, nodes)) { case ((stack, nodes), neigh) =>
+      val (nextStack, nextNodes) = adjacency(node).foldLeft((rest, nodes)) { case ((stack, nodes), neigh) =>
         if nodes(neigh) then (stack, nodes) else (neigh :: stack, nodes + neigh)
       }
       loop(nextStack, nextNodes)
@@ -45,7 +45,7 @@ private def distanceFrom[N, D: Numeric](
     case None => distances
     case Some((node, rest)) =>
       val dist = distances(node)
-      val (nextQueue, nextDistances) = adjacency(node).iterator.foldLeft((rest, distances)) {
+      val (nextQueue, nextDistances) = adjacency(node).foldLeft((rest, distances)) {
         case ((queue, distances), (neigh, d)) =>
           if maxDistance.forall(dist + d <= _) && distances.get(neigh).forall(_ > dist + d) then
             (queue.enqueue(neigh), distances.updated(neigh, dist + d))
@@ -127,7 +127,7 @@ def allPaths[N, D: Numeric](
   def loop(queue: Queue[Path[N, D]], paths: Set[Path[N, D]]): Set[Path[N, D]] = queue.dequeueOption match
     case None => paths
     case Some((node @ Path(path, distance), rest)) =>
-      val next = adjacency(node.at).iterator.map((neigh, dist) => Path(path :+ neigh, distance + dist))
+      val next = adjacency(node.at).map((neigh, dist) => Path(path :+ neigh, distance + dist))
       loop(rest ++ next, if ends(node.at) then paths + node else paths)
 
   loop(Queue(Path(path = Vector(start), distance = Numeric[D].zero)), Set.empty)
