@@ -8,9 +8,7 @@ import scala.annotation.targetName
 
 extension (range: Range)
   def toNumericRange[N: Integral]: NumericRange[N] =
-    if range.isEmpty then NumericRange.Exclusive(`0`, `0`, `1`)
-    else if range.isInclusive then
-      NumericRange.inclusive(fromInt(range.start), fromInt(range.end), fromInt(range.step))
+    if range.isInclusive then NumericRange.inclusive(fromInt(range.start), fromInt(range.end), fromInt(range.step))
     else NumericRange.Exclusive(fromInt(range.start), fromInt(range.end), fromInt(range.step))
 
   def toInterval: Interval[Int] = Interval(range)
@@ -149,8 +147,7 @@ case class Interval[N: Integral](start: N, end: N) extends Iterable[N] with Part
     else ((value - start) +% length) + start
 
   def toRange: Range = if isEmpty then 0 until 0 else start.toInt to end.toInt
-  def toNumericRange: NumericRange[N] =
-    if isEmpty then NumericRange(`1`, `0`, `1`) else NumericRange.inclusive(start, end, `1`)
+  def toNumericRange: NumericRange[N] = NumericRange.inclusive(start, end, `1`)
 
   override def toString: String = if isEmpty then "Interval.empty" else s"Interval($start..$end)"
 
@@ -387,5 +384,4 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
   def maxOption: Option[N] = intervals.lastOption.map(_._2)
 
   override def toString: String =
-    if isEmpty then "Diet()"
-    else intervals.map((s, e) => if s == e then s.toString else s"$s..$e").mkString("Diet(", ", ", ")")
+    intervals.map((s, e) => if s == e then s.toString else s"$s..$e").mkString("Diet(", ", ", ")")
