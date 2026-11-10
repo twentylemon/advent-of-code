@@ -3,6 +3,9 @@ on:
   workflow_dispatch:
   schedule:
   - cron: '22 17 15 11 *' # XXXX-11-15T17:22
+  push:
+    branches:
+    - main
 jobs:
   scala-steward:
     runs-on: ubuntu-latest

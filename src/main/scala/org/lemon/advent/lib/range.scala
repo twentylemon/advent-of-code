@@ -299,8 +299,7 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
       val baseIntervals =
         intervals.maxBefore(start) match
           case Some((s, e)) if e >= start =>
-            val removed = intervals.removed(s)
-            val withLeft = if s < start then removed.updated(s, start - `1`) else removed
+            val withLeft = intervals.updated(s, start - `1`)
             if e > end then withLeft.updated(end + `1`, e) else withLeft
           case _ => intervals
 
