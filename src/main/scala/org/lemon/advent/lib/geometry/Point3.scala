@@ -39,7 +39,7 @@ case class Point3[N: Integral](x: N, y: N, z: N):
   def shiftRight(n: N): Point3[N] = copy(x = x + n)
   def shiftIn(n: N): Point3[N] = copy(z = z + n)
   def shiftOut(n: N): Point3[N] = copy(z = z - n)
-  def shift(orientation: Orientation, n: N): Point3[N] = (orientation.facing: @unchecked) match
+  def shift(orientation: Orientation, n: N): Point3[N] = orientation.facing.runtimeChecked match
     case Point3(0, -1, 0) => shiftUp(n)
     case Point3(0, 1, 0) => shiftDown(n)
     case Point3(-1, 0, 0) => shiftLeft(n)
