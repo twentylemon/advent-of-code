@@ -21,7 +21,7 @@ private object Day23:
     val paths = mutable.Buffer.empty[Int]
     val queue = mutable.Queue((Set(start), start, 0))
     while !queue.isEmpty do
-      val (path, cell, steps) = queue.dequeue
+      val (path, cell, steps) = queue.dequeue()
       if cell == end then paths += steps
       else
         queue ++= edges(cell)

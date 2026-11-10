@@ -114,4 +114,4 @@ private object Day24:
         Option.when(calc(last)("z") == calc(last)("x") + calc(last)("y"))(
           (Seq(a, b, c, d, e, f) ++ gongShow.keys).sorted.mkString(",")
         )
-    }.next
+    }.next()

@@ -1,6 +1,7 @@
 package org.lemon.advent.year2022
 
 import org.lemon.advent.*
+import org.lemon.advent.lib.*
 import org.lemon.advent.lib.geometry.*
 import org.lemon.advent.year2022.Day23.*
 
@@ -14,7 +15,7 @@ class Day23Test extends UnitTest:
                 |..##.
                 |.....""".stripMargin
 
-    simulate(parse(in)).drop(2).next should contain theSameElementsAs Set(
+    simulate(parse(in)).nth(2) should contain theSameElementsAs Set(
       Coord(2, 0),
       Coord(4, 1),
       Coord(0, 2),

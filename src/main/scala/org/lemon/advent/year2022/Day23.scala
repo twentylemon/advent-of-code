@@ -30,7 +30,7 @@ private object Day23:
     val checks = Seq((Seq(u, ur, ul), u), (Seq(d, dr, dl), d), (Seq(l, ul, dl), l), (Seq(r, ur, dr), r))
     val check = Iterator.continually(checks).flatMap(x => x).drop(round % checks.size)
     if shouldChill then None
-    else move(check.next) orElse move(check.next) orElse move(check.next) orElse move(check.next)
+    else move(check.next()) orElse move(check.next()) orElse move(check.next()) orElse move(check.next())
 
   def simulate(elves: Set[Coord]) =
     Iterator.unfold((elves, 0))((elfyLads, round) =>

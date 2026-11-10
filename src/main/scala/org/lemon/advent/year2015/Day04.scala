@@ -18,11 +18,11 @@ private object Day04:
     Iterator.from(1)
       .grouped(100_000)
       .flatMap(_.par.flatMap(md).seq.minOption)
-      .next
+      .next()
 
   def part2(input: String) =
     val md = sixZeros(input.trim)
     Iterator.from(1)
       .grouped(100_000)
       .flatMap(_.par.flatMap(md).seq.minOption)
-      .next
+      .next()

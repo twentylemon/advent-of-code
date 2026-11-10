@@ -14,14 +14,14 @@ extension [A](it: Iterator[A])
     */
   def nth(n: Int): A =
     if n < 0 then throw IndexOutOfBoundsException(n.toString)
-    it.drop(n).next
+    it.drop(n).next()
 
   /** Returns the nth element of the iterator, or None if there is no nth element.
     *
     * @param n the index of the element to return
     * @return the nth element of the iterator, or None if there is no nth element
     */
-  def nthOption(n: Int): Option[A] = if n < 0 then None else it.drop(n).nextOption
+  def nthOption(n: Int): Option[A] = if n < 0 then None else it.drop(n).nextOption()
 
   /** Returns the last element of the iterator.
     *

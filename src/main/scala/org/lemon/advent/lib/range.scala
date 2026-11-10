@@ -252,7 +252,7 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
 
       // find all intervals that our range covers or touches
       val iter = baseIntervals.iteratorFrom(mergeStart)
-      iter.nextOption match
+      iter.nextOption() match
         case None => Diet(baseIntervals.updated(mergeStart, mergeEnd))
         case Some((s, e)) if !reaches(s, mergeEnd) => Diet(baseIntervals.updated(mergeStart, mergeEnd))
         case Some((s, e)) =>

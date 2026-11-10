@@ -45,7 +45,7 @@ class MemoizeTest extends UnitTest:
         calls += 1
         if k < 2 then BigInt(k) else fib(k - 1) + fib(k - 2)
       }
-      val expected = Iterator.iterate((BigInt(0), BigInt(1)))((a, b) => (b, a + b)).drop(n).next._1
+      val expected = Iterator.iterate((BigInt(0), BigInt(1)))((a, b) => (b, a + b)).nth(n)._1
       fib(n) == expected && calls == n + 1
     })
   }

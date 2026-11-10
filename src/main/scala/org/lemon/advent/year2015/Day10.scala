@@ -8,7 +8,7 @@ private object Day10:
   def lookSay(str: String) =
     @annotation.tailrec
     def loop(idx: Int, acc: mutable.StringBuilder): String =
-      if idx >= str.size then acc.result
+      if idx >= str.size then acc.result()
       else
         val ch = str(idx)
         val length = str.segmentLength(_ == ch, idx)
