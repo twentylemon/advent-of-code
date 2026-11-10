@@ -5,7 +5,7 @@ lazy val advent = (project in file("."))
     scalacOptions ++= Seq("-language:implicitConversions"),
     // scalacOptions ++= Seq("-rewrite", "-source:future-migration"),
     libraryDependencies += "org.scala-lang.modules" %% "scala-parallel-collections" % "1.3.0",
-    libraryDependencies += "com.softwaremill.sttp.client4" %% "core" % "4.0.27",
+    libraryDependencies += "com.softwaremill.sttp.client4" %% "core" % "4.1.1",
     libraryDependencies ++= Seq(
       "io.circe" %% "circe-core" % "0.14.17",
       "io.circe" %% "circe-generic" % "0.14.17",
