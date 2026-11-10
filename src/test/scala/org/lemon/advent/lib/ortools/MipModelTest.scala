@@ -64,12 +64,38 @@ class MipModelTest extends UnitTest:
     model.release()
   }
 
-  test("declaring a variable name twice throws IllegalArgumentException") {
+  test("an objective with no bound is Unbounded with no objective") {
     val model = MipModel()
-    model.intVar("x")
-    an[IllegalArgumentException] should be thrownBy model.boolVar("x")
+    val x = model.numVar("x", ub = Double.PositiveInfinity)
+    model.maximize(x)
+    model.solve() shouldBe SolveStatus.Unbounded
+    an[IllegalStateException] should be thrownBy model.objective
     model.release()
   }
+
+  test("a time limit doesn't stop a quick solve") {
+    val model = MipModel()
+    val x = model.intVar("x")
+    model.subjectTo(x <= 3)
+    model.maximize(x)
+    model.setTimeout(10000)
+    model.solve() shouldBe SolveStatus.Optimal
+    model.objective shouldBe 3.0 +- 1e-6
+    model.release()
+  }
+
+  Seq[(String, (MipModel, String) => Var)](
+    ("intVar", _.intVar(_)),
+    ("boolVar", _.boolVar(_)),
+    ("numVar", _.numVar(_)),
+  ).foreach((kind, declare) =>
+    test(s"$kind throws IllegalArgumentException for a name that's already declared") {
+      val model = MipModel()
+      declare(model, "x")
+      an[IllegalArgumentException] should be thrownBy declare(model, "x")
+      model.release()
+    }
+  )
 
   test("apply looks up a declared variable by name") {
     val model = MipModel()
