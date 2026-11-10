@@ -1,10 +1,11 @@
 package org.lemon.advent.lib.graph
 
-import scala.collection.mutable
+import scala.annotation.tailrec
+import scala.collection.immutable.Queue
 import scala.math.Numeric.Implicits.*
 import scala.math.Ordering.Implicits.*
 
-/** Performs a breadth first fill of the graph from the starting node, returning
+/** Performs a fill of the graph from the starting node, returning
   * the set of all reachable nodes.
   *
   * @param adjacency function to return edges for a given node
@@ -13,12 +14,16 @@ import scala.math.Ordering.Implicits.*
   * @tparam N the node type
   */
 def fill[N](adjacency: N => Iterable[N] | Iterator[N], start: N): Set[N] =
-  val nodes = mutable.Set(start)
-  val queue = mutable.Queue(start)
-  while !queue.isEmpty do
-    val node = queue.dequeue
-    queue ++= adjacency(node).filter(nodes.add)
-  nodes.toSet
+  @tailrec
+  def loop(stack: List[N], nodes: Set[N]): Set[N] = stack match
+    case Nil => nodes
+    case node :: rest =>
+      val (nextStack, nextNodes) = adjacency(node).iterator.foldLeft((rest, nodes)) { case ((stack, nodes), neigh) =>
+        if nodes(neigh) then (stack, nodes) else (neigh :: stack, nodes + neigh)
+      }
+      loop(nextStack, nextNodes)
+
+  loop(List(start), Set(start))
 
 /** Performs a breadth first fill of the graph from the starting node, optionally up to a maximum distance,
   * returning the distance to all reachable nodes within that limit.
@@ -35,17 +40,20 @@ private def distanceFrom[N, D: Numeric](
     end: N,
     maxDistance: Option[D],
 ): Map[N, D] =
-  val distances = mutable.Map(end -> Numeric[D].zero)
-  // given Ordering[(N, D)] = Ordering.by[(N, D), D](_._2).reverse
-  // val queue = mutable.PriorityQueue(distances.head)
-  val queue = mutable.Queue(distances.head)
-  while !queue.isEmpty do
-    val node = queue.dequeue._1
-    val dist = distances(node)
-    queue ++= adjacency(node).iterator
-      .filter((neigh, d) => maxDistance.forall(dist + d <= _) && distances.get(neigh).forall(_ > dist + d))
-      .tapEach((neigh, d) => distances(neigh) = dist + d)
-  distances.toMap
+  @tailrec
+  def loop(queue: Queue[N], distances: Map[N, D]): Map[N, D] = queue.dequeueOption match
+    case None => distances
+    case Some((node, rest)) =>
+      val dist = distances(node)
+      val (nextQueue, nextDistances) = adjacency(node).iterator.foldLeft((rest, distances)) {
+        case ((queue, distances), (neigh, d)) =>
+          if maxDistance.forall(dist + d <= _) && distances.get(neigh).forall(_ > dist + d) then
+            (queue.enqueue(neigh), distances.updated(neigh, dist + d))
+          else (queue, distances)
+      }
+      loop(nextQueue, nextDistances)
+
+  loop(Queue(end), Map(end -> Numeric[D].zero))
 
 /** Performs a breadth first fill of the graph from the starting node up to a maximum distance,
   * returning the distance to all reachable nodes within that limit.
@@ -115,15 +123,14 @@ def allPaths[N, D: Numeric](
     start: N,
     ends: N => Boolean,
 ): Set[Path[N, D]] =
-  val paths = mutable.Set.empty[Path[N, D]]
-  val queue = mutable.Queue(Path(path = Vector(start), distance = Numeric[D].zero))
+  @tailrec
+  def loop(queue: Queue[Path[N, D]], paths: Set[Path[N, D]]): Set[Path[N, D]] = queue.dequeueOption match
+    case None => paths
+    case Some((node @ Path(path, distance), rest)) =>
+      val next = adjacency(node.at).iterator.map((neigh, dist) => Path(path :+ neigh, distance + dist))
+      loop(rest ++ next, if ends(node.at) then paths + node else paths)
 
-  while queue.nonEmpty do
-    val node @ Path(path, distance) = queue.dequeue
-    if ends(node.at) then paths.add(node)
-    queue ++= adjacency(node.at).map((neigh, dist) => Path(path :+ neigh, distance + dist))
-
-  paths.toSet
+  loop(Queue(Path(path = Vector(start), distance = Numeric[D].zero)), Set.empty)
 
 /** Performs a breadth first fill of the graph from the starting node to the ending nodes, returning
   * all possible paths between the two sets. The distance between each node is assumed to be one.
