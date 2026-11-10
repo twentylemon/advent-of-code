@@ -7,9 +7,9 @@ lazy val advent = (project in file("."))
     libraryDependencies += "org.scala-lang.modules" %% "scala-parallel-collections" % "1.2.0",
     libraryDependencies += "com.softwaremill.sttp.client4" %% "core" % "4.0.13",
     libraryDependencies ++= Seq(
-      "io.circe" %% "circe-core" % "0.14.15",
-      "io.circe" %% "circe-generic" % "0.14.15",
-      "io.circe" %% "circe-parser" % "0.14.15"
+      "io.circe" %% "circe-core" % "0.14.17",
+      "io.circe" %% "circe-generic" % "0.14.17",
+      "io.circe" %% "circe-parser" % "0.14.17"
     ),
     libraryDependencies += "com.google.ortools" % "ortools-java" % "9.15.6755",
     libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.19.0" % Test,
