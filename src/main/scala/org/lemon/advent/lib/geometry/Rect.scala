@@ -180,11 +180,4 @@ case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
 
   def wrap(coord: Point[N]): Point[N] = Point(xRange.wrap(coord.x), yRange.wrap(coord.y))
 
-  def show(coord2Char: Point[N] => Char): String =
-    import scala.collection.mutable
-    val builder = mutable.StringBuilder(size.toInt + height.toInt)
-    this.foreach(coord =>
-      builder.append(coord2Char(coord))
-      if coord.col == right then builder.append('\n')
-    )
-    builder.toString
+  def show(coord2Char: Point[N] => Char): String = rows.map(_.map(coord2Char).mkString + "\n").mkString

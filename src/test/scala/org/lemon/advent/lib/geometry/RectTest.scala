@@ -8,10 +8,13 @@ import org.scalacheck.*
 
 class RectTest extends UnitTest:
   val emptyArea: Gen[Area] =
+    def emptied(range: Interval[Int]) = Gen.oneOf(range, Interval(range.start, range.start - 1))
     for
-      x <- Gen.choose(-100, 100)
-      y <- Gen.choose(-100, 100)
-    yield Area(x, x - 1, y, y - 1)
+      area <- Arbitrary.arbitrary[Area]
+      x <- emptied(area.xRange)
+      y <- emptied(area.yRange)
+      if x.isEmpty || y.isEmpty
+    yield Rect(x, y)
 
   test("area contains all enclosed points") {
     check((area: Area) => area.forall(area.contains))
@@ -27,6 +30,10 @@ class RectTest extends UnitTest:
 
   test("perimeter is the number of exposed unit edges") {
     check((area: Area) => area.perimeter == area.map(_.adjacent.count(!area.contains(_))).sum)
+  }
+
+  test("perimeter of an empty area is 0") {
+    check(forAll(emptyArea)(_.perimeter == 0))
   }
 
   test("corners are the boundary coords the boundary doesn't pass straight through") {
@@ -110,6 +117,10 @@ class RectTest extends UnitTest:
     check((area: Area, x: Int) =>
       !area.xRange.contains(x) ==> Prop.throws(classOf[IllegalArgumentException])(area.reverseCol(x))
     )
+  }
+
+  test("boundary of an empty area is empty") {
+    check(forAll(emptyArea)(_.boundary.isEmpty))
   }
 
   test("boundary contains only coords in area") {
@@ -234,6 +245,10 @@ class RectTest extends UnitTest:
     )
   }
 
+  test("an empty area has no rectangles") {
+    check(forAll(emptyArea, Gen.choose(-5, 5), Gen.choose(-5, 5)) { (area, x, y) => area.rectangles(x, y).isEmpty })
+  }
+
   test("quadrants cover the area") {
     check((area: Area) => area.quadrants.flatMap(_.toSeq).toSet == area.toSet)
   }
@@ -249,6 +264,10 @@ class RectTest extends UnitTest:
 
   test("quadrants are non-empty") {
     check((area: Area) => area.quadrants.forall(_.nonEmpty))
+  }
+
+  test("an empty area has no quadrants") {
+    check(forAll(emptyArea)(_.quadrants.isEmpty))
   }
 
   test("area encloses itself") {
@@ -331,6 +350,10 @@ class RectTest extends UnitTest:
 
   test("diff contains the points not in the removed area") {
     check((a1: Area, a2: Area) => a1.diff(a2).flatMap(_.toSeq).toSet == a1.filterNot(a2.contains).toSet)
+  }
+
+  test("diff of an empty area is empty") {
+    check(forAll(emptyArea, Arbitrary.arbitrary[Area])((empty, area) => empty.diff(area).isEmpty))
   }
 
   test("translate moves every point") {
