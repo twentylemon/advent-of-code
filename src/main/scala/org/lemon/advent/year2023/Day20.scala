@@ -56,7 +56,7 @@ private object Day20:
     val queue = mutable.Queue((false, context.circuits("button"), context.circuits("broadcaster")))
 
     while !queue.isEmpty do
-      val (signal, from, to) = queue.dequeue
+      val (signal, from, to) = queue.dequeue()
       sniff(signal, from)
       if signal then high = high + 1 else low = low + 1
       val next = to.receive(signal, from).map(s => to.downstream.map(name => (s, to, context.circuits(name))))

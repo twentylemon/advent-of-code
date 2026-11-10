@@ -49,7 +49,7 @@ class Day19PosthumousTest extends UnitTest {
     def tick(time: Int) = copy(time = this.time - time, bank = bank + robots * time)
 
     def tickUntil(predicate: State => Boolean, minTime: Int) =
-      Iterator.iterate(this)(_.tick(1)).dropWhile(s => s.time >= minTime && !predicate(s)).next
+      Iterator.iterate(this)(_.tick(1)).dropWhile(s => s.time >= minTime && !predicate(s)).next()
 
   def isBetterThan(lhs: State, rhs: State) =
     lhs.bank.geode > rhs.bank.geode && lhs.robots.geode > rhs.robots.geode && lhs.robots.obsidian > rhs.robots.obsidian
@@ -60,7 +60,7 @@ class Day19PosthumousTest extends UnitTest {
     val queue = mutable.PriorityQueue(initialState)(using Ordering.by(state => (state.time, state.bank.geode)))
 
     def iterate(queue: mutable.PriorityQueue[State], best: Map[Int, State]): Int =
-      val state = queue.dequeue
+      val state = queue.dequeue()
       if state.time <= 0 then state.bank.geode
       else if isBetterThan(best(state.time), state) then iterate(queue, best)
       else

@@ -26,7 +26,7 @@ def findCycle[S](initial: S)(step: S => S, eq: (S, S) => Boolean): Cycle[S] =
     BrentState(power, period, tortoise, step(state.hare))
   }.find(s => eq(s.tortoise, s.hare)).map(_.period).get
 
-  val hareStart = Iterator.iterate(initial)(step).drop(period).next()
+  val hareStart = Iterator.iterate(initial)(step).nth(period)
   val (offset, historyPrefix, cycleStart) = Iterator
     .iterate((initial, hareStart, Vector.empty[S])) { (t, h, hist) => (step(t), step(h), hist :+ t) }
     .find((tortoise, hare, _) => eq(tortoise, hare))

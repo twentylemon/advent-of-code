@@ -29,4 +29,4 @@ private object Day15:
   def part2(input: String, range: Range): Long =
     val sensors = input.linesIterator.map(parseSensor).toSeq
     val (diet, row) = range.iterator.map(coverageTree(sensors, _)).zipWithIndex.find(!_._1(range)).get
-    (diet.intervalsIterator.next._2 + 1) * 4000000L + row
+    (diet.intervalsIterator.next()._2 + 1) * 4000000L + row

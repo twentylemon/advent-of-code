@@ -86,7 +86,7 @@ private object Day17:
       else
         val op = state.opCodes(state.instruction)
         op(state)
-    ).dropWhile(_.pointer < state.program.size).next
+    ).dropWhile(_.pointer < state.program.size).next()
 
   def part1(input: String) =
     val (a, b, c, program) = parse(input)
