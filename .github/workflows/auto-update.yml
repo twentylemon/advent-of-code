@@ -1,4 +1,4 @@
-name: auto-update
+name: Update PRs
 
 on:
   push:
@@ -14,3 +14,4 @@ jobs:
         env:
           GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
           PR_FILTER: auto_merge
+          MERGE_CONFLICT_ACTION: ignore
