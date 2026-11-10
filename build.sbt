@@ -19,6 +19,9 @@ lazy val advent = (project in file("."))
     Test / parallelExecution := false,
     Test / logBuffered := false,
     coverageExcludedPackages := "org\\.lemon\\.advent\\.(?!lib(\\.|$)).*;org\\.lemon\\.advent\\.lib\\.Bench",
+    strykerMutate := Seq("src/main/scala/org/lemon/advent/lib/**/*.scala", "!**/lib/bench.scala"),
+    strykerTestFilter := Seq("org.lemon.advent.lib.*"),
+    strykerExcludedMutations := Seq("StringLiteral"),
   )
 
 addCommandAlias("libCoverage", "; coverage; testOnly org.lemon.advent.lib.*; coverageReport; coverageOff")
