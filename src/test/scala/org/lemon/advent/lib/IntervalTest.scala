@@ -485,24 +485,10 @@ class IntervalTest extends UnitTest:
     })
   }
 
-  test("intersects when overlapping") {
-    val gen =
-      for
-        (a, b) <- shortIntervalGen
-        c <- Gen.choose(a, b)
-        d <- Gen.choose(c, b + 100)
-      yield (a, b, c, d)
-    check(forAll(gen) { (a, b, c, d) => interval(a, b).intersects(interval(c, d)) })
-  }
-
-  test("does not intersect when disjoint") {
-    val gen =
-      for
-        (a, b) <- shortIntervalGen
-        gap <- Gen.choose(1, 100)
-        len <- Gen.choose(1, 100)
-      yield (a, b, b + gap, b + gap + len)
-    check(forAll(gen) { (a, b, c, d) => !interval(a, b).intersects(interval(c, d)) })
+  test("intersects matches Range") {
+    check((a: Byte, b: Byte, c: Byte, d: Byte) =>
+      interval(a, b).intersects(interval(c, d)) == range(a, b).exists(range(c, d).contains)
+    )
   }
 
   test("intersect is symmetric") {
