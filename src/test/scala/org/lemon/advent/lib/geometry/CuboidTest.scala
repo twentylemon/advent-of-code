@@ -7,11 +7,14 @@ import org.scalacheck.*
 
 class CuboidTest extends UnitTest:
   val emptyCuboid: Gen[Cuboid[Int]] =
+    def emptied(range: Interval[Int]) = Gen.oneOf(range, Interval(range.start, range.start - 1))
     for
-      x <- Gen.choose(-100, 100)
-      y <- Gen.choose(-100, 100)
-      z <- Gen.choose(-100, 100)
-    yield Cuboid(Interval(x, x - 1), Interval(y, y - 1), Interval(z, z - 1))
+      cuboid <- Arbitrary.arbitrary[Cuboid[Int]]
+      x <- emptied(cuboid.xRange)
+      y <- emptied(cuboid.yRange)
+      z <- emptied(cuboid.zRange)
+      if x.isEmpty || y.isEmpty || z.isEmpty
+    yield Cuboid(x, y, z)
 
   test("points cover cuboid") {
     check((cuboid: Cuboid[Int]) =>
@@ -41,6 +44,10 @@ class CuboidTest extends UnitTest:
 
   test("surface area is the number of exposed unit faces") {
     check((cuboid: Cuboid[Int]) => cuboid.surfaceArea == cuboid.map(_.adjacent.count(!cuboid.contains(_))).sum)
+  }
+
+  test("surface area of an empty cuboid is 0") {
+    check(forAll(emptyCuboid)(_.surfaceArea == 0))
   }
 
   test("leftFace contains height * depth points") {
@@ -125,6 +132,10 @@ class CuboidTest extends UnitTest:
 
   test("octants are non-empty") {
     check((cuboid: Cuboid[Int]) => cuboid.octants.forall(_.nonEmpty))
+  }
+
+  test("an empty cuboid has no octants") {
+    check(forAll(emptyCuboid)(_.octants.isEmpty))
   }
 
   test("expand encloses original cuboid") {
@@ -253,6 +264,10 @@ class CuboidTest extends UnitTest:
 
   test("diff contains the points not in the removed cuboid") {
     check((c1: Cuboid[Int], c2: Cuboid[Int]) => c1.diff(c2).flatMap(_.toSeq).toSet == c1.filterNot(c2.contains).toSet)
+  }
+
+  test("diff of an empty cuboid is empty") {
+    check(forAll(emptyCuboid, Arbitrary.arbitrary[Cuboid[Int]])((empty, cuboid) => empty.diff(cuboid).isEmpty))
   }
 
   test("clamp returns a point in the cuboid") {
