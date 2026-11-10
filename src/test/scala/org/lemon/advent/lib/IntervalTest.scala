@@ -1,7 +1,7 @@
 package org.lemon.advent.lib
 
 import org.lemon.advent.*
-import org.scalacheck.{Arbitrary, Shrink, Gen}
+import org.scalacheck.{Arbitrary, Prop, Shrink, Gen}
 import org.scalacheck.Prop.*
 import org.scalacheck.Shrink.*
 import org.scalacheck.Arbitrary.*
@@ -19,6 +19,13 @@ class RangeExtensionTest extends UnitTest:
 
   test("toNumericRange converts inclusive Range to NumericRange") {
     check((range: Range) => range.toSet == range.toNumericRange[Int].toSet)
+  }
+
+  test("toNumericRange converts exclusive Range to NumericRange") {
+    check((range: Range) =>
+      val exclusive = range.start until range.end by range.step
+      exclusive.toSet == exclusive.toNumericRange[Int].toSet
+    )
   }
 
   test("toInterval converts Range to Interval") {
@@ -231,7 +238,15 @@ class IntervalTest extends UnitTest:
   }
 
   test("Interval rejects Range with step != 1 or -1") {
-    an[IllegalArgumentException] should be thrownBy Interval(1 to 10 by 2)
+    check(forAll(arbitrary[Range], Gen.choose(2, 100)) { (range, k) =>
+      Prop.throws(classOf[IllegalArgumentException])(Interval(range by range.step * k))
+    })
+  }
+
+  test("Interval rejects NumericRange with step != 1 or -1") {
+    check(forAll(arbitrary[Range], Gen.choose(2, 100)) { (range, k) =>
+      Prop.throws(classOf[IllegalArgumentException])(Interval((range by range.step * k).toNumericRange[Int]))
+    })
   }
 
   test("isEmpty matches Range") {
@@ -276,6 +291,15 @@ class IntervalTest extends UnitTest:
     check(forAll(gen) { (a, b, i) => interval(a, b)(i) == range(a, b)(i) })
   }
 
+  test("apply throws IndexOutOfBoundsException outside the interval") {
+    val gen =
+      for
+        (a, b) <- shortIntervalGen
+        i <- Gen.oneOf(Gen.choose(-5, -1), Gen.choose(b - a + 1, b - a + 5))
+      yield (a, b, i)
+    check(forAll(gen) { (a, b, i) => Prop.throws(classOf[IndexOutOfBoundsException])(interval(a, b)(i)) })
+  }
+
   test("head matches Range") {
     check(forAll(intervalGen) { (a, b) => interval(a, b).head == range(a, b).head })
   }
@@ -312,8 +336,26 @@ class IntervalTest extends UnitTest:
     check(forAll(shortIntervalGen) { (a, b) => interval(a, b).iterator.toSeq == range(a, b).iterator.toSeq })
   }
 
+  test("iterator throws NoSuchElementException after the end") {
+    check((a: Int, n: Byte) =>
+      n >= 0 ==> {
+        val it = interval(a, a + n).iterator
+        it.toSeq == range(a, a + n) && Prop.throws(classOf[NoSuchElementException])(it.next())
+      }
+    )
+  }
+
   test("reverseIterator matches Range") {
     check(forAll(shortIntervalGen) { (a, b) => interval(a, b).reverseIterator.toSeq == range(a, b).reverse })
+  }
+
+  test("reverseIterator throws NoSuchElementException after the start") {
+    check((a: Int, n: Byte) =>
+      n >= 0 ==> {
+        val it = interval(a, a + n).reverseIterator
+        it.toSeq == range(a, a + n).reverse && Prop.throws(classOf[NoSuchElementException])(it.next())
+      }
+    )
   }
 
   test("indices matches Range") {

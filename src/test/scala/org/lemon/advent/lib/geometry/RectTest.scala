@@ -91,6 +91,12 @@ class RectTest extends UnitTest:
     check(forAll(gen) { (area, y) => area.reverseRow(y).toSeq == area.row(y).toSeq.reverse })
   }
 
+  test("reverseRow throws IllegalArgumentException outside the area") {
+    check((area: Area, y: Int) =>
+      !area.yRange.contains(y) ==> Prop.throws(classOf[IllegalArgumentException])(area.reverseRow(y))
+    )
+  }
+
   test("col contains the coords in that column") {
     val gen = for area <- Arbitrary.arbitrary[Area]; x <- Gen.oneOf(area.xRange) yield (area, x)
     check(forAll(gen) { (area, x) => area.col(x).toSeq == area.filter(_.x == x).toSeq })
@@ -105,6 +111,12 @@ class RectTest extends UnitTest:
   test("reverseCol is col in reverse") {
     val gen = for area <- Arbitrary.arbitrary[Area]; x <- Gen.oneOf(area.xRange) yield (area, x)
     check(forAll(gen) { (area, x) => area.reverseCol(x).toSeq == area.col(x).toSeq.reverse })
+  }
+
+  test("reverseCol throws IllegalArgumentException outside the area") {
+    check((area: Area, x: Int) =>
+      !area.xRange.contains(x) ==> Prop.throws(classOf[IllegalArgumentException])(area.reverseCol(x))
+    )
   }
 
   test("boundary of an empty area is empty") {
@@ -128,6 +140,18 @@ class RectTest extends UnitTest:
 
   test("boundary size is the number of edge coords") {
     check((area: Area) => area.boundary.size == area.count(_.adjacent.exists(!area.contains(_))))
+  }
+
+  test("upDiagonal throws IllegalArgumentException outside the area") {
+    check((area: Area, coord: Coord) =>
+      !area.contains(coord) ==> Prop.throws(classOf[IllegalArgumentException])(area.upDiagonal(coord))
+    )
+  }
+
+  test("downDiagonal throws IllegalArgumentException outside the area") {
+    check((area: Area, coord: Coord) =>
+      !area.contains(coord) ==> Prop.throws(classOf[IllegalArgumentException])(area.downDiagonal(coord))
+    )
   }
 
   test("map with coord keys cover area") {
