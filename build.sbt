@@ -12,7 +12,7 @@ lazy val advent = (project in file("."))
       "io.circe" %% "circe-parser" % "0.14.17"
     ),
     libraryDependencies += "com.google.ortools" % "ortools-java" % "9.15.6755",
-    libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.19.0" % Test,
+    libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.20.0" % Test,
     libraryDependencies += "org.scalatestplus" %% "scalacheck-1-17" % "3.2.18.0" % Test,
     libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.20" % Test,
     Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oDF"),
