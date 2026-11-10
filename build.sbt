@@ -13,7 +13,7 @@ lazy val advent = (project in file("."))
     ),
     libraryDependencies += "com.google.ortools" % "ortools-java" % "9.14.6206",
     libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.19.0" % Test,
-    libraryDependencies += "org.scalatestplus" %% "scalacheck-1-17" % "3.2.18.0" % Test,
+    libraryDependencies += "org.scalatestplus" %% "scalacheck-1-18" % "3.2.19.0" % Test,
     libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.19" % Test,
     Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oDF"),
     Test / parallelExecution := false,
