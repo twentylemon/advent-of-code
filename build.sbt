@@ -5,16 +5,16 @@ lazy val advent = (project in file("."))
     scalacOptions ++= Seq("-language:implicitConversions"),
     // scalacOptions ++= Seq("-rewrite", "-source:future-migration"),
     libraryDependencies += "org.scala-lang.modules" %% "scala-parallel-collections" % "1.3.0",
-    libraryDependencies += "com.softwaremill.sttp.client4" %% "core" % "4.0.13",
+    libraryDependencies += "com.softwaremill.sttp.client4" %% "core" % "4.0.27",
     libraryDependencies ++= Seq(
-      "io.circe" %% "circe-core" % "0.14.15",
-      "io.circe" %% "circe-generic" % "0.14.15",
-      "io.circe" %% "circe-parser" % "0.14.15"
+      "io.circe" %% "circe-core" % "0.14.17",
+      "io.circe" %% "circe-generic" % "0.14.17",
+      "io.circe" %% "circe-parser" % "0.14.17"
     ),
     libraryDependencies += "com.google.ortools" % "ortools-java" % "9.15.6755",
     libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.19.0" % Test,
     libraryDependencies += "org.scalatestplus" %% "scalacheck-1-17" % "3.2.18.0" % Test,
-    libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.19" % Test,
+    libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.20" % Test,
     Test / testOptions += Tests.Argument(TestFrameworks.ScalaTest, "-oDF"),
     Test / parallelExecution := false,
     Test / logBuffered := false,
