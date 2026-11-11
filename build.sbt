@@ -22,6 +22,7 @@ lazy val advent = (project in file("."))
     strykerMutate := Seq("src/main/scala/org/lemon/advent/lib/**/*.scala", "!**/lib/bench.scala"),
     strykerTestFilter := Seq("org.lemon.advent.lib.*"),
     strykerExcludedMutations := Seq("StringLiteral"),
+    strykerConcurrency := 2,
   )
 
 addCommandAlias("libCoverage", "; coverage; testOnly org.lemon.advent.lib.*; coverageReport; coverageOff")
