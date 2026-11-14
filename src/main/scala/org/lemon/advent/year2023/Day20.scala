@@ -63,9 +63,6 @@ private object Day20:
       queue ++= next.getOrElse(Seq.empty)
     (low, high)
 
-  def resolve(circuits: Map[String, Circuit]) =
-    val context = CircuitContext(circuits)
-
   def part1(input: String) =
     val context = CircuitContext(parse(input))
     val presses = for _ <- (0 until 1000).iterator yield pressTheButton(context)
