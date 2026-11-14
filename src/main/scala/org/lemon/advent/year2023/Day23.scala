@@ -21,7 +21,7 @@ private object Day23:
   def scenicRoute(start: Coord, end: Coord, edges: WeightedGraph[Coord, Int]) =
     val nodes = edges.keys.toIndexedSeq
     val index = nodes.zipWithIndex.toMap
-    val neighbours = nodes.map(node => edges(node).map((next, dist) => (index(next), dist)).toArray).toArray
+    val neighbours = nodes.map(node => edges(node).map((next, dist) => (index(next), dist)).toIndexedSeq)
     val target = index(end)
     val paths = mutable.Buffer.empty[Int]
     val queue = mutable.Queue((BitSet(index(start)), index(start), 0))
