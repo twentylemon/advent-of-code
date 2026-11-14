@@ -5,7 +5,7 @@ import org.lemon.advent.lib.*
 private object Day13:
 
   def parse(input: String) = input.chunks
-    .map(g => g.linesIterator.map(_.toCharArray.toSeq).toSeq)
+    .map(g => g.linesIterator.map(_.toSeq).toSeq)
 
   def reflecting(grid: Seq[Seq[Char]], diff: Int) =
     val idx = grid.indices
