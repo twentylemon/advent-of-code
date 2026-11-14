@@ -1,7 +1,5 @@
 package org.lemon.advent.year2016
 
-import org.lemon.advent.lib.*
-
 private object Day18:
 
   def trapped(previous: String)(pos: Int) =
