@@ -55,7 +55,7 @@ private object Day20:
     var (low, high) = (0L, 0L)
     val queue = mutable.Queue((false, context.circuits("button"), context.circuits("broadcaster")))
 
-    while !queue.isEmpty do
+    while queue.nonEmpty do
       val (signal, from, to) = queue.dequeue()
       sniff(signal, from)
       if signal then high = high + 1 else low = low + 1
