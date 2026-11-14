@@ -3,6 +3,7 @@ package org.lemon.advent.year2023
 import org.lemon.advent.lib.geometry.*
 import org.lemon.advent.lib.graph.*
 
+import scala.collection.immutable.BitSet
 import scala.collection.mutable
 
 private object Day23:
@@ -18,15 +19,19 @@ private object Day23:
       case _ => from.adjacent
 
   def scenicRoute(start: Coord, end: Coord, edges: WeightedGraph[Coord, Int]) =
+    val nodes = edges.keys.toIndexedSeq
+    val index = nodes.zipWithIndex.toMap
+    val neighbours = nodes.map(node => edges(node).map((neigh, dist) => (index(neigh), dist)).toIndexedSeq)
+    val target = index(end)
     val paths = mutable.Buffer.empty[Int]
-    val queue = mutable.Queue((Set(start), start, 0))
+    val queue = mutable.Queue((BitSet(index(start)), index(start), 0))
     while queue.nonEmpty do
       val (path, cell, steps) = queue.dequeue()
-      if cell == end then paths += steps
+      if cell == target then paths += steps
       else
-        queue ++= edges(cell)
-          .filterNot((coord, _) => path.contains(coord))
-          .map((coord, dist) => (path + coord, coord, steps + dist))
+        queue ++= neighbours(cell)
+          .filterNot((neigh, _) => path(neigh))
+          .map((neigh, dist) => (path + neigh, neigh, steps + dist))
 
     paths.max
 
