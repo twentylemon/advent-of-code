@@ -26,7 +26,7 @@ private object Day21:
     case RotateLeft(steps) => seed.drop(steps % seed.size) ++ seed.take(steps % seed.size)
     case RotateRight(steps) => seed.drop(seed.size - (steps % seed.size)) ++ seed.take(seed.size - (steps % seed.size))
     case RotateCh(ch) =>
-      val (pos, rotate) = (seed.indexOf(ch), RotateRight(1))
+      val pos = seed.indexOf(ch)
       scramble(seed, RotateRight(1 + pos + (if pos >= 4 then 1 else 0)))
     case Reverse(start, end) => seed.take(start) ++ seed.slice(start, end + 1).reverse ++ seed.drop(end + 1)
     case Move(x, y) => seed.patch(x, "", 1).patch(y, seed(x).toString, 0)
