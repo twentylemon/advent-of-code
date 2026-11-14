@@ -6,8 +6,8 @@ private object Day08:
     @annotation.tailrec
     def loop(str: List[Char], acc: Int): Int = str match
       case Nil => acc
-      case '\\' :: 'x' :: a :: b :: tail => loop(tail, acc + 1)
-      case '\\' :: a :: tail => loop(tail, acc + 1)
+      case '\\' :: 'x' :: _ :: _ :: tail => loop(tail, acc + 1)
+      case '\\' :: _ :: tail => loop(tail, acc + 1)
       case '"' :: tail => loop(tail, acc)
       case _ :: tail => loop(tail, acc + 1)
     loop(str.toList, 0)

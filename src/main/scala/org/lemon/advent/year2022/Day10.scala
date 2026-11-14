@@ -36,7 +36,7 @@ private object Day10:
     .zipWithIndex
     .map((state, cycle) =>
       cycle match
-        case x if (state.registers("x") - cycle % 40).abs < 2 => "#"
+        case _ if (state.registers("x") - cycle % 40).abs < 2 => "#"
         case _ => "."
     )
     .dropRight(1)

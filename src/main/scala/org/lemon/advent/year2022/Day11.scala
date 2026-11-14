@@ -64,5 +64,5 @@ private object Day11:
   def part2(input: String) =
     val monkeys = input.chunks.map(parseMonkey).map(m => m.id -> m).toMap
     val mod = monkeys.values.map(_.divisor).reduce(_ * _)
-    val ending = (1 to 10000).foldLeft(monkeys)((m, i) => round(x => x % mod)(m))
+    val ending = (1 to 10000).foldLeft(monkeys)((m, _) => round(x => x % mod)(m))
     ending.values.map(_.totalInspected).toSeq.sorted.takeRight(2).map(_.toLong).reduce(_ * _)

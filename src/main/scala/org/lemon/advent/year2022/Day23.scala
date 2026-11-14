@@ -36,7 +36,7 @@ private object Day23:
     Iterator.unfold((elves, 0))((elfyLads, round) =>
       val candidates = elfyLads.map(elf => elf -> candidate(elf, round, elfyLads)).toMap
       val counts = candidates.values.frequencies
-      val valid = candidates.filter((elf, cand) => cand.isDefined && counts(cand) == 1)
+      val valid = candidates.filter((_, cand) => cand.isDefined && counts(cand) == 1)
       if valid.isEmpty then None
       else
         val afterMove = elfyLads -- valid.keySet ++ valid.values.flatten.toSet

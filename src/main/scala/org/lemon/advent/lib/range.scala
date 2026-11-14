@@ -251,7 +251,7 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
       val iter = baseIntervals.iteratorFrom(mergeStart)
       iter.nextOption() match
         case None => Diet(baseIntervals.updated(mergeStart, mergeEnd))
-        case Some((s, e)) if !reaches(s, mergeEnd) => Diet(baseIntervals.updated(mergeStart, mergeEnd))
+        case Some((s, _)) if !reaches(s, mergeEnd) => Diet(baseIntervals.updated(mergeStart, mergeEnd))
         case Some((s, e)) =>
           // at least one overlap, collect the rest
           val rest = iter.takeWhile((s2, _) => reaches(s2, mergeEnd max e)).toList
