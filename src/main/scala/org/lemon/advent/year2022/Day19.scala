@@ -27,7 +27,7 @@ private object Day19:
     )
 
   def optimize(blueprint: Blueprint, time: Int) =
-    val model = MipModel()
+    val model = MipModel(SolverType.SAT)
     val expr = mutable.Map.empty[String, LinearExpr].withDefaultValue(LinearExpr.Zero)
 
     for t <- 0 until time do
