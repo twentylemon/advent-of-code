@@ -21,7 +21,7 @@ private object Day23:
   def scenicRoute(start: Coord, end: Coord, edges: WeightedGraph[Coord, Int]) =
     val nodes = edges.keys.toIndexedSeq
     val index = nodes.zipWithIndex.toMap
-    val neighbours = nodes.map(node => edges(node).map((next, dist) => (index(next), dist)).toIndexedSeq)
+    val neighbours = nodes.map(node => edges(node).map((neigh, dist) => (index(neigh), dist)).toIndexedSeq)
     val target = index(end)
     val paths = mutable.Buffer.empty[Int]
     val queue = mutable.Queue((BitSet(index(start)), index(start), 0))
@@ -30,8 +30,8 @@ private object Day23:
       if cell == target then paths += steps
       else
         queue ++= neighbours(cell)
-          .filterNot((next, _) => path(next))
-          .map((next, dist) => (path + next, next, steps + dist))
+          .filterNot((neigh, _) => path(neigh))
+          .map((neigh, dist) => (path + neigh, neigh, steps + dist))
 
     paths.max
 
@@ -49,4 +49,7 @@ private object Day23:
 
   def part2(input: String) =
     val grid = parse(input)
-    scenicRoute(startOf(grid), endOf(grid), compress(trails(grid), landmarks(grid)))
+    val possibleSteps = grid
+      .filter(_._2 != '#')
+      .map((coord, _) => (coord, coord.adjacent.filter(c => grid.getOrElse(c, '#') != '#')))
+    scenicRoute(startOf(grid), endOf(grid), compress(possibleSteps, landmarks(grid)))
