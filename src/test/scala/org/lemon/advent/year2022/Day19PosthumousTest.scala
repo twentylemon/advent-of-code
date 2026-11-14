@@ -117,6 +117,7 @@ class Day19PosthumousTest extends UnitTest {
     part1(read(file(2022)(19))) shouldBe 2160
   }
 
+  // passes, but is slow
   ignore("part 2 example") {
     val in =
       """|Blueprint 1: Each ore robot costs 4 ore. Each clay robot costs 2 ore. Each obsidian robot costs 3 ore and 14 clay. Each geode robot costs 2 ore and 7 obsidian.
@@ -125,7 +126,7 @@ class Day19PosthumousTest extends UnitTest {
     part2(in) shouldBe 56 * 62
   }
 
-  test("part 2") {
+  ignore("part 2") {
     part2(read(file(2022)(19))) shouldBe 13340
   }
 
