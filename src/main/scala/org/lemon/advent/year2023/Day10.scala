@@ -18,11 +18,7 @@ private object Day10:
         case 'S' => loc.adjacent
         case _ => Seq.empty[Coord]
 
-  def parse(input: String) = input.linesIterator
-    .zipWithIndex
-    .flatMap((line, y) => line.zipWithIndex.map((c, x) => Pipe(char = c, loc = (x, y))))
-    .map(pipe => pipe.loc -> pipe)
-    .toMap
+  def parse(input: String) = Coord.gridToMap(input).map((loc, c) => loc -> Pipe(char = c, loc = loc))
 
   def startOf(grid: Map[Coord, Pipe]) = grid.values.find(_.char == 'S').get
 
