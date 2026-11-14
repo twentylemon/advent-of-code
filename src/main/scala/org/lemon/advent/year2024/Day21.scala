@@ -30,7 +30,7 @@ private object Day21:
       .map(path => path.path.map(buttons(_)).mkString)
 
   def asNested(map: Map[Char, Coord])(path: String) =
-    'A' +: path.zip(path.tail).map((from, to) =>
+    'A' +: path.sliding2.map((from, to) =>
       map(from).directionTo(map(to)) match
         case Some(Direction.Up) => '^'
         case Some(Direction.Down) => 'v'
@@ -48,7 +48,7 @@ private object Day21:
         pathsBetween(board)(from, to)
           .map(asNested(asMap(board)))
           .map(nested =>
-            nested.zip(nested.tail)
+            nested.sliding2
               .map((start, end) => length(start, end, depth - 1))
               .sum
           ).min
