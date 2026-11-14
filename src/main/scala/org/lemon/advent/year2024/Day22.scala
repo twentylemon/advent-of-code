@@ -35,7 +35,10 @@ private object Day22:
       .toMap
 
   def part2(input: String) =
-    val stores = parse(input).par
+    parse(input).par
       .map(sequences)
-      .toSeq
-    stores.flatMap(_.keys).toSet.map(seq => stores.map(_.getOrElse(seq, 0L)).sum).max
+      .seq
+      .flatten
+      .groupMapReduce(_._1)(_._2)(_ + _)
+      .values
+      .max
