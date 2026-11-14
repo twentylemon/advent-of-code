@@ -1,7 +1,6 @@
 package org.lemon.advent.year2025
 
 import org.lemon.advent.lib.*
-import org.lemon.advent.lib.graph.*
 
 private object Day11:
 
