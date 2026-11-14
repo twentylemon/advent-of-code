@@ -25,14 +25,9 @@ private object Day03:
 
   def isSymbol(char: Char) = !char.isLetterOrDigit && char != '.'
 
-  def parseSymbols(input: String) = input.linesIterator
-    .zipWithIndex
-    .flatMap((line, row) =>
-      line
-        .zipWithIndex
-        .filter((c, _) => isSymbol(c))
-        .map((c, col) => Sym(sym = c, coord = (col, row)))
-    )
+  def parseSymbols(input: String) = Coord.gridToMap(input)
+    .collect { case (coord, c) if isSymbol(c) => Sym(sym = c, coord = coord) }
+    .toSeq
 
   def findSurroundingParts(coord: Coord, parts: Iterable[Part]) =
     def collides(c: Coord, part: Part) = c.row == part.row && part.bound.contains(c.col)
