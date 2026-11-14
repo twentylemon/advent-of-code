@@ -52,7 +52,7 @@ private object Day24:
       }
       .toMap
 
-  def checkCarryBit(expressions: Map[String, Expr], suffixes: Iterable[String]) =
+  def checkCarryBit(expressions: Map[String, Expr]) =
     // carry bit is (a & b | a ^ b) & carry_{i-1}, so carry must be AND or OR
     expressions.view
       .filterKeys(!_.startsWith("z"))
@@ -75,19 +75,10 @@ private object Day24:
   def part2(input: String) =
     val expressions = parse(input)
 
-    def display(e: Map[String, Expr]) =
-      val (x, y, z) = (calc(e)("x"), calc(e)("y"), calc(e)("z"))
-      println(s"x = ${x.toBinaryString.padLeft(z.toBinaryString.size, '0')}")
-      println(s"y = ${y.toBinaryString.padLeft(z.toBinaryString.size, '0')}")
-      println(s"z = ${z.toBinaryString}")
-      println(s"+ = ${(x + y).toBinaryString.padLeft(z.toBinaryString.size, '0')}")
-      println(s"^ = ${(z ^ (x + y)).toBinaryString.padLeft(z.toBinaryString.size, '0')}")
-      println()
-
     // assumption is that the circuit is a regular full adder, there's no shenanigans in between
     val bitSuffixes = expressions.keys.filter(_.startsWith("x")).map(_.drop(1))
     val wrongAdds = checkAdditionBit(expressions, bitSuffixes)
-    val wrongCarries = checkCarryBit(expressions, bitSuffixes)
+    val wrongCarries = checkCarryBit(expressions)
 
     val swaps = for x <- wrongAdds.keys; y <- wrongCarries.keys yield (x, y)
 
