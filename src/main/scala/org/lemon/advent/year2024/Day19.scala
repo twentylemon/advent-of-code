@@ -2,8 +2,6 @@ package org.lemon.advent.year2024
 
 import org.lemon.advent.lib.*
 
-import scala.collection.mutable
-
 private object Day19:
 
   def parse(input: String) =

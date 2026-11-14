@@ -1,7 +1,5 @@
 package org.lemon.advent.year2024
 
-import scala.collection.mutable
-
 import org.lemon.advent.lib.geometry.*
 import org.lemon.advent.lib.graph.*
 

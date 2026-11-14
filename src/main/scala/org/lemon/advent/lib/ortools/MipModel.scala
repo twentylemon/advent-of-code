@@ -10,7 +10,7 @@ enum SolverType:
 enum SolveStatus:
   case Optimal, Feasible, Infeasible, Unbounded, Abnormal, NotSolved
 
-class MipModel(name: String = "mip", solverType: SolverType = SolverType.CBC):
+class MipModel(solverType: SolverType = SolverType.CBC):
   Loader.loadNativeLibraries()
   private val solver = MPSolver.createSolver(solverType.toString)
   require(solver != null, s"Could not create solver ${solverType}")
