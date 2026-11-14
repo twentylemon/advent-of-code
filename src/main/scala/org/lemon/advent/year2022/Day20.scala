@@ -6,24 +6,15 @@ import scala.collection.mutable
 private object Day20:
 
   def mix(seq: Seq[Long], times: Int = 1): Seq[Long] =
-    val normalToMix = seq.indices.map(i => (i -> i)).to(mutable.Map)
-
-    def shift(range: Range, amount: Int) =
-      normalToMix
-        .filter((_, mi) => range.contains(mi))
-        .foreach((k, _) => normalToMix(k) += amount)
+    val order = mutable.ArrayBuffer.from(seq.indices)
 
     for _ <- 1 to times; i <- seq.indices do
-      val v = seq(i)
-      val mixIndex = normalToMix(i)
-      val posMod = (mixIndex + v) +% (seq.size - 1L)
-      val newMixIndex = if posMod == 0 then seq.size - 1 else posMod.toInt
+      val mixIndex = order.indexOf(i)
+      order.remove(mixIndex)
+      val posMod = (mixIndex + seq(i)) +% order.size.toLong
+      order.insert(if posMod == 0 then order.size else posMod.toInt, i)
 
-      if mixIndex != newMixIndex then
-        shift(newMixIndex until mixIndex by (mixIndex - newMixIndex).sign, (mixIndex - newMixIndex).sign)
-      normalToMix(i) = newMixIndex
-
-    seq.indices.sortBy(normalToMix).map(seq)
+    order.map(seq).toSeq
 
   def part1(in: String) =
     val m = mix(in.linesIterator.map(_.toLong).toSeq)
