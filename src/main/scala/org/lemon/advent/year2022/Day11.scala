@@ -58,11 +58,11 @@ private object Day11:
 
   def part1(input: String) =
     val monkeys = input.chunks.map(parseMonkey).map(m => m.id -> m).toMap
-    val ending = (1 to 20).foldLeft(monkeys)((m, _) => round(x => x / 3)(m))
-    ending.values.map(_.totalInspected).toSeq.sorted.takeRight(2).reduce(_ * _)
+    val ending = Iterator.iterate(monkeys)(round(_ / 3)).nth(20)
+    ending.values.map(_.totalInspected).toSeq.sorted.takeRight(2).product
 
   def part2(input: String) =
     val monkeys = input.chunks.map(parseMonkey).map(m => m.id -> m).toMap
-    val mod = monkeys.values.map(_.divisor).reduce(_ * _)
-    val ending = (1 to 10000).foldLeft(monkeys)((m, _) => round(x => x % mod)(m))
-    ending.values.map(_.totalInspected).toSeq.sorted.takeRight(2).map(_.toLong).reduce(_ * _)
+    val mod = monkeys.values.map(_.divisor).product
+    val ending = Iterator.iterate(monkeys)(round(_ % mod)).nth(10000)
+    ending.values.map(_.totalInspected).toSeq.sorted.takeRight(2).map(_.toLong).product
