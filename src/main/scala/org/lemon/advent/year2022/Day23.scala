@@ -28,7 +28,7 @@ private object Day23:
 
     val shouldChill = (elf.surrounding.toSet & elves).isEmpty
     val checks = Seq((Seq(u, ur, ul), u), (Seq(d, dr, dl), d), (Seq(l, ul, dl), l), (Seq(r, ur, dr), r))
-    val check = Iterator.continually(checks).flatMap(x => x).drop(round % checks.size)
+    val check = Iterator.continually(checks).flatten.drop(round % checks.size)
     if shouldChill then None
     else move(check.next()) orElse move(check.next()) orElse move(check.next()) orElse move(check.next())
 
