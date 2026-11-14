@@ -35,21 +35,16 @@ private object Day23:
 
     paths.max
 
-  def trails(grid: Map[Coord, Char]) = grid
-    .filter(_._2 != '#')
-    .map((coord, _) => (coord, coord.adjacent.filter(c => grid.getOrElse(c, '#') != '#')))
-
-  def landmarks(grid: Map[Coord, Char]) = junctions(trails(grid)) + startOf(grid) + endOf(grid)
-
   def part1(input: String) =
     val grid = parse(input)
     val possibleSteps =
       grid.map((coord, _) => (coord, neighbours(coord, grid).filter(c => grid.getOrElse(c, '#') != '#')))
-    scenicRoute(startOf(grid), endOf(grid), compress(possibleSteps, landmarks(grid)))
+    scenicRoute(startOf(grid), endOf(grid), possibleSteps.view.mapValues(s => s.map((_, 1))).toMap)
 
   def part2(input: String) =
     val grid = parse(input)
     val possibleSteps = grid
       .filter(_._2 != '#')
       .map((coord, _) => (coord, coord.adjacent.filter(c => grid.getOrElse(c, '#') != '#')))
-    scenicRoute(startOf(grid), endOf(grid), compress(possibleSteps, landmarks(grid)))
+    val nodes = junctions(possibleSteps) + startOf(grid) + endOf(grid)
+    scenicRoute(startOf(grid), endOf(grid), compress(possibleSteps, nodes))
