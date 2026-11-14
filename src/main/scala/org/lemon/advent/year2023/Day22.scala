@@ -40,7 +40,6 @@ private object Day22:
 
   def totalDestruction(
       brick: Brick,
-      bricks: Seq[Brick],
       supports: Map[Brick, Seq[Brick]],
       supported: Map[Brick, Seq[Brick]]
   ) =
@@ -60,5 +59,5 @@ private object Day22:
     val supports = supporting(stable)
     val supported = supportedBy(stable)
     stable
-      .map(totalDestruction(_, stable, supports, supported))
+      .map(totalDestruction(_, supports, supported))
       .sum
