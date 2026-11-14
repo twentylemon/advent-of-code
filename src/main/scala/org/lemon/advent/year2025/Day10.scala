@@ -20,7 +20,7 @@ private object Day10:
     ).toSeq
 
   def solve(buttons: Seq[Seq[Int]], targetValues: Seq[Int], useParity: Boolean) =
-    val model = MipModel("day10")
+    val model = MipModel()
     val maxPress = if useParity then 1 else targetValues.max
     val presses = buttons.indices.map(i =>
       if useParity then model.boolVar(s"press_$i") // each button is pressed 0 or 1 times
