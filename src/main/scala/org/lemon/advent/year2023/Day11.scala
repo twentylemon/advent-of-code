@@ -7,11 +7,7 @@ private object Day11:
 
   case class DarkEnergy(xs: Seq[Int], ys: Seq[Int])
 
-  def parseGalaxies(input: String) = input.linesIterator
-    .map(_.zipWithIndex.filter(_._1 == '#'))
-    .zipWithIndex
-    .flatMap((row, y) => row.map((_, x) => (x, y)))
-    .toSeq
+  def parseGalaxies(input: String) = Coord.gridToMap(input).collect { case (coord, '#') => coord }.toSeq
 
   def parseDarkEnergy(input: String) =
     def find(grid: Iterable[Iterable[Char]]) = grid
