@@ -16,7 +16,7 @@ private object Day07:
         case 'Q' => Queen
         case 'J' => Jack
         case 'T' => Ten
-        case d => Rank.fromOrdinal(d.toString.toInt - 2)
+        case d => Rank.fromOrdinal(d.asDigit - 2)
 
   enum Kind:
     case HighCard, Pair, TwoPair, ThreeOfKind, FullHouse, FourOfKind, FiveOfKind
@@ -68,12 +68,7 @@ private object Day07:
     run(input)
 
   def part2(input: String) =
-    given Ordering[Rank] with
-      def compare(x: Rank, y: Rank): Int =
-        if x == y then 0
-        else if x == Rank.Jack then -1
-        else if y == Rank.Jack then 1
-        else x.ordinal.compareTo(y.ordinal)
+    given Ordering[Rank] = Ordering.by(rank => if rank == Rank.Jack then -1 else rank.ordinal)
 
     given Ordering[Hand] = Ordering.by[Hand, Kind](_.jokerKind)
       .orElse(Ordering.by[Hand, Seq[Rank]](_.cards))
