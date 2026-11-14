@@ -3,8 +3,6 @@ package org.lemon.advent.year2023
 import org.lemon.advent.lib.geometry.*
 import org.lemon.advent.lib.geometry.Coord.*
 
-import scala.collection.mutable
-
 private object Day18:
 
   def parse(input: String) = input.linesIterator.map {
