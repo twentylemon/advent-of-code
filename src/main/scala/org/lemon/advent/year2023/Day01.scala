@@ -19,8 +19,8 @@ private object Day01:
   ) ++ (1 to 9).map(x => (x.toString, x)).toMap
 
   def find(line: String): (Int, Int) =
-    val min = nums.map((k, v) => (line.indexOf(k), k)).view.filterKeys(_ != -1)
-    val max = nums.map((k, v) => (line.lastIndexOf(k), k)).view.filterKeys(_ != -1)
+    val min = nums.map((k, _) => (line.indexOf(k), k)).view.filterKeys(_ != -1)
+    val max = nums.map((k, _) => (line.lastIndexOf(k), k)).view.filterKeys(_ != -1)
     (nums(min(min.keySet.min)), nums(max(max.keySet.max)))
 
   def part2(input: String) = input.linesIterator
