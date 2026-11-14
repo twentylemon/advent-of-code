@@ -27,7 +27,7 @@ private object Day09:
 
   def trackTail(in: String, numberOfKnots: Int) =
     val tailPos = mutable.Map.empty[Coord, Int].withDefaultValue(0)
-    var rope = Seq.fill(numberOfKnots)(Coord.origin)
+    val rope = Seq.fill(numberOfKnots)(Coord.origin)
     in.linesIterator.foldLeft(rope)((r, m) => move(m, r, tailPos))
     tailPos
 

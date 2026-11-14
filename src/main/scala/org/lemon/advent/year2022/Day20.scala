@@ -11,7 +11,7 @@ private object Day20:
     def shift(range: Range, amount: Int) =
       normalToMix
         .filter((_, mi) => range.contains(mi))
-        .foreach((k, v) => normalToMix(k) += amount)
+        .foreach((k, _) => normalToMix(k) += amount)
 
     for _ <- 1 to times; i <- seq.indices do
       val v = seq(i)
