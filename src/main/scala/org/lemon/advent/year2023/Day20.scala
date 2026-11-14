@@ -79,19 +79,15 @@ private object Day20:
     val chain = Seq("xl", "ln", "xp", "gp")
     val counts = mutable.Map.empty[String, Long]
 
-    try
-      val presses =
-        for
-          press <- 1 until 100000
-        yield pressTheButton(
+    (1 until 100000)
+      .find { press =>
+        pressTheButton(
           context,
           (signal, circuit) =>
             if signal && chain.contains(circuit.name) then
               counts.updateWith(circuit.name)(_.orElse(Some(press)))
-              if counts.size == chain.size then
-                throw new AssertionError(counts.values.fold(1L)(_ `lcm` _).toString)
         )
-      0L
-    catch
-      case success: AssertionError => success.getMessage().toLong
-      case rip: Throwable => throw rip
+        counts.size == chain.size
+      }
+      .map(_ => counts.values.lcm)
+      .getOrElse(0L)
