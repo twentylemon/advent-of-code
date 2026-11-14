@@ -5,7 +5,7 @@ import org.lemon.advent.lib.*
 private object Day14:
 
   def parse(input: String) = input.linesIterator
-    .map(_.toCharArray.toSeq)
+    .map(_.toSeq)
     .toSeq
 
   def tiltLeft(row: Seq[Char]) = Seq.unfold(row)(row =>
