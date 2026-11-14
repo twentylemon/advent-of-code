@@ -25,12 +25,8 @@ private object Day17:
       (Direction.Down, hash(0) & 0x0f),
       (Direction.Left, (hash(1) >> 4) & 0x0f),
       (Direction.Right, hash(1) & 0x0f)
-    ).flatMap {
-      case (dir, ch) if ch >= 0x0b && ch <= 0x0f =>
-        val neigh = coord + dir
-        if neigh.x >= 0 && neigh.x < 4 && neigh.y >= 0 && neigh.y < 4 then Some(neigh -> (dir :: path))
-        else None
-      case _ => None
+    ).collect {
+      case (dir, ch) if ch >= 0x0b && ch <= 0x0f && Area(4, 4).contains(coord + dir) => (coord + dir) -> (dir :: path)
     }
 
   def part1(input: String) =
