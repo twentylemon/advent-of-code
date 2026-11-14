@@ -20,7 +20,7 @@ private object Day23:
   def scenicRoute(start: Coord, end: Coord, edges: WeightedGraph[Coord, Int]) =
     val paths = mutable.Buffer.empty[Int]
     val queue = mutable.Queue((Set(start), start, 0))
-    while !queue.isEmpty do
+    while queue.nonEmpty do
       val (path, cell, steps) = queue.dequeue()
       if cell == end then paths += steps
       else

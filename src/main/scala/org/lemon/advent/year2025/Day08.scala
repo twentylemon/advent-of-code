@@ -20,7 +20,7 @@ private object Day08:
       .sortBy(_.euclidean(_))
       .take(strands)
     val circuits = closests.foldLeft(DisjointSet(coords)) { case (circuits, (a, b)) => circuits.union(a, b) }
-    circuits.components.map(_.size).toSeq.sorted.reverse.take(3).product
+    circuits.components.map(_.size).toSeq.sorted.takeRight(3).product
 
   def minimumSpanningTree(coords: Seq[Coord]): Seq[(Coord, Coord)] =
     val all = coords.toSet
