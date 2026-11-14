@@ -8,7 +8,7 @@ private object Day03:
     sack
       .splitAt(sack.length / 2)
       .toList
-      .map(_.toCharArray.toSeq)
+      .map(_.toSeq)
 
   def getPriorityOfCommon(compartments: Seq[Seq[Char]]) = compartments
     .map(_.toSet)
@@ -19,7 +19,7 @@ private object Day03:
   def part1(input: String) = input.linesIterator.map(compartmentsOf).map(getPriorityOfCommon).sum
 
   def part2(input: String) = input.linesIterator
-    .map(_.toCharArray.toSeq)
+    .map(_.toSeq)
     .grouped(3)
     .map(getPriorityOfCommon)
     .sum
