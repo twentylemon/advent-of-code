@@ -3,8 +3,6 @@ package org.lemon.advent.year2022
 import org.lemon.advent.lib.*
 import org.lemon.advent.lib.geometry.*
 
-import scala.collection.mutable
-
 private object Day14:
 
   enum Trickle:
@@ -30,30 +28,21 @@ private object Day14:
   def part1(input: String): Int =
     val rocks = input.linesIterator.flatMap(parseRocks).toSeq
     val deepest = rocks.map(_.yRange.end).max
-    val initialBlocks = rocks.flatten.toSet
-    val sand = mutable.Set.from(initialBlocks)
-    def occupied = sand.contains
     def deep(coord: Coord) = coord.y > deepest
-
-    var resting = true
-    while resting do
+    Iterator.unfold(rocks.flatten.toSet) { occupied =>
       trickle(occupied, deep)(Coord(500, 0)) match
-        case Fall => resting = false
-        case Rest(coord) => sand += coord
-    sand.size - initialBlocks.size
+        case Fall => None
+        case Rest(coord) => Some((coord, occupied + coord))
+    }.size
 
   def part2(input: String): Int =
     val rocks = input.linesIterator.flatMap(parseRocks).toSeq
     val deepest = rocks.map(_.yRange.end).max
-    val initialBlocks = rocks.flatten.toSet
-    val sand = mutable.Set.from(initialBlocks)
-    def occupied(coord: Coord) = coord.y >= deepest + 2 || sand.contains(coord)
     def deep(coord: Coord) = false
-
-    var resting = true
-    while resting do
+    Iterator.unfold(rocks.flatten.toSet) { sand =>
+      def occupied(coord: Coord) = coord.y >= deepest + 2 || sand.contains(coord)
       trickle(occupied, deep)(Coord(500, 0)) match
-        case Rest(Coord(500, 0)) => resting = false
-        case Rest(coord) => sand += coord
+        case Rest(Coord(500, 0)) => None
+        case Rest(coord) => Some((coord, sand + coord))
         case Fall => throw AssertionError()
-    sand.size - initialBlocks.size + 1
+    }.size + 1
