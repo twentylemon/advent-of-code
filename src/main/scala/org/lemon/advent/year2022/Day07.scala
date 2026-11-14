@@ -19,7 +19,7 @@ private object Day07:
       case "$ cd .." => pwd = pwd.parent
       case "$ cd /" => pwd = root
       case s"$$ cd $dir" =>
-        pwd = pwd.contents.filter(_.isInstanceOf[Directory]).map(_.asInstanceOf[Directory]).find(_.name == dir).get
+        pwd = pwd.contents.collect { case d: Directory => d }.find(_.name == dir).get
       case "$ ls" => "nothing to do"
       case s"dir $dir" => pwd.contents.add(Directory(dir, pwd))
       case s"$size $name" => pwd.contents.add(Obj(name = name, size = size.toInt))
@@ -33,8 +33,7 @@ private object Day07:
   def part1(input: String) =
     val root = buildTree(input.linesIterator)
     iterator(root)
-      .filter(_.isInstanceOf[Directory])
-      .map(_.size)
+      .collect { case dir: Directory => dir.size }
       .filter(_ <= 100000)
       .sum
 
@@ -45,7 +44,6 @@ private object Day07:
     val unused = total - root.size
     val needToIce = required - unused
     iterator(root)
-      .filter(_.isInstanceOf[Directory])
-      .map(_.size)
+      .collect { case dir: Directory => dir.size }
       .filter(_ >= needToIce)
       .min
