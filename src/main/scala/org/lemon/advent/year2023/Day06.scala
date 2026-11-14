@@ -6,7 +6,7 @@ private object Day06:
   def parse(input: String) =
     val ins = input.linesIterator
       .map {
-        case s"$_: $nums" => nums.wsv.map(_.toLongOption).flatten
+        case s"$_: $nums" => nums.wsv.flatMap(_.toLongOption)
       }
       .toSeq
     ins(0).zip(ins(1))
