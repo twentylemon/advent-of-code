@@ -1,7 +1,6 @@
 package org.lemon.advent.lib.graph
 
 import scala.annotation.tailrec
-import scala.collection.mutable
 import scala.math.Numeric.Implicits.*
 import scala.math.Ordering.Implicits.*
 

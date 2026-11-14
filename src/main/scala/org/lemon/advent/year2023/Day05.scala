@@ -3,7 +3,6 @@ package org.lemon.advent.year2023
 import org.lemon.advent.lib.*
 
 import scala.collection.immutable.NumericRange
-import scala.collection.parallel.CollectionConverters.*
 
 private object Day05:
 
