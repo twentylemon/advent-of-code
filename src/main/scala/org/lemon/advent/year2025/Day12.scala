@@ -10,7 +10,7 @@ private object Day12:
   def parse(input: String) =
     val xs = input.chunks
     val shapes = xs
-      .collect { case s"$x:\n$grid" => Coord.gridToMap(grid) }
+      .collect { case s"$_:\n$grid" => Coord.gridToMap(grid) }
     val trees = xs.last.linesIterator.map {
       case s"${x}x$y: $rest" =>
         Problem(Area(x.toInt, y.toInt), rest.wsv.map(_.toInt))
