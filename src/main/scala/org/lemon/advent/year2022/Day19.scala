@@ -75,14 +75,14 @@ private object Day19:
     // we can only build one robot per turn, don't bother to have more income than that
     val maxOre =
       blueprint.ore.cost.ore.max(blueprint.clay.cost.ore).max(blueprint.obsidian.cost.ore).max(blueprint.geode.cost.ore)
-    model.subjectTo((0 until time).map(t => expr(s"ore_$t")).reduce(_ + _) <= maxOre)
+    model.subjectTo((0 until time).map(t => expr(s"ore_$t")).reduce(_ + _) <= maxOre - 1)
     model.subjectTo((0 until time).map(t => expr(s"clay_$t")).reduce(_ + _) <= blueprint.obsidian.cost.clay)
     model.subjectTo((0 until time).map(t => expr(s"obsidian_$t")).reduce(_ + _) <= blueprint.geode.cost.obsidian)
 
     // don't bother building robots if they can't contribute to geodes later
     model.subjectTo(((time - 3) until time).map(t => expr(s"ore_$t")).reduce(_ + _) === 0)
-    model.subjectTo(((time - 3) until time).map(t => expr(s"clay_$t")).reduce(_ + _) === 0)
-    model.subjectTo(((time - 2) until time).map(t => expr(s"obsidian_$t")).reduce(_ + _) === 0)
+    model.subjectTo(((time - 5) until time).map(t => expr(s"clay_$t")).reduce(_ + _) === 0)
+    model.subjectTo(((time - 3) until time).map(t => expr(s"obsidian_$t")).reduce(_ + _) === 0)
     model.subjectTo(((time - 1) until time).map(t => expr(s"geode_$t")).reduce(_ + _) === 0)
 
     // objective is to maximize the geode bank at the end
