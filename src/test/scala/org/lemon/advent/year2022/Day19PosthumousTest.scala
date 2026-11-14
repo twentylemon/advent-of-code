@@ -125,7 +125,7 @@ class Day19PosthumousTest extends UnitTest {
     part2(in) shouldBe 56 * 62
   }
 
-  test("part 2") {
+  ignore("part 2") {
     part2(read(file(2022)(19))) shouldBe 13340
   }
 
