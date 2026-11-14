@@ -28,7 +28,6 @@ private object Day21:
     assert(depth % area.width == area.width / 2, "start is in the middle")
 
     val numGridsOver = depth.toLong / size - 1
-    val leftOverSteps = depth % size
 
     val numOddGrids = square((numGridsOver / 2) * 2 + 1)
     val numEvenGrids = square(((numGridsOver + 1) / 2) * 2)
