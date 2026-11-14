@@ -47,7 +47,7 @@ private object Day22:
     val falling = mutable.Set.empty[Brick]
     val queue = mutable.Queue(brick)
 
-    while !queue.isEmpty do
+    while queue.nonEmpty do
       val next = queue.dequeue()
       falling += next
       queue ++= supports(next).filter(supported(_).forall(falling))
