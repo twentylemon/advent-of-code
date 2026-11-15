@@ -538,10 +538,10 @@ class IntervalTest extends UnitTest:
     check((a: Int, b: Int, c: Int, d: Int) => Interval(a, b).diff(Interval(c, d)).size <= 2)
   }
 
-  test("diff and the intersection cover lhs") {
+  test("diff and the intersection make up lhs") {
     check((a: Int, b: Int, c: Int, d: Int) =>
       val (lhs, rhs) = (Interval(a, b), Interval(c, d))
-      lhs.diff(rhs).map(_.length).sum + (lhs & rhs).length == lhs.length
+      lhs.diff(rhs).foldLeft(Diet(lhs & rhs))(_ + _) == Diet(lhs)
     )
   }
 
