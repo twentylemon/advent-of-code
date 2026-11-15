@@ -107,6 +107,16 @@ case class Interval[N: Integral](start: N, end: N) extends Iterable[N] with Part
 
   def splitAt(n: N): (Interval[N], Interval[N]) = (take(n), drop(n))
 
+  def segmentLength(p: N => Boolean, from: N = `0`): N = fromInt(drop(from).iterator.takeWhile(p).size)
+
+  def indexWhere(p: N => Boolean, from: N = `0`): N =
+    val index = drop(from).iterator.indexWhere(p)
+    if index < 0 then `-1` else (from max `0`) + fromInt(index)
+
+  override def takeWhile(p: N => Boolean): Interval[N] = take(segmentLength(p))
+  override def dropWhile(p: N => Boolean): Interval[N] = drop(segmentLength(p))
+  override def span(p: N => Boolean): (Interval[N], Interval[N]) = splitAt(segmentLength(p))
+
   override def tail: Interval[N] =
     if isEmpty then throw new UnsupportedOperationException("tail of empty interval")
     else drop(`1`)
@@ -158,8 +168,6 @@ object Diet:
   def apply[N: Integral](values: Iterable[N]): Diet[N] =
     values.iterator.foldLeft(empty[N])(_ + _)
 
-  def apply[N: Integral](start: N, end: N): Diet[N] = empty[N].add(start, end)
-
   def apply(range: Range): Diet[Int] = empty[Int].add(range)
   def apply[N: Integral](range: NumericRange[N]): Diet[N] = empty[N].add(range)
   def apply[N: Integral](interval: Interval[N]): Diet[N] = empty[N].add(interval)
@@ -184,7 +192,7 @@ object Diet:
   * @tparam N the numeric type of values stored
   * @param intervals the underlying interval storage, mapping each interval's start to its end (inclusive)
   */
-case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
+case class Diet[N: Integral] private (intervals: TreeMap[N, N]) extends (N => Boolean):
   /** Returns whether this tree contains the given value.
     *
     * @param value the value to check
@@ -210,7 +218,7 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
   def contains(range: NumericRange[N]): Boolean = contains(Interval(range))
   def contains(interval: Interval[N]): Boolean = contains(interval.start, interval.end)
 
-  def apply(value: N): Boolean = contains(value)
+  override def apply(value: N): Boolean = contains(value)
   def apply(start: N, end: N): Boolean = contains(start, end)
   def apply(range: Range): Boolean = contains(range)
   def apply(range: NumericRange[N]): Boolean = contains(range)
@@ -331,7 +339,8 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
     * @return a new diet containing all values from both diets
     */
   def union(rhs: Diet[N]): Diet[N] =
-    rhs.intervals.foldLeft(this)((diet, interval) => diet + (interval._1, interval._2))
+    val (big, small) = if intervals.size >= rhs.intervals.size then (this, rhs) else (rhs, this)
+    small.intervals.foldLeft(big)((diet, interval) => diet + (interval._1, interval._2))
 
   def ++(rhs: Diet[N]): Diet[N] = union(rhs)
 
@@ -341,14 +350,15 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
     * @return a new diet containing only values present in both diets
     */
   def intersect(rhs: Diet[N]): Diet[N] =
+    val (big, small) = if intervals.size >= rhs.intervals.size then (this, rhs) else (rhs, this)
     def overlaps(start: N, end: N): Iterator[(N, N)] =
       // interval that may start before but overlap
-      val fromBefore = rhs.intervals.maxBefore(start).filter((_, e) => e >= start).iterator
-      // intervals from rhs that start within [start, end]
-      val fromRange = rhs.intervals.iteratorFrom(start).takeWhile((s, _) => s <= end)
+      val fromBefore = big.intervals.maxBefore(start).filter((_, e) => e >= start).iterator
+      // intervals from `big` that start within [start, end]
+      val fromRange = big.intervals.iteratorFrom(start).takeWhile((s, _) => s <= end)
       (fromBefore ++ fromRange).map((otherStart, otherEnd) => (start max otherStart, end min otherEnd))
 
-    Diet(intervals.flatMap(overlaps))
+    Diet(small.intervals.flatMap(overlaps))
 
   def &(rhs: Diet[N]): Diet[N] = intersect(rhs)
 
