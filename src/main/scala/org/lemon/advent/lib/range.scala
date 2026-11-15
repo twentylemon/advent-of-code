@@ -331,7 +331,8 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
     * @return a new diet containing all values from both diets
     */
   def union(rhs: Diet[N]): Diet[N] =
-    rhs.intervals.foldLeft(this)((diet, interval) => diet + (interval._1, interval._2))
+    val (big, small) = if intervals.size >= rhs.intervals.size then (this, rhs) else (rhs, this)
+    small.intervals.foldLeft(big)((diet, interval) => diet + (interval._1, interval._2))
 
   def ++(rhs: Diet[N]): Diet[N] = union(rhs)
 
