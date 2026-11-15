@@ -107,11 +107,15 @@ case class Interval[N: Integral](start: N, end: N) extends Iterable[N] with Part
 
   def splitAt(n: N): (Interval[N], Interval[N]) = (take(n), drop(n))
 
-  private def prefixLength(p: N => Boolean): N = fromInt(iterator.takeWhile(p).size)
+  def segmentLength(p: N => Boolean, from: N = `0`): N = fromInt(drop(from).iterator.takeWhile(p).size)
 
-  override def takeWhile(p: N => Boolean): Interval[N] = take(prefixLength(p))
-  override def dropWhile(p: N => Boolean): Interval[N] = drop(prefixLength(p))
-  override def span(p: N => Boolean): (Interval[N], Interval[N]) = splitAt(prefixLength(p))
+  def indexWhere(p: N => Boolean, from: N = `0`): N =
+    val index = drop(from).iterator.indexWhere(p)
+    if index < 0 then `-1` else (from max `0`) + fromInt(index)
+
+  override def takeWhile(p: N => Boolean): Interval[N] = take(segmentLength(p))
+  override def dropWhile(p: N => Boolean): Interval[N] = drop(segmentLength(p))
+  override def span(p: N => Boolean): (Interval[N], Interval[N]) = splitAt(segmentLength(p))
 
   override def tail: Interval[N] =
     if isEmpty then throw new UnsupportedOperationException("tail of empty interval")
