@@ -205,15 +205,9 @@ class IntervalTest extends UnitTest:
 
   def interval(a: Int, b: Int) = Interval(a, b)
 
-  /** @return an amount in `[lo, hi]`, clipped to the `Int` range */
-  def amount(lo: Long, hi: Long): Gen[Int] = Gen.chooseNum(lo.max(Int.MinValue).toInt, hi.min(Int.MaxValue).toInt)
-  // how far `[a, b]` can shrink from one side and stay non-empty
   def shrinkRoom(a: Int, b: Int): Long = b.toLong - a
-  // how far `[a, b]` can grow from its start or its end without overflowing
-  def startRoom(a: Int): Long = a.toLong - Int.MinValue
-  def endRoom(b: Int): Long = Int.MaxValue.toLong - b
   def withAmount(lo: (Int, Int) => Long, hi: (Int, Int) => Long): Gen[(Int, Int, Int)] =
-    for (a, b) <- intervalGen; n <- amount(lo(a, b), hi(a, b)) yield (a, b, n)
+    for (a, b) <- intervalGen; n <- amountWithin(lo(a, b), hi(a, b)) yield (a, b, n)
   def range(a: Int, b: Int) = a to b
   given Arbitrary[Range] = Arbitrary(for
     i <- Gen.choose(-10000, 10000)
@@ -542,11 +536,10 @@ class IntervalTest extends UnitTest:
   }
 
   test("an interval emptied by an operation is Interval.empty") {
-    // at least the length, so every op empties it, but short of overflowing `a + n` or `b - n`
     val gen =
       for
         (a, b) <- shortIntervalGen
-        n <- amount(b.toLong - a + 1, (Int.MaxValue.toLong - a) min (b.toLong - Int.MinValue))
+        n <- amountWithin(b.toLong - a + 1, roomAbove(a) min roomBelow(b))
       yield (a, b, n)
     check(forAll(gen) { (a, b, n) =>
       Interval(a, b).contract(n) == Interval.empty[Int] &&
@@ -618,7 +611,7 @@ class IntervalTest extends UnitTest:
   }
 
   test("shift by the opposite amount is the original") {
-    val gen = withAmount((a, _) => -startRoom(a), (_, b) => endRoom(b))
+    val gen = withAmount((a, _) => -roomBelow(a), (_, b) => roomAbove(b))
     check(forAll(gen) { (a, b, n) => Interval(a, b).shift(n).shift(-n) == Interval(a, b) })
   }
 
@@ -628,7 +621,7 @@ class IntervalTest extends UnitTest:
   }
 
   test("growStart keeps the end") {
-    val gen = withAmount((a, b) => -shrinkRoom(a, b), (a, _) => startRoom(a))
+    val gen = withAmount((a, b) => -shrinkRoom(a, b), (a, _) => roomBelow(a))
     check(forAll(gen) { (a, b, n) => Interval(a, b).growStart(n).end == b })
   }
 
@@ -653,7 +646,7 @@ class IntervalTest extends UnitTest:
   }
 
   test("growEnd keeps the start") {
-    val gen = withAmount((a, b) => -shrinkRoom(a, b), (_, b) => endRoom(b))
+    val gen = withAmount((a, b) => -shrinkRoom(a, b), (_, b) => roomAbove(b))
     check(forAll(gen) { (a, b, n) => Interval(a, b).growEnd(n).start == a })
   }
 
@@ -693,7 +686,7 @@ class IntervalTest extends UnitTest:
   }
 
   test("expand is growStart then growEnd") {
-    val gen = withAmount((a, b) => -shrinkRoom(a, b) / 2, (a, b) => startRoom(a) min endRoom(b))
+    val gen = withAmount((a, b) => -shrinkRoom(a, b) / 2, (a, b) => roomBelow(a) min roomAbove(b))
     check(forAll(gen) { (a, b, n) => Interval(a, b).expand(n) == Interval(a, b).growStart(n).growEnd(n) })
   }
 
@@ -703,12 +696,12 @@ class IntervalTest extends UnitTest:
   }
 
   test("contract raises the start") {
-    val gen = withAmount((a, b) => -(startRoom(a) min endRoom(b)), (a, b) => shrinkRoom(a, b) / 2)
+    val gen = withAmount((a, b) => -(roomBelow(a) min roomAbove(b)), (a, b) => shrinkRoom(a, b) / 2)
     check(forAll(gen) { (a, b, n) => Interval(a, b).contract(n).start == a + n })
   }
 
   test("contract lowers the end") {
-    val gen = withAmount((a, b) => -(startRoom(a) min endRoom(b)), (a, b) => shrinkRoom(a, b) / 2)
+    val gen = withAmount((a, b) => -(roomBelow(a) min roomAbove(b)), (a, b) => shrinkRoom(a, b) / 2)
     check(forAll(gen) { (a, b, n) => Interval(a, b).contract(n).end == b - n })
   }
 
@@ -723,7 +716,7 @@ class IntervalTest extends UnitTest:
   }
 
   test("contract undoes expand") {
-    val gen = withAmount((a, b) => -shrinkRoom(a, b) / 2, (a, b) => startRoom(a) min endRoom(b))
+    val gen = withAmount((a, b) => -shrinkRoom(a, b) / 2, (a, b) => roomBelow(a) min roomAbove(b))
     check(forAll(gen) { (a, b, n) => Interval(a, b).expand(n).contract(n) == Interval(a, b) })
   }
 

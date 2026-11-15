@@ -148,14 +148,14 @@ class CuboidTest extends UnitTest:
         cuboid <- Arbitrary.arbitrary[Cuboid[Int]]
         shrinkRoom = ((cuboid.width min cuboid.height min cuboid.depth) - 1L) / 2
         growRoom = Seq(
-          cuboid.left.toLong - Int.MinValue,
-          Int.MaxValue.toLong - cuboid.right,
-          cuboid.top.toLong - Int.MinValue,
-          Int.MaxValue.toLong - cuboid.bottom,
-          cuboid.front.toLong - Int.MinValue,
-          Int.MaxValue.toLong - cuboid.back,
+          roomBelow(cuboid.left),
+          roomAbove(cuboid.right),
+          roomBelow(cuboid.top),
+          roomAbove(cuboid.bottom),
+          roomBelow(cuboid.front),
+          roomAbove(cuboid.back),
         ).min
-        n <- amount(-shrinkRoom, growRoom)
+        n <- amountWithin(-shrinkRoom, growRoom)
       yield (cuboid, n)
     check(forAll(gen) { (cuboid, n) => cuboid.expand(n).contract(n) == cuboid })
   }
@@ -178,9 +178,9 @@ class CuboidTest extends UnitTest:
     val gen =
       for
         cuboid <- Arbitrary.arbitrary[Cuboid[Int]]
-        x <- amount(Int.MinValue.toLong - cuboid.left, Int.MaxValue.toLong - cuboid.right)
-        y <- amount(Int.MinValue.toLong - cuboid.top, Int.MaxValue.toLong - cuboid.bottom)
-        z <- amount(Int.MinValue.toLong - cuboid.front, Int.MaxValue.toLong - cuboid.back)
+        x <- amountWithin(-roomBelow(cuboid.left), roomAbove(cuboid.right))
+        y <- amountWithin(-roomBelow(cuboid.top), roomAbove(cuboid.bottom))
+        z <- amountWithin(-roomBelow(cuboid.front), roomAbove(cuboid.back))
       yield (cuboid, Point3(x, y, z))
     check(forAll(gen) { (cuboid, offset) => cuboid.translate(offset).translate(-offset) == cuboid })
   }

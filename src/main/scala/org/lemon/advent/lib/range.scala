@@ -20,7 +20,6 @@ extension [N: Integral](tuple: (N, N))
   def toInterval: Interval[N] = Interval(tuple._1, tuple._2)
 
 object Interval:
-  /** @return the interval of values between `start` and `end` inclusive, or [[empty]] when `start > end` */
   def apply[N: Integral](start: N, end: N): Interval[N] =
     if start > end then empty else new Interval(start, end)
 
@@ -46,7 +45,7 @@ object Interval:
 
 /** A discrete range of values between `start` and `end` inclusive.
   * Differs from a Range in that it is always inclusive and has a fixed step of 1.
-  * Every empty interval is [[Interval.empty]], so equal intervals have the same `start` and `end`.
+  * An interval is empty when `start > end`.
   *
   * @param start the start of the interval (inclusive)
   * @param end the end of the interval (inclusive)
