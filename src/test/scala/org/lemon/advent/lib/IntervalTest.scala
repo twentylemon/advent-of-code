@@ -428,32 +428,34 @@ class IntervalTest extends UnitTest:
   }
 
   test("halves are non-empty") {
-    check((a: Int, b: Int) => Interval(a, b).halves.forall(_.nonEmpty))
+    check(forAll(intervalGen) { (a, b) => interval(a, b).halves.forall(_.nonEmpty) })
   }
 
   test("there are at most 2 halves") {
-    check((a: Int, b: Int) => Interval(a, b).halves.size <= 2)
+    check(forAll(intervalGen) { (a, b) => interval(a, b).halves.size <= 2 })
   }
 
   test("the union of the halves is the interval") {
-    check((a: Int, b: Int) => Interval(a, b).halves.foldLeft(Diet.empty[Int])(_ + _) == Diet(Interval(a, b)))
+    check(forAll(intervalGen) { (a, b) =>
+      interval(a, b).halves.foldLeft(Diet.empty[Int])(_ + _) == Diet(interval(a, b))
+    })
   }
 
   test("the first half ends before the second starts") {
-    check((a: Int, b: Int) =>
-      Interval(a, b).halves match
+    check(forAll(intervalGen) { (a, b) =>
+      interval(a, b).halves match
         case Seq(first, second) => first.end < second.start
         case _ => true
-    )
+    })
   }
 
   test("the first half is the same length as the second, or one longer") {
-    check((a: Int, b: Int) =>
-      Interval(a, b).halves match
+    check(forAll(intervalGen) { (a, b) =>
+      interval(a, b).halves match
         case Seq(first, second) => first.length == second.length || first.length == second.length + 1
         case Seq(only) => only.length == 1
-        case _ => true
-    )
+        case _ => false
+    })
   }
 
   val predicateGen: Gen[(Int, Int, Int => Boolean)] =
