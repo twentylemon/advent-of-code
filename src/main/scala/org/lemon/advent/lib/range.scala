@@ -184,7 +184,7 @@ object Diet:
   * @tparam N the numeric type of values stored
   * @param intervals the underlying interval storage, mapping each interval's start to its end (inclusive)
   */
-case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
+case class Diet[N: Integral] private (intervals: TreeMap[N, N]) extends (N => Boolean):
   /** Returns whether this tree contains the given value.
     *
     * @param value the value to check
@@ -210,7 +210,7 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
   def contains(range: NumericRange[N]): Boolean = contains(Interval(range))
   def contains(interval: Interval[N]): Boolean = contains(interval.start, interval.end)
 
-  def apply(value: N): Boolean = contains(value)
+  override def apply(value: N): Boolean = contains(value)
   def apply(start: N, end: N): Boolean = contains(start, end)
   def apply(range: Range): Boolean = contains(range)
   def apply(range: NumericRange[N]): Boolean = contains(range)

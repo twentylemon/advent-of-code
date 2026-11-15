@@ -111,6 +111,7 @@ class DietTest extends UnitTest:
         Gen.const(Max),
         Gen.const(MaxOption),
         Gen.const(IntervalsIterator),
+        Gen.listOf(value).map(FilterBy(_)),
         Gen.const(ToRanges),
         Gen.const(ToNumericRanges),
         Gen.const(Size),
@@ -158,6 +159,8 @@ class DietTest extends UnitTest:
     case object MinOption extends Query(_.minOption, _.minOption.map(first))
     case object Max extends Query(_.max, state => last(state.max))
     case object MaxOption extends Query(_.maxOption, _.maxOption.map(last))
+    case class FilterBy(values: List[Int])
+        extends Query(values.filter(_), state => values.filter(v => state.contains(Math.floorDiv(v, blockSize))))
     case object IntervalsIterator extends Query(_.intervalsIterator.map(i => (i.start, i.end)).toSeq, runs)
     case object ToRanges extends Query(_.toRanges.map(r => (r.start, r.end)), runs)
     case object ToNumericRanges extends Query(_.toNumericRanges.map(r => (r.start, r.end)), runs)
