@@ -146,7 +146,11 @@ case class Interval[N: Integral](start: N, end: N) extends Iterable[N] with Part
     if isEmpty then throw new UnsupportedOperationException("wrap of empty interval")
     else ((value - start) +% length) + start
 
-  def toRange: Range = if isEmpty then 0 until 0 else start.toInt to end.toInt
+  def toRange: Range =
+    if isEmpty then 0 until 0
+    else
+      require(start >= fromInt(Int.MinValue) && end <= fromInt(Int.MaxValue), s"$this does not fit in a Range")
+      start.toInt to end.toInt
   def toNumericRange: NumericRange[N] = NumericRange.inclusive(start, end, `1`)
 
   override def toString: String = if isEmpty then "Interval.empty" else s"Interval($start..$end)"

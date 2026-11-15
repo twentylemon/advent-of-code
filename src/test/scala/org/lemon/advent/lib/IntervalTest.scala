@@ -462,6 +462,22 @@ class IntervalTest extends UnitTest:
     check(forAll(intervalGen) { (a, b) => interval(a, b).toRange == range(a, b) })
   }
 
+  test("toRange of a Long interval within the Int range matches Range") {
+    check(forAll(intervalGen) { (a, b) => Interval(a.toLong, b.toLong).toRange == range(a, b) })
+  }
+
+  test("toRange throws IllegalArgumentException for a Long interval outside the Int range") {
+    val outside = Gen.oneOf(
+      for start <- Gen.chooseNum(Long.MinValue, Int.MinValue - 1L); end <- Gen.chooseNum(start, Long.MaxValue)
+      yield (start, end),
+      for end <- Gen.chooseNum(Int.MaxValue + 1L, Long.MaxValue); start <- Gen.chooseNum(Long.MinValue, end)
+      yield (start, end),
+    )
+    check(forAllNoShrink(outside) { (start, end) =>
+      Prop.throws(classOf[IllegalArgumentException])(Interval(start, end).toRange)
+    })
+  }
+
   test("toNumericRange roundtrips") {
     check(forAll(rangeIntervalGen) { (a, b) => interval(a, b).toNumericRange == range(a, b).toNumericRange[Int] })
   }
