@@ -125,12 +125,8 @@ case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
     * @return the non-empty quadrants of this rectangle
     */
   def quadrants: Seq[Rect[N]] =
-    def halves(range: Interval[N]): Seq[Interval[N]] =
-      val mid = range.start + (range.length - `1`) / fromInt(2)
-      Interval(range.start, mid) +: Option.when(mid < range.end)(Interval(mid + `1`, range.end)).toSeq
-
     if isEmpty then Seq.empty
-    else for y <- halves(yRange); x <- halves(xRange) yield Rect(x, y)
+    else for y <- yRange.halves; x <- xRange.halves yield Rect(x, y)
 
   def growLeft(n: N): Rect[N] = copy(xRange = xRange.growStart(n))
   def growRight(n: N): Rect[N] = copy(xRange = xRange.growEnd(n))

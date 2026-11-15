@@ -423,6 +423,23 @@ class IntervalTest extends UnitTest:
     })
   }
 
+  test("halves concatenate to the interval") {
+    check(forAll(shortIntervalGen) { (a, b) => interval(a, b).halves.flatMap(_.toSeq) == range(a, b) })
+  }
+
+  test("halves differ in length by at most one, with any odd middle in the first") {
+    check(forAll(shortIntervalGen) { (a, b) =>
+      interval(a, b).halves.map(_.length) match
+        case Seq(only) => only == 1
+        case Seq(first, second) => first == second || first == second + 1
+        case _ => false
+    })
+  }
+
+  test("halves of an empty interval is empty") {
+    Interval.empty[Int].halves shouldBe empty
+  }
+
   test("tail matches Range") {
     check(forAll(shortIntervalGen) { (a, b) => interval(a, b).tail.toSeq == range(a, b).tail.toSeq })
   }

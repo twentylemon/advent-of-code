@@ -90,12 +90,8 @@ case class Cuboid[N: Integral](xRange: Interval[N], yRange: Interval[N], zRange:
     * @return the non-empty octants of this cuboid
     */
   def octants: Seq[Cuboid[N]] =
-    def halves(range: Interval[N]): Seq[Interval[N]] =
-      val mid = range.start + (range.length - `1`) / fromInt(2)
-      Interval(range.start, mid) +: Option.when(mid < range.end)(Interval(mid + `1`, range.end)).toSeq
-
     if isEmpty then Seq.empty
-    else for x <- halves(xRange); y <- halves(yRange); z <- halves(zRange) yield Cuboid(x, y, z)
+    else for x <- xRange.halves; y <- yRange.halves; z <- zRange.halves yield Cuboid(x, y, z)
 
   def expand(n: N): Cuboid[N] = Cuboid(xRange.expand(n), yRange.expand(n), zRange.expand(n))
   def contract(n: N): Cuboid[N] = Cuboid(xRange.contract(n), yRange.contract(n), zRange.contract(n))
