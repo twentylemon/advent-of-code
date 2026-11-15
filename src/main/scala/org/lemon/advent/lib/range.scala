@@ -55,6 +55,8 @@ case class Interval[N: Integral](start: N, end: N) extends Iterable[N] with Part
   @deprecated("use length instead")
   override def size: Int = length.toInt
   def length: N = if isEmpty then `0` else end - start + `1`
+  override def knownSize: Int =
+    if isEmpty then 0 else if length > `0` && length <= fromInt(Int.MaxValue) then length.toInt else -1
 
   def contains(x: N): Boolean = x >= start && x <= end
   def containsSlice(that: Interval[N]): Boolean = that.isEmpty || (nonEmpty && that.start >= start && that.end <= end)
