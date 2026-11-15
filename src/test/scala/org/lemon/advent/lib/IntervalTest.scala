@@ -423,32 +423,16 @@ class IntervalTest extends UnitTest:
     })
   }
 
-  test("halves contains no empty intervals") {
+  test("halves are non-empty") {
     check((a: Int, b: Int) => Interval(a, b).halves.forall(_.nonEmpty))
   }
 
-  test("the interval contains its halves") {
-    check((a: Int, b: Int) => Interval(a, b).halves.forall(Interval(a, b).containsSlice))
-  }
-
-  test("halves is at most 2 intervals") {
+  test("there are at most 2 halves") {
     check((a: Int, b: Int) => Interval(a, b).halves.size <= 2)
   }
 
-  test("halves start and end with the interval") {
-    check((a: Int, b: Int) =>
-      val halves = Interval(a, b).halves
-      halves.headOption.map(_.start) == Interval(a, b).headOption &&
-      halves.lastOption.map(_.end) == Interval(a, b).lastOption
-    )
-  }
-
-  test("the second half starts right after the first") {
-    check((a: Int, b: Int) =>
-      Interval(a, b).halves match
-        case Seq(first, second) => first.end + 1 == second.start
-        case _ => true
-    )
+  test("the union of the halves is the interval") {
+    check((a: Int, b: Int) => Interval(a, b).halves.foldLeft(Diet.empty[Int])(_ + _) == Diet(Interval(a, b)))
   }
 
   test("the first half is the same length as the second, or one longer") {
