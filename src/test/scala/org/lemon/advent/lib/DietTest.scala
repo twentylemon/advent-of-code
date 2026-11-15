@@ -111,12 +111,14 @@ class DietTest extends UnitTest:
         Gen.const(Max),
         Gen.const(MaxOption),
         Gen.const(IntervalsIterator),
+        Gen.const(GapsMatchDiff),
         Gen.const(ToRanges),
         Gen.const(ToNumericRanges),
         Gen.const(Size),
       )
       val unitOnly = Seq(block.map(AddValue(_)), block.map(RemoveValue(_)), Gen.const(ToSeq))
-      Gen.oneOf(if blockSize == 1 then commands ++ unitOnly else commands).flatMap(identity)
+      val blockOnly = Seq(Gen.const(Gaps))
+      Gen.oneOf(if blockSize == 1 then commands ++ unitOnly else commands ++ blockOnly).flatMap(identity)
 
     abstract class Update(f: Diet[Int] => Diet[Int], model: State => State) extends SuccessCommand:
       type Result = Diet[Int]
@@ -146,8 +148,7 @@ class DietTest extends UnitTest:
       override def postCondition(state: State, result: Try[R]): Prop = result.toOption == Try(model(state)).toOption
 
     case class Contains(n: Int) extends Query(_.contains(n), _.contains(Math.floorDiv(n, blockSize)))
-    case class ContainsRange(range: Range)
-        extends Query(
+    case class ContainsRange(range: Range) extends Query(
           _.contains(range),
           state =>
             range.isEmpty || (Math.floorDiv(range.min, blockSize) to Math.floorDiv(range.max, blockSize)).forall(state),
@@ -159,6 +160,15 @@ class DietTest extends UnitTest:
     case object Max extends Query(_.max, state => last(state.max))
     case object MaxOption extends Query(_.maxOption, _.maxOption.map(last))
     case object IntervalsIterator extends Query(_.intervalsIterator.map(i => (i.start, i.end)).toSeq, runs)
+    case object Gaps extends Query(
+          _.gaps.map(i => (i.start, i.end)).toSeq,
+          state => if state.isEmpty then Seq.empty else runs((state.min to state.max).toSet -- state),
+        )
+    case object GapsMatchDiff extends Query(
+          diet =>
+            diet.gaps.toSeq == diet.minOption.toSeq.flatMap(min => (Diet(Interval(min, diet.max)) -- diet).toIntervals),
+          _ => true,
+        )
     case object ToRanges extends Query(_.toRanges.map(r => (r.start, r.end)), runs)
     case object ToNumericRanges extends Query(_.toNumericRanges.map(r => (r.start, r.end)), runs)
     case object ToSeq extends Query(_.toSeq, _.toSeq.sorted)
