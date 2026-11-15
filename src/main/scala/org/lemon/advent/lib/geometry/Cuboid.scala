@@ -123,13 +123,9 @@ case class Cuboid[N: Integral](xRange: Interval[N], yRange: Interval[N], zRange:
     if isEmpty then Seq.empty
     else if common.isEmpty then Seq(this)
     else
-      def outside(range: Interval[N], inner: Interval[N]): Seq[Interval[N]] =
-        Option.when(inner.start > range.start)(Interval(range.start, inner.start - `1`)).toSeq ++
-          Option.when(inner.end < range.end)(Interval(inner.end + `1`, range.end)).toSeq
-
-      outside(xRange, common.xRange).map(x => Cuboid(x, yRange, zRange)) ++
-        outside(yRange, common.yRange).map(y => Cuboid(common.xRange, y, zRange)) ++
-        outside(zRange, common.zRange).map(z => Cuboid(common.xRange, common.yRange, z))
+      (xRange -- common.xRange).map(x => Cuboid(x, yRange, zRange)) ++
+        (yRange -- common.yRange).map(y => Cuboid(common.xRange, y, zRange)) ++
+        (zRange -- common.zRange).map(z => Cuboid(common.xRange, common.yRange, z))
 
   def --(rhs: Cuboid[N]): Seq[Cuboid[N]] = diff(rhs)
 

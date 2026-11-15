@@ -522,6 +522,31 @@ class IntervalTest extends UnitTest:
     check(forAll(gen) { (a, b, c, d) => interval(a, b).intersect(interval(c, d)).isEmpty })
   }
 
+  val nearbyBounds: Gen[(Int, Int, Int, Int)] =
+    Gen.oneOf(0, Int.MinValue + 30, Int.MaxValue - 30).flatMap { center =>
+      val bound = Gen.choose(center - 30, center + 30)
+      Gen.zip(bound, bound, bound, bound)
+    }
+
+  test("diff contains the values not in rhs") {
+    check(forAll(nearbyBounds) { (a, b, c, d) =>
+      interval(a, b).diff(interval(c, d)).flatMap(_.toSeq) == range(a, b).filterNot(range(c, d).contains)
+    })
+  }
+
+  test("diff is at most two non-empty intervals") {
+    check(forAll(nearbyBounds) { (a, b, c, d) =>
+      val pieces = interval(a, b).diff(interval(c, d))
+      pieces.size <= 2 && pieces.forall(_.nonEmpty)
+    })
+  }
+
+  test("-- is diff") {
+    check(forAll(nearbyBounds) { (a, b, c, d) =>
+      (interval(a, b) -- interval(c, d)) == interval(a, b).diff(interval(c, d))
+    })
+  }
+
   test("ordering matches tuple ordering") {
     val gen = Gen.listOf(intervalGen).map(_.map((a, b) => interval(a, b)))
     check(forAll(gen) { intervals =>
