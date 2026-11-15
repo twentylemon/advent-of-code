@@ -168,8 +168,6 @@ object Diet:
   def apply[N: Integral](values: Iterable[N]): Diet[N] =
     values.iterator.foldLeft(empty[N])(_ + _)
 
-  def apply[N: Integral](start: N, end: N): Diet[N] = empty[N].add(start, end)
-
   def apply(range: Range): Diet[Int] = empty[Int].add(range)
   def apply[N: Integral](range: NumericRange[N]): Diet[N] = empty[N].add(range)
   def apply[N: Integral](interval: Interval[N]): Diet[N] = empty[N].add(interval)
@@ -341,7 +339,8 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
     * @return a new diet containing all values from both diets
     */
   def union(rhs: Diet[N]): Diet[N] =
-    rhs.intervals.foldLeft(this)((diet, interval) => diet + (interval._1, interval._2))
+    val (big, small) = if intervals.size >= rhs.intervals.size then (this, rhs) else (rhs, this)
+    small.intervals.foldLeft(big)((diet, interval) => diet + (interval._1, interval._2))
 
   def ++(rhs: Diet[N]): Diet[N] = union(rhs)
 
@@ -351,14 +350,15 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
     * @return a new diet containing only values present in both diets
     */
   def intersect(rhs: Diet[N]): Diet[N] =
+    val (big, small) = if intervals.size >= rhs.intervals.size then (this, rhs) else (rhs, this)
     def overlaps(start: N, end: N): Iterator[(N, N)] =
       // interval that may start before but overlap
-      val fromBefore = rhs.intervals.maxBefore(start).filter((_, e) => e >= start).iterator
-      // intervals from rhs that start within [start, end]
-      val fromRange = rhs.intervals.iteratorFrom(start).takeWhile((s, _) => s <= end)
+      val fromBefore = big.intervals.maxBefore(start).filter((_, e) => e >= start).iterator
+      // intervals from `big` that start within [start, end]
+      val fromRange = big.intervals.iteratorFrom(start).takeWhile((s, _) => s <= end)
       (fromBefore ++ fromRange).map((otherStart, otherEnd) => (start max otherStart, end min otherEnd))
 
-    Diet(intervals.flatMap(overlaps))
+    Diet(small.intervals.flatMap(overlaps))
 
   def &(rhs: Diet[N]): Diet[N] = intersect(rhs)
 
