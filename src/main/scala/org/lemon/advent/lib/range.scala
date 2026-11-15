@@ -301,7 +301,7 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
           case _ => intervals
 
       // handle intervals completely within the range and the one that may extend past end
-      val affected = baseIntervals.rangeFrom(start).takeWhile((s, _) => s <= end)
+      val affected = baseIntervals.iteratorFrom(start).takeWhile((s, _) => s <= end)
       val finalIntervals = affected.foldLeft(baseIntervals) { case (acc, (s, e)) =>
         val removed = acc.removed(s)
         if e > end then removed.updated(end + `1`, e) else removed
