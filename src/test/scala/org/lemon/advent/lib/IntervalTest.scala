@@ -423,6 +423,45 @@ class IntervalTest extends UnitTest:
     })
   }
 
+  val predicateGen: Gen[(Int, Int, Int => Boolean)] =
+    for
+      (a, b) <- shortIntervalGen
+      p <- Gen.oneOf(Gen.choose(a - 1, b + 1).map(k => (x: Int) => x < k), arbitrary[Int => Boolean])
+    yield (a, b, p)
+
+  test("takeWhile matches Range") {
+    check(forAll(predicateGen) { (a, b, p) =>
+      val taken: Interval[Int] = interval(a, b).takeWhile(p)
+      taken.toSeq == range(a, b).takeWhile(p)
+    })
+  }
+
+  test("dropWhile matches Range") {
+    check(forAll(predicateGen) { (a, b, p) =>
+      val dropped: Interval[Int] = interval(a, b).dropWhile(p)
+      dropped.toSeq == range(a, b).dropWhile(p)
+    })
+  }
+
+  test("span matches Range") {
+    check(forAll(predicateGen) { (a, b, p) =>
+      val (taken, dropped): (Interval[Int], Interval[Int]) = interval(a, b).span(p)
+      (taken.toSeq, dropped.toSeq) == range(a, b).span(p)
+    })
+  }
+
+  test("takeWhile, dropWhile and span call the predicate on the same values as Range") {
+    def calledWith(p: Int => Boolean)(run: (Int => Boolean) => Any): Seq[Int] =
+      val seen = Seq.newBuilder[Int]
+      run(x => { seen += x; p(x) })
+      seen.result()
+    check(forAll(predicateGen) { (a, b, p) =>
+      calledWith(p)(interval(a, b).takeWhile) == calledWith(p)(range(a, b).takeWhile) &&
+      calledWith(p)(interval(a, b).dropWhile) == calledWith(p)(range(a, b).dropWhile) &&
+      calledWith(p)(interval(a, b).span) == calledWith(p)(range(a, b).span)
+    })
+  }
+
   test("tail matches Range") {
     check(forAll(shortIntervalGen) { (a, b) => interval(a, b).tail.toSeq == range(a, b).tail.toSeq })
   }
