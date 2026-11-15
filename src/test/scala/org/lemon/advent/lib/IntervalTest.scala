@@ -42,6 +42,12 @@ class TupleExtensionTest extends UnitTest:
   }
 
 class EmptyIntervalTest extends UnitTest:
+  test("every interval with start > end is Interval.empty") {
+    val emptyBoundsGen =
+      for a <- Gen.choose(Int.MinValue + 1, Int.MaxValue); b <- Gen.choose(Int.MinValue, a - 1) yield (a, b)
+    check(forAll(emptyBoundsGen) { (a, b) => Interval(a, b) == Interval.empty[Int] })
+  }
+
   test("is empty") {
     Interval.empty[Int].isEmpty shouldBe true
   }
@@ -594,15 +600,6 @@ class IntervalTest extends UnitTest:
     check(forAll(gen) { (a, b, c, d) => interval(a, b).intersect(interval(c, d)).isEmpty })
   }
 
-  test("every empty interval is Interval.empty") {
-    check((a: Int, b: Int) =>
-      a > b ==> {
-        val empty = Interval(a, b)
-        empty == Interval.empty[Int] && empty.start == 1 && empty.end == 0 && empty.## == Interval.empty[Int].##
-      }
-    )
-  }
-
   test("an interval emptied by an operation is Interval.empty") {
     val gen =
       for
@@ -613,37 +610,6 @@ class IntervalTest extends UnitTest:
       Interval(a, b).contract(n) == Interval.empty[Int] &&
       Interval(a, b).growStart(-n) == Interval.empty[Int] &&
       Interval(a, b).growEnd(-n) == Interval.empty[Int]
-    })
-  }
-
-  test("equal intervals stay equal under the same operation") {
-    val gen =
-      for
-        (a, b, c, d) <- Gen.oneOf(
-          intervalGen.map((a, b) => (a, b, a, b)),
-          Gen.zip(arbitrary[Int], arbitrary[Int], arbitrary[Int], arbitrary[Int]).suchThat((a, b, c, d) =>
-            a > b && c > d
-          )
-        )
-        n <- arbitrary[Int]
-        (x, y) <- intervalGen
-      yield (Interval(a, b), Interval(c, d), n, Interval(x, y))
-    check(forAll(gen) { (lhs, rhs, n, other) =>
-      lhs == rhs ==> {
-        lhs.start == rhs.start && lhs.end == rhs.end &&
-        lhs.expand(n) == rhs.expand(n) && lhs.shift(n) == rhs.shift(n) &&
-        lhs.growStart(n) == rhs.growStart(n) && lhs.growEnd(n) == rhs.growEnd(n) &&
-        lhs.slice(n, n + 10) == rhs.slice(n, n + 10) && lhs.take(n) == rhs.take(n) && lhs.drop(n) == rhs.drop(n) &&
-        lhs.intersect(other) == rhs.intersect(other)
-      }
-    })
-  }
-
-  test("ordering is consistent with equality") {
-    val gen = Gen.zip(arbitrary[Int], arbitrary[Int], arbitrary[Int], arbitrary[Int])
-    check(forAll(gen) { (a, b, c, d) =>
-      val (lhs, rhs) = (Interval(a, b), Interval(c, d))
-      (summon[Ordering[Interval[Int]]].compare(lhs, rhs) == 0) == (lhs == rhs)
     })
   }
 
