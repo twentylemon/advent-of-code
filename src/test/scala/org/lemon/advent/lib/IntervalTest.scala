@@ -435,6 +435,14 @@ class IntervalTest extends UnitTest:
     check((a: Int, b: Int) => Interval(a, b).halves.foldLeft(Diet.empty[Int])(_ + _) == Diet(Interval(a, b)))
   }
 
+  test("the first half ends before the second starts") {
+    check((a: Int, b: Int) =>
+      Interval(a, b).halves match
+        case Seq(first, second) => first.end < second.start
+        case _ => true
+    )
+  }
+
   test("the first half is the same length as the second, or one longer") {
     check((a: Int, b: Int) =>
       Interval(a, b).halves match
