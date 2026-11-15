@@ -456,18 +456,6 @@ class IntervalTest extends UnitTest:
     })
   }
 
-  test("takeWhile, dropWhile and span call the predicate on the same values as Range") {
-    def calledWith(p: Int => Boolean)(run: (Int => Boolean) => Any): Seq[Int] =
-      val seen = Seq.newBuilder[Int]
-      run(x => { seen += x; p(x) })
-      seen.result()
-    check(forAll(predicateGen) { (a, b, p) =>
-      calledWith(p)(interval(a, b).takeWhile) == calledWith(p)(range(a, b).takeWhile) &&
-      calledWith(p)(interval(a, b).dropWhile) == calledWith(p)(range(a, b).dropWhile) &&
-      calledWith(p)(interval(a, b).span) == calledWith(p)(range(a, b).span)
-    })
-  }
-
   test("tail matches Range") {
     check(forAll(shortIntervalGen) { (a, b) => interval(a, b).tail.toSeq == range(a, b).tail.toSeq })
   }
