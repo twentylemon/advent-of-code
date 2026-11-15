@@ -522,29 +522,6 @@ class IntervalTest extends UnitTest:
     check(forAll(gen) { (a, b, c, d) => interval(a, b).intersect(interval(c, d)).isEmpty })
   }
 
-  test("diff contains no empty intervals") {
-    check((a: Int, b: Int, c: Int, d: Int) => Interval(a, b).diff(Interval(c, d)).forall(_.nonEmpty))
-  }
-
-  test("rhs does not contain the results of diff") {
-    check((a: Int, b: Int, c: Int, d: Int) => Interval(a, b).diff(Interval(c, d)).forall(!_.intersects(Interval(c, d))))
-  }
-
-  test("lhs contains the results of diff") {
-    check((a: Int, b: Int, c: Int, d: Int) => Interval(a, b).diff(Interval(c, d)).forall(Interval(a, b).containsSlice))
-  }
-
-  test("diff is at most 2 intervals") {
-    check((a: Int, b: Int, c: Int, d: Int) => Interval(a, b).diff(Interval(c, d)).size <= 2)
-  }
-
-  test("diff and the intersection make up lhs") {
-    check((a: Int, b: Int, c: Int, d: Int) =>
-      val (lhs, rhs) = (Interval(a, b), Interval(c, d))
-      lhs.diff(rhs).foldLeft(Diet(lhs & rhs))(_ + _) == Diet(lhs)
-    )
-  }
-
   test("ordering matches tuple ordering") {
     val gen = Gen.listOf(intervalGen).map(_.map((a, b) => interval(a, b)))
     check(forAll(gen) { intervals =>

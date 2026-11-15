@@ -130,16 +130,6 @@ case class Interval[N: Integral](start: N, end: N) extends Iterable[N] with Part
 
   def &(rhs: Interval[N]): Interval[N] = intersect(rhs)
 
-  def diff(rhs: Interval[N]): Seq[Interval[N]] =
-    val common = intersect(rhs)
-    if isEmpty then Seq.empty
-    else if common.isEmpty then Seq(this)
-    else
-      Option.when(common.start > start)(Interval(start, common.start - `1`)).toSeq ++
-        Option.when(common.end < end)(Interval(common.end + `1`, end)).toSeq
-
-  def --(rhs: Interval[N]): Seq[Interval[N]] = diff(rhs)
-
   def shift(n: N): Interval[N] = Interval(start + n, end + n)
   def growStart(n: N): Interval[N] = Interval(start - n, end)
   def growEnd(n: N): Interval[N] = Interval(start, end + n)

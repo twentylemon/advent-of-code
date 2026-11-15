@@ -165,8 +165,8 @@ case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
     if isEmpty then Seq.empty
     else if common.isEmpty then Seq(this)
     else
-      (xRange -- common.xRange).map(x => Rect(x, yRange)) ++
-        (yRange -- common.yRange).map(y => Rect(common.xRange, y))
+      (Diet(xRange) - common.xRange).intervalsIterator.map(x => Rect(x, yRange)).toSeq ++
+        (Diet(yRange) - common.yRange).intervalsIterator.map(y => Rect(common.xRange, y))
 
   def --(rhs: Rect[N]): Seq[Rect[N]] = diff(rhs)
 
