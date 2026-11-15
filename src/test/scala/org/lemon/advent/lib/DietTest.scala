@@ -25,7 +25,14 @@ class DietTest extends UnitTest:
   }
 
   test("toString formats an interval") {
-    check((a: Int, b: Int) => a != b ==> (Diet(a min b, a max b).toString == s"Diet(${a min b}..${a max b})"))
+    check((a: Int, b: Int) => a != b ==> (Diet(Interval(a min b, a max b)).toString == s"Diet(${a min b}..${a max b})"))
+  }
+
+  test("a diet of two values contains just those values") {
+    check((a: Int, b: Int) =>
+      val diet = Diet(a, b)
+      diet.size == Set(a, b).size && diet.contains(a) && diet.contains(b)
+    )
   }
 
   test("toString formats separate values") {

@@ -158,8 +158,6 @@ object Diet:
   def apply[N: Integral](values: Iterable[N]): Diet[N] =
     values.iterator.foldLeft(empty[N])(_ + _)
 
-  def apply[N: Integral](start: N, end: N): Diet[N] = empty[N].add(start, end)
-
   def apply(range: Range): Diet[Int] = empty[Int].add(range)
   def apply[N: Integral](range: NumericRange[N]): Diet[N] = empty[N].add(range)
   def apply[N: Integral](interval: Interval[N]): Diet[N] = empty[N].add(interval)
