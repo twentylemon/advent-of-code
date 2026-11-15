@@ -143,7 +143,21 @@ class CuboidTest extends UnitTest:
   }
 
   test("expand and contract are inverse") {
-    check((cuboid: Cuboid[Int], n: Int) => cuboid.expand(n).contract(n) == cuboid)
+    val gen =
+      for
+        cuboid <- Arbitrary.arbitrary[Cuboid[Int]]
+        shrinkRoom = ((cuboid.width min cuboid.height min cuboid.depth) - 1L) / 2
+        growRoom = Seq(
+          cuboid.left.toLong - Int.MinValue,
+          Int.MaxValue.toLong - cuboid.right,
+          cuboid.top.toLong - Int.MinValue,
+          Int.MaxValue.toLong - cuboid.bottom,
+          cuboid.front.toLong - Int.MinValue,
+          Int.MaxValue.toLong - cuboid.back,
+        ).min
+        n <- amount(-shrinkRoom, growRoom)
+      yield (cuboid, n)
+    check(forAll(gen) { (cuboid, n) => cuboid.expand(n).contract(n) == cuboid })
   }
 
   test("contract is enclosed by original cuboid") {
@@ -161,7 +175,14 @@ class CuboidTest extends UnitTest:
   }
 
   test("translate by the opposite offset is the original") {
-    check((cuboid: Cuboid[Int], offset: Point3[Int]) => cuboid.translate(offset).translate(-offset) == cuboid)
+    val gen =
+      for
+        cuboid <- Arbitrary.arbitrary[Cuboid[Int]]
+        x <- amount(Int.MinValue.toLong - cuboid.left, Int.MaxValue.toLong - cuboid.right)
+        y <- amount(Int.MinValue.toLong - cuboid.top, Int.MaxValue.toLong - cuboid.bottom)
+        z <- amount(Int.MinValue.toLong - cuboid.front, Int.MaxValue.toLong - cuboid.back)
+      yield (cuboid, Point3(x, y, z))
+    check(forAll(gen) { (cuboid, offset) => cuboid.translate(offset).translate(-offset) == cuboid })
   }
 
   test("cuboid encloses itself") {

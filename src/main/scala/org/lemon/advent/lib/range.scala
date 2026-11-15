@@ -20,7 +20,11 @@ extension [N: Integral](tuple: (N, N))
   def toInterval: Interval[N] = Interval(tuple._1, tuple._2)
 
 object Interval:
-  def empty[N: Integral]: Interval[N] = Interval(`1`, `0`)
+  /** @return the interval of values between `start` and `end` inclusive, or [[empty]] when `start > end` */
+  def apply[N: Integral](start: N, end: N): Interval[N] =
+    if start > end then empty else new Interval(start, end)
+
+  def empty[N: Integral]: Interval[N] = new Interval(`1`, `0`)
 
   def apply[N](range: Range)(using DefaultsTo[N, Int], Integral[N]): Interval[N] =
     if range.isEmpty then empty
@@ -42,13 +46,13 @@ object Interval:
 
 /** A discrete range of values between `start` and `end` inclusive.
   * Differs from a Range in that it is always inclusive and has a fixed step of 1.
-  * An interval is empty when `start > end`.
+  * Every empty interval is [[Interval.empty]], so equal intervals have the same `start` and `end`.
   *
   * @param start the start of the interval (inclusive)
   * @param end the end of the interval (inclusive)
   * @tparam N the numeric type of values stored
   */
-case class Interval[N: Integral](start: N, end: N) extends Iterable[N] with PartialFunction[N, N]:
+case class Interval[N: Integral] private (start: N, end: N) extends Iterable[N] with PartialFunction[N, N]:
   def isInclusive: Boolean = true
   override def isEmpty: Boolean = start > end
 

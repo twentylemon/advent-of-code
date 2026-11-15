@@ -5,6 +5,9 @@ import org.lemon.advent.lib.geometry.*
 import org.scalacheck.{Arbitrary, Shrink, Gen}
 import org.scalacheck.Shrink.*
 
+/** @return an amount in `[lo, hi]`, clipped to the `Int` range */
+def amount(lo: Long, hi: Long): Gen[Int] = Gen.chooseNum(lo.max(Int.MinValue).toInt, hi.min(Int.MaxValue).toInt)
+
 given Arbitrary[Coord] = Arbitrary(Gen.resultOf(Coord.apply))
 given Shrink[Coord] = Shrink { case Coord(x, y) => shrink((x, y)).map(Coord.apply) }
 

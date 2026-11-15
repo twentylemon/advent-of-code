@@ -365,23 +365,41 @@ class RectTest extends UnitTest:
   }
 
   test("translate by the opposite offset is the original") {
-    check((area: Area, offset: Coord) => area.translate(offset).translate(-offset) == area)
+    val gen =
+      for
+        area <- Arbitrary.arbitrary[Area]
+        x <- amount(Int.MinValue.toLong - area.left, Int.MaxValue.toLong - area.right)
+        y <- amount(Int.MinValue.toLong - area.top, Int.MaxValue.toLong - area.bottom)
+      yield (area, Coord(x, y))
+    check(forAll(gen) { (area, offset) => area.translate(offset).translate(-offset) == area })
   }
 
   test("growLeft and dropLeft are inverse") {
-    check((area: Area, n: Int) => area.growLeft(n).dropLeft(n) == area)
+    val gen =
+      for area <- Arbitrary.arbitrary[Area]; n <- amount(1L - area.width, area.left.toLong - Int.MinValue)
+      yield (area, n)
+    check(forAll(gen) { (area, n) => area.growLeft(n).dropLeft(n) == area })
   }
 
   test("growRight and dropRight are inverse") {
-    check((area: Area, n: Int) => area.growRight(n).dropRight(n) == area)
+    val gen =
+      for area <- Arbitrary.arbitrary[Area]; n <- amount(1L - area.width, Int.MaxValue.toLong - area.right)
+      yield (area, n)
+    check(forAll(gen) { (area, n) => area.growRight(n).dropRight(n) == area })
   }
 
   test("growTop and dropTop are inverse") {
-    check((area: Area, n: Int) => area.growTop(n).dropTop(n) == area)
+    val gen =
+      for area <- Arbitrary.arbitrary[Area]; n <- amount(1L - area.height, area.top.toLong - Int.MinValue)
+      yield (area, n)
+    check(forAll(gen) { (area, n) => area.growTop(n).dropTop(n) == area })
   }
 
   test("growBottom and dropBottom are inverse") {
-    check((area: Area, n: Int) => area.growBottom(n).dropBottom(n) == area)
+    val gen =
+      for area <- Arbitrary.arbitrary[Area]; n <- amount(1L - area.height, Int.MaxValue.toLong - area.bottom)
+      yield (area, n)
+    check(forAll(gen) { (area, n) => area.growBottom(n).dropBottom(n) == area })
   }
 
   test("growLeft encloses original area") {
@@ -405,7 +423,19 @@ class RectTest extends UnitTest:
   }
 
   test("expand and contract are inverse") {
-    check((area: Area, n: Int) => area.expand(n).contract(n) == area)
+    val gen =
+      for
+        area <- Arbitrary.arbitrary[Area]
+        shrinkRoom = ((area.width min area.height) - 1L) / 2
+        growRoom = Seq(
+          area.left.toLong - Int.MinValue,
+          Int.MaxValue.toLong - area.right,
+          area.top.toLong - Int.MinValue,
+          Int.MaxValue.toLong - area.bottom,
+        ).min
+        n <- amount(-shrinkRoom, growRoom)
+      yield (area, n)
+    check(forAll(gen) { (area, n) => area.expand(n).contract(n) == area })
   }
 
   test("contract is enclosed by original area") {
