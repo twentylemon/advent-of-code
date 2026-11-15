@@ -107,6 +107,15 @@ case class Interval[N: Integral](start: N, end: N) extends Iterable[N] with Part
 
   def splitAt(n: N): (Interval[N], Interval[N]) = (take(n), drop(n))
 
+  def halves: Seq[Interval[N]] =
+    if isEmpty then Seq.empty
+    else
+      val two = fromInt[N](2)
+      def floorHalf(n: N): N = (n - (n +% two)) / two
+      val bothOdd = (start +% two) * (end +% two)
+      val mid = floorHalf(start) + floorHalf(end) + bothOdd
+      Interval(start, mid) +: Option.when(mid < end)(Interval(mid + `1`, end)).toSeq
+
   def segmentLength(p: N => Boolean, from: N = `0`): N = fromInt(drop(from).iterator.takeWhile(p).size)
 
   def indexWhere(p: N => Boolean, from: N = `0`): N =

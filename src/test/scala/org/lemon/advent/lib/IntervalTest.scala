@@ -146,6 +146,10 @@ class EmptyIntervalTest extends UnitTest:
     check((n: Int) => Interval.empty[Int].dropRight(n).isEmpty)
   }
 
+  test("has no halves") {
+    Interval.empty[Int].halves shouldBe empty
+  }
+
   test("intersects nothing") {
     check((a: Int, b: Int) => !Interval.empty[Int].intersects(Interval(a, b)))
   }
@@ -420,6 +424,37 @@ class IntervalTest extends UnitTest:
       val (il, ir) = interval(a, b).splitAt(n)
       val (rl, rr) = range(a, b).splitAt(n)
       il.toSeq == rl.toSeq && ir.toSeq == rr.toSeq
+    })
+  }
+
+  test("halves are non-empty") {
+    check(forAll(intervalGen) { (a, b) => interval(a, b).halves.forall(_.nonEmpty) })
+  }
+
+  test("there are at most 2 halves") {
+    check(forAll(intervalGen) { (a, b) => interval(a, b).halves.size <= 2 })
+  }
+
+  test("the union of the halves is the interval") {
+    check(forAll(intervalGen) { (a, b) =>
+      interval(a, b).halves.foldLeft(Diet.empty[Int])(_ + _) == Diet(interval(a, b))
+    })
+  }
+
+  test("the first half ends before the second starts") {
+    check(forAll(intervalGen) { (a, b) =>
+      interval(a, b).halves match
+        case Seq(first, second) => first.end < second.start
+        case _ => true
+    })
+  }
+
+  test("the first half is the same length as the second, or one longer") {
+    check(forAll(intervalGen) { (a, b) =>
+      interval(a, b).halves match
+        case Seq(first, second) => first.length == second.length || first.length == second.length + 1
+        case Seq(only) => only.length == 1
+        case _ => false
     })
   }
 
