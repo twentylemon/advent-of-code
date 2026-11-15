@@ -89,9 +89,7 @@ case class Cuboid[N: Integral](xRange: Interval[N], yRange: Interval[N], zRange:
     * the middle slice is in the lower octants.
     * @return the non-empty octants of this cuboid
     */
-  def octants: Seq[Cuboid[N]] =
-    if isEmpty then Seq.empty
-    else for x <- xRange.halves; y <- yRange.halves; z <- zRange.halves yield Cuboid(x, y, z)
+  def octants: Seq[Cuboid[N]] = for x <- xRange.halves; y <- yRange.halves; z <- zRange.halves yield Cuboid(x, y, z)
 
   def expand(n: N): Cuboid[N] = Cuboid(xRange.expand(n), yRange.expand(n), zRange.expand(n))
   def contract(n: N): Cuboid[N] = Cuboid(xRange.contract(n), yRange.contract(n), zRange.contract(n))

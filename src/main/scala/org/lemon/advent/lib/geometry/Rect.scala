@@ -124,9 +124,7 @@ case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
     * the middle column or row is in the left or top quadrants.
     * @return the non-empty quadrants of this rectangle
     */
-  def quadrants: Seq[Rect[N]] =
-    if isEmpty then Seq.empty
-    else for y <- yRange.halves; x <- xRange.halves yield Rect(x, y)
+  def quadrants: Seq[Rect[N]] = for y <- yRange.halves; x <- xRange.halves yield Rect(x, y)
 
   def growLeft(n: N): Rect[N] = copy(xRange = xRange.growStart(n))
   def growRight(n: N): Rect[N] = copy(xRange = xRange.growEnd(n))
