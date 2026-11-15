@@ -146,6 +146,10 @@ class EmptyIntervalTest extends UnitTest:
     check((n: Int) => Interval.empty[Int].dropRight(n).isEmpty)
   }
 
+  test("has no halves") {
+    Interval.empty[Int].halves shouldBe empty
+  }
+
   test("intersects nothing") {
     check((a: Int, b: Int) => !Interval.empty[Int].intersects(Interval(a, b)))
   }
@@ -450,10 +454,6 @@ class IntervalTest extends UnitTest:
         case Seq(only) => only.length == 1
         case _ => true
     )
-  }
-
-  test("halves of an empty interval is empty") {
-    Interval.empty[Int].halves shouldBe empty
   }
 
   val predicateGen: Gen[(Int, Int, Int => Boolean)] =
