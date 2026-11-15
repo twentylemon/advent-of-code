@@ -89,13 +89,7 @@ case class Cuboid[N: Integral](xRange: Interval[N], yRange: Interval[N], zRange:
     * the middle slice is in the lower octants.
     * @return the non-empty octants of this cuboid
     */
-  def octants: Seq[Cuboid[N]] =
-    def halves(range: Interval[N]): Seq[Interval[N]] =
-      val mid = range.start + (range.length - `1`) / fromInt(2)
-      Interval(range.start, mid) +: Option.when(mid < range.end)(Interval(mid + `1`, range.end)).toSeq
-
-    if isEmpty then Seq.empty
-    else for x <- halves(xRange); y <- halves(yRange); z <- halves(zRange) yield Cuboid(x, y, z)
+  def octants: Seq[Cuboid[N]] = for x <- xRange.halves; y <- yRange.halves; z <- zRange.halves yield Cuboid(x, y, z)
 
   def expand(n: N): Cuboid[N] = Cuboid(xRange.expand(n), yRange.expand(n), zRange.expand(n))
   def contract(n: N): Cuboid[N] = Cuboid(xRange.contract(n), yRange.contract(n), zRange.contract(n))
@@ -123,13 +117,9 @@ case class Cuboid[N: Integral](xRange: Interval[N], yRange: Interval[N], zRange:
     if isEmpty then Seq.empty
     else if common.isEmpty then Seq(this)
     else
-      def outside(range: Interval[N], inner: Interval[N]): Seq[Interval[N]] =
-        Option.when(inner.start > range.start)(Interval(range.start, inner.start - `1`)).toSeq ++
-          Option.when(inner.end < range.end)(Interval(inner.end + `1`, range.end)).toSeq
-
-      outside(xRange, common.xRange).map(x => Cuboid(x, yRange, zRange)) ++
-        outside(yRange, common.yRange).map(y => Cuboid(common.xRange, y, zRange)) ++
-        outside(zRange, common.zRange).map(z => Cuboid(common.xRange, common.yRange, z))
+      (Diet(xRange) - common.xRange).intervalsIterator.map(x => Cuboid(x, yRange, zRange)).toSeq ++
+        (Diet(yRange) - common.yRange).intervalsIterator.map(y => Cuboid(common.xRange, y, zRange)) ++
+        (Diet(zRange) - common.zRange).intervalsIterator.map(z => Cuboid(common.xRange, common.yRange, z))
 
   def --(rhs: Cuboid[N]): Seq[Cuboid[N]] = diff(rhs)
 

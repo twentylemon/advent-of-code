@@ -124,13 +124,7 @@ case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
     * the middle column or row is in the left or top quadrants.
     * @return the non-empty quadrants of this rectangle
     */
-  def quadrants: Seq[Rect[N]] =
-    def halves(range: Interval[N]): Seq[Interval[N]] =
-      val mid = range.start + (range.length - `1`) / fromInt(2)
-      Interval(range.start, mid) +: Option.when(mid < range.end)(Interval(mid + `1`, range.end)).toSeq
-
-    if isEmpty then Seq.empty
-    else for y <- halves(yRange); x <- halves(xRange) yield Rect(x, y)
+  def quadrants: Seq[Rect[N]] = for y <- yRange.halves; x <- xRange.halves yield Rect(x, y)
 
   def growLeft(n: N): Rect[N] = copy(xRange = xRange.growStart(n))
   def growRight(n: N): Rect[N] = copy(xRange = xRange.growEnd(n))
@@ -165,12 +159,8 @@ case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
     if isEmpty then Seq.empty
     else if common.isEmpty then Seq(this)
     else
-      def outside(range: Interval[N], inner: Interval[N]): Seq[Interval[N]] =
-        Option.when(inner.start > range.start)(Interval(range.start, inner.start - `1`)).toSeq ++
-          Option.when(inner.end < range.end)(Interval(inner.end + `1`, range.end)).toSeq
-
-      outside(xRange, common.xRange).map(x => Rect(x, yRange)) ++
-        outside(yRange, common.yRange).map(y => Rect(common.xRange, y))
+      (Diet(xRange) - common.xRange).intervalsIterator.map(x => Rect(x, yRange)).toSeq ++
+        (Diet(yRange) - common.yRange).intervalsIterator.map(y => Rect(common.xRange, y))
 
   def --(rhs: Rect[N]): Seq[Rect[N]] = diff(rhs)
 

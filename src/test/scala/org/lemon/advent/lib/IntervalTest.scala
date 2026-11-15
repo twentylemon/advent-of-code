@@ -146,6 +146,10 @@ class EmptyIntervalTest extends UnitTest:
     check((n: Int) => Interval.empty[Int].dropRight(n).isEmpty)
   }
 
+  test("has no halves") {
+    Interval.empty[Int].halves shouldBe empty
+  }
+
   test("intersects nothing") {
     check((a: Int, b: Int) => !Interval.empty[Int].intersects(Interval(a, b)))
   }
@@ -424,6 +428,70 @@ class IntervalTest extends UnitTest:
       val (il, ir) = interval(a, b).splitAt(n)
       val (rl, rr) = range(a, b).splitAt(n)
       il.toSeq == rl.toSeq && ir.toSeq == rr.toSeq
+    })
+  }
+
+  test("halves are non-empty") {
+    check(forAll(intervalGen) { (a, b) => interval(a, b).halves.forall(_.nonEmpty) })
+  }
+
+  test("there are at most 2 halves") {
+    check(forAll(intervalGen) { (a, b) => interval(a, b).halves.size <= 2 })
+  }
+
+  test("the union of the halves is the interval") {
+    check(forAll(intervalGen) { (a, b) =>
+      interval(a, b).halves.foldLeft(Diet.empty[Int])(_ + _) == Diet(interval(a, b))
+    })
+  }
+
+  test("the first half ends before the second starts") {
+    check(forAll(intervalGen) { (a, b) =>
+      interval(a, b).halves match
+        case Seq(first, second) => first.end < second.start
+        case _ => true
+    })
+  }
+
+  test("the first half is the same length as the second, or one longer") {
+    check(forAll(intervalGen) { (a, b) =>
+      interval(a, b).halves match
+        case Seq(first, second) => first.length == second.length || first.length == second.length + 1
+        case Seq(only) => only.length == 1
+        case _ => false
+    })
+  }
+
+  val predicateGen: Gen[(Int, Int, Int => Boolean)] =
+    for
+      (a, b) <- shortIntervalGen
+      p <- Gen.oneOf(Gen.choose(a - 1, b + 1).map(k => (x: Int) => x < k), arbitrary[Int => Boolean])
+    yield (a, b, p)
+
+  test("segmentLength matches Range") {
+    val gen = for (a, b, p) <- predicateGen; from <- Gen.chooseNum(-1, b - a + 2) yield (a, b, p, from)
+    check(forAll(gen) { (a, b, p, from) =>
+      interval(a, b).segmentLength(p, from) == range(a, b).segmentLength(p, from)
+    })
+  }
+
+  test("indexWhere matches Range") {
+    val gen = for (a, b, p) <- predicateGen; from <- Gen.chooseNum(-1, b - a + 2) yield (a, b, p, from)
+    check(forAll(gen) { (a, b, p, from) => interval(a, b).indexWhere(p, from) == range(a, b).indexWhere(p, from) })
+  }
+
+  test("takeWhile matches Range") {
+    check(forAll(predicateGen) { (a, b, p) => interval(a, b).takeWhile(p).toSeq == range(a, b).takeWhile(p) })
+  }
+
+  test("dropWhile matches Range") {
+    check(forAll(predicateGen) { (a, b, p) => interval(a, b).dropWhile(p).toSeq == range(a, b).dropWhile(p) })
+  }
+
+  test("span matches Range") {
+    check(forAll(predicateGen) { (a, b, p) =>
+      val (taken, dropped) = interval(a, b).span(p)
+      (taken.toSeq, dropped.toSeq) == range(a, b).span(p)
     })
   }
 
