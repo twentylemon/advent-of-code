@@ -111,13 +111,14 @@ class DietTest extends UnitTest:
         Gen.const(Max),
         Gen.const(MaxOption),
         Gen.const(IntervalsIterator),
-        Gen.const(Gaps),
+        Gen.const(GapsMatchDiff),
         Gen.const(ToRanges),
         Gen.const(ToNumericRanges),
         Gen.const(Size),
       )
       val unitOnly = Seq(block.map(AddValue(_)), block.map(RemoveValue(_)), Gen.const(ToSeq))
-      Gen.oneOf(if blockSize == 1 then commands ++ unitOnly else commands).flatMap(identity)
+      val blockOnly = Seq(Gen.const(Gaps))
+      Gen.oneOf(if blockSize == 1 then commands ++ unitOnly else commands ++ blockOnly).flatMap(identity)
 
     abstract class Update(f: Diet[Int] => Diet[Int], model: State => State) extends SuccessCommand:
       type Result = Diet[Int]
@@ -161,9 +162,12 @@ class DietTest extends UnitTest:
     case object IntervalsIterator extends Query(_.intervalsIterator.map(i => (i.start, i.end)).toSeq, runs)
     case object Gaps extends Query(
           _.gaps.map(i => (i.start, i.end)).toSeq,
-          state =>
-            val stateRuns = runs(state)
-            stateRuns.zip(stateRuns.drop(1)).map { case ((_, end), (nextStart, _)) => (end + 1, nextStart - 1) },
+          state => if state.isEmpty then Seq.empty else runs((state.min to state.max).toSet -- state),
+        )
+    case object GapsMatchDiff extends Query(
+          diet =>
+            diet.gaps.toSeq == diet.minOption.toSeq.flatMap(min => (Diet(Interval(min, diet.max)) -- diet).toIntervals),
+          _ => true,
         )
     case object ToRanges extends Query(_.toRanges.map(r => (r.start, r.end)), runs)
     case object ToNumericRanges extends Query(_.toNumericRanges.map(r => (r.start, r.end)), runs)
