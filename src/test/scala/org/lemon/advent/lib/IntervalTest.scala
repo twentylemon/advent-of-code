@@ -423,23 +423,23 @@ class IntervalTest extends UnitTest:
     })
   }
 
+  val predicateGen: Gen[(Int, Int, Int => Boolean)] =
+    for
+      (a, b) <- shortIntervalGen
+      p <- Gen.oneOf(Gen.choose(a - 1, b + 1).map(k => (x: Int) => x < k), arbitrary[Int => Boolean])
+    yield (a, b, p)
+
   test("takeWhile matches Range") {
-    check(forAll(shortIntervalGen, arbitrary[Int => Boolean]) { case ((a, b), p) =>
-      val taken: Interval[Int] = interval(a, b).takeWhile(p)
-      taken.toSeq == range(a, b).takeWhile(p)
-    })
+    check(forAll(predicateGen) { (a, b, p) => interval(a, b).takeWhile(p).toSeq == range(a, b).takeWhile(p) })
   }
 
   test("dropWhile matches Range") {
-    check(forAll(shortIntervalGen, arbitrary[Int => Boolean]) { case ((a, b), p) =>
-      val dropped: Interval[Int] = interval(a, b).dropWhile(p)
-      dropped.toSeq == range(a, b).dropWhile(p)
-    })
+    check(forAll(predicateGen) { (a, b, p) => interval(a, b).dropWhile(p).toSeq == range(a, b).dropWhile(p) })
   }
 
   test("span matches Range") {
-    check(forAll(shortIntervalGen, arbitrary[Int => Boolean]) { case ((a, b), p) =>
-      val (taken, dropped): (Interval[Int], Interval[Int]) = interval(a, b).span(p)
+    check(forAll(predicateGen) { (a, b, p) =>
+      val (taken, dropped) = interval(a, b).span(p)
       (taken.toSeq, dropped.toSeq) == range(a, b).span(p)
     })
   }
@@ -449,7 +449,7 @@ class IntervalTest extends UnitTest:
       val seen = Seq.newBuilder[Int]
       run(x => { seen += x; p(x) })
       seen.result()
-    check(forAll(shortIntervalGen, arbitrary[Int => Boolean]) { case ((a, b), p) =>
+    check(forAll(predicateGen) { (a, b, p) =>
       calledWith(p)(interval(a, b).takeWhile) == calledWith(p)(range(a, b).takeWhile) &&
       calledWith(p)(interval(a, b).dropWhile) == calledWith(p)(range(a, b).dropWhile) &&
       calledWith(p)(interval(a, b).span) == calledWith(p)(range(a, b).span)
