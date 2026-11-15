@@ -371,6 +371,11 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
     */
   def intervalsIterator: Iterator[Interval[N]] = intervals.iterator.map(_.toInterval)
 
+  def gaps: Iterator[Interval[N]] =
+    intervals.iterator.zip(intervals.iterator.drop(1)).map { case ((_, end), (nextStart, _)) =>
+      Interval(end + `1`, nextStart - `1`)
+    }
+
   def toRanges: Seq[Range] = intervalsIterator.map(_.toRange).toSeq
   def toNumericRanges: Seq[NumericRange[N]] = intervalsIterator.map(_.toNumericRange).toSeq
   def toIntervals: Seq[Interval[N]] = intervalsIterator.toSeq
