@@ -45,12 +45,10 @@ private object Day19:
       .flatMap(_.values)
       .sum
 
-  def countAccepted(flow: Seq[Flow], ranges: Map[Char, Range], workflows: Map[String, Seq[Flow]]): Long =
+  def countAccepted(flow: Seq[Flow], ranges: Map[Char, Interval[Int]], workflows: Map[String, Seq[Flow]]): Long =
     val Flow(v, op, lit, dest) = flow.head
     val (good, bad) = op match
-      case '>' =>
-        val (g, b) = ranges(v).reverse.span(_ > lit)
-        (g.reverse, b.reverse)
+      case '>' => ranges(v).span(_ <= lit).swap
       case '<' => ranges(v).span(_ < lit)
 
     val badCount =
@@ -60,7 +58,7 @@ private object Day19:
       if good.isEmpty then 0
       else
         dest match
-          case "A" => ranges.updated(v, good).values.map(_.size.toLong).product
+          case "A" => ranges.updated(v, good).values.map(_.length.toLong).product
           case "R" => 0
           case dest => countAccepted(workflows(dest), ranges.updated(v, good), workflows)
 
@@ -68,4 +66,4 @@ private object Day19:
 
   def part2(input: String) =
     val (flows, _) = parse(input)
-    countAccepted(flows("in"), "xmas".map(_ -> (1 to 4000)).toMap, flows)
+    countAccepted(flows("in"), "xmas".map(_ -> Interval(1, 4000)).toMap, flows)

@@ -423,6 +423,39 @@ class IntervalTest extends UnitTest:
     })
   }
 
+  val predicateGen: Gen[(Int, Int, Int => Boolean)] =
+    for
+      (a, b) <- shortIntervalGen
+      p <- Gen.oneOf(Gen.choose(a - 1, b + 1).map(k => (x: Int) => x < k), arbitrary[Int => Boolean])
+    yield (a, b, p)
+
+  test("segmentLength matches Range") {
+    val gen = for (a, b, p) <- predicateGen; from <- Gen.chooseNum(-1, b - a + 2) yield (a, b, p, from)
+    check(forAll(gen) { (a, b, p, from) =>
+      interval(a, b).segmentLength(p, from) == range(a, b).segmentLength(p, from)
+    })
+  }
+
+  test("indexWhere matches Range") {
+    val gen = for (a, b, p) <- predicateGen; from <- Gen.chooseNum(-1, b - a + 2) yield (a, b, p, from)
+    check(forAll(gen) { (a, b, p, from) => interval(a, b).indexWhere(p, from) == range(a, b).indexWhere(p, from) })
+  }
+
+  test("takeWhile matches Range") {
+    check(forAll(predicateGen) { (a, b, p) => interval(a, b).takeWhile(p).toSeq == range(a, b).takeWhile(p) })
+  }
+
+  test("dropWhile matches Range") {
+    check(forAll(predicateGen) { (a, b, p) => interval(a, b).dropWhile(p).toSeq == range(a, b).dropWhile(p) })
+  }
+
+  test("span matches Range") {
+    check(forAll(predicateGen) { (a, b, p) =>
+      val (taken, dropped) = interval(a, b).span(p)
+      (taken.toSeq, dropped.toSeq) == range(a, b).span(p)
+    })
+  }
+
   test("tail matches Range") {
     check(forAll(shortIntervalGen) { (a, b) => interval(a, b).tail.toSeq == range(a, b).tail.toSeq })
   }
