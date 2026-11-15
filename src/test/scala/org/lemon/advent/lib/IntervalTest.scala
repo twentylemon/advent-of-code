@@ -423,17 +423,41 @@ class IntervalTest extends UnitTest:
     })
   }
 
-  test("halves concatenate to the interval") {
-    check(forAll(shortIntervalGen) { (a, b) => interval(a, b).halves.flatMap(_.toSeq) == range(a, b) })
+  test("halves contains no empty intervals") {
+    check((a: Int, b: Int) => Interval(a, b).halves.forall(_.nonEmpty))
   }
 
-  test("halves differ in length by at most one, with any odd middle in the first") {
-    check(forAll(shortIntervalGen) { (a, b) =>
-      interval(a, b).halves.map(_.length) match
-        case Seq(only) => only == 1
-        case Seq(first, second) => first == second || first == second + 1
-        case _ => false
-    })
+  test("the interval contains its halves") {
+    check((a: Int, b: Int) => Interval(a, b).halves.forall(Interval(a, b).containsSlice))
+  }
+
+  test("halves is at most 2 intervals") {
+    check((a: Int, b: Int) => Interval(a, b).halves.size <= 2)
+  }
+
+  test("halves start and end with the interval") {
+    check((a: Int, b: Int) =>
+      val halves = Interval(a, b).halves
+      halves.headOption.map(_.start) == Interval(a, b).headOption &&
+      halves.lastOption.map(_.end) == Interval(a, b).lastOption
+    )
+  }
+
+  test("the second half starts right after the first") {
+    check((a: Int, b: Int) =>
+      Interval(a, b).halves match
+        case Seq(first, second) => first.end + 1 == second.start
+        case _ => true
+    )
+  }
+
+  test("the first half is the same length as the second, or one longer") {
+    check((a: Int, b: Int) =>
+      Interval(a, b).halves match
+        case Seq(first, second) => first.length == second.length || first.length == second.length + 1
+        case Seq(only) => only.length == 1
+        case _ => true
+    )
   }
 
   test("halves of an empty interval is empty") {

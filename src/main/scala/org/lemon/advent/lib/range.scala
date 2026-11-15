@@ -108,8 +108,13 @@ case class Interval[N: Integral](start: N, end: N) extends Iterable[N] with Part
   def splitAt(n: N): (Interval[N], Interval[N]) = (take(n), drop(n))
 
   def halves: Seq[Interval[N]] =
-    val (first, second) = splitAt(length - length / fromInt(2))
-    Seq(first, second).filter(_.nonEmpty)
+    if isEmpty then Seq.empty
+    else
+      val two = fromInt[N](2)
+      def floorHalf(n: N): N = (n - (n +% two)) / two
+      val bothOdd = (start +% two) * (end +% two)
+      val mid = floorHalf(start) + floorHalf(end) + bothOdd
+      Interval(start, mid) +: Option.when(mid < end)(Interval(mid + `1`, end)).toSeq
 
   override def tail: Interval[N] =
     if isEmpty then throw new UnsupportedOperationException("tail of empty interval")
