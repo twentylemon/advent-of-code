@@ -341,14 +341,15 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
     * @return a new diet containing only values present in both diets
     */
   def intersect(rhs: Diet[N]): Diet[N] =
+    val (big, small) = if intervals.size >= rhs.intervals.size then (this, rhs) else (rhs, this)
     def overlaps(start: N, end: N): Iterator[(N, N)] =
       // interval that may start before but overlap
-      val fromBefore = rhs.intervals.maxBefore(start).filter((_, e) => e >= start).iterator
-      // intervals from rhs that start within [start, end]
-      val fromRange = rhs.intervals.iteratorFrom(start).takeWhile((s, _) => s <= end)
+      val fromBefore = big.intervals.maxBefore(start).filter((_, e) => e >= start).iterator
+      // intervals from `big` that start within [start, end]
+      val fromRange = big.intervals.iteratorFrom(start).takeWhile((s, _) => s <= end)
       (fromBefore ++ fromRange).map((otherStart, otherEnd) => (start max otherStart, end min otherEnd))
 
-    Diet(intervals.flatMap(overlaps))
+    Diet(small.intervals.flatMap(overlaps))
 
   def &(rhs: Diet[N]): Diet[N] = intersect(rhs)
 
