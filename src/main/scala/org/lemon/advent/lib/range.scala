@@ -371,6 +371,11 @@ case class Diet[N: Integral] private (intervals: TreeMap[N, N]):
     */
   def intervalsIterator: Iterator[Interval[N]] = intervals.iterator.map(_.toInterval)
 
+  /** Returns the missing values between consecutive intervals of this diet. Only gaps enclosed by
+    * [min, max] are included: the values below `min` and above `max` are not gaps.
+    *
+    * @return an iterator over the gaps between this diet's intervals, in increasing order
+    */
   def gaps: Iterator[Interval[N]] =
     intervals.iterator.zip(intervals.iterator.drop(1)).map { case ((_, end), (nextStart, _)) =>
       Interval(end + `1`, nextStart - `1`)
