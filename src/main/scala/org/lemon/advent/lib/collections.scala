@@ -1,7 +1,6 @@
 package org.lemon.advent.lib
 
 import scala.collection.{AbstractIterator, LazyZip2, LazyZip3, LazyZip4, SeqOps}
-import scala.annotation.tailrec
 import scala.util.NotGiven
 
 extension [A](it: Iterator[A])
@@ -162,12 +161,16 @@ extension [A, CC[X] <: SeqOps[X, CC, CC[X]]](seq: CC[A])(using NotGiven[A =:= Ch
     */
   def split(delimiter: A): CC[CC[A]] =
     val factory = seq.iterableFactory
-    @tailrec
-    def loop(remaining: CC[A], acc: Vector[CC[A]]): CC[CC[A]] =
-      if remaining.isEmpty then
-        if acc.isEmpty then factory.from(Vector(factory.empty))
-        else factory.from(acc.take(acc.lastIndexWhere(_.nonEmpty) + 1))
-      else
-        val (before, after) = remaining.span(_ != delimiter)
-        loop(after.drop(1), acc :+ before)
-    loop(seq, Vector.empty)
+    if seq.isEmpty then factory.from(Vector(factory.empty))
+    else
+      val parts = Vector.newBuilder[CC[A]]
+      var part = factory.newBuilder[A]
+      seq.foreach(value =>
+        if value == delimiter then
+          parts += part.result()
+          part = factory.newBuilder[A]
+        else part += value
+      )
+      parts += part.result()
+      val all = parts.result()
+      factory.from(all.take(all.lastIndexWhere(_.nonEmpty) + 1))
