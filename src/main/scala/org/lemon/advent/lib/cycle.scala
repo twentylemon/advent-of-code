@@ -14,7 +14,7 @@ case class Cycle[S](offset: Int, period: Int, history: Seq[S]):
     else history(((n - offset) % period + offset).toInt)
 
 /** Detects a cycle in the sequence of states produced by repeatedly applying `step` to `initial`,
-  * comparing states by using `eq`. Uses Brent's cycle detection algorithm.
+  * comparing states by using `eq`.
   *
   * @param initial the starting state
   * @param step function to produce the next state
@@ -36,7 +36,6 @@ def findCycle[S](initial: S)(step: S => S, eq: (S, S) => Boolean): Cycle[S] =
   Cycle(offset, period, history.take(offset + period))
 
 /** Detects a cycle in the sequence of states produced by repeatedly applying `step` to `initial`.
-  * Uses Brent's cycle detection algorithm.
   *
   * @param initial the starting state
   * @param step function to produce the next state
