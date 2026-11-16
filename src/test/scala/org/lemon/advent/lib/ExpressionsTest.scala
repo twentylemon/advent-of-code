@@ -84,15 +84,37 @@ class ExpressionsTest extends UnitTest:
     check(ExpressionCommands.property())
   }
 
-  test("resolve of a reference cycle is None") {
-    check(forAll(Gen.choose(1, 50), Gen.identifier) { (length, name) =>
-      val cycle = (0 until length).map(i => s"$name$i" -> Reference[Long](s"$name${(i + 1) % length}")).toMap
-      ExpressionContext(cycle).resolve(s"${name}0").isEmpty
+  val cycleGen =
+    val link: Gen[String => Expression[Long]] = Gen.oneOf(
+      Gen.const((next: String) => Reference[Long](next)),
+      Gen.const((next: String) => Negate(Reference(next))),
+      Arbitrary.arbitrary[Long].map(n => (next: String) => Add(Reference(next), Literal(n))),
+      Arbitrary.arbitrary[Long].map(n => (next: String) => Add(Literal(n), Reference(next))),
+    )
+    for
+      prefix <- Gen.identifier
+      links <- Gen.nonEmptyListOf(link)
+    yield links.indices.map(i => s"$prefix$i" -> links(i)(s"$prefix${(i + 1) % links.size}")).toMap
+
+  test("resolve of every name in a cycle is None") {
+    check(forAll(cycleGen) { cycle =>
+      val context = ExpressionContext(cycle)
+      cycle.keys.forall(context.resolve(_).isEmpty)
+    })
+  }
+
+  test("resolve of a name that depends on a cycle is None, and names resolved along the way keep their values") {
+    check(forAll(cycleGen, Arbitrary.arbitrary[Long]) { (cycle, value) =>
+      val context = ExpressionContext(
+        cycle + ("dependent" -> Add(Reference("independent"), Reference(cycle.keys.head)))
+          + ("independent" -> Literal(value))
+      )
+      context.resolve("dependent").isEmpty && context.resolve("independent") == Some(value)
     })
   }
 
   test("resolve of a missing name is None") {
-    check((name: String, other: String, value: Long) =>
-      name != other ==> ExpressionContext(Map(other -> Literal(value))).resolve(name).isEmpty
+    check((definitions: Map[String, Long], name: String) =>
+      ExpressionContext((definitions - name).view.mapValues(Literal(_)).toMap).resolve(name).isEmpty
     )
   }
