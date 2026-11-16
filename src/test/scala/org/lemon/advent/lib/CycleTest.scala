@@ -44,12 +44,15 @@ class CycleTest extends UnitTest:
     })
   }
 
-  test("stateAt repeats every period over the whole Long range") {
+  test("stateAt is periodic over the whole Long range") {
     val gen =
       for
         (next, initial) <- functionalGraph
         cycle = findCycle(initial)(next)
-        n <- Gen.chooseNum(cycle.offset.toLong, Long.MaxValue - cycle.period)
-      yield (cycle, n)
-    check(forAll(gen) { (cycle: Cycle[Int], n: Long) => cycle.stateAt(n + cycle.period) == cycle.stateAt(n) })
+        n <- Gen.chooseNum(cycle.offset.toLong, Long.MaxValue)
+        k <- Gen.chooseNum(0L, (Long.MaxValue - n) / cycle.period)
+      yield (cycle, n, k)
+    check(forAll(gen) { (cycle: Cycle[Int], n: Long, k: Long) =>
+      cycle.stateAt(n + k * cycle.period) == cycle.stateAt(n)
+    })
   }
