@@ -134,7 +134,7 @@ class ExpressionsTest extends UnitTest:
     )
   }
 
-  test("simplify of a name in a cycle applies every link once, ending at a reference to that name") {
+  test("simplify of a name in a cycle unrolls the cycle once") {
     val gen = for prefix <- Gen.identifier; links <- Gen.nonEmptyListOf(linkGen) yield (prefix, links)
     check(forAll(gen) { (prefix, links) =>
       val context = ExpressionContext(cycleOf(prefix, links))
