@@ -47,10 +47,9 @@ def findCycle[S](initial: S)(step: S => S): Cycle[S] =
   findCycle(initial)(step, _ == _)
 
 /** Detects a cycle in the sequence of states produced by repeatedly applying `step` to `initial`,
-  * where two states are the same when they have equal keys. This implementation calls `step` once
-  * per state up to the first repeat, so it is faster when `step` is expensive. [[findCycle]] can
-  * call `step` up to about three times as often, but it doesn't hash, so it can be faster when
-  * `step` is cheap and comparing two states usually stops early.
+  * where two states are the same when they have equal keys. This implementation is faster when
+  * `step` is expensive. [[findCycle]] can be faster when `step` is cheap and comparing two states
+  * usually stops early.
   *
   * @param initial the starting state
   * @param step function to produce the next state
