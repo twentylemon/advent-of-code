@@ -2,6 +2,8 @@ package org.lemon.advent.lib
 
 import org.lemon.advent.*
 import org.scalacheck.*
+import org.scalacheck.Arbitrary.*
+import org.scalacheck.Gen.*
 import org.scalacheck.Prop.*
 import org.scalacheck.commands.Commands
 
@@ -21,20 +23,20 @@ class ExpressionsTest extends UnitTest:
     override def newSut(state: State) = Sut(ExpressionContext(Map.empty))
     override def destroySut(sut: Sut) = ()
     override def initialPreCondition(state: State) = state.isEmpty
-    override def genInitialState = Gen.const(Map.empty)
+    override def genInitialState = const(Map.empty)
     override def genCommand(state: State) =
       val name = s"x${state.size}"
-      val literal = Arbitrary.arbitrary[Long].map(DefineLiteral(name, _))
-      val unknown = Gen.const(DefineUnknown(name))
-      if state.isEmpty then Gen.frequency(3 -> literal, 1 -> unknown)
+      val literal = arbitrary[Long].map(DefineLiteral(name, _))
+      val unknown = const(DefineUnknown(name))
+      if state.isEmpty then frequency(3 -> literal, 1 -> unknown)
       else
         val defined = Gen.oneOf(state.keys.toSeq)
-        Gen.frequency(
+        frequency(
           3 -> literal,
           1 -> unknown,
           2 -> defined.map(DefineReference(name, _)),
           2 -> defined.map(DefineNegate(name, _)),
-          4 -> Gen.zip(defined, defined).map(DefineAdd(name, _, _)),
+          4 -> zip(defined, defined).map(DefineAdd(name, _, _)),
           4 -> defined.map(Resolve(_)),
           4 -> defined.map(Simplify(_)),
         )
@@ -86,25 +88,24 @@ class ExpressionsTest extends UnitTest:
 
   val cycleGen =
     val link: Gen[String => Expression[Long]] = Gen.oneOf(
-      Gen.const((next: String) => Reference[Long](next)),
-      Gen.const((next: String) => Negate(Reference(next))),
-      Arbitrary.arbitrary[Long].map(n => (next: String) => Add(Reference(next), Literal(n))),
-      Arbitrary.arbitrary[Long].map(n => (next: String) => Add(Literal(n), Reference(next))),
+      const((next: String) => Reference[Long](next)),
+      const((next: String) => Negate(Reference(next))),
+      arbitrary[Long].map(n => (next: String) => Add(Reference(next), Literal(n))),
+      arbitrary[Long].map(n => (next: String) => Add(Literal(n), Reference(next))),
     )
     for
-      prefix <- Gen.identifier
-      links <- Gen.nonEmptyListOf(link)
+      prefix <- identifier
+      links <- nonEmptyListOf(link)
     yield links.indices.map(i => s"$prefix$i" -> links(i)(s"$prefix${(i + 1) % links.size}")).toMap
 
   test("resolve of every name in a cycle is None") {
     check(forAll(cycleGen) { cycle =>
-      val context = ExpressionContext(cycle)
-      cycle.keys.forall(context.resolve(_).isEmpty)
+      cycle.keys.map(ExpressionContext(cycle).resolve).forall(_.isEmpty)
     })
   }
 
   test("resolve of a name that depends on a cycle is None, and names resolved along the way keep their values") {
-    check(forAll(cycleGen, Arbitrary.arbitrary[Long]) { (cycle, value) =>
+    check(forAll(cycleGen, arbitrary[Long]) { (cycle, value) =>
       val context = ExpressionContext(
         cycle + ("dependent" -> Add(Reference("independent"), Reference(cycle.keys.head)))
           + ("independent" -> Literal(value))
