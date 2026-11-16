@@ -101,13 +101,20 @@ class ExpressionsTest extends UnitTest:
     check(forAll(cycleGen)(cycle => cycle.keys.map(ExpressionContext(cycle).resolve).forall(_.isEmpty)))
   }
 
-  test("resolve of a name that depends on a cycle is None, and names resolved along the way keep their values") {
+  test("resolve of a name that depends on a cycle is None") {
+    check(forAll(cycleGen)(cycle =>
+      ExpressionContext(cycle + ("dependent" -> Reference(cycle.keys.head))).resolve("dependent").isEmpty
+    ))
+  }
+
+  test("resolve of a name visited on the way into a cycle keeps its value") {
     check(forAll(cycleGen, arbitrary[Long]) { (cycle, value) =>
       val context = ExpressionContext(
         cycle + ("dependent" -> Add(Reference("independent"), Reference(cycle.keys.head)))
           + ("independent" -> Literal(value))
       )
-      context.resolve("dependent").isEmpty && context.resolve("independent") == Some(value)
+      context.resolve("dependent")
+      context.resolve("independent") == Some(value)
     })
   }
 
