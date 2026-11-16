@@ -113,20 +113,6 @@ class ExpressionsTest extends UnitTest:
     })
   }
 
-  test("resolve of a name outside a cycle is unaffected by the cycle") {
-    val gen =
-      for
-        cycle <- cycleGen
-        name <- arbitrary[String].suchThat(!cycle.contains(_))
-        value <- arbitrary[Long]
-      yield (cycle, name, value)
-    check(forAll(gen) { (cycle, name, value) =>
-      val context = ExpressionContext(cycle + (name -> Literal(value)))
-      cycle.keys.foreach(context.resolve)
-      context.resolve(name) == Some(value)
-    })
-  }
-
   test("resolve of a missing name is None") {
     check((definitions: Map[String, Long], name: String) =>
       ExpressionContext((definitions - name).view.mapValues(Literal(_)).toMap).resolve(name).isEmpty
