@@ -98,9 +98,7 @@ class ExpressionsTest extends UnitTest:
     yield links.indices.map(i => s"$prefix$i" -> links(i)(s"$prefix${(i + 1) % links.size}")).toMap
 
   test("resolve of every name in a cycle is None") {
-    check(forAll(cycleGen) { cycle =>
-      cycle.keys.map(ExpressionContext(cycle).resolve).forall(_.isEmpty)
-    })
+    check(forAll(cycleGen)(cycle => cycle.keys.map(ExpressionContext(cycle).resolve).forall(_.isEmpty)))
   }
 
   test("resolve of a name that depends on a cycle is None, and names resolved along the way keep their values") {
