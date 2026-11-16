@@ -27,12 +27,14 @@ class ExpressionsTest extends UnitTest:
       val name = s"x${state.size}"
       val literal = arbitrary[Long].map(DefineLiteral(name, _))
       val unknown = Gen.const(DefineUnknown(name))
-      if state.isEmpty then Gen.frequency(3 -> literal, 1 -> unknown)
+      val missing = arbitrary[String].suchThat(!_.matches("x\\d+")).map(DefineMissingReference(name, _))
+      if state.isEmpty then Gen.frequency(3 -> literal, 1 -> unknown, 1 -> missing)
       else
         val defined = Gen.oneOf(state.keys.toSeq)
         Gen.frequency(
           3 -> literal,
           1 -> unknown,
+          1 -> missing,
           2 -> defined.map(DefineReference(name, _)),
           2 -> defined.map(DefineNegate(name, _)),
           4 -> Gen.zip(defined, defined).map(DefineAdd(name, _, _)),
@@ -52,6 +54,9 @@ class ExpressionsTest extends UnitTest:
 
     case class DefineUnknown(name: String) extends Define(name, Unknown()):
       override def expected(state: State) = Expected(None, Unknown())
+
+    case class DefineMissingReference(name: String, to: String) extends Define(name, Reference(to)):
+      override def expected(state: State) = Expected(None, Reference(to))
 
     case class DefineReference(name: String, to: String) extends Define(name, Reference(to), to):
       override def expected(state: State) = state(to)
@@ -85,17 +90,21 @@ class ExpressionsTest extends UnitTest:
     check(ExpressionCommands.property())
   }
 
+  val linkGen: Gen[Expression[Long] => Expression[Long]] = Gen.oneOf(
+    Gen.const((next: Expression[Long]) => next),
+    Gen.const((next: Expression[Long]) => Negate(next)),
+    arbitrary[Long].map(n => (next: Expression[Long]) => Add(next, Literal(n))),
+    arbitrary[Long].map(n => (next: Expression[Long]) => Add(Literal(n), next)),
+  )
+
+  def cycleOf(prefix: String, links: Seq[Expression[Long] => Expression[Long]]) =
+    links.indices.map(i => s"$prefix$i" -> links(i)(Reference(s"$prefix${(i + 1) % links.size}"))).toMap
+
   val cycleGen =
-    val link: Gen[String => Expression[Long]] = Gen.oneOf(
-      Gen.const((next: String) => Reference[Long](next)),
-      Gen.const((next: String) => Negate(Reference(next))),
-      arbitrary[Long].map(n => (next: String) => Add(Reference(next), Literal(n))),
-      arbitrary[Long].map(n => (next: String) => Add(Literal(n), Reference(next))),
-    )
     for
       prefix <- Gen.identifier
-      links <- Gen.nonEmptyListOf(link)
-    yield links.indices.map(i => s"$prefix$i" -> links(i)(s"$prefix${(i + 1) % links.size}")).toMap
+      links <- Gen.nonEmptyListOf(linkGen)
+    yield cycleOf(prefix, links)
 
   test("resolve of every name in a cycle is None") {
     check(forAll(cycleGen)(cycle => cycle.keys.map(ExpressionContext(cycle).resolve).forall(_.isEmpty)))
@@ -117,4 +126,23 @@ class ExpressionsTest extends UnitTest:
     check((definitions: Map[String, Long], name: String) =>
       ExpressionContext((definitions - name).view.mapValues(Literal(_)).toMap).resolve(name).isEmpty
     )
+  }
+
+  test("simplify of a missing name is a reference to it") {
+    check((definitions: Map[String, Long], name: String) =>
+      ExpressionContext((definitions - name).view.mapValues(Literal(_)).toMap).simplify(name) == Reference(name)
+    )
+  }
+
+  test("simplify of a name in a cycle applies every link once, ending at a reference to that name") {
+    val gen = for prefix <- Gen.identifier; links <- Gen.nonEmptyListOf(linkGen) yield (prefix, links)
+    check(forAll(gen) { (prefix, links) =>
+      val context = ExpressionContext(cycleOf(prefix, links))
+      links.indices.forall(i =>
+        val unrolled = links.indices.foldRight[Expression[Long]](Reference(s"$prefix$i"))((k, inner) =>
+          links((i + k) % links.size)(inner)
+        )
+        context.simplify(s"$prefix$i") == unrolled
+      )
+    })
   }
