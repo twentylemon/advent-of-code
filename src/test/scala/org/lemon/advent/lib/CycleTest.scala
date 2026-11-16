@@ -22,6 +22,7 @@ class CycleTest extends UnitTest:
       val offset = states.indexOf(states(firstRepeat))
       Seq(findCycle(initial)(next), findCycleBy(initial)(next)).forall(cycle =>
         cycle.offset == offset && cycle.period == firstRepeat - offset &&
+          cycle.history == states.take(firstRepeat) &&
           (0 until 200).forall(n => cycle.stateAt(n) == Iterator.iterate(initial)(next).nth(n))
       )
     })
@@ -31,7 +32,8 @@ class CycleTest extends UnitTest:
     check(forAll(functionalGraph) { (next: Vector[Int], initial: Int) =>
       val byKey = findCycle((initial, 0))((n, steps) => (next(n), steps + 1), _._1 == _._1)
       val plain = findCycle(initial)(next)
-      byKey.offset == plain.offset && byKey.period == plain.period && byKey.history.map(_._1) == plain.history
+      byKey.offset == plain.offset && byKey.period == plain.period &&
+      byKey.history.map(_._1) == plain.history && byKey.history.map(_._2) == byKey.history.indices
     })
   }
 
@@ -40,7 +42,8 @@ class CycleTest extends UnitTest:
     check(forAll(functionalGraph) { (next: Vector[Int], initial: Int) =>
       val byKey = findCycleBy((initial, 0))((n, steps) => (next(n), steps + 1), _._1)
       val plain = findCycleBy(initial)(next)
-      byKey.offset == plain.offset && byKey.period == plain.period && byKey.history.map(_._1) == plain.history
+      byKey.offset == plain.offset && byKey.period == plain.period &&
+      byKey.history.map(_._1) == plain.history && byKey.history.map(_._2) == byKey.history.indices
     })
   }
 
