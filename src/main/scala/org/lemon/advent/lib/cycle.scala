@@ -18,7 +18,7 @@ case class Cycle[S](offset: Int, period: Int, history: Seq[S]):
   *
   * @param initial the starting state
   * @param step function to produce the next state
-  * @param eq function to compare if two states are equal. `eq(a, b)` must imply `eq(step(a), step(b))`
+  * @param eq function to compare if two states are equal
   * @return the cycle information including offset, period, and state lookup
   * @tparam S the state type
   */
