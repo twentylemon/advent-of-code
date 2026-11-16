@@ -1,7 +1,6 @@
 package org.lemon.advent.lib
 
 import scala.annotation.tailrec
-import scala.collection.mutable
 
 case class Cycle[S](offset: Int, period: Int, history: Seq[S]):
   def stateAt(n: Long): S =
@@ -18,20 +17,17 @@ case class Cycle[S](offset: Int, period: Int, history: Seq[S]):
   * @tparam S the state type
   */
 def findCycle[S](initial: S)(step: S => S, eq: (S, S) => Boolean): Cycle[S] =
-  val states = mutable.ArrayBuffer(initial, step(initial))
-  var power = 1
-  var period = 1
-  var tortoise = 0
-  while !eq(states(tortoise), states.last) do
-    if power == period then
-      power *= 2
-      period = 0
-      tortoise = states.size - 1
-    states += step(states.last)
-    period += 1
+  @tailrec
+  def brent(power: Int, period: Int, tortoise: S, states: List[S]): (Int, List[S]) =
+    val hare = states.head
+    if eq(tortoise, hare) then (period, states)
+    else if power == period then brent(power * 2, 1, hare, step(hare) :: states)
+    else brent(power, period + 1, tortoise, step(hare) :: states)
 
-  val offset = Iterator.from(0).find(i => eq(states(i), states(i + period))).get
-  Cycle(offset, period, states.view.take(offset + period).toVector)
+  val (period, reversed) = brent(1, 1, initial, List(step(initial), initial))
+  val history = reversed.reverse.toVector
+  val offset = history.indices.find(i => eq(history(i), history(i + period))).get
+  Cycle(offset, period, history.take(offset + period))
 
 /** Detects a cycle in the sequence of states produced by repeatedly applying `step` to `initial`.
   * Uses Brent's cycle detection algorithm.
