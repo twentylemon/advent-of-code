@@ -27,7 +27,7 @@ class ExpressionsTest extends UnitTest:
       val name = s"x${state.size}"
       val literal = arbitrary[Long].map(DefineLiteral(name, _))
       val unknown = Gen.const(DefineUnknown(name))
-      val missing = arbitrary[String].suchThat(!_.matches("x\\d+")).map(DefineMissingReference(name, _))
+      val missing = arbitrary[String].suchThat(!_.startsWith("x")).map(DefineMissingReference(name, _))
       if state.isEmpty then Gen.frequency(3 -> literal, 1 -> unknown, 1 -> missing)
       else
         val defined = Gen.oneOf(state.keys.toSeq)
