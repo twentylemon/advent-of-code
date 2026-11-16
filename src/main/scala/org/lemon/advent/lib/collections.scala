@@ -1,6 +1,6 @@
 package org.lemon.advent.lib
 
-import scala.collection.{AbstractIterator, SeqOps}
+import scala.collection.{AbstractIterator, LazyZip2, LazyZip3, LazyZip4, SeqOps}
 import scala.annotation.tailrec
 import scala.util.NotGiven
 
@@ -30,6 +30,7 @@ extension [A](it: Iterator[A])
   def last: A = it.reduceLeft((_, b) => b)
 
   /** Returns `sliding(2)` as tuples instead of collections.
+    * Iterators with fewer than 2 elements yield an empty result.
     *
     * @return sliding window of pairs in the iterator
     */
@@ -46,6 +47,7 @@ extension [A](it: Iterator[A])
     windows.getOrElse(Iterator.empty)
 
   /** Returns `sliding(3)` as tuples instead of collections.
+    * Iterators with fewer than 3 elements yield an empty result.
     *
     * @return sliding window of triples in the iterator
     */
@@ -64,6 +66,7 @@ extension [A](it: Iterator[A])
     windows.getOrElse(Iterator.empty)
 
   /** Returns `sliding(4)` as tuples instead of collections.
+    * Iterators with fewer than 4 elements yield an empty result.
     *
     * @return sliding window of 4-tuples in the iterator
     */
@@ -119,23 +122,25 @@ extension [A](it: Iterable[A])
     yield (indexed(i), indexed(j), indexed(k))
 
   /** Returns `sliding(2)` as tuples instead of collections.
-    * Singleton collections yield an empty result.
+    * Collections with fewer than 2 elements yield an empty result.
     *
     * @return sliding window of pairs in the collection
     */
-  def sliding2 = it lazyZip it.drop(1)
+  def sliding2: LazyZip2[A, A, it.type] = it lazyZip it.drop(1)
 
   /** Returns `sliding(3)` as tuples instead of collections.
+    * Collections with fewer than 3 elements yield an empty result.
     *
     * @return sliding window of triples in the collection
     */
-  def sliding3 = it lazyZip it.drop(1) lazyZip it.drop(2)
+  def sliding3: LazyZip3[A, A, A, it.type] = it lazyZip it.drop(1) lazyZip it.drop(2)
 
   /** Returns `sliding(4)` as tuples instead of collections.
+    * Collections with fewer than 4 elements yield an empty result.
     *
     * @return sliding window of 4-tuples in the collection
     */
-  def sliding4 = it lazyZip it.drop(1) lazyZip it.drop(2) lazyZip it.drop(3)
+  def sliding4: LazyZip4[A, A, A, A, it.type] = it lazyZip it.drop(1) lazyZip it.drop(2) lazyZip it.drop(3)
 
   /** Returns a map of element frequencies.
     *
