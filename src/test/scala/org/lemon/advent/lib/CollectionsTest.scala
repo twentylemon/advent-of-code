@@ -35,11 +35,7 @@ class CollectionsTest extends UnitTest:
   test("pairs is equal to stdlib combinations(2) of a set") {
     check((xs: Set[Int]) =>
       val pair = xs.pairs.toSeq.sorted
-      val combo = xs.toSeq
-        .combinations(2)
-        .map { case Seq(a, b) => (a, b) }
-        .toSeq
-        .sorted
+      val combo = xs.toSeq.combinations(2).map { case Seq(a, b) => (a, b) }.toSeq.sorted
       pair == combo
     )
   }
@@ -47,11 +43,7 @@ class CollectionsTest extends UnitTest:
   test("triples is equal to stdlib combinations(3) of a set") {
     check((xs: Set[Int]) =>
       val trip = xs.triples.toSeq.sorted
-      val combo = xs.toSeq
-        .combinations(3)
-        .map { case Seq(a, b, c) => (a, b, c) }
-        .toSeq
-        .sorted
+      val combo = xs.toSeq.combinations(3).map { case Seq(a, b, c) => (a, b, c) }.toSeq.sorted
       trip == combo
     )
   }
@@ -91,14 +83,14 @@ class CollectionsTest extends UnitTest:
   }
 
   test("frequencies counts match elements") {
-    check(forAll { (it: Iterable[Int]) =>
+    check((it: Iterable[Int]) =>
       val freq = it.frequencies
       it.forall(elem => freq(elem) == it.count(_ == elem))
-    })
+    )
   }
 
   test("frequencies keys are exactly the distinct elements") {
-    check(forAll { (it: Iterable[Int]) => it.frequencies.keySet == it.toSet })
+    check((it: Iterable[Int]) => it.frequencies.keySet == it.toSet)
   }
 
   test("findValue finds a key mapped to the value") {
