@@ -7,22 +7,23 @@ import org.lemon.advent.*
 class CollectionsTest extends UnitTest:
 
   test("iterator nth is the element at that index") {
-    val gen = for xs <- Gen.nonEmptyListOf(Arbitrary.arbitrary[Int]); n <- Gen.choose(0, xs.size - 1) yield (xs, n)
+    val gen = for xs <- Gen.nonEmptyListOf(Arbitrary.arbitrary[Int]); n <- Gen.chooseNum(0, xs.size - 1) yield (xs, n)
     check(forAll(gen) { (xs, n) => xs.iterator.nth(n) == xs(n) })
   }
 
   test("iterator nth throws IndexOutOfBoundsException for a negative index") {
-    check((xs: List[Int], n: Int) => n < 0 ==> Prop.throws(classOf[IndexOutOfBoundsException])(xs.iterator.nth(n)))
-  }
-
-  test("iterator nthOption matches lift") {
-    check(forAll(Arbitrary.arbitrary[List[Int]], Gen.choose(-10, 100)) { (xs, n) =>
-      xs.iterator.nthOption(n) == xs.lift(n)
+    check(forAll(Arbitrary.arbitrary[List[Int]], Gen.chooseNum(Int.MinValue, -1)) { (xs, n) =>
+      Prop.throws(classOf[IndexOutOfBoundsException])(xs.iterator.nth(n))
     })
   }
 
+  test("iterator nthOption matches lift") {
+    val gen = for xs <- Arbitrary.arbitrary[List[Int]]; n <- Gen.chooseNum(-1, xs.size) yield (xs, n)
+    check(forAll(gen) { (xs, n) => xs.iterator.nthOption(n) == xs.lift(n) })
+  }
+
   test("iterator last is the last element") {
-    check((xs: List[Int]) => xs.nonEmpty ==> (xs.iterator.last == xs.last))
+    check(forAll(Gen.nonEmptyListOf(Arbitrary.arbitrary[Int])) { xs => xs.iterator.last == xs.last })
   }
 
   test("cartesianProduct pairs every element of one with every element of the other") {
