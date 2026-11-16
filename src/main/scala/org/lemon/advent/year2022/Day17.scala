@@ -58,6 +58,5 @@ private object Day17:
     val afterOneCycle = dropRock(cycle.history(cycle.offset + cycle.period - 1))
     val heightPerCycle = afterOneCycle.maxHeight - cycle.history(cycle.offset).maxHeight
 
-    val posInCycle = ((target - cycle.offset) % cycle.period).toInt
     val numFullCycles = (target - cycle.offset) / cycle.period
-    cycle.history(cycle.offset + posInCycle).maxHeight + numFullCycles * heightPerCycle
+    cycle.stateAt(target).maxHeight + numFullCycles * heightPerCycle
