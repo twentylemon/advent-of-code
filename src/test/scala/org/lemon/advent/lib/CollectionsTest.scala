@@ -1,29 +1,31 @@
 package org.lemon.advent.lib
 
 import org.scalacheck.*
+import org.scalacheck.Arbitrary.*
+import org.scalacheck.Gen.*
 import org.scalacheck.Prop.*
 import org.lemon.advent.*
 
 class CollectionsTest extends UnitTest:
 
   test("iterator nth is the element at that index") {
-    val gen = for xs <- Gen.nonEmptyListOf(Arbitrary.arbitrary[Int]); n <- Gen.chooseNum(0, xs.size - 1) yield (xs, n)
+    val gen = for xs <- nonEmptyListOf(arbitrary[Int]); n <- chooseNum(0, xs.size - 1) yield (xs, n)
     check(forAll(gen) { (xs, n) => xs.iterator.nth(n) == xs(n) })
   }
 
   test("iterator nth throws IndexOutOfBoundsException for a negative index") {
-    check(forAll(Arbitrary.arbitrary[List[Int]], Gen.chooseNum(Int.MinValue, -1)) { (xs, n) =>
+    check(forAll(arbitrary[List[Int]], chooseNum(Int.MinValue, -1)) { (xs, n) =>
       Prop.throws(classOf[IndexOutOfBoundsException])(xs.iterator.nth(n))
     })
   }
 
   test("iterator nthOption matches lift") {
-    val gen = for xs <- Arbitrary.arbitrary[List[Int]]; n <- Gen.chooseNum(-1, xs.size) yield (xs, n)
+    val gen = for xs <- arbitrary[List[Int]]; n <- chooseNum(-1, xs.size) yield (xs, n)
     check(forAll(gen) { (xs, n) => xs.iterator.nthOption(n) == xs.lift(n) })
   }
 
   test("iterator last is the last element") {
-    check(forAll(Gen.nonEmptyListOf(Arbitrary.arbitrary[Int])) { xs => xs.iterator.last == xs.last })
+    check(forAll(nonEmptyListOf(arbitrary[Int])) { xs => xs.iterator.last == xs.last })
   }
 
   test("cartesianProduct pairs every element of one with every element of the other") {
@@ -106,9 +108,9 @@ class CollectionsTest extends UnitTest:
   test("split matches String#split") {
     val gen =
       for
-        delim <- Gen.alphaNumChar
-        repeat <- Gen.choose(1, 10)
-        parts <- Gen.listOf(Gen.stringOf(Gen.alphaNumChar.suchThat(_ != delim)))
+        delim <- alphaNumChar
+        repeat <- choose(1, 10)
+        parts <- listOf(stringOf(alphaNumChar.suchThat(_ != delim)))
       yield (parts.mkString(delim.toString.repeat(repeat)), delim)
 
     check(forAll(gen) { (str: String, delim: Char) =>
