@@ -2,6 +2,12 @@ package org.lemon.advent.lib
 
 import scala.annotation.tailrec
 
+/** A sequence of states that eventually repeats: after `offset` states, the next `period` states repeat forever.
+  * @param offset the index of the first state in the cycle
+  * @param period the length of the cycle
+  * @param history the first `offset + period` states
+  * @tparam S the state type
+  */
 case class Cycle[S](offset: Int, period: Int, history: Seq[S]):
   def stateAt(n: Long): S =
     if n < history.size then history(n.toInt)
@@ -30,7 +36,6 @@ def findCycle[S](initial: S)(step: S => S, eq: (S, S) => Boolean): Cycle[S] =
   Cycle(offset, period, history.take(offset + period))
 
 /** Detects a cycle in the sequence of states produced by repeatedly applying `step` to `initial`.
-  * Uses Brent's cycle detection algorithm.
   *
   * @param initial the starting state
   * @param step function to produce the next state
