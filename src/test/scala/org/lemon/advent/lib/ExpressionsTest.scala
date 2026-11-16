@@ -2,6 +2,7 @@ package org.lemon.advent.lib
 
 import org.lemon.advent.*
 import org.scalacheck.*
+import org.scalacheck.Arbitrary.*
 import org.scalacheck.Prop.*
 import org.scalacheck.commands.Commands
 
@@ -24,7 +25,7 @@ class ExpressionsTest extends UnitTest:
     override def genInitialState = Gen.const(Map.empty)
     override def genCommand(state: State) =
       val name = s"x${state.size}"
-      val literal = Arbitrary.arbitrary[Long].map(DefineLiteral(name, _))
+      val literal = arbitrary[Long].map(DefineLiteral(name, _))
       val unknown = Gen.const(DefineUnknown(name))
       if state.isEmpty then Gen.frequency(3 -> literal, 1 -> unknown)
       else
@@ -84,15 +85,36 @@ class ExpressionsTest extends UnitTest:
     check(ExpressionCommands.property())
   }
 
-  test("resolve of a reference cycle is None") {
-    check(forAll(Gen.choose(1, 50), Gen.identifier) { (length, name) =>
-      val cycle = (0 until length).map(i => s"$name$i" -> Reference[Long](s"$name${(i + 1) % length}")).toMap
-      ExpressionContext(cycle).resolve(s"${name}0").isEmpty
+  val cycleGen =
+    val link: Gen[String => Expression[Long]] = Gen.oneOf(
+      Gen.const((next: String) => Reference[Long](next)),
+      Gen.const((next: String) => Negate(Reference(next))),
+      arbitrary[Long].map(n => (next: String) => Add(Reference(next), Literal(n))),
+      arbitrary[Long].map(n => (next: String) => Add(Literal(n), Reference(next))),
+    )
+    for
+      prefix <- Gen.identifier
+      links <- Gen.nonEmptyListOf(link)
+    yield links.indices.map(i => s"$prefix$i" -> links(i)(s"$prefix${(i + 1) % links.size}")).toMap
+
+  test("resolve of every name in a cycle is None") {
+    check(forAll(cycleGen)(cycle => cycle.keys.map(ExpressionContext(cycle).resolve).forall(_.isEmpty)))
+  }
+
+  test("resolve of a name that depends on a cycle is None") {
+    val gen =
+      for
+        cycle <- cycleGen
+        target <- Gen.oneOf(cycle.keys)
+        dependent <- arbitrary[String].suchThat(!cycle.contains(_))
+      yield (cycle, target, dependent)
+    check(forAll(gen) { (cycle, target, dependent) =>
+      ExpressionContext(cycle + (dependent -> Reference(target))).resolve(dependent).isEmpty
     })
   }
 
   test("resolve of a missing name is None") {
-    check((name: String, other: String, value: Long) =>
-      name != other ==> ExpressionContext(Map(other -> Literal(value))).resolve(name).isEmpty
+    check((definitions: Map[String, Long], name: String) =>
+      ExpressionContext((definitions - name).view.mapValues(Literal(_)).toMap).resolve(name).isEmpty
     )
   }
