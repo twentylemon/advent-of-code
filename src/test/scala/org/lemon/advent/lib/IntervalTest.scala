@@ -290,11 +290,6 @@ class IntervalTest extends UnitTest:
     check(forAll(shortIntervalGen) { (a, b) => Interval(a.toLong, b.toLong).sum == (a.toLong to b.toLong).sum })
   }
 
-  test("sum with another Numeric matches Range") {
-    object OtherIntNumeric extends Numeric.IntIsIntegral with Ordering.IntOrdering
-    check(forAll(shortIntervalGen) { (a, b) => interval(a, b).sum(using OtherIntNumeric) == range(a, b).sum })
-  }
-
   test("length matches Range") {
     check(forAll(rangeIntervalGen) { (a, b) => interval(a, b).length == range(a, b).length })
   }

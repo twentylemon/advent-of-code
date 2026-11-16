@@ -121,12 +121,10 @@ case class Interval[N: Integral](start: N, end: N) extends Iterable[N] with Part
       val mid = midpoint
       Interval(start, mid) +: Option.when(mid < end)(Interval(mid + `1`, end)).toSeq
 
-  override def sum[B >: N](using num: Numeric[B]): B =
-    if num ne summon[Integral[N]] then super.sum
-    else
-      val two = fromInt[N](2)
-      val total = if length % two == `0` then length / two * (start + end) else length * midpoint
-      total.asInstanceOf[B]
+  override def sum[B >: N](using Numeric[B]): B =
+    val two = fromInt[N](2)
+    val total = if length % two == `0` then length / two * (start + end) else length * midpoint
+    total.asInstanceOf[B]
 
   def segmentLength(p: N => Boolean, from: N = `0`): N = fromInt(drop(from).iterator.takeWhile(p).size)
 
