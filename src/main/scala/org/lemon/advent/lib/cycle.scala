@@ -9,7 +9,6 @@ import scala.annotation.tailrec
   * @tparam S the state type
   */
 case class Cycle[S](offset: Int, period: Int, history: Seq[S]):
-  /** Returns a state equal to the one after `n` steps, by the `eq` or `key` the cycle was found with. */
   def stateAt(n: Long): S =
     if n < history.size then history(n.toInt)
     else history(((n - offset) % period + offset).toInt)
