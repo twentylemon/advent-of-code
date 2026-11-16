@@ -2,17 +2,26 @@ package org.lemon.advent.lib
 
 import scala.annotation.tailrec
 
+/** A sequence of states that eventually repeats: after `offset` states, the next `period` states repeat forever.
+  * @param offset the index of the first state in the cycle
+  * @param period the length of the cycle
+  * @param history the first `offset + period` states
+  * @tparam S the state type
+  */
 case class Cycle[S](offset: Int, period: Int, history: Seq[S]):
+  /** Returns the state after `n` steps. Past `history`, it returns the earlier state that the `n`th state
+    * repeats, which matches the real `n`th state only under the comparison the cycle was found with (`eq` or `key`).
+    */
   def stateAt(n: Long): S =
     if n < history.size then history(n.toInt)
     else history(((n - offset) % period + offset).toInt)
 
 /** Detects a cycle in the sequence of states produced by repeatedly applying `step` to `initial`,
-  * comparing states by using `eq`.
+  * comparing states by using `eq`. Uses Brent's cycle detection algorithm.
   *
   * @param initial the starting state
   * @param step function to produce the next state
-  * @param eq function to compare if two states are equal
+  * @param eq function to compare if two states are equal. `eq(a, b)` must imply `eq(step(a), step(b))`
   * @return the cycle information including offset, period, and state lookup
   * @tparam S the state type
   */
@@ -41,9 +50,10 @@ def findCycle[S](initial: S)(step: S => S): Cycle[S] =
   findCycle(initial)(step, _ == _)
 
 /** Detects a cycle in the sequence of states produced by repeatedly applying `step` to `initial`,
-  * where two states are the same when they have equal keys. This implementation is faster when
-  * `step` is expensive. [[findCycle]] can be faster when `step` is cheap and comparing two states
-  * usually stops early.
+  * where two states are the same when they have equal keys. This implementation calls `step` once
+  * per state up to the first repeat, so it is faster when `step` is expensive. [[findCycle]] can
+  * call `step` up to about three times as often, but it doesn't hash, so it can be faster when
+  * `step` is cheap and comparing two states usually stops early.
   *
   * @param initial the starting state
   * @param step function to produce the next state
