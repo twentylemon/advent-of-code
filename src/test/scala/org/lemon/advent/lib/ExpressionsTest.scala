@@ -102,19 +102,32 @@ class ExpressionsTest extends UnitTest:
   }
 
   test("resolve of a name that depends on a cycle is None") {
-    check(forAll(cycleGen)(cycle =>
-      ExpressionContext(cycle + ("dependent" -> Reference(cycle.keys.head))).resolve("dependent").isEmpty
-    ))
+    val gen =
+      for
+        cycle <- cycleGen
+        target <- Gen.oneOf(cycle.keys)
+        dependent <- arbitrary[String].suchThat(!cycle.contains(_))
+      yield (cycle, target, dependent)
+    check(forAll(gen) { (cycle, target, dependent) =>
+      ExpressionContext(cycle + (dependent -> Reference(target))).resolve(dependent).isEmpty
+    })
   }
 
   test("resolve of a name visited on the way into a cycle keeps its value") {
-    check(forAll(cycleGen, arbitrary[Long]) { (cycle, value) =>
+    val gen =
+      for
+        cycle <- cycleGen
+        target <- Gen.oneOf(cycle.keys)
+        dependent <- arbitrary[String].suchThat(!cycle.contains(_))
+        independent <- arbitrary[String].suchThat(name => !cycle.contains(name) && name != dependent)
+        value <- arbitrary[Long]
+      yield (cycle, target, dependent, independent, value)
+    check(forAll(gen) { (cycle, target, dependent, independent, value) =>
       val context = ExpressionContext(
-        cycle + ("dependent" -> Add(Reference("independent"), Reference(cycle.keys.head)))
-          + ("independent" -> Literal(value))
+        cycle + (dependent -> Add(Reference(independent), Reference(target))) + (independent -> Literal(value))
       )
-      context.resolve("dependent")
-      context.resolve("independent") == Some(value)
+      context.resolve(dependent)
+      context.resolve(independent) == Some(value)
     })
   }
 
