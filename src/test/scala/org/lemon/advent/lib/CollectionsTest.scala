@@ -1,29 +1,31 @@
 package org.lemon.advent.lib
 
 import org.scalacheck.*
+import org.scalacheck.Arbitrary.*
+import org.scalacheck.Gen.*
 import org.scalacheck.Prop.*
 import org.lemon.advent.*
 
 class CollectionsTest extends UnitTest:
 
   test("iterator nth is the element at that index") {
-    val gen = for xs <- Gen.nonEmptyListOf(Arbitrary.arbitrary[Int]); n <- Gen.chooseNum(0, xs.size - 1) yield (xs, n)
+    val gen = for xs <- nonEmptyListOf(arbitrary[Int]); n <- chooseNum(0, xs.size - 1) yield (xs, n)
     check(forAll(gen) { (xs, n) => xs.iterator.nth(n) == xs(n) })
   }
 
   test("iterator nth throws IndexOutOfBoundsException for a negative index") {
-    check(forAll(Arbitrary.arbitrary[List[Int]], Gen.chooseNum(Int.MinValue, -1)) { (xs, n) =>
+    check(forAll(arbitrary[List[Int]], chooseNum(Int.MinValue, -1)) { (xs, n) =>
       Prop.throws(classOf[IndexOutOfBoundsException])(xs.iterator.nth(n))
     })
   }
 
   test("iterator nthOption matches lift") {
-    val gen = for xs <- Arbitrary.arbitrary[List[Int]]; n <- Gen.chooseNum(-1, xs.size) yield (xs, n)
+    val gen = for xs <- arbitrary[List[Int]]; n <- chooseNum(-1, xs.size) yield (xs, n)
     check(forAll(gen) { (xs, n) => xs.iterator.nthOption(n) == xs.lift(n) })
   }
 
   test("iterator last is the last element") {
-    check(forAll(Gen.nonEmptyListOf(Arbitrary.arbitrary[Int])) { xs => xs.iterator.last == xs.last })
+    check(forAll(nonEmptyListOf(arbitrary[Int])) { xs => xs.iterator.last == xs.last })
   }
 
   test("cartesianProduct pairs every element of one with every element of the other") {
@@ -33,11 +35,7 @@ class CollectionsTest extends UnitTest:
   test("pairs is equal to stdlib combinations(2) of a set") {
     check((xs: Set[Int]) =>
       val pair = xs.pairs.toSeq.sorted
-      val combo = xs.toSeq
-        .combinations(2)
-        .map { case Seq(a, b) => (a, b) }
-        .toSeq
-        .sorted
+      val combo = xs.toSeq.combinations(2).map { case Seq(a, b) => (a, b) }.toSeq.sorted
       pair == combo
     )
   }
@@ -45,11 +43,7 @@ class CollectionsTest extends UnitTest:
   test("triples is equal to stdlib combinations(3) of a set") {
     check((xs: Set[Int]) =>
       val trip = xs.triples.toSeq.sorted
-      val combo = xs.toSeq
-        .combinations(3)
-        .map { case Seq(a, b, c) => (a, b, c) }
-        .toSeq
-        .sorted
+      val combo = xs.toSeq.combinations(3).map { case Seq(a, b, c) => (a, b, c) }.toSeq.sorted
       trip == combo
     )
   }
@@ -89,14 +83,14 @@ class CollectionsTest extends UnitTest:
   }
 
   test("frequencies counts match elements") {
-    check(forAll { (it: Iterable[Int]) =>
+    check((it: Iterable[Int]) =>
       val freq = it.frequencies
       it.forall(elem => freq(elem) == it.count(_ == elem))
-    })
+    )
   }
 
   test("frequencies keys are exactly the distinct elements") {
-    check(forAll { (it: Iterable[Int]) => it.frequencies.keySet == it.toSet })
+    check((it: Iterable[Int]) => it.frequencies.keySet == it.toSet)
   }
 
   test("findValue finds a key mapped to the value") {
@@ -106,9 +100,9 @@ class CollectionsTest extends UnitTest:
   test("split matches String#split") {
     val gen =
       for
-        delim <- Gen.alphaNumChar
-        repeat <- Gen.choose(1, 10)
-        parts <- Gen.listOf(Gen.stringOf(Gen.alphaNumChar.suchThat(_ != delim)))
+        delim <- alphaNumChar
+        repeat <- choose(1, 10)
+        parts <- listOf(stringOf(alphaNumChar.suchThat(_ != delim)))
       yield (parts.mkString(delim.toString.repeat(repeat)), delim)
 
     check(forAll(gen) { (str: String, delim: Char) =>
