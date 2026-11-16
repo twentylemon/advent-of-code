@@ -54,6 +54,10 @@ class EmptyIntervalTest extends UnitTest:
     Interval.empty[Int].size shouldBe 0
   }
 
+  test("has knownSize 0") {
+    Interval.empty[Int].knownSize shouldBe 0
+  }
+
   test("sums to 0") {
     Interval.empty[Int].sum shouldBe 0
   }
@@ -267,6 +271,15 @@ class IntervalTest extends UnitTest:
 
   test("size matches Range") {
     check(forAll(rangeIntervalGen) { (a, b) => interval(a, b).size == range(a, b).size })
+  }
+
+  test("knownSize matches Range") {
+    check(forAll(rangeIntervalGen) { (a, b) => interval(a, b).knownSize == range(a, b).knownSize })
+  }
+
+  test("knownSize is -1 when the length doesn't fit in an Int") {
+    val gen = for a <- Gen.choose(Int.MinValue, -1); b <- Gen.choose(a + Int.MaxValue, Int.MaxValue) yield (a, b)
+    check(forAll(gen) { (a, b) => interval(a, b).knownSize == -1 })
   }
 
   test("sum matches Range") {
