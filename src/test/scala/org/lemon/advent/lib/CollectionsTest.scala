@@ -26,14 +26,8 @@ class CollectionsTest extends UnitTest:
     check(forAll(Gen.nonEmptyListOf(Arbitrary.arbitrary[Int])) { xs => xs.iterator.last == xs.last })
   }
 
-  test("cartesianProduct has a pair for every combination of elements") {
-    check((xs: Vector[Int], ys: Vector[String]) => xs.cartesianProduct(ys).size == xs.size * ys.size)
-  }
-
-  test("cartesianProduct pairs are in row-major order") {
-    check((xs: Vector[Int], ys: Vector[String]) =>
-      xs.cartesianProduct(ys).zipWithIndex.forall { case ((x, y), i) => x == xs(i / ys.size) && y == ys(i % ys.size) }
-    )
+  test("cartesianProduct pairs every element of one with every element of the other") {
+    check((xs: List[Int], ys: List[String]) => xs.cartesianProduct(ys).toSeq == xs.flatMap(x => ys.map((x, _))))
   }
 
   test("pairs is equal to stdlib combinations(2) of a set") {
