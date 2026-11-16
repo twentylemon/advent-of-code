@@ -102,11 +102,10 @@ extension [A](it: Iterable[A])
     * @return iterator of all unordered pairs
     */
   def pairs: Iterator[(A, A)] =
-    val indexed = it.toIndexedSeq
     for
-      i <- indexed.indices.iterator
-      j <- indexed.indices.drop(i + 1).iterator
-    yield (indexed(i), indexed(j))
+      case a :: rest <- it.toList.tails
+      b <- rest.iterator
+    yield (a, b)
 
   /** Returns an iterator of all unordered triples of elements in the iterable.
     * If the collection contains duplicates, the triples will not be unique.
@@ -114,12 +113,11 @@ extension [A](it: Iterable[A])
     * @return iterator of all unordered triples
     */
   def triples: Iterator[(A, A, A)] =
-    val indexed = it.toIndexedSeq
     for
-      i <- indexed.indices.iterator
-      j <- indexed.indices.drop(i + 1).iterator
-      k <- indexed.indices.drop(j + 1).iterator
-    yield (indexed(i), indexed(j), indexed(k))
+      case a :: rest <- it.toList.tails
+      case b :: rest2 <- rest.tails
+      c <- rest2.iterator
+    yield (a, b, c)
 
   /** Returns `sliding(2)` as tuples instead of collections.
     * Collections with fewer than 2 elements yield an empty result.
