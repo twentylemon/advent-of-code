@@ -1,6 +1,7 @@
 package org.lemon.advent.lib
 
 import scala.annotation.tailrec
+import scala.collection.mutable
 
 case class Cycle[S](offset: Int, period: Int, history: Seq[S]):
   def stateAt(n: Long): S =
@@ -17,24 +18,20 @@ case class Cycle[S](offset: Int, period: Int, history: Seq[S]):
   * @tparam S the state type
   */
 def findCycle[S](initial: S)(step: S => S, eq: (S, S) => Boolean): Cycle[S] =
-  case class BrentState(power: Int, period: Int, tortoise: S, hare: S)
+  val states = mutable.ArrayBuffer(initial, step(initial))
+  var power = 1
+  var period = 1
+  var tortoise = 0
+  while !eq(states(tortoise), states.last) do
+    if power == period then
+      power *= 2
+      period = 0
+      tortoise = states.size - 1
+    states += step(states.last)
+    period += 1
 
-  val period = Iterator.iterate(BrentState(1, 1, initial, step(initial))) { state =>
-    val (power, period, tortoise) =
-      if state.power == state.period then (state.power * 2, 1, state.hare)
-      else (state.power, state.period + 1, state.tortoise)
-    BrentState(power, period, tortoise, step(state.hare))
-  }.find(s => eq(s.tortoise, s.hare)).map(_.period).get
-
-  val hareStart = Iterator.iterate(initial)(step).nth(period)
-  val (offset, historyPrefix, cycleStart) = Iterator
-    .iterate((initial, hareStart, Vector.empty[S])) { (t, h, hist) => (step(t), step(h), hist :+ t) }
-    .find((tortoise, hare, _) => eq(tortoise, hare))
-    .map((tortoise, _, hist) => (hist.size, hist, tortoise))
-    .get
-
-  val history = historyPrefix ++ Iterator.iterate(cycleStart)(step).take(period).toSeq
-  Cycle(offset, period, history)
+  val offset = Iterator.from(0).find(i => eq(states(i), states(i + period))).get
+  Cycle(offset, period, states.view.take(offset + period).toVector)
 
 /** Detects a cycle in the sequence of states produced by repeatedly applying `step` to `initial`.
   * Uses Brent's cycle detection algorithm.
