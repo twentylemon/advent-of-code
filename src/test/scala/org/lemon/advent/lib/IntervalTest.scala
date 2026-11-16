@@ -58,6 +58,11 @@ class EmptyIntervalTest extends UnitTest:
     Interval.empty[Int].knownSize shouldBe 0
   }
 
+  test("sums to 0") {
+    val sum: Int = Interval.empty[Int].sum
+    sum shouldBe 0
+  }
+
   test("has length 0") {
     Interval.empty[Int].length shouldBe 0
   }
@@ -100,6 +105,10 @@ class EmptyIntervalTest extends UnitTest:
 
   test("max throws UnsupportedOperationException") {
     an[UnsupportedOperationException] should be thrownBy Interval.empty[Int].max
+  }
+
+  test("midpoint throws UnsupportedOperationException") {
+    an[UnsupportedOperationException] should be thrownBy Interval.empty[Int].midpoint
   }
 
   test("maxOption is None") {
@@ -278,6 +287,14 @@ class IntervalTest extends UnitTest:
     check(forAll(gen) { (a, b) => interval(a, b).knownSize == -1 })
   }
 
+  test("sum matches Range") {
+    check(forAll(rangeIntervalGen) { (a, b) => interval(a, b).sum == range(a, b).sum })
+  }
+
+  test("sum of a Long interval matches NumericRange") {
+    check(forAll(shortIntervalGen) { (a, b) => Interval(a.toLong, b.toLong).sum == (a.toLong to b.toLong).sum })
+  }
+
   test("length matches Range") {
     check(forAll(rangeIntervalGen) { (a, b) => interval(a, b).length == range(a, b).length })
   }
@@ -347,6 +364,10 @@ class IntervalTest extends UnitTest:
 
   test("maxOption matches Range") {
     check(forAll(shortIntervalGen) { (a, b) => interval(a, b).maxOption == range(a, b).maxOption })
+  }
+
+  test("midpoint matches the middle of Range, rounding down") {
+    check(forAll(rangeIntervalGen) { (a, b) => interval(a, b).midpoint == range(a, b)((range(a, b).length - 1) / 2) })
   }
 
   test("iterator matches Range") {

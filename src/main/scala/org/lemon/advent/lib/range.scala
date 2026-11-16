@@ -76,6 +76,19 @@ case class Interval[N: Integral](start: N, end: N) extends Iterable[N] with Part
   def max: N = if isEmpty then throw new UnsupportedOperationException("max of empty interval") else end
   def maxOption: Option[N] = lastOption
 
+  /** Returns the middle value of this interval. If the interval has an even length,
+    * this is the lower of the two middle values.
+    * @return the middle value of this interval
+    * @throws UnsupportedOperationException if this interval is empty
+    */
+  def midpoint: N =
+    if isEmpty then throw new UnsupportedOperationException("midpoint of empty interval")
+    else
+      val two = fromInt[N](2)
+      def floorHalf(n: N): N = (n - (n +% two)) / two
+      val bothOdd = (start +% two) * (end +% two)
+      floorHalf(start) + floorHalf(end) + bothOdd
+
   override def iterator: Iterator[N] = steps(start, end, `1`)
   def reverseIterator: Iterator[N] = steps(end, start, `-1`)
 
@@ -109,14 +122,19 @@ case class Interval[N: Integral](start: N, end: N) extends Iterable[N] with Part
 
   def splitAt(n: N): (Interval[N], Interval[N]) = (take(n), drop(n))
 
+  /** Returns the halves of this interval. If the interval has an odd length,
+    * the middle value is in the first half.
+    * @return the non-empty halves of this interval
+    */
   def halves: Seq[Interval[N]] =
     if isEmpty then Seq.empty
     else
-      val two = fromInt[N](2)
-      def floorHalf(n: N): N = (n - (n +% two)) / two
-      val bothOdd = (start +% two) * (end +% two)
-      val mid = floorHalf(start) + floorHalf(end) + bothOdd
+      val mid = midpoint
       Interval(start, mid) +: Option.when(mid < end)(Interval(mid + `1`, end)).toSeq
+
+  def sum: N =
+    val two = fromInt[N](2)
+    if length % two == `0` then length / two * (start + end) else length * midpoint
 
   def segmentLength(p: N => Boolean, from: N = `0`): N = fromInt(drop(from).iterator.takeWhile(p).size)
 
