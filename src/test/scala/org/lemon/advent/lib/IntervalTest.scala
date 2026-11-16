@@ -54,6 +54,10 @@ class EmptyIntervalTest extends UnitTest:
     Interval.empty[Int].size shouldBe 0
   }
 
+  test("sums to 0") {
+    Interval.empty[Int].sum shouldBe 0
+  }
+
   test("has length 0") {
     Interval.empty[Int].length shouldBe 0
   }
@@ -263,6 +267,19 @@ class IntervalTest extends UnitTest:
 
   test("size matches Range") {
     check(forAll(rangeIntervalGen) { (a, b) => interval(a, b).size == range(a, b).size })
+  }
+
+  test("sum matches Range") {
+    check(forAll(rangeIntervalGen) { (a, b) => interval(a, b).sum == range(a, b).sum })
+  }
+
+  test("sum of a Long interval matches NumericRange") {
+    check(forAll(shortIntervalGen) { (a, b) => Interval(a.toLong, b.toLong).sum == (a.toLong to b.toLong).sum })
+  }
+
+  test("sum with another Numeric matches Range") {
+    object OtherIntNumeric extends Numeric.IntIsIntegral with Ordering.IntOrdering
+    check(forAll(shortIntervalGen) { (a, b) => interval(a, b).sum(using OtherIntNumeric) == range(a, b).sum })
   }
 
   test("length matches Range") {
