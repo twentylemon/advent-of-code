@@ -59,7 +59,3 @@ trait BinaryOperation[T] extends Expression[T]:
   override def simplify(context: ExpressionContext[T]) = resolve(context) match
     case Some(value) => Literal(value)
     case None => copy(lhs = lhs.simplify(context), rhs = rhs.simplify(context))
-
-case class Unknown[T]() extends Expression[T]:
-  override def resolve(context: ExpressionContext[T]) = None
-  override def simplify(context: ExpressionContext[T]) = this

@@ -36,7 +36,7 @@ private object Day21:
 
   def solve(simplifiedExpression: Expr, knownValue: Long): Long =
     simplifiedExpression match
-      case Unknown() => knownValue
+      case Reference("humn") => knownValue
 
       case Add(Literal(n), rhs) => solve(rhs, knownValue - n)
       case Add(lhs, Literal(n)) => solve(lhs, knownValue - n)
@@ -53,7 +53,7 @@ private object Day21:
 
   def part2(in: String) =
     val monkeys = in.linesIterator.map(parseExpression).toMap
-    val context = ExpressionContext(monkeys + ("humn" -> Unknown[Long]()))
+    val context = ExpressionContext(monkeys - "humn")
 
     val root = monkeys("root").asInstanceOf[BiOp]
     val lhs = root.lhs.resolve(context)
