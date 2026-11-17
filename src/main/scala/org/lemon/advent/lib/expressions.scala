@@ -4,6 +4,7 @@ import scala.collection.mutable
 
 case class ExpressionContext[T](expressions: Map[String, Expression[T]]):
   private val cache = mutable.Map.empty[String, Option[Option[T]]]
+  private val simplifying = mutable.Set.empty[String]
 
   def resolve(name: String): Option[T] =
     cache.get(name) match
@@ -15,7 +16,13 @@ case class ExpressionContext[T](expressions: Map[String, Expression[T]]):
         cache(name) = Some(result)
         result
 
-  def simplify(name: String): Expression[T] = expressions(name).simplify(this)
+  def simplify(name: String): Expression[T] = expressions.get(name) match
+    case Some(expression) if !simplifying(name) =>
+      simplifying += name
+      val simplified = expression.simplify(this)
+      simplifying -= name
+      simplified
+    case _ => Reference(name)
 
 trait Expression[T]:
   def resolve(context: ExpressionContext[T]): Option[T]
