@@ -18,7 +18,7 @@ class ExpressionsTest extends UnitTest:
     case binary: BinaryOperation[Long] => references(binary.lhs) ++ references(binary.rhs)
     case _ => Set.empty
 
-  object ExpressionCommands extends Commands:
+  object AcyclicCommands extends Commands:
     case class Expected(value: Option[Long], simplified: Expression[Long])
     type State = Map[String, Expected]
     final class Sut(var context: ExpressionContext[Long])
@@ -93,7 +93,7 @@ class ExpressionsTest extends UnitTest:
       override def postCondition(state: State, result: Expression[Long]): Prop = result == state(name).simplified
 
   test("resolve and simplify match a model of the definitions") {
-    check(ExpressionCommands.property())
+    check(AcyclicCommands.property())
   }
 
   object CycleCommands extends Commands:
