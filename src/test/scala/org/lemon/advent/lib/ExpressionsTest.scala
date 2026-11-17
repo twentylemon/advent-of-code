@@ -32,12 +32,12 @@ class ExpressionsTest extends UnitTest:
       val name = s"x${state.size}"
       val literal = arbitrary[Long].map(DefineLiteral(name, _))
       val missing = arbitrary[String].suchThat(!_.startsWith("x")).map(DefineMissingReference(name, _))
-      if state.isEmpty then Gen.frequency(3 -> literal, 2 -> missing)
+      if state.isEmpty then Gen.frequency(3 -> literal, 1 -> missing)
       else
         val defined = Gen.oneOf(state.keys.toSeq)
         Gen.frequency(
           3 -> literal,
-          2 -> missing,
+          1 -> missing,
           2 -> defined.map(DefineReference(name, _)),
           2 -> defined.map(DefineNegate(name, _)),
           4 -> Gen.zip(defined, defined).map(DefineAdd(name, _, _)),
