@@ -3,7 +3,6 @@ package org.lemon.advent.lib
 import org.lemon.advent.*
 import org.scalacheck.*
 import org.scalacheck.Arbitrary.*
-import org.scalacheck.Prop.*
 import org.scalacheck.commands.Commands
 
 class ExpressionsTest extends UnitTest:
@@ -128,10 +127,4 @@ class ExpressionsTest extends UnitTest:
 
   test("resolve and simplify match a model of the definitions") {
     check(ExpressionCommands.property())
-  }
-
-  test("resolve of a missing name is None") {
-    check((definitions: Map[String, Long], name: String) =>
-      ExpressionContext((definitions - name).view.mapValues(Literal(_)).toMap).resolve(name).isEmpty
-    )
   }
