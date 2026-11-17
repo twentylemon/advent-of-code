@@ -35,21 +35,23 @@ private object Day21:
     ExpressionContext(monkeys).resolve("root").get
 
   def solve(target: String, simplifiedExpression: Expr, knownValue: Long): Long =
-    simplifiedExpression match
-      case Reference(`target`) => knownValue
+    def loop(expression: Expr, knownValue: Long): Long =
+      expression match
+        case Reference(`target`) => knownValue
 
-      case Add(Literal(n), rhs) => solve(target, rhs, knownValue - n)
-      case Add(lhs, Literal(n)) => solve(target, lhs, knownValue - n)
+        case Add(Literal(n), rhs) => loop(rhs, knownValue - n)
+        case Add(lhs, Literal(n)) => loop(lhs, knownValue - n)
 
-      case Subtract(Literal(n), rhs) => solve(target, rhs, n - knownValue)
-      case Subtract(lhs, Literal(n)) => solve(target, lhs, n - -knownValue)
+        case Subtract(Literal(n), rhs) => loop(rhs, n - knownValue)
+        case Subtract(lhs, Literal(n)) => loop(lhs, n - -knownValue)
 
-      case Multiply(Literal(n), rhs) => solve(target, rhs, knownValue / n)
-      case Multiply(lhs, Literal(n)) => solve(target, lhs, knownValue / n)
+        case Multiply(Literal(n), rhs) => loop(rhs, knownValue / n)
+        case Multiply(lhs, Literal(n)) => loop(lhs, knownValue / n)
 
-      case Divide(Literal(n), rhs) => solve(target, rhs, n / knownValue)
-      case Divide(lhs, Literal(n)) => solve(target, lhs, n * knownValue)
-      case _ => ???
+        case Divide(Literal(n), rhs) => loop(rhs, n / knownValue)
+        case Divide(lhs, Literal(n)) => loop(lhs, n * knownValue)
+        case _ => ???
+    loop(simplifiedExpression, knownValue)
 
   def part2(in: String) =
     val monkeys = in.linesIterator.map(parseExpression).toMap
