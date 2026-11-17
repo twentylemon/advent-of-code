@@ -112,18 +112,26 @@ class ExpressionsTest extends UnitTest:
       override def preCondition(state: State) = state.contains(name)
       override def postCondition(state: State, result: Option[Long]): Prop = result == state(name).value
 
+    case class Simplified(
+        tree: Expression[Long],
+        simplify: String => Expression[Long],
+        treeWithValue: Option[Long],
+        definitionWithValue: Option[Long],
+    )
+
     case class Simplify(name: String, value: Long) extends SuccessCommand:
-      type Result = (Expression[Long], ExpressionContext[Long])
-      override def run(sut: Sut) = (sut.context.simplify(name), sut.context)
+      type Result = Simplified
+      override def run(sut: Sut) =
+        val context = sut.context
+        val tree = context.simplify(name)
+        val withValue = ExpressionContext(context.expressions + (name -> Literal(value)))
+        Simplified(tree, context.simplify, tree.resolve(withValue), context.expressions(name).resolve(withValue))
       override def nextState(state: State) = state
       override def preCondition(state: State) = state.contains(name)
-      override def postCondition(state: State, result: Result): Prop =
-        val (simplified, context) = result
+      override def postCondition(state: State, result: Simplified): Prop =
         if state(name).inCycle then
-          val withValue = ExpressionContext(context.expressions + (name -> Literal(value)))
-          references(simplified) == Set(name)
-          && simplified.resolve(withValue) == context.expressions(name).resolve(withValue)
-        else simplified == state(name).simplified(context.simplify)
+          references(result.tree) == Set(name) && result.treeWithValue == result.definitionWithValue
+        else result.tree == state(name).simplified(result.simplify)
 
   test("resolve and simplify match a model of the definitions") {
     check(ExpressionCommands.property())
