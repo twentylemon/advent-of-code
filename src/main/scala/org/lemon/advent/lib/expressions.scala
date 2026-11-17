@@ -6,7 +6,7 @@ case class ExpressionContext[T](expressions: Map[String, Expression[T]]):
   private val cache = mutable.Map.empty[String, Option[Option[T]]]
   private val simplifying = mutable.Set.empty[String]
 
-  def resolve(name: String): Option[T] =
+  private[lib] def resolve(name: String): Option[T] =
     cache.get(name) match
       case Some(Some(result)) => result
       case Some(None) => None
@@ -16,7 +16,7 @@ case class ExpressionContext[T](expressions: Map[String, Expression[T]]):
         cache(name) = Some(result)
         result
 
-  def simplify(name: String): Expression[T] = expressions.get(name) match
+  private[lib] def simplify(name: String): Expression[T] = expressions.get(name) match
     case Some(expression) if !simplifying(name) =>
       simplifying += name
       val simplified = expression.simplify(using this)

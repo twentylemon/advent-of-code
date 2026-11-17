@@ -75,14 +75,14 @@ class ExpressionsTest extends UnitTest:
 
     case class Resolve(name: String) extends SuccessCommand:
       type Result = Option[Long]
-      override def run(sut: Sut) = sut.context.resolve(name)
+      override def run(sut: Sut) = Reference(name).resolve(using sut.context)
       override def nextState(state: State) = state
       override def preCondition(state: State) = state.contains(name)
       override def postCondition(state: State, result: Option[Long]): Prop = result == state(name).value
 
     case class Simplify(name: String) extends SuccessCommand:
       type Result = Expression[Long]
-      override def run(sut: Sut) = sut.context.simplify(name)
+      override def run(sut: Sut) = Reference(name).simplify(using sut.context)
       override def nextState(state: State) = state
       override def preCondition(state: State) = state.contains(name)
       override def postCondition(state: State, result: Expression[Long]): Prop = result == state(name).simplified
@@ -141,20 +141,20 @@ class ExpressionsTest extends UnitTest:
         extends Define(Map(name -> expression), on):
       override def ringMember(state: State) = Map(name -> state.ringMember(on))
 
-    sealed abstract class Query[R](name: String, f: ExpressionContext[Long] => R) extends SuccessCommand:
+    sealed abstract class Query[R](name: String, f: ExpressionContext[Long] ?=> R) extends SuccessCommand:
       type Result = R
-      override def run(sut: Sut) = f(sut.context)
+      override def run(sut: Sut) = f(using sut.context)
       override def nextState(state: State) = state
       override def preCondition(state: State) = state.definitions.contains(name)
 
-    case class Resolve(name: String) extends Query(name, _.resolve(name)):
+    case class Resolve(name: String) extends Query(name, Reference(name).resolve):
       override def postCondition(state: State, result: Option[Long]): Prop = result.isEmpty
 
-    case class Simplify(name: String) extends Query(name, _.simplify(name)):
+    case class Simplify(name: String) extends Query(name, Reference(name).simplify):
       override def postCondition(state: State, result: Expression[Long]): Prop =
         references(result) == Set(state.ringMember(name))
 
-    case class SimplifyPinned(name: String, pin: Long) extends Query(name, _.simplify(name)):
+    case class SimplifyPinned(name: String, pin: Long) extends Query(name, Reference(name).simplify):
       override def preCondition(state: State) = state.ringMember.get(name).contains(name)
       override def postCondition(state: State, result: Expression[Long]): Prop =
         def pinned = ExpressionContext(state.definitions.updated(name, Literal(pin)))
