@@ -4,10 +4,7 @@ import org.lemon.advent.lib.expressions.*
 
 private object Day21:
 
-  type Expr = Expression[Long]
-  type BiOp = BinaryOperation[Long]
-
-  def parseExpression(line: String): (String, Expr) = line match
+  def parseExpression(line: String): (String, Expression[Long]) = line match
     case s"$v: $lhs $op $rhs" => (
         v,
         op match
@@ -22,8 +19,8 @@ private object Day21:
     val monkeys = in.linesIterator.map(parseExpression).toMap
     ExpressionContext(monkeys).resolve("root").get
 
-  def solve(target: String, simplifiedExpression: Expr, knownValue: Long): Long =
-    def loop(expression: Expr, knownValue: Long): Long =
+  def solve(target: String, simplifiedExpression: Expression[Long], knownValue: Long): Long =
+    def loop(expression: Expression[Long], knownValue: Long): Long =
       expression match
         case Reference(`target`) => knownValue
 
@@ -46,7 +43,7 @@ private object Day21:
     val human = "humn"
     val context = ExpressionContext(monkeys - human)
 
-    val root = monkeys("root").asInstanceOf[BiOp]
+    val root = monkeys("root").asInstanceOf[BinaryOperation[Long]]
     val lhs = root.lhs.resolve(context)
     val rhs = root.rhs.resolve(context)
 
