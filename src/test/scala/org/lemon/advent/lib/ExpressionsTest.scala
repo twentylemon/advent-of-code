@@ -31,14 +31,12 @@ class ExpressionsTest extends UnitTest:
     override def genCommand(state: State) =
       val name = s"x${state.size}"
       val literal = arbitrary[Long].map(DefineLiteral(name, _))
-      val unknown = Gen.const(DefineUnknown(name))
       val missing = arbitrary[String].suchThat(!_.startsWith("x")).map(DefineMissingReference(name, _))
-      if state.isEmpty then Gen.frequency(3 -> literal, 1 -> unknown, 1 -> missing)
+      if state.isEmpty then Gen.frequency(3 -> literal, 1 -> missing)
       else
         val defined = Gen.oneOf(state.keys.toSeq)
         Gen.frequency(
           3 -> literal,
-          1 -> unknown,
           1 -> missing,
           2 -> defined.map(DefineReference(name, _)),
           2 -> defined.map(DefineNegate(name, _)),
@@ -57,9 +55,6 @@ class ExpressionsTest extends UnitTest:
 
     case class DefineLiteral(name: String, n: Long) extends Define(name, Literal(n)):
       override def expected(state: State) = Expected(Some(n), Literal(n))
-
-    case class DefineUnknown(name: String) extends Define(name, Unknown()):
-      override def expected(state: State) = Expected(None, Unknown())
 
     case class DefineMissingReference(name: String, to: String) extends Define(name, Reference(to)):
       override def expected(state: State) = Expected(None, Reference(to))
