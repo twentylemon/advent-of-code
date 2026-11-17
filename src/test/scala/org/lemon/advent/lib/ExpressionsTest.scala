@@ -129,7 +129,7 @@ class ExpressionsTest extends UnitTest:
           3 -> Gen.zip(members, arbitrary[Long]).map(SimplifyPinned(_, _)),
         )
 
-    abstract class Define(defined: Map[String, Expression[Long]], references: String*) extends UnitCommand:
+    sealed abstract class Define(defined: Map[String, Expression[Long]], references: String*) extends UnitCommand:
       def ringMember(state: State): Map[String, String]
       override def run(sut: Sut) = sut.context = ExpressionContext(sut.context.expressions ++ defined)
       override def nextState(state: State) =
@@ -145,7 +145,7 @@ class ExpressionsTest extends UnitTest:
         extends Define(Map(name -> expression), on):
       override def ringMember(state: State) = Map(name -> state.ringMember(on))
 
-    abstract class Query[R](name: String, f: ExpressionContext[Long] => R) extends SuccessCommand:
+    sealed abstract class Query[R](name: String, f: ExpressionContext[Long] => R) extends SuccessCommand:
       type Result = R
       override def run(sut: Sut) = f(sut.context)
       override def nextState(state: State) = state
