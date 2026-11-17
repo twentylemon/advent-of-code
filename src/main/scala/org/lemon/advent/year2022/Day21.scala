@@ -17,7 +17,7 @@ private object Day21:
 
   def part1(in: String) =
     val monkeys = in.linesIterator.map(parseExpression).toMap
-    ExpressionContext(monkeys).resolve("root").get
+    ExpressionContext(monkeys)("root")
 
   def solve(target: String, simplifiedExpression: Expression[Long], knownValue: Long): Long =
     def loop(expression: Expression[Long], knownValue: Long): Long =

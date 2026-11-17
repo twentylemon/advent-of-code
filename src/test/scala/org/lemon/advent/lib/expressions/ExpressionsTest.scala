@@ -5,6 +5,8 @@ import org.scalacheck.*
 import org.scalacheck.Arbitrary.*
 import org.scalacheck.commands.Commands
 
+import scala.util.{Failure, Success, Try}
+
 class ExpressionsTest extends UnitTest:
   def references(expression: Expression[Long]): Set[String] = expression match
     case Reference(name) => Set(name)
@@ -47,6 +49,7 @@ class ExpressionsTest extends UnitTest:
           2 -> Gen.zip(Gen.oneOf(unaryOps), defined).map(DefineUnary(name, _, _)),
           4 -> Gen.zip(Gen.oneOf(binaryOps), defined, defined).map(DefineBinary(name, _, _, _)),
           4 -> defined.map(Resolve(_)),
+          2 -> defined.map(Apply(_)),
           4 -> defined.map(Simplify(_)),
         )
 
@@ -85,6 +88,16 @@ class ExpressionsTest extends UnitTest:
       override def nextState(state: State) = state
       override def preCondition(state: State) = state.contains(name)
       override def postCondition(state: State, result: Option[T]): Prop = result == state(name).value
+
+    case class Apply(name: String) extends Command:
+      type Result = T
+      override def run(sut: Sut) = sut.context(name)
+      override def nextState(state: State) = state
+      override def preCondition(state: State) = state.contains(name)
+      override def postCondition(state: State, result: Try[T]): Prop = (state(name).value, result) match
+        case (Some(value), Success(applied)) => applied == value
+        case (None, Failure(_: NoSuchElementException)) => true
+        case _ => false
 
     case class Simplify(name: String) extends SuccessCommand:
       type Result = Expression[T]

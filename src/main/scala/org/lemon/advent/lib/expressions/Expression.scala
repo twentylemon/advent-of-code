@@ -16,6 +16,8 @@ case class ExpressionContext[T](expressions: Map[String, Expression[T]]):
         cache(name) = Some(result)
         result
 
+  def apply(name: String): T = resolve(name).getOrElse(throw new NoSuchElementException(s"$name does not resolve"))
+
   def simplify(name: String): Expression[T] = expressions.get(name) match
     case Some(expression) if !simplifying(name) =>
       simplifying += name
