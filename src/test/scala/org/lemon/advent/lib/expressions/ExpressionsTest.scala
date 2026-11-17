@@ -6,12 +6,6 @@ import org.scalacheck.Arbitrary.*
 import org.scalacheck.commands.Commands
 
 class ExpressionsTest extends UnitTest:
-  case class Add(lhs: Expression[Long], rhs: Expression[Long]) extends BinaryOperation[Long]:
-    override def apply(left: Long, right: Long) = left + right
-
-  case class Negate(operand: Expression[Long]) extends UnaryOperation[Long]:
-    override def apply(operand: Long) = -operand
-
   def references(expression: Expression[Long]): Set[String] = expression match
     case Reference(name) => Set(name)
     case unary: UnaryOperation[Long] => references(unary.operand)
@@ -22,6 +16,12 @@ class ExpressionsTest extends UnitTest:
     case class Expected(value: Option[Long], simplified: Expression[Long])
     type State = Map[String, Expected]
     final class Sut(var context: ExpressionContext[Long])
+
+    enum Op(val construct: (Expression[Long], Expression[Long]) => Expression[Long], val eval: (Long, Long) => Long):
+      case Plus extends Op(Add(_, _), _ + _)
+      case Minus extends Op(Subtract(_, _), _ - _)
+      case Times extends Op(Multiply(_, _), _ * _)
+      case Div extends Op(Divide(_, _), _ / _)
 
     override def canCreateNewSut(newState: State, initSuts: Iterable[State], runningSuts: Iterable[Sut]) = true
     override def newSut(state: State) = Sut(ExpressionContext(Map.empty))
@@ -40,7 +40,7 @@ class ExpressionsTest extends UnitTest:
           1 -> missing,
           2 -> defined.map(DefineReference(name, _)),
           2 -> defined.map(DefineNegate(name, _)),
-          4 -> Gen.zip(defined, defined).map(DefineAdd(name, _, _)),
+          4 -> Gen.zip(Gen.oneOf(Op.values.toSeq), defined, defined).map(DefineBinary(name, _, _, _)),
           4 -> defined.map(Resolve(_)),
           4 -> defined.map(Simplify(_)),
         )
@@ -67,11 +67,13 @@ class ExpressionsTest extends UnitTest:
         val value = state(of).value.map(-_)
         Expected(value, value.fold[Expression[Long]](Negate(state(of).simplified))(Literal(_)))
 
-    case class DefineAdd(name: String, lhs: String, rhs: String)
-        extends Define(name, Add(Reference(lhs), Reference(rhs)), lhs, rhs):
+    case class DefineBinary(name: String, op: Op, lhs: String, rhs: String)
+        extends Define(name, op.construct(Reference(lhs), Reference(rhs)), lhs, rhs):
+      override def preCondition(state: State) =
+        super.preCondition(state) && !(op == Op.Div && state(rhs).value.contains(0L))
       override def expected(state: State) =
-        val value = for l <- state(lhs).value; r <- state(rhs).value yield l + r
-        Expected(value, value.fold[Expression[Long]](Add(state(lhs).simplified, state(rhs).simplified))(Literal(_)))
+        val value = for l <- state(lhs).value; r <- state(rhs).value yield op.eval(l, r)
+        Expected(value, value.fold(op.construct(state(lhs).simplified, state(rhs).simplified))(Literal(_)))
 
     case class Resolve(name: String) extends SuccessCommand:
       type Result = Option[Long]
@@ -97,7 +99,7 @@ class ExpressionsTest extends UnitTest:
 
     val link: Gen[String => Expression[Long]] = Gen.oneOf(
       Gen.const((next: String) => Reference[Long](next)),
-      Gen.const((next: String) => Negate(Reference(next))),
+      Gen.const((next: String) => Negate(Reference[Long](next))),
       arbitrary[Long].map(n => (next: String) => Add(Reference(next), Literal(n))),
       arbitrary[Long].map(n => (next: String) => Add(Literal(n), Reference(next))),
     )
