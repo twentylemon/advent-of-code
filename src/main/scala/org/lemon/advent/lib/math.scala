@@ -18,7 +18,7 @@ extension [N: Integral](a: N)
     */
   def +%(n: N): N =
     val mod = a % n
-    if mod < `0` then mod + n else mod
+    if mod < `0` then mod + n.abs else mod
 
   /** Returns `this / n` rounded up.
     *
