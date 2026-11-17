@@ -157,7 +157,7 @@ case class Interval[N: Integral](start: N, end: N) extends Iterable[N] with Part
   override def tails: Iterator[Interval[N]] = Interval(`0`, length).iterator.map(drop)
   override def inits: Iterator[Interval[N]] = Interval(`0`, length).iterator.map(dropRight)
 
-  def indexOf(elem: N): N = if contains(elem) then elem - start else - `1`
+  def indexOf(elem: N): N = if contains(elem) then elem - start else `-1`
   def lastIndexOf(elem: N): N = indexOf(elem)
 
   def isDefinedAt(idx: N): Boolean = contains(start + idx)
