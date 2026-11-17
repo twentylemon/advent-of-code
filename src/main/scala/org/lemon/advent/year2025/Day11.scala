@@ -10,7 +10,7 @@ private object Day11:
     }.toMap
 
   def countPaths(graph: Map[String, Seq[String]], start: String, end: String) =
-    lazy val count: String => Long = memoize { (name: String) =>
+    lazy val count: String => Long = memoize { name =>
       if name == end then 1L
       else graph.getOrElse(name, Seq.empty).map(count).sum
     }
