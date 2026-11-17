@@ -36,9 +36,9 @@ private object Day07:
 
   def part1(input: String, output: String = "a") =
     val expressions = parse(input)
-    ExpressionContext(expressions).resolve(output).get
+    ExpressionContext(expressions)(output)
 
   def part2(input: String) =
     val expressions = parse(input)
-    val a = ExpressionContext(expressions).resolve("a").get
-    ExpressionContext(expressions + ("b" -> Literal(a))).resolve("a").get
+    val a = ExpressionContext(expressions)("a")
+    ExpressionContext(expressions + ("b" -> Literal(a)))("a")

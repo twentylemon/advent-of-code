@@ -26,7 +26,7 @@ private object Day24:
       .toSeq
       .sortBy(_._1)
       .zipWithIndex
-      .map { case ((_, e), i) => (1L << i) * (if e.resolve(context).get then 1 else 0) }
+      .map { case ((name, _), i) => (1L << i) * (if context(name) then 1 else 0) }
       .sum
 
   def part1(input: String) =
