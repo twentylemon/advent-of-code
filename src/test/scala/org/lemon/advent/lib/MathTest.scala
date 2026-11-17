@@ -57,12 +57,7 @@ class MathTest extends UnitTest:
   }
 
   test("lcm divided by each argument leaves coprime quotients") {
-    check(forAll(commonFactorPairs) { (a, b) =>
-      (a != 0 && b != 0) ==> {
-        val lcm = a.lcm(b)
-        (lcm / a).gcd(lcm / b) == 1
-      }
-    })
+    check(forAll(commonFactorPairs) { (a, b) => (a != 0 && b != 0) ==> ((a.lcm(b) / a).gcd(a.lcm(b) / b) == 1) })
   }
 
   test("lcm of an iterable is the least common multiple") {
