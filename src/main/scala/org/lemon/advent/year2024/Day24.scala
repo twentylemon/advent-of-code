@@ -29,13 +29,13 @@ private object Day24:
     lits ++ ops
 
   def calc(expressions: Map[String, Expr])(wire: String) =
-    given ExpressionContext[Boolean] = ExpressionContext(expressions)
+    val context = ExpressionContext(expressions)
     expressions.view
       .filterKeys(_.startsWith(wire))
       .toSeq
       .sortBy(_._1)
       .zipWithIndex
-      .map { case ((_, e), i) => (1L << i) * (if e.resolve.get then 1 else 0) }
+      .map { case ((_, e), i) => (1L << i) * (if e.resolve(context).get then 1 else 0) }
       .sum
 
   def part1(input: String) =

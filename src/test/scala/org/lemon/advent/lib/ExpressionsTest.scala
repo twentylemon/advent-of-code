@@ -75,14 +75,14 @@ class ExpressionsTest extends UnitTest:
 
     case class Resolve(name: String) extends SuccessCommand:
       type Result = Option[Long]
-      override def run(sut: Sut) = Reference(name).resolve(using sut.context)
+      override def run(sut: Sut) = Reference(name).resolve(sut.context)
       override def nextState(state: State) = state
       override def preCondition(state: State) = state.contains(name)
       override def postCondition(state: State, result: Option[Long]): Prop = result == state(name).value
 
     case class Simplify(name: String) extends SuccessCommand:
       type Result = Expression[Long]
-      override def run(sut: Sut) = Reference(name).simplify(using sut.context)
+      override def run(sut: Sut) = Reference(name).simplify(sut.context)
       override def nextState(state: State) = state
       override def preCondition(state: State) = state.contains(name)
       override def postCondition(state: State, result: Expression[Long]): Prop = result == state(name).simplified
@@ -141,9 +141,9 @@ class ExpressionsTest extends UnitTest:
         extends Define(Map(name -> expression), on):
       override def ringMember(state: State) = Map(name -> state.ringMember(on))
 
-    sealed abstract class Query[R](name: String, f: ExpressionContext[Long] ?=> R) extends SuccessCommand:
+    sealed abstract class Query[R](name: String, f: ExpressionContext[Long] => R) extends SuccessCommand:
       type Result = R
-      override def run(sut: Sut) = f(using sut.context)
+      override def run(sut: Sut) = f(sut.context)
       override def nextState(state: State) = state
       override def preCondition(state: State) = state.definitions.contains(name)
 
@@ -158,7 +158,7 @@ class ExpressionsTest extends UnitTest:
       override def preCondition(state: State) = state.ringMember.get(name).contains(name)
       override def postCondition(state: State, result: Expression[Long]): Prop =
         def pinned = ExpressionContext(state.definitions.updated(name, Literal(pin)))
-        result.resolve(using pinned) == state.definitions(name).resolve(using pinned)
+        result.resolve(pinned) == state.definitions(name).resolve(pinned)
 
   test("names that reach a reference cycle resolve to None and simplify to the ring member they reach") {
     check(CycleCommands.property())

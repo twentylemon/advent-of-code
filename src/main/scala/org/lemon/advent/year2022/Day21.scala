@@ -32,8 +32,7 @@ private object Day21:
 
   def part1(in: String) =
     val monkeys = in.linesIterator.map(parseExpression).toMap
-    given ExpressionContext[Long] = ExpressionContext(monkeys)
-    Reference("root").resolve.get
+    Reference("root").resolve(ExpressionContext(monkeys)).get
 
   def solve(target: String, simplifiedExpression: Expr, knownValue: Long): Long =
     def loop(expression: Expr, knownValue: Long): Long =
@@ -57,12 +56,12 @@ private object Day21:
   def part2(in: String) =
     val monkeys = in.linesIterator.map(parseExpression).toMap
     val human = "humn"
-    given ExpressionContext[Long] = ExpressionContext(monkeys - human)
+    val context = ExpressionContext(monkeys - human)
 
     val root = monkeys("root").asInstanceOf[BiOp]
-    val lhs = root.lhs.resolve
-    val rhs = root.rhs.resolve
+    val lhs = root.lhs.resolve(context)
+    val rhs = root.rhs.resolve(context)
 
-    lhs.map(solve(human, root.rhs.simplify, _))
-      .orElse(rhs.map(solve(human, root.lhs.simplify, _)))
+    lhs.map(solve(human, root.rhs.simplify(context), _))
+      .orElse(rhs.map(solve(human, root.lhs.simplify(context), _)))
       .get

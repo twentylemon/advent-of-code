@@ -35,10 +35,9 @@ private object Day07:
     }.toMap
 
   def part1(input: String, output: String = "a") =
-    given ExpressionContext[Int] = ExpressionContext(parse(input))
-    Reference(output).resolve.get
+    Reference(output).resolve(ExpressionContext(parse(input))).get
 
   def part2(input: String) =
     val expressions = parse(input)
-    val a = Reference("a").resolve(using ExpressionContext(expressions)).get
-    Reference("a").resolve(using ExpressionContext(expressions + ("b" -> Literal(a)))).get
+    val a = Reference("a").resolve(ExpressionContext(expressions)).get
+    Reference("a").resolve(ExpressionContext(expressions + ("b" -> Literal(a)))).get
