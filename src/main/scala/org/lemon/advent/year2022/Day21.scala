@@ -7,18 +7,6 @@ private object Day21:
   type Expr = Expression[Long]
   type BiOp = BinaryOperation[Long]
 
-  case class Add(lhs: Expr, rhs: Expr) extends BiOp:
-    override def apply(left: Long, right: Long) = left + right
-
-  case class Subtract(lhs: Expr, rhs: Expr) extends BiOp:
-    override def apply(left: Long, right: Long) = left - right
-
-  case class Multiply(lhs: Expr, rhs: Expr) extends BiOp:
-    override def apply(left: Long, right: Long) = left * right
-
-  case class Divide(lhs: Expr, rhs: Expr) extends BiOp:
-    override def apply(left: Long, right: Long) = left / right
-
   def parseExpression(line: String): (String, Expr) = line match
     case s"$v: $lhs $op $rhs" => (
         v,
