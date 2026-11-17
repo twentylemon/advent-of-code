@@ -129,39 +129,36 @@ class ExpressionsTest extends UnitTest:
           3 -> Gen.zip(members, arbitrary[Long]).map(SimplifyPinned(_, _)),
         )
 
-    case class DefineRing(ring: Map[String, Expression[Long]]) extends UnitCommand:
-      override def run(sut: Sut) = sut.context = ExpressionContext(sut.context.expressions ++ ring)
+    abstract class Define(defined: Map[String, Expression[Long]], references: String*) extends UnitCommand:
+      def ringMember(state: State): Map[String, String]
+      override def run(sut: Sut) = sut.context = ExpressionContext(sut.context.expressions ++ defined)
       override def nextState(state: State) =
-        State(state.definitions ++ ring, state.ringMember ++ ring.keys.map(name => name -> name))
-      override def preCondition(state: State) = ring.keys.forall(!state.definitions.contains(_))
+        State(state.definitions ++ defined, state.ringMember ++ ringMember(state))
+      override def preCondition(state: State) =
+        defined.keys.forall(!state.definitions.contains(_)) && references.forall(state.definitions.contains)
       override def postCondition(state: State, success: Boolean): Prop = success
 
-    case class DefineDependent(name: String, expression: Expression[Long], on: String) extends UnitCommand:
-      override def run(sut: Sut) = sut.context = ExpressionContext(sut.context.expressions + (name -> expression))
-      override def nextState(state: State) =
-        State(state.definitions + (name -> expression), state.ringMember + (name -> state.ringMember(on)))
-      override def preCondition(state: State) = !state.definitions.contains(name) && state.definitions.contains(on)
-      override def postCondition(state: State, success: Boolean): Prop = success
+    case class DefineRing(ring: Map[String, Expression[Long]]) extends Define(ring):
+      override def ringMember(state: State) = ring.keys.map(name => name -> name).toMap
 
-    case class Resolve(name: String) extends SuccessCommand:
-      type Result = Option[Long]
-      override def run(sut: Sut) = sut.context.resolve(name)
+    case class DefineDependent(name: String, expression: Expression[Long], on: String)
+        extends Define(Map(name -> expression), on):
+      override def ringMember(state: State) = Map(name -> state.ringMember(on))
+
+    abstract class Query[R](name: String, f: ExpressionContext[Long] => R) extends SuccessCommand:
+      type Result = R
+      override def run(sut: Sut) = f(sut.context)
       override def nextState(state: State) = state
       override def preCondition(state: State) = state.definitions.contains(name)
+
+    case class Resolve(name: String) extends Query(name, _.resolve(name)):
       override def postCondition(state: State, result: Option[Long]): Prop = result.isEmpty
 
-    case class Simplify(name: String) extends SuccessCommand:
-      type Result = Expression[Long]
-      override def run(sut: Sut) = sut.context.simplify(name)
-      override def nextState(state: State) = state
-      override def preCondition(state: State) = state.definitions.contains(name)
+    case class Simplify(name: String) extends Query(name, _.simplify(name)):
       override def postCondition(state: State, result: Expression[Long]): Prop =
         references(result) == Set(state.ringMember(name))
 
-    case class SimplifyPinned(name: String, pin: Long) extends SuccessCommand:
-      type Result = Expression[Long]
-      override def run(sut: Sut) = sut.context.simplify(name)
-      override def nextState(state: State) = state
+    case class SimplifyPinned(name: String, pin: Long) extends Query(name, _.simplify(name)):
       override def preCondition(state: State) = state.ringMember.get(name).contains(name)
       override def postCondition(state: State, result: Expression[Long]): Prop =
         def pinned = ExpressionContext(state.definitions.updated(name, Literal(pin)))
