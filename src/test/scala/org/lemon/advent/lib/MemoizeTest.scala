@@ -1,10 +1,13 @@
 package org.lemon.advent.lib
 
 import org.lemon.advent.UnitTest
+import org.scalacheck.Arbitrary.*
 import org.scalacheck.Gen
 import org.scalacheck.Prop.*
 
 class MemoizeTest extends UnitTest:
+
+  private def fibonacci(n: Int) = Iterator.iterate((BigInt(0), BigInt(1)))((a, b) => (b, a + b)).nth(n)._1
 
   test("memoize calls the function once for each distinct argument") {
     check((xs: List[Byte]) =>
@@ -45,7 +48,39 @@ class MemoizeTest extends UnitTest:
         calls += 1
         if k < 2 then BigInt(k) else fib(k - 1) + fib(k - 2)
       }
-      val expected = Iterator.iterate((BigInt(0), BigInt(1)))((a, b) => (b, a + b)).nth(n)._1
-      fib(n) == expected && calls == n + 1
+      fib(n) == fibonacci(n) && calls == n + 1
+    })
+  }
+
+  test("memoize of 2 arguments works on a recursive function") {
+    check(forAll(Gen.choose(2, 200), arbitrary[Int]) { (n, a) =>
+      var calls = 0
+      lazy val fib: (Int, Int) => BigInt = memoize { (k, a) =>
+        calls += 1
+        if k < 2 then BigInt(k) else fib(k - 1, a) + fib(k - 2, a)
+      }
+      fib(n, a) == fibonacci(n) && calls == n + 1
+    })
+  }
+
+  test("memoize of 3 arguments works on a recursive function") {
+    check(forAll(Gen.choose(2, 200), arbitrary[Int], arbitrary[Int]) { (n, a, b) =>
+      var calls = 0
+      lazy val fib: (Int, Int, Int) => BigInt = memoize { (k, a, b) =>
+        calls += 1
+        if k < 2 then BigInt(k) else fib(k - 1, a, b) + fib(k - 2, a, b)
+      }
+      fib(n, a, b) == fibonacci(n) && calls == n + 1
+    })
+  }
+
+  test("memoize of 4 arguments works on a recursive function") {
+    check(forAll(Gen.choose(2, 200), arbitrary[Int], arbitrary[Int], arbitrary[Int]) { (n, a, b, c) =>
+      var calls = 0
+      lazy val fib: (Int, Int, Int, Int) => BigInt = memoize { (k, a, b, c) =>
+        calls += 1
+        if k < 2 then BigInt(k) else fib(k - 1, a, b, c) + fib(k - 2, a, b, c)
+      }
+      fib(n, a, b, c) == fibonacci(n) && calls == n + 1
     })
   }
