@@ -15,14 +15,11 @@ case class ExpressionContext[T](expressions: Map[String, Expression[T]]):
       inProgress -= name
       result
 
-  def resolve(name: String): Option[T] = resolved.get(name) match
-    case Some(result) => result
-    case None =>
-      unlessInProgress(name, resolving, None) {
-        val result = expressions.get(name).flatMap(_.resolve(this))
-        resolved(name) = result
-        result
-      }
+  def resolve(name: String): Option[T] =
+    resolved.getOrElseUpdate(
+      name,
+      unlessInProgress(name, resolving, None)(expressions.get(name).flatMap(_.resolve(this)))
+    )
 
   def apply(name: String): T = resolve(name).getOrElse(throw new NoSuchElementException(s"$name does not resolve"))
 
