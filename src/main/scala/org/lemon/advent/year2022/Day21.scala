@@ -1,6 +1,6 @@
 package org.lemon.advent.year2022
 
-import org.lemon.advent.lib.*
+import org.lemon.advent.lib.expressions.*
 
 private object Day21:
 
