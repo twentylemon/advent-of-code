@@ -37,18 +37,31 @@ class MathTest extends UnitTest:
     check(forAll(Gen.nonEmptyListOf(arbitrary[Int])) { xs => xs.gcd == xs.map(BigInt(_)).reduce(_ `gcd` _).toInt })
   }
 
-  test("lcm is the least non-negative common multiple, even when the product overflows") {
-    val sharingAFactor =
-      for
-        x <- arbitrary[Int]
-        y <- arbitrary[Int]
-        common <- Gen.chooseNum(1L, Long.MaxValue / (x.toLong.abs * y.toLong.abs).max(1))
-      yield (common * x, common * y)
+  val commonFactorPairs =
+    for
+      x <- arbitrary[Int]
+      y <- arbitrary[Int]
+      common <- Gen.chooseNum(1L, Long.MaxValue / (x.toLong.abs * y.toLong.abs).max(1))
+    yield (common * x, common * y)
 
-    check(forAll(sharingAFactor) { (a, b) =>
-      val lcm = a.lcm(b)
-      if a == 0 || b == 0 then lcm == 0
-      else lcm > 0 && lcm % a == 0 && lcm % b == 0 && (lcm / a).gcd(lcm / b) == 1
+  test("lcm with 0 is 0") {
+    check((a: Long) => a.lcm(0L) == 0 && 0L.lcm(a) == 0)
+  }
+
+  test("lcm is non-negative") {
+    check(forAll(commonFactorPairs) { (a, b) => a.lcm(b) >= 0 })
+  }
+
+  test("lcm is a multiple of both arguments") {
+    check(forAll(commonFactorPairs) { (a, b) => (a != 0 && b != 0) ==> (a.lcm(b) % a == 0 && a.lcm(b) % b == 0) })
+  }
+
+  test("lcm divided by each argument leaves coprime quotients") {
+    check(forAll(commonFactorPairs) { (a, b) =>
+      (a != 0 && b != 0) ==> {
+        val lcm = a.lcm(b)
+        (lcm / a).gcd(lcm / b) == 1
+      }
     })
   }
 
