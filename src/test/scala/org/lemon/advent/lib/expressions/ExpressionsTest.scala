@@ -12,16 +12,21 @@ class ExpressionsTest extends UnitTest:
     case binary: BinaryOperation[Long] => references(binary.lhs) ++ references(binary.rhs)
     case _ => Set.empty
 
-  object AcyclicCommands extends Commands:
-    case class Expected(value: Option[Long], simplified: Expression[Long])
-    type State = Map[String, Expected]
-    final class Sut(var context: ExpressionContext[Long])
+  case class UnaryOp[T](name: String, construct: Expression[T] => Expression[T], eval: T => T):
+    override def toString = name
 
-    enum Op(val construct: (Expression[Long], Expression[Long]) => Expression[Long], val eval: (Long, Long) => Long):
-      case Plus extends Op(Add(_, _), _ + _)
-      case Minus extends Op(Subtract(_, _), _ - _)
-      case Times extends Op(Multiply(_, _), _ * _)
-      case Div extends Op(Divide(_, _), _ / _)
+  case class BinaryOp[T](
+      name: String,
+      construct: (Expression[T], Expression[T]) => Expression[T],
+      eval: (T, T) => T,
+      allowsRhs: T => Boolean = (_: T) => true,
+  ):
+    override def toString = name
+
+  class AcyclicCommands[T: Arbitrary](unaryOps: Seq[UnaryOp[T]], binaryOps: Seq[BinaryOp[T]]) extends Commands:
+    case class Expected(value: Option[T], simplified: Expression[T])
+    type State = Map[String, Expected]
+    final class Sut(var context: ExpressionContext[T])
 
     override def canCreateNewSut(newState: State, initSuts: Iterable[State], runningSuts: Iterable[Sut]) = true
     override def newSut(state: State) = Sut(ExpressionContext(Map.empty))
@@ -30,7 +35,7 @@ class ExpressionsTest extends UnitTest:
     override def genInitialState = Gen.const(Map.empty)
     override def genCommand(state: State) =
       val name = s"x${state.size}"
-      val literal = arbitrary[Long].map(DefineLiteral(name, _))
+      val literal = arbitrary[T].map(DefineLiteral(name, _))
       val missing = arbitrary[String].suchThat(!_.startsWith("x")).map(DefineMissingReference(name, _))
       if state.isEmpty then Gen.frequency(3 -> literal, 1 -> missing)
       else
@@ -39,22 +44,21 @@ class ExpressionsTest extends UnitTest:
           3 -> literal,
           1 -> missing,
           2 -> defined.map(DefineReference(name, _)),
-          2 -> defined.map(DefineNegate(name, _)),
-          4 -> Gen.zip(Gen.oneOf(Op.values.toSeq), defined, defined).map(DefineBinary(name, _, _, _)),
+          2 -> Gen.zip(Gen.oneOf(unaryOps), defined).map(DefineUnary(name, _, _)),
+          4 -> Gen.zip(Gen.oneOf(binaryOps), defined, defined).map(DefineBinary(name, _, _, _)),
           4 -> defined.map(Resolve(_)),
           4 -> defined.map(Simplify(_)),
         )
 
-    sealed abstract class Define(defined: String, expression: Expression[Long], references: String*)
-        extends UnitCommand:
+    sealed abstract class Define(defined: String, expression: Expression[T], references: String*) extends UnitCommand:
       def expected(state: State): Expected
       override def run(sut: Sut) = sut.context = ExpressionContext(sut.context.expressions + (defined -> expression))
       override def nextState(state: State) = state.updated(defined, expected(state))
       override def preCondition(state: State) = !state.contains(defined) && references.forall(state.contains)
       override def postCondition(state: State, success: Boolean): Prop = success
 
-    case class DefineLiteral(name: String, n: Long) extends Define(name, Literal(n)):
-      override def expected(state: State) = Expected(Some(n), Literal(n))
+    case class DefineLiteral(name: String, value: T) extends Define(name, Literal(value)):
+      override def expected(state: State) = Expected(Some(value), Literal(value))
 
     case class DefineMissingReference(name: String, to: String) extends Define(name, Reference(to)):
       override def expected(state: State) = Expected(None, Reference(to))
@@ -62,35 +66,52 @@ class ExpressionsTest extends UnitTest:
     case class DefineReference(name: String, to: String) extends Define(name, Reference(to), to):
       override def expected(state: State) = state(to)
 
-    case class DefineNegate(name: String, of: String) extends Define(name, Negate(Reference(of)), of):
+    case class DefineUnary(name: String, op: UnaryOp[T], of: String)
+        extends Define(name, op.construct(Reference(of)), of):
       override def expected(state: State) =
-        val value = state(of).value.map(-_)
-        Expected(value, value.fold[Expression[Long]](Negate(state(of).simplified))(Literal(_)))
+        val value = state(of).value.map(op.eval)
+        Expected(value, value.fold(op.construct(state(of).simplified))(Literal(_)))
 
-    case class DefineBinary(name: String, op: Op, lhs: String, rhs: String)
+    case class DefineBinary(name: String, op: BinaryOp[T], lhs: String, rhs: String)
         extends Define(name, op.construct(Reference(lhs), Reference(rhs)), lhs, rhs):
-      override def preCondition(state: State) =
-        super.preCondition(state) && !(op == Op.Div && state(rhs).value.contains(0L))
+      override def preCondition(state: State) = super.preCondition(state) && state(rhs).value.forall(op.allowsRhs)
       override def expected(state: State) =
         val value = for l <- state(lhs).value; r <- state(rhs).value yield op.eval(l, r)
         Expected(value, value.fold(op.construct(state(lhs).simplified, state(rhs).simplified))(Literal(_)))
 
     case class Resolve(name: String) extends SuccessCommand:
-      type Result = Option[Long]
+      type Result = Option[T]
       override def run(sut: Sut) = sut.context.resolve(name)
       override def nextState(state: State) = state
       override def preCondition(state: State) = state.contains(name)
-      override def postCondition(state: State, result: Option[Long]): Prop = result == state(name).value
+      override def postCondition(state: State, result: Option[T]): Prop = result == state(name).value
 
     case class Simplify(name: String) extends SuccessCommand:
-      type Result = Expression[Long]
+      type Result = Expression[T]
       override def run(sut: Sut) = sut.context.simplify(name)
       override def nextState(state: State) = state
       override def preCondition(state: State) = state.contains(name)
-      override def postCondition(state: State, result: Expression[Long]): Prop = result == state(name).simplified
+      override def postCondition(state: State, result: Expression[T]): Prop = result == state(name).simplified
 
-  test("resolve and simplify match a model of the definitions") {
-    check(AcyclicCommands.property())
+  test("resolve and simplify of numeric expressions match a model of the definitions") {
+    val commands = AcyclicCommands[Long](
+      Seq(UnaryOp("Negate", Negate(_), -_)),
+      Seq(
+        BinaryOp("Add", Add(_, _), _ + _),
+        BinaryOp("Subtract", Subtract(_, _), _ - _),
+        BinaryOp("Multiply", Multiply(_, _), _ * _),
+        BinaryOp("Divide", Divide(_, _), _ / _, allowsRhs = _ != 0),
+      ),
+    )
+    check(commands.property())
+  }
+
+  test("resolve and simplify of logic expressions match a model of the definitions") {
+    val commands = AcyclicCommands[Boolean](
+      Seq(UnaryOp("Not", Not(_), !_)),
+      Seq(BinaryOp("And", And(_, _), _ && _), BinaryOp("Or", Or(_, _), _ || _), BinaryOp("Xor", Xor(_, _), _ ^ _)),
+    )
+    check(commands.property())
   }
 
   object CycleCommands extends Commands:

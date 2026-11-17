@@ -6,16 +6,6 @@ import org.lemon.advent.lib.expressions.*
 private object Day24:
 
   type Expr = Expression[Boolean]
-  type BiOp = BinaryOperation[Boolean]
-
-  case class And(lhs: Expr, rhs: Expr) extends BiOp:
-    override def apply(left: Boolean, right: Boolean) = left && right
-
-  case class Or(lhs: Expr, rhs: Expr) extends BiOp:
-    override def apply(left: Boolean, right: Boolean) = left || right
-
-  case class Xor(lhs: Expr, rhs: Expr) extends BiOp:
-    override def apply(left: Boolean, right: Boolean) = left ^ right
 
   def parse(input: String) =
     val Seq(init, gates) = input.chunks
