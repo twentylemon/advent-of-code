@@ -158,7 +158,7 @@ class ExpressionsTest extends UnitTest:
       override def preCondition(state: State) = state.ringMember.get(name).contains(name)
       override def postCondition(state: State, result: Expression[Long]): Prop =
         def pinned = ExpressionContext(state.definitions.updated(name, Literal(pin)))
-        result.resolve(pinned) == state.definitions(name).resolve(pinned)
+        result.resolve(using pinned) == state.definitions(name).resolve(using pinned)
 
   test("names that reach a reference cycle resolve to None and simplify to the ring member they reach") {
     check(CycleCommands.property())
