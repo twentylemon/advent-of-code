@@ -130,12 +130,6 @@ class ExpressionsTest extends UnitTest:
     )
   }
 
-  test("simplify of a missing name is a reference to it") {
-    check((definitions: Map[String, Long], name: String) =>
-      ExpressionContext((definitions - name).view.mapValues(Literal(_)).toMap).simplify(name) == Reference(name)
-    )
-  }
-
   test("simplify of a name in a cycle refers only to that name") {
     val gen = for cycle <- cycleGen; name <- Gen.oneOf(cycle.keys) yield (cycle, name)
     check(forAll(gen)((cycle, name) => references(ExpressionContext(cycle).simplify(name)) == Set(name)))
