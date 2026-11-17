@@ -1,9 +1,8 @@
 package org.lemon.advent.lib
 
 import org.lemon.advent.*
-import org.lemon.advent.lib.lcm
-import org.lemon.advent.lib.gcd
-import org.scalacheck.{Arbitrary, Gen}
+import org.scalacheck.Gen
+import org.scalacheck.Arbitrary.*
 import org.scalacheck.Prop.*
 
 class MathTest extends UnitTest:
@@ -16,27 +15,14 @@ class MathTest extends UnitTest:
     check((a: Long, n: Long) => n != 0 ==> (a +% n == BigInt(a).mod(BigInt(n).abs).toLong))
   }
 
-  test("/^ is ceiling division") {
+  test("/^ is ceiling division for Int") {
     check((a: Int, n: Int) => n != 0 ==> (a /^ n == (-Math.floorDiv(-a.toLong, n.toLong)).toInt))
   }
 
-  test("lcm of 1 and x is x") {
-    check((x: Int) => x > 1 ==> (1.lcm(x) == x))
-  }
-
-  test("lcm matches BigInt when the result fits in a Long") {
-    // share a big common factor so a*b overflows even though lcm(a, b) does not
-    val gen =
-      for
-        common <- Gen.choose(1L, 1L << 40)
-        x <- Gen.choose(-1000L, 1000L)
-        y <- Gen.choose(-1000L, 1000L)
-      yield (common * x, common * y)
-
-    check(forAll(gen) { (a: Long, b: Long) =>
-      val expected = if a == 0 || b == 0 then BigInt(0) else (BigInt(a) * BigInt(b)).abs / BigInt(a).gcd(BigInt(b))
-      expected.isValidLong ==> (a.lcm(b) == expected.toLong)
-    })
+  test("/^ is ceiling division for Long") {
+    check((a: Long, n: Long) =>
+      n != 0 ==> (a /^ n == (BigDecimal(a) / BigDecimal(n)).setScale(0, BigDecimal.RoundingMode.CEILING).toLong)
+    )
   }
 
   test("gcd matches BigInt gcd for Int") {
@@ -48,30 +34,31 @@ class MathTest extends UnitTest:
   }
 
   test("gcd of an iterable matches BigInt gcd") {
-    check((xs: List[Int]) => xs.nonEmpty ==> (xs.gcd == xs.map(BigInt(_)).reduce(_ `gcd` _).toInt))
+    check(forAll(Gen.nonEmptyListOf(arbitrary[Int])) { xs => xs.gcd == xs.map(BigInt(_)).reduce(_ `gcd` _).toInt })
   }
 
-  test("lcm of an iterable matches BigInt lcm") {
-    val gen = Gen.choose(1, 4).flatMap(Gen.listOfN(_, Gen.choose(1L, 1000L)))
-    check(forAll(gen) { xs => xs.lcm == xs.map(BigInt(_)).reduce((a, b) => a * b / a.gcd(b)).toLong })
-  }
+  test("lcm is the least non-negative common multiple, even when the product overflows") {
+    val sharingAFactor =
+      for
+        x <- arbitrary[Int]
+        y <- arbitrary[Int]
+        common <- Gen.chooseNum(1L, Long.MaxValue / (x.toLong.abs * y.toLong.abs).max(1))
+      yield (common * x, common * y)
 
-  Seq(2, 3, 5, 7, 11, 17).pairs.foreach((a, b) =>
-    test(s"lcm of coprime numbers $a and $b = $a*$b") {
-      a.lcm(b) shouldBe a * b
-    }
-  )
-
-  (2 to 10 by 2).pairs.foreach((a, b) =>
-    test(s"gcd of multiples of 2 numbers $a and $b is a multiple of 2") {
-      a.gcd(b) % 2 shouldBe 0
-    }
-  )
-
-  test("lcm is the smallest positive common multiple") {
-    given Arbitrary[Int] = Arbitrary(Gen.choose(1, 1000))
-    check((a: Int, b: Int) =>
+    check(forAll(sharingAFactor) { (a, b) =>
       val lcm = a.lcm(b)
-      lcm % a == 0 && lcm % b == 0 && (1 until lcm).forall(m => m % a != 0 || m % b != 0)
-    )
+      if a == 0 || b == 0 then lcm == 0
+      else lcm > 0 && lcm % a == 0 && lcm % b == 0 && (lcm / a).gcd(lcm / b) == 1
+    })
+  }
+
+  test("lcm of an iterable is the least common multiple") {
+    check(forAll(Gen.nonEmptyListOf(arbitrary[Int].suchThat(_ != 0).map(BigInt(_)))) { xs =>
+      val lcm = xs.lcm
+      xs.forall(lcm % _ == 0) && xs.map(lcm / _).gcd == 1
+    })
+  }
+
+  test("lcm of an iterable containing 0 is 0") {
+    check((xs: List[Int], ys: List[Int]) => (xs ++ (0 :: ys)).lcm == 0)
   }
