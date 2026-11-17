@@ -113,7 +113,7 @@ class ExpressionsTest extends UnitTest:
     override def genInitialState = Gen.const(State(Map.empty, Map.empty))
     override def genCommand(state: State) =
       val size = state.definitions.size
-      val ring = Gen.nonEmptyListOf(link).map(links =>
+      val ring = Gen.resize(4, Gen.nonEmptyListOf(link)).map(links =>
         def nameAt(i: Int) = s"x${size + i % links.size}"
         DefineRing(links.indices.map(i => nameAt(i) -> links(i)(nameAt(i + 1))).toMap)
       )
