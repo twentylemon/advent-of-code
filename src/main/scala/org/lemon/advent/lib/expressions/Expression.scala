@@ -3,28 +3,32 @@ package org.lemon.advent.lib.expressions
 import scala.collection.mutable
 
 case class ExpressionContext[T](expressions: Map[String, Expression[T]]):
-  private val cache = mutable.Map.empty[String, Option[Option[T]]]
+  private val resolved = mutable.Map.empty[String, Option[T]]
+  private val resolving = mutable.Set.empty[String]
   private val simplifying = mutable.Set.empty[String]
 
-  def resolve(name: String): Option[T] =
-    cache.get(name) match
-      case Some(Some(result)) => result
-      case Some(None) => None
-      case None =>
-        cache(name) = None
+  private def unlessInProgress[R](name: String, inProgress: mutable.Set[String], onCycle: => R)(body: => R): R =
+    if inProgress(name) then onCycle
+    else
+      inProgress += name
+      val result = body
+      inProgress -= name
+      result
+
+  def resolve(name: String): Option[T] = resolved.get(name) match
+    case Some(result) => result
+    case None =>
+      unlessInProgress(name, resolving, None) {
         val result = expressions.get(name).flatMap(_.resolve(this))
-        cache(name) = Some(result)
+        resolved(name) = result
         result
+      }
 
   def apply(name: String): T = resolve(name).getOrElse(throw new NoSuchElementException(s"$name does not resolve"))
 
   def simplify(name: String): Expression[T] = expressions.get(name) match
-    case Some(expression) if !simplifying(name) =>
-      simplifying += name
-      val simplified = expression.simplify(this)
-      simplifying -= name
-      simplified
-    case _ => Reference(name)
+    case Some(expression) => unlessInProgress(name, simplifying, Reference(name))(expression.simplify(this))
+    case None => Reference(name)
 
 trait Expression[T]:
   def resolve(context: ExpressionContext[T]): Option[T]
