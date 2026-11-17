@@ -90,21 +90,23 @@ class ExpressionsTest extends UnitTest:
     check(ExpressionCommands.property())
   }
 
-  val linkGen: Gen[Expression[Long] => Expression[Long]] = Gen.oneOf(
-    Gen.const((next: Expression[Long]) => next),
-    Gen.const((next: Expression[Long]) => Negate(next)),
-    arbitrary[Long].map(n => (next: Expression[Long]) => Add(next, Literal(n))),
-    arbitrary[Long].map(n => (next: Expression[Long]) => Add(Literal(n), next)),
-  )
-
-  def cycleOf(prefix: String, links: Seq[Expression[Long] => Expression[Long]]) =
-    links.indices.map(i => s"$prefix$i" -> links(i)(Reference(s"$prefix${(i + 1) % links.size}"))).toMap
-
   val cycleGen =
+    val link: Gen[String => Expression[Long]] = Gen.oneOf(
+      Gen.const((next: String) => Reference[Long](next)),
+      Gen.const((next: String) => Negate(Reference(next))),
+      arbitrary[Long].map(n => (next: String) => Add(Reference(next), Literal(n))),
+      arbitrary[Long].map(n => (next: String) => Add(Literal(n), Reference(next))),
+    )
     for
       prefix <- Gen.identifier
-      links <- Gen.nonEmptyListOf(linkGen)
-    yield cycleOf(prefix, links)
+      links <- Gen.nonEmptyListOf(link)
+    yield links.indices.map(i => s"$prefix$i" -> links(i)(s"$prefix${(i + 1) % links.size}")).toMap
+
+  def references(expression: Expression[Long]): Set[String] = expression match
+    case Reference(name) => Set(name)
+    case unary: UnaryOperation[Long] => references(unary.operand)
+    case binary: BinaryOperation[Long] => references(binary.lhs) ++ references(binary.rhs)
+    case _ => Set.empty
 
   test("resolve of every name in a cycle is None") {
     check(forAll(cycleGen)(cycle => cycle.keys.map(ExpressionContext(cycle).resolve).forall(_.isEmpty)))
@@ -134,15 +136,15 @@ class ExpressionsTest extends UnitTest:
     )
   }
 
-  test("simplify of a name in a cycle unrolls the cycle once") {
-    val gen = for prefix <- Gen.identifier; links <- Gen.nonEmptyListOf(linkGen) yield (prefix, links)
-    check(forAll(gen) { (prefix, links) =>
-      val context = ExpressionContext(cycleOf(prefix, links))
-      links.indices.forall(i =>
-        val unrolled = links.indices.foldRight[Expression[Long]](Reference(s"$prefix$i"))((k, inner) =>
-          links((i + k) % links.size)(inner)
-        )
-        context.simplify(s"$prefix$i") == unrolled
-      )
+  test("simplify of a name in a cycle refers only to that name") {
+    val gen = for cycle <- cycleGen; name <- Gen.oneOf(cycle.keys) yield (cycle, name)
+    check(forAll(gen)((cycle, name) => references(ExpressionContext(cycle).simplify(name)) == Set(name)))
+  }
+
+  test("simplify of a name in a cycle resolves like its definition once that name has a value") {
+    val gen = for cycle <- cycleGen; name <- Gen.oneOf(cycle.keys); value <- arbitrary[Long] yield (cycle, name, value)
+    check(forAll(gen) { (cycle, name, value) =>
+      val withValue = ExpressionContext(cycle + (name -> Literal(value)))
+      ExpressionContext(cycle).simplify(name).resolve(withValue) == cycle(name).resolve(withValue)
     })
   }
