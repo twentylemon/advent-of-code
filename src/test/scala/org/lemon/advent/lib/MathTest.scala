@@ -8,12 +8,12 @@ import org.scalacheck.Prop.*
 
 class MathTest extends UnitTest:
 
-  test("+% matches floorMod for a positive Int modulus") {
-    check((a: Int, n: Int) => n > 0 ==> (a +% n == Math.floorMod(a, n)))
+  test("+% is the non-negative remainder for an Int modulus") {
+    check((a: Int, n: Int) => n != 0 ==> (a +% n == Math.floorMod(a.toLong, n.toLong.abs).toInt))
   }
 
-  test("+% matches floorMod for a positive Long modulus") {
-    check((a: Long, n: Long) => n > 0 ==> (a +% n == Math.floorMod(a, n)))
+  test("+% is the non-negative remainder for a Long modulus") {
+    check((a: Long, n: Long) => n != 0 ==> (a +% n == BigInt(a).mod(BigInt(n).abs).toLong))
   }
 
   test("/^ is ceiling division") {
