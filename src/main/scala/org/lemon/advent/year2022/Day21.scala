@@ -34,31 +34,32 @@ private object Day21:
     val monkeys = in.linesIterator.map(parseExpression).toMap
     ExpressionContext(monkeys).resolve("root").get
 
-  def solve(simplifiedExpression: Expr, knownValue: Long): Long =
+  def solve(target: String, simplifiedExpression: Expr, knownValue: Long): Long =
     simplifiedExpression match
-      case Reference("humn") => knownValue
+      case Reference(`target`) => knownValue
 
-      case Add(Literal(n), rhs) => solve(rhs, knownValue - n)
-      case Add(lhs, Literal(n)) => solve(lhs, knownValue - n)
+      case Add(Literal(n), rhs) => solve(target, rhs, knownValue - n)
+      case Add(lhs, Literal(n)) => solve(target, lhs, knownValue - n)
 
-      case Subtract(Literal(n), rhs) => solve(rhs, n - knownValue)
-      case Subtract(lhs, Literal(n)) => solve(lhs, n - -knownValue)
+      case Subtract(Literal(n), rhs) => solve(target, rhs, n - knownValue)
+      case Subtract(lhs, Literal(n)) => solve(target, lhs, n - -knownValue)
 
-      case Multiply(Literal(n), rhs) => solve(rhs, knownValue / n)
-      case Multiply(lhs, Literal(n)) => solve(lhs, knownValue / n)
+      case Multiply(Literal(n), rhs) => solve(target, rhs, knownValue / n)
+      case Multiply(lhs, Literal(n)) => solve(target, lhs, knownValue / n)
 
-      case Divide(Literal(n), rhs) => solve(rhs, n / knownValue)
-      case Divide(lhs, Literal(n)) => solve(lhs, n * knownValue)
+      case Divide(Literal(n), rhs) => solve(target, rhs, n / knownValue)
+      case Divide(lhs, Literal(n)) => solve(target, lhs, n * knownValue)
       case _ => ???
 
   def part2(in: String) =
     val monkeys = in.linesIterator.map(parseExpression).toMap
-    val context = ExpressionContext(monkeys - "humn")
+    val human = "humn"
+    val context = ExpressionContext(monkeys - human)
 
     val root = monkeys("root").asInstanceOf[BiOp]
     val lhs = root.lhs.resolve(context)
     val rhs = root.rhs.resolve(context)
 
-    lhs.map(solve(root.rhs.simplify(context), _))
-      .orElse(rhs.map(solve(root.lhs.simplify(context), _)))
+    lhs.map(solve(human, root.rhs.simplify(context), _))
+      .orElse(rhs.map(solve(human, root.lhs.simplify(context), _)))
       .get
