@@ -47,7 +47,8 @@ class ExpressionsTest extends UnitTest:
           4 -> defined.map(Simplify(_)),
         )
 
-    abstract class Define(defined: String, expression: Expression[Long], references: String*) extends UnitCommand:
+    sealed abstract class Define(defined: String, expression: Expression[Long], references: String*)
+        extends UnitCommand:
       def expected(state: State): Expected
       override def run(sut: Sut) = sut.context = ExpressionContext(sut.context.expressions + (defined -> expression))
       override def nextState(state: State) = state.updated(defined, expected(state))
