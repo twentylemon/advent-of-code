@@ -6,9 +6,6 @@ import org.scalacheck.Arbitrary.*
 import org.scalacheck.commands.Commands
 
 class ExpressionsTest extends UnitTest:
-  case class Negate(operand: Expression[Long]) extends UnaryOperation[Long]:
-    override def apply(operand: Long) = -operand
-
   def references(expression: Expression[Long]): Set[String] = expression match
     case Reference(name) => Set(name)
     case unary: UnaryOperation[Long] => references(unary.operand)
@@ -102,7 +99,7 @@ class ExpressionsTest extends UnitTest:
 
     val link: Gen[String => Expression[Long]] = Gen.oneOf(
       Gen.const((next: String) => Reference[Long](next)),
-      Gen.const((next: String) => Negate(Reference(next))),
+      Gen.const((next: String) => Negate(Reference[Long](next))),
       arbitrary[Long].map(n => (next: String) => Add(Reference(next), Literal(n))),
       arbitrary[Long].map(n => (next: String) => Add(Literal(n), Reference(next))),
     )

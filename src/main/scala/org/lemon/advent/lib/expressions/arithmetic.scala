@@ -18,3 +18,7 @@ case class Multiply[T: Numeric](lhs: Expression[T], rhs: Expression[T]) extends 
 case class Divide[T: Integral](lhs: Expression[T], rhs: Expression[T]) extends BinaryOperation[T]:
   override def apply(left: T, right: T) = left / right
   override def copy(lhs: Expression[T], rhs: Expression[T]) = Divide(lhs, rhs)
+
+case class Negate[T: Numeric](operand: Expression[T]) extends UnaryOperation[T]:
+  override def apply(operand: T) = -operand
+  override def copy(operand: Expression[T]) = Negate(operand)
