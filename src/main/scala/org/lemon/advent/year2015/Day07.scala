@@ -1,6 +1,6 @@
 package org.lemon.advent.year2015
 
-import org.lemon.advent.lib.*
+import org.lemon.advent.lib.expressions.*
 
 private object Day07:
 

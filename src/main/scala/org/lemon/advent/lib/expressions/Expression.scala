@@ -1,4 +1,4 @@
-package org.lemon.advent.lib
+package org.lemon.advent.lib.expressions
 
 import scala.collection.mutable
 
