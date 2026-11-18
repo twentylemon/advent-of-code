@@ -31,19 +31,18 @@ def compress[N, D: Numeric](
         case Some((cost, node, rest)) if node != start && keepNodes.contains(node) =>
           search(rest, best, found.updated(node, cost))
         case Some((cost, node, rest)) =>
-          val (nextQueue, nextBest) = adjacency(node).iterator
-            .filter((next, _) => next != start)
-            .foldLeft((rest, best)) { case (acc @ (queue, best), (next, dist)) =>
+          val (nextQueue, nextBest) = adjacency(node).iterator.foldLeft((rest, best)) {
+            case (acc @ (queue, best), (next, dist)) =>
               val nextCost = cost + dist
               if best.get(next).exists(_ <= nextCost) then acc
               else (queue.enqueue(nextCost, next), best.updated(next, nextCost))
-            }
+          }
           search(nextQueue, nextBest, found)
 
     val zero = Numeric[D].zero
     search(MinQueue(zero, start), Map(start -> zero), Map.empty)
 
-  keepNodes.map(node => node -> edgesFrom(node)).toMap
+  keepNodes.iterator.map(node => node -> edgesFrom(node)).toMap
 
 /** Compresses a graph by keeping only the specified important nodes and computing
   * shortest path distances between them. The distance between each node is assumed to be one.
