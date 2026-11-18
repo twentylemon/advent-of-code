@@ -27,7 +27,10 @@ The user comes up with every idea for solving a puzzle. Claude can write the cod
 - Format: `sbt "scalafmtAll; scalafmtSbt"`. CI runs `scalafmtCheckAll; scalafmtSbtCheck`. For one file: `Test/scalafmtOnly <file>`.
 - Python: `black --check .` and `pytest`, from `venv`.
 - Local only, too heavy for CI: `sbt libCoverage` (scoverage over `lib`) and `sbt stryker` (mutation testing over `lib`).
-- JMH: `sbt "Jmh/run -i 5 -wi 5 -r 1 -w 1 -f 2 -t 1 <bench class>"`.
+- JMH: `sbt "Jmh/run -wi 5 -w 2 -i 10 -r 2 -f 3 -t 1 -jvmArgs -Xms2g -jvmArgs -Xmx2g <bench class>"`.
+  - Whole-solution benches warm up for longer: `-w 3 -r 3`.
+  - Add `-prof gc` when allocation matters.
+  - Read the per-fork iterations before trusting a CI. A fork that's still warming up, or a single stalled iteration, can widen it or fake a win.
 - CI runs `testOnly` per package on every push. `gh run view <id> --log` has per-test durations.
 
 ## Workflow
