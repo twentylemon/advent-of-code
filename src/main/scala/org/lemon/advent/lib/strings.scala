@@ -1,34 +1,17 @@
 package org.lemon.advent.lib
 
 extension (str: String)
-  /** Prepends the string with the given character until it reaches the given length.
-    *
-    * @param len the desired length of the string
-    * @param c the character to prepend
-    * @return the string padded to the left with the given character
-    */
+  /** Prepends `c` until the string is `len` long. A string that's already long enough is returned unchanged. */
   def padLeft(len: Int, c: Char): String = if len <= str.length then str else c.toString * (len - str.length) + str
 
-  /** Splits the string by commas into a sequence of strings.
-    *
-    * @return the comma-separated values
-    */
+  /** Splits on commas, trimming each value and dropping the blank ones. */
   def csv: Seq[String] = str.split(",").map(_.trim).filter(_.nonEmpty).toSeq
 
-  /** Splits the string by whitespace into a sequence of strings.
-    *
-    * @return the whitespace-separated values
-    */
+  /** Splits on runs of whitespace, ignoring any at either end. */
   def wsv: Seq[String] = str.split("\\s+").map(_.trim).filter(_.nonEmpty).toSeq
 
-  /** Splits the string by double newlines into a sequence of strings.
-    *
-    * @return the chunks of text separated by blank lines
-    */
+  /** Splits into the blocks of lines between empty lines. */
   def chunks: Seq[String] = str.split("\n\n").filter(_.trim.nonEmpty).toSeq
 
-  /** Parses the string into a BigInt.
-    *
-    * @return the string as a BigInt
-    */
+  /** Parses the string as a `BigInt`, ignoring surrounding whitespace. */
   def toBigInt: BigInt = BigInt(str.trim)
