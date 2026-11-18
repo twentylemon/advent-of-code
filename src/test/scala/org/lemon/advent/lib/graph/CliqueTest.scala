@@ -9,8 +9,7 @@ import org.scalacheck.Prop.*
 class CliqueTest extends UnitTest:
   val undirectedGen: Gen[(Set[Int], Set[Set[Int]])] =
     for
-      size <- Gen.choose(0, 8)
-      nodes <- Gen.containerOfN[Set, Int](size, arbitrary[Int])
+      nodes <- Gen.resize(8, Gen.containerOf[Set, Int](arbitrary[Int]))
       edges <- Gen.someOf(nodes.subsets(2).toSeq)
     yield (nodes, edges.toSet)
 
