@@ -79,9 +79,9 @@ class FillTest extends UnitTest:
     val gen =
       for
         query <- queryGen()
-        dag = query.graph.copy(edges = query.graph.edges.filter((from, to, _) => from < to))
-        ends <- Gen.someOf(dag.nodes)
-      yield (dag, query.start, ends.toSet)
+        edges = query.graph.edges.filter((from, to, _) => from < to)
+        ends <- Gen.someOf(query.graph.nodes)
+      yield (query.graph.copy(edges = edges), query.start, ends.toSet)
     check(forAll(gen) { (dag, start, ends) =>
       countPaths(dag.unitAdjacency, start, ends) == ends.toSeq.map(dag.simplePaths(start, _).size).sum
     })
@@ -91,8 +91,8 @@ class FillTest extends UnitTest:
     val gen =
       for
         query <- queryGen()
-        dag = query.graph.copy(edges = query.graph.edges.filter((from, to, _) => from < to))
-      yield (dag, query.start, query.end)
+        edges = query.graph.edges.filter((from, to, _) => from < to)
+      yield (query.graph.copy(edges = edges), query.start, query.end)
     check(forAll(gen) { (dag, start, end) =>
       countPaths(dag.unitAdjacency, start, end) == dag.simplePaths(start, end).size
     })
