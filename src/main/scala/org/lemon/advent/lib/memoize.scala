@@ -2,19 +2,17 @@ package org.lemon.advent.lib
 
 import scala.collection.mutable
 
-/** Memoizes a function, caching the results of previous calls.
-  * Use as:
+/** Memoizes a function, caching its result for each distinct argument. Overloads take functions of up to 4
+  * arguments, and cache on all of them together. A recursive function goes in a typed `lazy val`, so that it calls
+  * its own memoized version:
   * ```scala
   * lazy val fib: BigInt => BigInt = memoize {
-  *  case 0 => 0
-  *  case 1 => 1
-  *  case n => fib(n - 1) + fib(n - 2)
+  *   case 0 => 0
+  *   case 1 => 1
+  *   case n => fib(n - 1) + fib(n - 2)
   * }
-  * fib(100) shouldBe BigInt("354224848179261915075")
+  * fib(100) // 354224848179261915075
   * ```
-  *
-  * @param f the function to memoize
-  * @return a memoized version of the function
   */
 def memoize[T, R](f: T => R): T => R =
   val cache = mutable.Map.empty[T, R]
