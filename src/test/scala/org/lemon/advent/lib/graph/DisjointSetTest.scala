@@ -31,7 +31,7 @@ class DisjointSetTest extends UnitTest:
       type Result = (Set[Set[Int]], Int)
       override def run(sut: Sut) =
         sut.set = sut.set.union(a, b)
-        (sut.set.components.toSet, sut.set.componentCount)
+        (sut.set.components.toSet, sut.set.components.size)
       override def nextState(state: State) =
         if !contains(state, a) || !contains(state, b) then state
         else
@@ -63,6 +63,6 @@ class DisjointSetTest extends UnitTest:
       yield (elements, duplicates)
     check(forAll(gen) { case (elements, duplicates) =>
       val set = DisjointSet(elements.toList ++ duplicates.toList)
-      set.components.toSet == elements.map(Set(_)) && set.componentCount == elements.size
+      set.components.toSet == elements.map(Set(_)) && set.components.size == elements.size
     })
   }

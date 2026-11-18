@@ -22,7 +22,7 @@ private object Day25:
   def contract(nodes: Seq[String], edges: Seq[(String, String)]) =
     edges.iterator
       .scanLeft(DisjointSet(nodes)) { case (groups, (a, b)) => groups.union(a, b) }
-      .find(_.componentCount == 2)
+      .find(_.components.size == 2)
       .get
 
   def part1(input: String) =
