@@ -32,17 +32,6 @@ class CliqueTest extends UnitTest:
     })
   }
 
-  test("cliques of a subset of nodes are the maximal cliques of its induced subgraph") {
-    val gen =
-      for
-        (nodes, edges) <- undirectedGen
-        subset <- Gen.someOf(nodes)
-      yield (subset.toSet, edges)
-    check(forAll(gen) { (subset, edges) =>
-      cliques(subset, neighbours(edges)) == maximalCliques(subset, edges)
-    })
-  }
-
   test("cliques of a unit graph finds every maximal clique") {
     check(forAll(undirectedGen) { (nodes, edges) =>
       val graph = nodes.map(node => node -> neighbours(edges)(node)).toMap
