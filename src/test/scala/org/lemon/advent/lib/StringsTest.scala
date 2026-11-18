@@ -9,7 +9,7 @@ class StringsTest extends UnitTest:
 
   val csvField = Gen.asciiPrintableStr.map(_.filterNot(_ == ',').trim).suchThat(_.nonEmpty)
   val csvFields = Gen.nonEmptyListOf(csvField)
-  val wsvTokens = Gen.nonEmptyListOf(Gen.asciiPrintableStr.map(_.filterNot(_ == ' ')).suchThat(_.nonEmpty))
+  val wsvTokens = Gen.nonEmptyListOf(Gen.asciiPrintableStr.map(_.filterNot(_.isWhitespace)).suchThat(_.nonEmpty))
   val chunkLine = Gen.asciiPrintableStr.suchThat(_.trim.nonEmpty)
   val chunkTexts = Gen.nonEmptyListOf(Gen.nonEmptyListOf(chunkLine).map(_.mkString("\n")))
 
