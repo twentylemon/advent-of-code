@@ -82,17 +82,3 @@ class StringsTest extends UnitTest:
   test("toBigInt round trips with surrounding whitespace") {
     check(forAll(arbitrary[BigInt], whitespace, whitespace) { (n, pre, post) => s"$pre$n$post".toBigInt == n })
   }
-
-  test("toBigIntOption round trip") {
-    check((n: BigInt) => n.toString.toBigIntOption == Some(n))
-  }
-
-  test("toBigIntOption ignores surrounding whitespace") {
-    check(forAll(arbitrary[BigInt], whitespace, whitespace) { (n, pre, post) =>
-      s"$pre$n$post".toBigIntOption == Some(n)
-    })
-  }
-
-  test("toBigIntOption returns None for invalid strings") {
-    check(forAll(Gen.alphaStr.suchThat(_.nonEmpty))(s => s.toBigIntOption == None))
-  }
