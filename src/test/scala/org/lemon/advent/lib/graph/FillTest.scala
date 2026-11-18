@@ -63,11 +63,10 @@ class FillTest extends UnitTest:
     val gen =
       for
         query <- queryGen()
+        edges = query.graph.edges.filter((from, to, _) => from < to).distinctBy((from, to, _) => (from, to))
         ends <- Gen.someOf(query.graph.nodes)
-      yield (query, ends.toSet)
-    check(forAll(gen) { case (Query(graph, start, _), ends) =>
-      val dag =
-        graph.copy(edges = graph.edges.filter((from, to, _) => from < to).distinctBy((from, to, _) => (from, to)))
+      yield (query.graph.copy(edges = edges), query.start, ends.toSet)
+    check(forAll(gen) { (dag, start, ends) =>
       allPaths(dag.adjacency, start, ends).map(p => p.copy(distance = p.distance.toLong)) ==
         ends.flatMap(dag.simplePaths(start, _))
     })
@@ -77,14 +76,10 @@ class FillTest extends UnitTest:
     val gen =
       for
         query <- queryGen()
+        edges = query.graph.edges.filter((from, to, _) => from < to).map((from, to, _) => (from, to, 1)).distinct
         ends <- Gen.someOf(query.graph.nodes)
-      yield (query, ends.toSet)
-    check(forAll(gen) { case (Query(graph, start, _), ends) =>
-      val dag = graph.copy(edges =
-        graph.edges.filter((from, to, _) => from < to).distinctBy((from, to, _) => (from, to)).map((f, t, _) =>
-          (f, t, 1)
-        )
-      )
+      yield (query.graph.copy(edges = edges), query.start, ends.toSet)
+    check(forAll(gen) { (dag, start, ends) =>
       allPaths(dag.unitAdjacency, start, ends).map(p => p.copy(distance = p.distance.toLong)) ==
         ends.flatMap(dag.simplePaths(start, _))
     })
