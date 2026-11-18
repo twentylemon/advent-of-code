@@ -7,7 +7,11 @@ import org.scalacheck.Arbitrary.*
 
 class StringsTest extends UnitTest:
 
-  given Arbitrary[Seq[String]] = Arbitrary(Gen.nonEmptyListOf(Gen.alphaNumStr.suchThat(_.nonEmpty)))
+  val csvField = Gen.asciiPrintableStr.map(_.filterNot(_ == ',').trim).suchThat(_.nonEmpty)
+  val csvFields = Gen.nonEmptyListOf(csvField)
+  val wsvTokens = Gen.nonEmptyListOf(Gen.asciiPrintableStr.map(_.filterNot(_ == ' ')).suchThat(_.nonEmpty))
+  val chunkLine = Gen.asciiPrintableStr.suchThat(_.trim.nonEmpty)
+  val chunkTexts = Gen.nonEmptyListOf(Gen.nonEmptyListOf(chunkLine).map(_.mkString("\n")))
 
   test("padLeft leaves a string at least len long unchanged") {
     val gen =
@@ -30,19 +34,21 @@ class StringsTest extends UnitTest:
   }
 
   test("csv splits basic comma-separated string") {
-    check((xs: Seq[String]) => xs.mkString(",").csv == xs)
+    check(forAll(csvFields)(xs => xs.mkString(",").csv == xs))
   }
 
   test("csv splits with leading whitespace") {
-    check((xs: Seq[String]) => xs.mkString(", ").csv == xs)
+    check(forAll(csvFields)(xs => xs.mkString(", ").csv == xs))
   }
 
   test("csv splits with trailing whitespace") {
-    check((xs: Seq[String]) => xs.mkString(" ,").csv == xs)
+    check(forAll(csvFields)(xs => xs.mkString(" ,").csv == xs))
   }
 
-  test("csv filters out empty values") {
-    "a,,b,c".csv shouldBe Seq("a", "b", "c")
+  test("csv drops empty and blank values") {
+    val blank = Gen.stringOf(Gen.oneOf(' ', '\t'))
+    val parts = Gen.listOf(Gen.either(blank, csvField))
+    check(forAll(parts)(parts => parts.map(_.merge).mkString(",").csv == parts.collect { case Right(x) => x }))
   }
 
   test("csv handles empty string") {
@@ -50,16 +56,16 @@ class StringsTest extends UnitTest:
   }
 
   test("wsv splits basic space-separated string") {
-    check((xs: Seq[String]) => xs.mkString(" ").wsv == xs)
+    check(forAll(wsvTokens)(xs => xs.mkString(" ").wsv == xs))
   }
 
   test("wsv splits with multiple spaces") {
-    check((xs: Seq[String]) => xs.mkString("  ").wsv == xs)
+    check(forAll(wsvTokens)(xs => xs.mkString("  ").wsv == xs))
   }
 
   test("wsv splits with any whitespace") {
-    val whitespace = Gen.nonEmptyListOf(Gen.oneOf(' ', '\t', '\n')).map(_.mkString)
-    check(forAll(arbitrary[Seq[String]], whitespace) { (xs, ws) => xs.mkString(ws).wsv == xs })
+    val whitespace = Gen.nonEmptyListOf(Gen.oneOf(' ', '\t', '\r', '\n')).map(_.mkString)
+    check(forAll(wsvTokens, whitespace) { (xs, ws) => xs.mkString(ws).wsv == xs })
   }
 
   test("wsv handles empty string") {
@@ -67,15 +73,15 @@ class StringsTest extends UnitTest:
   }
 
   test("chunks splits basic double-newline-separated string") {
-    check((xs: Seq[String]) => xs.mkString("\n\n").chunks == xs)
+    check(forAll(chunkTexts)(xs => xs.mkString("\n\n").chunks == xs))
   }
 
   test("chunks handles multiple blank lines") {
     // multiple consecutive newlines should produce the same chunks when trimmed
     given Arbitrary[Int] = Arbitrary(Gen.choose(3, 10))
-    check((xs: Seq[String], gap: Int) =>
+    check(forAll(chunkTexts, arbitrary[Int]) { (xs, gap) =>
       xs.mkString("\n\n").chunks.map(_.trim) == xs.mkString("\n" * gap).chunks.map(_.trim)
-    )
+    })
   }
 
   test("chunks handles empty string") {
