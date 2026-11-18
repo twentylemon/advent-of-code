@@ -7,6 +7,7 @@ import org.scalacheck.Arbitrary.*
 
 class StringsTest extends UnitTest:
 
+  val whitespace = Gen.stringOf(Gen.oneOf(' ', '\t', '\r', '\n'))
   val csvField = Gen.asciiPrintableStr.map(_.filterNot(_ == ',').trim).suchThat(_.nonEmpty)
   val csvFields = Gen.nonEmptyListOf(csvField)
   val wsvTokens = Gen.nonEmptyListOf(Gen.asciiPrintableStr.map(_.filterNot(_.isWhitespace)).suchThat(_.nonEmpty))
@@ -33,21 +34,12 @@ class StringsTest extends UnitTest:
     })
   }
 
-  test("csv splits basic comma-separated string") {
-    check(forAll(csvFields)(xs => xs.mkString(",").csv == xs))
-  }
-
-  test("csv splits with leading whitespace") {
-    check(forAll(csvFields)(xs => xs.mkString(", ").csv == xs))
-  }
-
-  test("csv splits with trailing whitespace") {
-    check(forAll(csvFields)(xs => xs.mkString(" ,").csv == xs))
+  test("csv splits on commas and trims the values") {
+    check(forAll(csvFields, whitespace, whitespace) { (xs, pre, post) => xs.mkString(s"$pre,$post").csv == xs })
   }
 
   test("csv drops empty and blank values") {
-    val blank = Gen.stringOf(Gen.oneOf(' ', '\t'))
-    val parts = Gen.listOf(Gen.either(blank, csvField))
+    val parts = Gen.listOf(Gen.either(whitespace, csvField))
     check(forAll(parts)(parts => parts.map(_.merge).mkString(",").csv == parts.collect { case Right(x) => x }))
   }
 
@@ -55,17 +47,8 @@ class StringsTest extends UnitTest:
     "".csv shouldBe empty
   }
 
-  test("wsv splits basic space-separated string") {
-    check(forAll(wsvTokens)(xs => xs.mkString(" ").wsv == xs))
-  }
-
-  test("wsv splits with multiple spaces") {
-    check(forAll(wsvTokens)(xs => xs.mkString("  ").wsv == xs))
-  }
-
-  test("wsv splits with any whitespace") {
-    val whitespace = Gen.nonEmptyListOf(Gen.oneOf(' ', '\t', '\r', '\n')).map(_.mkString)
-    check(forAll(wsvTokens, whitespace) { (xs, ws) => xs.mkString(ws).wsv == xs })
+  test("wsv splits on any run of whitespace") {
+    check(forAll(wsvTokens, whitespace.suchThat(_.nonEmpty)) { (xs, ws) => xs.mkString(ws).wsv == xs })
   }
 
   test("wsv handles empty string") {
@@ -88,10 +71,6 @@ class StringsTest extends UnitTest:
     "".chunks shouldBe empty
   }
 
-  test("toBigInt round trip") {
-    check((n: BigInt) => n.toString.toBigInt == n)
-  }
-
   test("toBigInt works with + prefix") {
     check((n: BigInt) => ("+" + n.abs.toString).toBigInt == n.abs)
   }
@@ -100,8 +79,7 @@ class StringsTest extends UnitTest:
     check((n: BigInt) => ("-" + n.abs.toString).toBigInt == -n.abs)
   }
 
-  test("toBigInt ignores surrounding whitespace") {
-    val whitespace = Gen.listOf(Gen.oneOf(' ', '\t', '\n')).map(_.mkString)
+  test("toBigInt round trips with surrounding whitespace") {
     check(forAll(arbitrary[BigInt], whitespace, whitespace) { (n, pre, post) => s"$pre$n$post".toBigInt == n })
   }
 
@@ -110,7 +88,6 @@ class StringsTest extends UnitTest:
   }
 
   test("toBigIntOption ignores surrounding whitespace") {
-    val whitespace = Gen.listOf(Gen.oneOf(' ', '\t', '\n')).map(_.mkString)
     check(forAll(arbitrary[BigInt], whitespace, whitespace) { (n, pre, post) =>
       s"$pre$n$post".toBigIntOption == Some(n)
     })
