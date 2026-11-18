@@ -22,11 +22,11 @@ def compress[N, D: Numeric](
     keepNodes: Set[N],
 ): WeightedGraph[N, D] =
   // one dijkstra per important node, which records but does not walk through the other important nodes
-  def edgesFrom(start: N): Set[(N, D)] =
+  def edgesFrom(start: N): Map[N, D] =
     @tailrec
-    def search(queue: MinQueue[D, N], best: Map[N, D], found: Map[N, D]): Set[(N, D)] =
+    def search(queue: MinQueue[D, N], best: Map[N, D], found: Map[N, D]): Map[N, D] =
       queue.dequeue match
-        case None => found.toSet
+        case None => found
         case Some((cost, node, rest)) if cost > best(node) => search(rest, best, found)
         case Some((cost, node, rest)) if node != start && keepNodes.contains(node) =>
           search(rest, best, found.updated(node, cost))
