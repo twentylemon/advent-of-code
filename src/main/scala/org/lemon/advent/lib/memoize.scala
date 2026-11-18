@@ -11,7 +11,7 @@ import scala.collection.mutable
   *   case 1 => 1
   *   case n => fib(n - 1) + fib(n - 2)
   * }
-  * fib(100) // 354224848179261915075
+  * fib(100) shouldBe BigInt("354224848179261915075")
   * ```
   */
 def memoize[T, R](f: T => R): T => R =
