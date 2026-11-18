@@ -1,6 +1,6 @@
 package org.lemon.advent.lib.graph
 
-import scala.annotation.tailrec
+import scala.collection.mutable
 import scala.math.Numeric.Implicits.*
 import scala.math.Ordering.Implicits.*
 
@@ -22,25 +22,22 @@ def compress[N, D: Numeric](
     keepNodes: Set[N],
 ): WeightedGraph[N, D] =
   // one dijkstra per important node, which records but does not walk through the other important nodes
-  def edgesFrom(start: N): Set[(N, D)] =
-    @tailrec
-    def search(queue: MinQueue[D, N], best: Map[N, D], found: Map[N, D]): Set[(N, D)] =
-      queue.dequeue match
-        case None => found.toSet
-        case Some((cost, node, rest)) if cost > best(node) => search(rest, best, found)
-        case Some((cost, node, rest)) if node != start && keepNodes.contains(node) =>
-          search(rest, best, found.updated(node, cost))
-        case Some((cost, node, rest)) =>
-          val (nextQueue, nextBest) = adjacency(node).iterator.foldLeft((rest, best)) {
-            case (acc @ (queue, best), (next, dist)) =>
-              val nextCost = cost + dist
-              if best.get(next).exists(_ <= nextCost) then acc
-              else (queue.enqueue(nextCost, next), best.updated(next, nextCost))
-          }
-          search(nextQueue, nextBest, found)
-
+  def edgesFrom(start: N): Map[N, D] =
     val zero = Numeric[D].zero
-    search(MinQueue(zero, start), Map(start -> zero), Map.empty)
+    val best = mutable.HashMap(start -> zero)
+    val queue = mutable.PriorityQueue((zero, start))(using Ordering.by[(D, N), D](_._1).reverse)
+    val found = Map.newBuilder[N, D]
+    while queue.nonEmpty do
+      val (cost, node) = queue.dequeue()
+      if cost <= best(node) then
+        if node != start && keepNodes.contains(node) then found += node -> cost
+        else
+          for (next, dist) <- adjacency(node).iterator do
+            val nextCost = cost + dist
+            if best.get(next).forall(nextCost < _) then
+              best(next) = nextCost
+              queue.enqueue((nextCost, next))
+    found.result()
 
   keepNodes.iterator.map(node => node -> edgesFrom(node)).toMap
 
