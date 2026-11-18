@@ -60,7 +60,11 @@ class FillTest extends UnitTest:
   }
 
   test("allPaths finds every path to any of the ends in an acyclic graph") {
-    val gen = for query <- queryGen(); ends <- Gen.someOf(query.graph.nodes) yield (query, ends.toSet)
+    val gen =
+      for
+        query <- queryGen()
+        ends <- Gen.someOf(query.graph.nodes)
+      yield (query, ends.toSet)
     check(forAll(gen) { case (Query(graph, start, _), ends) =>
       val dag =
         graph.copy(edges = graph.edges.filter((from, to, _) => from < to).distinctBy((from, to, _) => (from, to)))
@@ -70,7 +74,11 @@ class FillTest extends UnitTest:
   }
 
   test("allPaths with unit adjacency finds every path to any of the ends in an acyclic graph") {
-    val gen = for query <- queryGen(); ends <- Gen.someOf(query.graph.nodes) yield (query, ends.toSet)
+    val gen =
+      for
+        query <- queryGen()
+        ends <- Gen.someOf(query.graph.nodes)
+      yield (query, ends.toSet)
     check(forAll(gen) { case (Query(graph, start, _), ends) =>
       val dag = graph.copy(edges =
         graph.edges.filter((from, to, _) => from < to).distinctBy((from, to, _) => (from, to)).map((f, t, _) =>
