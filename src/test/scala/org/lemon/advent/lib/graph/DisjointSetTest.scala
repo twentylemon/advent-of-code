@@ -2,6 +2,7 @@ package org.lemon.advent.lib.graph
 
 import org.lemon.advent.*
 import org.scalacheck.*
+import org.scalacheck.Arbitrary.*
 import org.scalacheck.Prop.*
 import org.scalacheck.commands.Commands
 
@@ -54,9 +55,14 @@ class DisjointSetTest extends UnitTest:
     check(DisjointSetCommands.property())
   }
 
-  test("duplicate elements share a single group") {
-    check((xs: List[Int]) =>
-      val set = DisjointSet(xs ++ xs)
-      set.components.toSet == xs.toSet.map(Set(_)) && set.componentCount == xs.distinct.size
-    )
+  test("duplicate elements are ignored") {
+    val gen =
+      for
+        elements <- arbitrary[Set[Int]]
+        duplicates <- Gen.someOf(elements)
+      yield (elements, duplicates)
+    check(forAll(gen) { case (elements, duplicates) =>
+      val set = DisjointSet(elements.toList ++ duplicates.toList)
+      set.components.toSet == elements.map(Set(_)) && set.componentCount == elements.size
+    })
   }

@@ -45,8 +45,7 @@ final class DisjointSet[A] private (parent: Map[A, A], rank: Map[A, Int], groups
     */
   def components: Iterator[Set[A]] = parent.keySet.groupBy(find).valuesIterator
 
-  /** @return the number of groups
-    */
+  /** @return the number of groups */
   def componentCount: Int = groups
 
   @tailrec
