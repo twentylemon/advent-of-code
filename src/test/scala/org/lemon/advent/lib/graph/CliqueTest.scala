@@ -21,13 +21,13 @@ class CliqueTest extends UnitTest:
     edges.filter(_(node)).flatMap(_ - node)
 
   test("cliques finds every maximal clique") {
-    check(forAllNoShrink(undirectedGen) { (nodes, edges) =>
+    check(forAll(undirectedGen) { (nodes, edges) =>
       cliques(nodes, neighbours(edges)) == maximalCliques(nodes, edges)
     })
   }
 
   test("cliques ignores self loops") {
-    check(forAllNoShrink(undirectedGen) { (nodes, edges) =>
+    check(forAll(undirectedGen) { (nodes, edges) =>
       cliques(nodes, n => neighbours(edges)(n) + n) == maximalCliques(nodes, edges)
     })
   }
@@ -38,13 +38,13 @@ class CliqueTest extends UnitTest:
         (nodes, edges) <- undirectedGen
         subset <- Gen.someOf(nodes)
       yield (subset.toSet, edges)
-    check(forAllNoShrink(gen) { (subset, edges) =>
+    check(forAll(gen) { (subset, edges) =>
       cliques(subset, neighbours(edges)) == maximalCliques(subset, edges)
     })
   }
 
   test("cliques of a unit graph finds every maximal clique") {
-    check(forAllNoShrink(undirectedGen) { (nodes, edges) =>
+    check(forAll(undirectedGen) { (nodes, edges) =>
       val graph = nodes.map(node => node -> neighbours(edges)(node)).toMap
       cliques(graph) == maximalCliques(nodes, edges)
     })
