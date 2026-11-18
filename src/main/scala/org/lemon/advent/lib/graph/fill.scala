@@ -151,7 +151,7 @@ def allPaths[N](adjacency: N => Iterable[N] | Iterator[N], start: N, ends: N => 
 /** Counts the paths from the starting node to the ending nodes, the same as `allPaths(adjacency, start, ends).size`
   * without building the paths.
   *
-  * Note that if `adjacency` can form loops, this function will overflow the stack.
+  * Note that if `adjacency` can form loops, this function will blow up.
   *
   * @param adjacency function to return edges for a given node
   * @param start the start node
@@ -168,7 +168,7 @@ def countPaths[N](adjacency: N => Iterable[N] | Iterator[N], start: N, ends: N =
 /** Counts the paths from the starting node to the ending node, the same as `allPaths(adjacency, start, _ == end).size`
   * without building the paths.
   *
-  * Note that if `adjacency` can form loops, this function will overflow the stack.
+  * Note that if `adjacency` can form loops, this function will blow up.
   *
   * @param adjacency function to return edges for a given node
   * @param start the start node
