@@ -21,13 +21,12 @@ private object Day25:
 
   def contract(nodes: Seq[String], edges: Seq[(String, String)]) =
     @tailrec
-    def loop(groups: DisjointSet[String], edges: List[(String, String)], merges: Int): DisjointSet[String] =
-      if merges == nodes.size - 2 then groups
+    def loop(groups: DisjointSet[String], edges: List[(String, String)]): DisjointSet[String] =
+      if groups.componentCount == 2 then groups
       else
         val (a, b) = edges.head
-        if groups.connected(a, b) then loop(groups, edges.tail, merges)
-        else loop(groups.union(a, b), edges.tail, merges + 1)
-    loop(DisjointSet(nodes), edges.toList, 0)
+        loop(groups.union(a, b), edges.tail)
+    loop(DisjointSet(nodes), edges.toList)
 
   def part1(input: String) =
     val graph = parse(input)

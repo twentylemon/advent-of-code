@@ -9,10 +9,11 @@ object DisjointSet:
     * @return a disjoint set of single element groups
     */
   def apply[A](elements: Iterable[A]): DisjointSet[A] =
-    new DisjointSet(elements.iterator.map(a => a -> a).toMap, Map.empty)
+    val parent = elements.iterator.map(a => a -> a).toMap
+    new DisjointSet(parent, Map.empty, parent.size)
 
 /** A partition of elements into disjoint groups, which `union` merges. */
-final class DisjointSet[A] private (parent: Map[A, A], rank: Map[A, Int]):
+final class DisjointSet[A] private (parent: Map[A, A], rank: Map[A, Int], groups: Int):
   /** Merges the groups containing two elements.
     *
     * @param a an element of the set
@@ -27,9 +28,9 @@ final class DisjointSet[A] private (parent: Map[A, A], rank: Map[A, Int]):
     else
       val rankA = rank.getOrElse(rootA, 0)
       val rankB = rank.getOrElse(rootB, 0)
-      if rankA < rankB then new DisjointSet(parent.updated(rootA, rootB), rank)
-      else if rankA > rankB then new DisjointSet(parent.updated(rootB, rootA), rank)
-      else new DisjointSet(parent.updated(rootB, rootA), rank.updated(rootA, rankA + 1))
+      if rankA < rankB then new DisjointSet(parent.updated(rootA, rootB), rank, groups - 1)
+      else if rankA > rankB then new DisjointSet(parent.updated(rootB, rootA), rank, groups - 1)
+      else new DisjointSet(parent.updated(rootB, rootA), rank.updated(rootA, rankA + 1), groups - 1)
 
   /** Returns whether two elements are in the same group.
     *
@@ -43,6 +44,10 @@ final class DisjointSet[A] private (parent: Map[A, A], rank: Map[A, Int]):
   /** @return an iterator over the groups of elements
     */
   def components: Iterator[Set[A]] = parent.keySet.groupBy(find).valuesIterator
+
+  /** @return the number of groups
+    */
+  def componentCount: Int = groups
 
   @tailrec
   private def find(a: A): A =
