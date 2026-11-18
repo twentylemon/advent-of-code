@@ -1,6 +1,7 @@
 package org.lemon.advent.lib.graph
 
 import scala.annotation.tailrec
+import scala.collection.immutable.BitSet
 
 /** Finds all maximal cliques in a graph. A maximal clique is a set of nodes where every
   * node is connected to every other node in the set, and the clique is not contained
@@ -11,22 +12,25 @@ import scala.annotation.tailrec
   * @return set of all maximal cliques
   */
 def cliques[N](nodes: Set[N], adjacency: N => Iterable[N]): Set[Set[N]] =
-  def neighbours(node: N) = adjacency(node).toSet - node
+  val index = nodes.toIndexedSeq
+  val id = index.zipWithIndex.toMap
+  val neighbours =
+    Array.tabulate(index.size)(i => BitSet.fromSpecific(adjacency(index(i)).iterator.flatMap(id.get)) - i)
 
-  def bronKerbosch(r: Set[N], p: Set[N], x: Set[N], found: Set[Set[N]]): Set[Set[N]] =
-    if p.isEmpty && x.isEmpty then found + r
+  def bronKerbosch(r: List[Int], p: BitSet, x: BitSet, found: Set[Set[N]]): Set[Set[N]] =
+    if p.isEmpty && x.isEmpty then found + r.iterator.map(index).toSet
     else
       @tailrec
-      def each(vs: List[N], p: Set[N], x: Set[N], found: Set[Set[N]]): Set[Set[N]] = vs match
+      def each(vs: List[Int], p: BitSet, x: BitSet, found: Set[Set[N]]): Set[Set[N]] = vs match
         case Nil => found
         case v :: rest =>
           val nv = neighbours(v)
-          each(rest, p - v, x + v, bronKerbosch(r + v, p.intersect(nv), x.intersect(nv), found))
+          each(rest, p - v, x + v, bronKerbosch(v :: r, p & nv, x & nv, found))
 
-      val u = p.union(x).head
-      each(p.diff(neighbours(u)).toList, p, x, found)
+      val u = (p.iterator ++ x.iterator).maxBy(u => (p & neighbours(u)).size)
+      each((p &~ neighbours(u)).toList, p, x, found)
 
-  bronKerbosch(Set.empty, nodes, Set.empty, Set.empty)
+  bronKerbosch(Nil, BitSet.fromSpecific(index.indices), BitSet.empty, Set.empty)
 
 /** Finds all maximal cliques in a graph. A maximal clique is a set of nodes where every
   * node is connected to every other node in the set, and the clique is not contained
