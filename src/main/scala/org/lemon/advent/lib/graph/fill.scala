@@ -1,5 +1,7 @@
 package org.lemon.advent.lib.graph
 
+import org.lemon.advent.lib.*
+
 import scala.annotation.tailrec
 import scala.collection.immutable.Queue
 import scala.math.Numeric.Implicits.*
@@ -145,3 +147,34 @@ def allPaths[N, D: Numeric](
   */
 def allPaths[N](adjacency: N => Iterable[N] | Iterator[N], start: N, ends: N => Boolean): Set[Path[N, Int]] =
   allPaths(unitAdjacency(adjacency), start, ends)
+
+/** Counts the paths from the starting node to the ending nodes, the same as `allPaths(adjacency, start, ends).size`
+  * without building the paths.
+  *
+  * Note that `adjacency` must not form loops.
+  *
+  * @param adjacency function to return edges for a given node
+  * @param start the start node
+  * @param ends function to check if a node is an ending node
+  * @return the number of paths from `start` to any of `ends`
+  * @tparam N the node type
+  */
+def countPaths[N](adjacency: N => Iterable[N] | Iterator[N], start: N, ends: N => Boolean): Long =
+  lazy val count: N => Long = memoize { node =>
+    adjacency(node).iterator.map(count).sum + (if ends(node) then 1 else 0)
+  }
+  count(start)
+
+/** Counts the paths from the starting node to the ending node, the same as `allPaths(adjacency, start, _ == end).size`
+  * without building the paths.
+  *
+  * Note that `adjacency` must not form loops.
+  *
+  * @param adjacency function to return edges for a given node
+  * @param start the start node
+  * @param end the end node
+  * @return the number of paths from `start` to `end`
+  * @tparam N the node type
+  */
+def countPaths[N](adjacency: N => Iterable[N] | Iterator[N], start: N, end: N): Long =
+  countPaths(adjacency, start, end == _)

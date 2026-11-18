@@ -1,20 +1,14 @@
 package org.lemon.advent.year2025
 
 import org.lemon.advent.lib.*
+import org.lemon.advent.lib.graph.*
 
 private object Day11:
 
   def parse(input: String) =
     input.linesIterator.map {
       case s"$from: $rest" => (from, rest.wsv)
-    }.toMap
-
-  def countPaths(graph: Map[String, Seq[String]], start: String, end: String) =
-    lazy val count: String => Long = memoize { name =>
-      if name == end then 1L
-      else graph.getOrElse(name, Seq.empty).map(count).sum
-    }
-    count(start)
+    }.toMap.withDefaultValue(Seq.empty)
 
   def part1(input: String) =
     val graph = parse(input)
