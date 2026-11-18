@@ -20,14 +20,10 @@ private object Day25:
     .groupMap(_._1)(_._2)
 
   def contract(nodes: Seq[String], edges: Seq[(String, String)]) =
-    @tailrec
-    def loop(groups: DisjointSet[String], edges: List[(String, String)], merges: Int): DisjointSet[String] =
-      if merges == nodes.size - 2 then groups
-      else
-        val (a, b) = edges.head
-        if groups.connected(a, b) then loop(groups, edges.tail, merges)
-        else loop(groups.union(a, b), edges.tail, merges + 1)
-    loop(DisjointSet(nodes), edges.toList, 0)
+    edges.iterator
+      .scanLeft(DisjointSet(nodes)) { case (groups, (a, b)) => groups.union(a, b) }
+      .find(_.components.size == 2)
+      .get
 
   def part1(input: String) =
     val graph = parse(input)

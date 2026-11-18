@@ -2,6 +2,7 @@ package org.lemon.advent.lib.graph
 
 import org.lemon.advent.*
 import org.scalacheck.*
+import org.scalacheck.Arbitrary.*
 import org.scalacheck.Prop.*
 import org.scalacheck.commands.Commands
 
@@ -27,10 +28,10 @@ class DisjointSetTest extends UnitTest:
       Gen.oneOf(Gen.zip(element, element).map(Union(_, _)), Gen.zip(element, element).map(Connected(_, _)))
 
     case class Union(a: Int, b: Int) extends Command:
-      type Result = Set[Set[Int]]
+      type Result = (Set[Set[Int]], Int)
       override def run(sut: Sut) =
         sut.set = sut.set.union(a, b)
-        sut.set.components.toSet
+        (sut.set.components.toSet, sut.set.components.size)
       override def nextState(state: State) =
         if !contains(state, a) || !contains(state, b) then state
         else
@@ -38,7 +39,8 @@ class DisjointSetTest extends UnitTest:
           rest + groups.flatten
       override def preCondition(state: State) = true
       override def postCondition(state: State, result: Try[Result]): Prop =
-        if contains(state, a) && contains(state, b) then result == Try(nextState(state)) else missing(result)
+        val next = nextState(state)
+        if contains(state, a) && contains(state, b) then result == Try((next, next.size)) else missing(result)
 
     case class Connected(a: Int, b: Int) extends Command:
       type Result = Boolean
@@ -51,4 +53,16 @@ class DisjointSetTest extends UnitTest:
 
   test("union and connected match a partition of the elements") {
     check(DisjointSetCommands.property())
+  }
+
+  test("duplicate elements are ignored") {
+    val gen =
+      for
+        elements <- arbitrary[Set[Int]]
+        duplicates <- Gen.someOf(elements)
+      yield (elements, duplicates)
+    check(forAll(gen) { case (elements, duplicates) =>
+      val set = DisjointSet(elements.toList ++ duplicates.toList)
+      set.components.toSet == elements.map(Set(_)) && set.components.size == elements.size
+    })
   }

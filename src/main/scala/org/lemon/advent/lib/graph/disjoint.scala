@@ -1,23 +1,25 @@
 package org.lemon.advent.lib.graph
 
 import scala.annotation.tailrec
+import scala.collection.AbstractIterable
 
 object DisjointSet:
-  /** Creates a disjoint set with each element in a group of its own.
+  /** Creates a disjoint set with each element in a component of its own.
     *
     * @param elements the elements of the set
-    * @return a disjoint set of single element groups
+    * @return a disjoint set of single element components
     */
   def apply[A](elements: Iterable[A]): DisjointSet[A] =
-    new DisjointSet(elements.iterator.map(a => a -> a).toMap, Map.empty)
+    val parent = elements.iterator.map(a => a -> a).toMap
+    new DisjointSet(parent, Map.empty, parent.size)
 
-/** A partition of elements into disjoint groups, which `union` merges. */
-final class DisjointSet[A] private (parent: Map[A, A], rank: Map[A, Int]):
-  /** Merges the groups containing two elements.
+/** A partition of elements into disjoint components, which `union` merges. */
+final class DisjointSet[A] private (parent: Map[A, A], rank: Map[A, Int], componentCount: Int):
+  /** Merges the components containing two elements.
     *
     * @param a an element of the set
     * @param b an element of the set
-    * @return a new disjoint set with a and b in the same group
+    * @return a new disjoint set with a and b in the same component
     * @throws NoSuchElementException if a or b is not in the set
     */
   def union(a: A, b: A): DisjointSet[A] =
@@ -27,22 +29,23 @@ final class DisjointSet[A] private (parent: Map[A, A], rank: Map[A, Int]):
     else
       val rankA = rank.getOrElse(rootA, 0)
       val rankB = rank.getOrElse(rootB, 0)
-      if rankA < rankB then new DisjointSet(parent.updated(rootA, rootB), rank)
-      else if rankA > rankB then new DisjointSet(parent.updated(rootB, rootA), rank)
-      else new DisjointSet(parent.updated(rootB, rootA), rank.updated(rootA, rankA + 1))
+      if rankA < rankB then new DisjointSet(parent.updated(rootA, rootB), rank, componentCount - 1)
+      else if rankA > rankB then new DisjointSet(parent.updated(rootB, rootA), rank, componentCount - 1)
+      else new DisjointSet(parent.updated(rootB, rootA), rank.updated(rootA, rankA + 1), componentCount - 1)
 
-  /** Returns whether two elements are in the same group.
+  /** Returns whether two elements are in the same component.
     *
     * @param a an element of the set
     * @param b an element of the set
-    * @return true if a and b are in the same group
+    * @return true if a and b are in the same component
     * @throws NoSuchElementException if a or b is not in the set
     */
   def connected(a: A, b: A): Boolean = find(a) == find(b)
 
-  /** @return an iterator over the groups of elements
-    */
-  def components: Iterator[Set[A]] = parent.keySet.groupBy(find).valuesIterator
+  /** @return the components, regrouped on each traversal, with a constant time `size` */
+  def components: Iterable[Set[A]] = new AbstractIterable[Set[A]]:
+    def iterator = parent.keySet.groupBy(DisjointSet.this.find).valuesIterator
+    override def knownSize = componentCount
 
   @tailrec
   private def find(a: A): A =
