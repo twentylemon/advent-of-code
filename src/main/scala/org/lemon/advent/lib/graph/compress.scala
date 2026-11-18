@@ -7,8 +7,9 @@ import scala.math.Ordering.Implicits.*
 /** Compresses a graph by keeping only the specified important nodes and computing
   * shortest path distances between them. Only nodes that are directly connected
   * via corridor paths (through non-important nodes) will have edges in the result.
-  * Useful for graphs with many corridor-like paths that can be reduced to weighted
-  * edges between junction nodes.
+  * Each edge is the shortest such corridor, so parallel corridors between two nodes
+  * collapse into one. Useful for graphs with many corridor-like paths that can be
+  * reduced to weighted edges between junction nodes.
   *
   * @param adjacency function to return edges for a given node
   * @param keepNodes the important nodes to keep in the compressed graph
@@ -46,6 +47,8 @@ def compress[N, D: Numeric](
 
 /** Compresses a graph by keeping only the specified important nodes and computing
   * shortest path distances between them. The distance between each node is assumed to be one.
+  * Only nodes connected by corridors through non-important nodes get an edge, weighted
+  * by the shortest corridor, so parallel corridors between two nodes collapse into one.
   *
   * @param adjacency function to return edges for a given node, all with distance one
   * @param keepNodes the important nodes to keep in the compressed graph
@@ -57,6 +60,8 @@ def compress[N](adjacency: N => Iterable[N] | Iterator[N], keepNodes: Set[N]): W
 
 /** Compresses a graph by keeping only the specified important nodes and computing
   * shortest path distances between them.
+  * Only nodes connected by corridors through non-important nodes get an edge, weighted
+  * by the shortest corridor, so parallel corridors between two nodes collapse into one.
   *
   * @param graph the graph to compress
   * @param keepNodes the important nodes to keep in the compressed graph
@@ -69,6 +74,8 @@ def compress[N, D: Numeric](graph: WeightedGraph[N, D], keepNodes: Set[N]): Weig
 
 /** Compresses a graph by keeping only the specified important nodes and computing
   * shortest path distances between them. The distance between each node is assumed to be one.
+  * Only nodes connected by corridors through non-important nodes get an edge, weighted
+  * by the shortest corridor, so parallel corridors between two nodes collapse into one.
   *
   * @param graph the graph to compress
   * @param keepNodes the important nodes to keep in the compressed graph
