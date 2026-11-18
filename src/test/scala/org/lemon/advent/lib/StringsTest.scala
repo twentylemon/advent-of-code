@@ -9,8 +9,22 @@ class StringsTest extends UnitTest:
 
   given Arbitrary[Seq[String]] = Arbitrary(Gen.nonEmptyListOf(Gen.alphaNumStr.suchThat(_.nonEmpty)))
 
+  test("padLeft leaves a string at least len long unchanged") {
+    val gen =
+      for
+        str <- arbitrary[String]
+        len <- Gen.chooseNum(Int.MinValue, str.length)
+      yield (str, len)
+    check(forAllNoShrink(gen, arbitrary[Char]) { case ((str, len), c) => str.padLeft(len, c) == str })
+  }
+
   test("padLeft matches padTo on the reversed string") {
-    check(forAll(arbitrary[String], Gen.choose(-10, 100), arbitrary[Char]) { (str, len, c) =>
+    val gen =
+      for
+        str <- arbitrary[String]
+        pad <- Gen.sized(n => Gen.choose(0, n))
+      yield (str, str.length + pad)
+    check(forAll(gen, arbitrary[Char]) { case ((str, len), c) =>
       str.padLeft(len, c) == str.reverse.padTo(len, c).reverse
     })
   }
