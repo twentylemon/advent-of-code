@@ -9,7 +9,7 @@ extension (str: String)
     * @param c the character to prepend
     * @return the string padded to the left with the given character
     */
-  def padLeft(len: Int, c: Char) = c.toString * (len - str.length) + str
+  def padLeft(len: Int, c: Char): String = if len <= str.length then str else c.toString * (len - str.length) + str
 
   /** Splits the string by commas into a sequence of strings.
     *
