@@ -1,7 +1,5 @@
 package org.lemon.advent.lib
 
-import scala.util.Try
-
 extension (str: String)
   /** Prepends the string with the given character until it reaches the given length.
     *
@@ -34,9 +32,3 @@ extension (str: String)
     * @return the string as a BigInt
     */
   def toBigInt: BigInt = BigInt(str.trim)
-
-  /** Tries to parse the string into a BigInt, returning None if it fails.
-    *
-    * @return the string as a BigInt, or None on failure
-    */
-  def toBigIntOption: Option[BigInt] = Try(BigInt(str.trim)).toOption
