@@ -21,8 +21,8 @@ private object Day11:
       case s"Operation: new = old * $rhs" => (old: BigInt) => old * rhs.toInt
 
   def parseTarget(test: String, ifTrue: String, ifFalse: String): BigInt => Int =
-    val trueTarget = ifTrue.strip.wsv.last.toInt
-    val falseTarget = ifFalse.strip.wsv.last.toInt
+    val trueTarget = ifTrue.wsv.last.toInt
+    val falseTarget = ifFalse.wsv.last.toInt
     test.strip match
       case s"Test: divisible by $n" => (x: BigInt) => if x % n.toInt == 0 then trueTarget else falseTarget
 
