@@ -25,8 +25,7 @@ private object Day21:
   def pathsBetween(buttons: Seq[Seq[Char]])(start: Char, end: Char) =
     def adjacency(coord: Coord): Seq[Coord] = coord.adjacent.filter(buttons.hasCoord).filter(buttons(_) != ' ')
     val map = asMap(buttons)
-    val fin = map(end)
-    allShortestPaths(adjacency, map(start), _ == fin)
+    allShortestPaths(adjacency, map(start), map(end))
       .map(path => path.path.map(buttons(_)).mkString)
 
   def asNested(map: Map[Char, Coord])(path: String) =
