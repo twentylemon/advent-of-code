@@ -14,7 +14,7 @@ class FillTest extends UnitTest:
 
   test("distanceFrom finds the shortest distance to every reachable node") {
     check(forAll(queryGen()) { case Query(graph, start, _) =>
-      distanceFrom(graph.adjacency, start).view.mapValues(_.toLong).toMap == graph.distancesFrom(start)
+      distanceFrom(graph.adjacency, start) == graph.distancesFrom(start)
     })
   }
 
@@ -31,46 +31,73 @@ class FillTest extends UnitTest:
     val gen =
       for
         query <- queryGen()
-        max <- Gen.choose(0, 60)
-      yield (query.graph.copy(edges = query.graph.edges.map((from, to, w) => (from, to, w % 5))), query.start, max)
-    check(forAll(gen) { (graph, start, max) =>
-      distanceFrom(graph.adjacency, start, max).view.mapValues(_.toLong).toMap ==
-        graph.distancesFrom(start).filter(_._2 <= max)
+        max <- Gen.choose(0L, query.graph.distancesFrom(query.start).values.max)
+      yield (query, max.toInt)
+    check(forAll(gen) { case (Query(graph, start, _), max) =>
+      distanceFrom(graph.adjacency, start, max) == graph.distancesFrom(start).filter(_._2 <= max)
     })
   }
 
   test("distanceFrom with unit adjacency counts the steps to every reachable node") {
     check(forAll(queryGen()) { case Query(graph, start, _) =>
       val steps = graph.copy(edges = graph.edges.map((from, to, _) => (from, to, 1)))
-      distanceFrom(graph.unitAdjacency, start).view.mapValues(_.toLong).toMap == steps.distancesFrom(start)
+      distanceFrom(graph.unitAdjacency, start) == steps.distancesFrom(start)
     })
   }
 
   test("distanceFrom with unit adjacency and a maximum distance keeps every node within it") {
-    check(forAll(queryGen(), Gen.choose(0, 8)) { (query, max) =>
-      val steps = query.graph.copy(edges = query.graph.edges.map((from, to, _) => (from, to, 1)))
-      distanceFrom(query.graph.unitAdjacency, query.start, max).view.mapValues(_.toLong).toMap ==
-        steps.distancesFrom(query.start).filter(_._2 <= max)
+    val gen =
+      for
+        query <- queryGen()
+        max <- Gen.choose(0, query.graph.size - 1)
+      yield (query, max)
+    check(forAll(gen) { case (Query(graph, start, _), max) =>
+      val steps = graph.copy(edges = graph.edges.map((from, to, _) => (from, to, 1)))
+      distanceFrom(graph.unitAdjacency, start, max) == steps.distancesFrom(start).filter(_._2 <= max)
     })
   }
 
-  test("allPaths finds every path in an acyclic graph") {
-    check(forAll(queryGen()) { case Query(graph, start, end) =>
-      val dag =
-        graph.copy(edges = graph.edges.filter((from, to, _) => from < to).distinctBy((from, to, _) => (from, to)))
-      allPaths(dag.adjacency, start, _ == end).map(p => p.copy(distance = p.distance.toLong)) ==
-        dag.simplePaths(start, end).toSet
+  test("allPaths finds every path to any of the ends in an acyclic graph") {
+    val gen =
+      for
+        query <- queryGen()
+        ends <- Gen.someOf(query.graph.nodes)
+      yield (query, ends.toSet)
+    check(forAll(gen) { case (Query(graph, start, _), ends) =>
+      val edges = graph.edges.filter((from, to, _) => from < to).distinctBy((from, to, _) => (from, to))
+      val dag = graph.copy(edges = edges)
+      allPaths(dag.adjacency, start, ends) == ends.flatMap(dag.simplePaths(start, _))
     })
   }
 
-  test("allPaths with unit adjacency finds every path in an acyclic graph") {
+  test("allPaths with unit adjacency finds every path to any of the ends in an acyclic graph") {
+    val gen =
+      for
+        query <- queryGen()
+        ends <- Gen.someOf(query.graph.nodes)
+      yield (query, ends.toSet)
+    check(forAll(gen) { case (Query(graph, start, _), ends) =>
+      val edges = graph.edges.filter((from, to, _) => from < to).map((from, to, _) => (from, to, 1)).distinct
+      val dag = graph.copy(edges = edges)
+      allPaths(dag.unitAdjacency, start, ends) == ends.flatMap(dag.simplePaths(start, _))
+    })
+  }
+
+  test("countPaths counts every path to any of the ends in an acyclic graph") {
+    val gen =
+      for
+        query <- queryGen()
+        ends <- Gen.someOf(query.graph.nodes)
+      yield (query, ends.toSet)
+    check(forAll(gen) { case (Query(graph, start, _), ends) =>
+      val dag = graph.copy(edges = graph.edges.filter((from, to, _) => from < to))
+      countPaths(dag.unitAdjacency, start, ends) == ends.toSeq.map(dag.simplePaths(start, _).size).sum
+    })
+  }
+
+  test("countPaths counts every path to the end in an acyclic graph") {
     check(forAll(queryGen()) { case Query(graph, start, end) =>
-      val dag = graph.copy(edges =
-        graph.edges.filter((from, to, _) => from < to).distinctBy((from, to, _) => (from, to)).map((f, t, _) =>
-          (f, t, 1)
-        )
-      )
-      allPaths(dag.unitAdjacency, start, _ == end).map(p => p.copy(distance = p.distance.toLong)) ==
-        dag.simplePaths(start, end).toSet
+      val dag = graph.copy(edges = graph.edges.filter((from, to, _) => from < to))
+      countPaths(dag.unitAdjacency, start, end) == dag.simplePaths(start, end).size
     })
   }
