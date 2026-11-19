@@ -32,12 +32,12 @@ private object Day15:
         case '[' => Seq(next, next.right)
         case ']' => Seq(next.left, next)
         case _ => Seq()
-    val chain = fill(wouldBePushed, robit)
+    val moves = fill(wouldBePushed, robit)
 
-    if chain.exists(c => grid(c + dir) == '#') then grid
+    if moves.exists(c => grid(c + dir) == '#') then grid
     else
-      val gapsFilled = chain.foldLeft(grid) { (g, coord) => g.updated(coord, '.') }
-      chain.foldLeft(gapsFilled) { (g, coord) => g.updated(coord + dir, grid(coord)) }
+      val gapsFilled = moves.foldLeft(grid) { (g, coord) => g.updated(coord, '.') }
+      moves.foldLeft(gapsFilled) { (g, coord) => g.updated(coord + dir, grid(coord)) }
 
   def gps(grid: Map[Coord, Char], box: Char) =
     grid.filter(_._2 == box).keysIterator.map(c => 100 * c.y + c.x).sum
