@@ -22,7 +22,7 @@ private object Day10:
 
   def startOf(grid: Map[Coord, Pipe]) = grid.values.find(_.char == 'S').get
 
-  def pathFind(start: Coord, grid: Map[Coord, Pipe]): Map[Pipe, Int] =
+  def loopDistances(start: Coord, grid: Map[Coord, Pipe]): Map[Pipe, Int] =
     def adjacency(coord: Coord) = grid(coord).connections
       .filter(grid.contains)
       .filter(neigh => grid(neigh).connections.contains(coord))
@@ -31,7 +31,7 @@ private object Day10:
 
   def part1(input: String) =
     val grid = parse(input)
-    val path = pathFind(startOf(grid).loc, grid)
+    val path = loopDistances(startOf(grid).loc, grid)
     path.values.max
 
   def determinePipe(loc: Coord, grid: Map[Coord, Pipe]) =
@@ -81,7 +81,7 @@ private object Day10:
   def part2(input: String) =
     val grid = parse(input)
     val start = startOf(grid)
-    val path = pathFind(start.loc, grid).keySet.map(_.loc)
+    val path = loopDistances(start.loc, grid).keySet.map(_.loc)
     val gridWithStartPipe = grid.updated(start.loc, determinePipe(start.loc, grid))
     grid.keysIterator
       .filterNot(path.contains)
