@@ -22,12 +22,15 @@ def pathFind[N, D: Numeric](
     start: N,
     ends: N => Boolean,
 ): Option[Path[N, D]] =
+  def unwind(best: Map[N, (D, N)], end: N): Vector[N] =
+    start +: Iterator.iterate(end)(best(_)._2).takeWhile(_ != start).toVector.reverse
+
   @tailrec
   def search(queue: MinQueue[D, (D, N)], best: Map[N, (D, N)]): Option[Path[N, D]] =
     queue.dequeue match
       case None => None
       case Some((_, (cost, node), rest)) if cost > best(node)._1 => search(rest, best)
-      case Some((_, (cost, node), _)) if ends(node) => Some(Path(unwind(best(_)._2, start, node), cost))
+      case Some((_, (cost, node), _)) if ends(node) => Some(Path(unwind(best, node), cost))
       case Some((_, (cost, node), rest)) =>
         val (nextQueue, nextBest) = adjacency(node).iterator.foldLeft((rest, best)) {
           case (acc @ (queue, best), (next, dist)) =>
@@ -39,10 +42,6 @@ def pathFind[N, D: Numeric](
 
   val zero = Numeric[D].zero
   search(MinQueue(heuristic(start), (zero, start)), Map(start -> (zero, start)))
-
-/** @return the path from `start` down to `end`, following each node's `parent` */
-private def unwind[N](parent: N => N, start: N, end: N): Vector[N] =
-  start +: Iterator.iterate(end)(parent).takeWhile(_ != start).toVector.reverse
 
 /** Performs an A* search of the graph from `start` to `end`, returning
   * the shortest path between them.
@@ -193,12 +192,15 @@ def allShortestPaths[N, D: Numeric](
   val zero = Numeric[D].zero
   val result = search(MinQueue(zero, start), Search(Map(start -> (zero, Set.empty)), None, Set.empty))
 
-  def pathsTo(node: N): Iterator[Vector[N]] =
-    if node == start then Iterator(Vector(start))
-    else result.best(node)._2.iterator.flatMap(parent => pathsTo(parent).map(_ :+ node))
+  @tailrec
+  def unwindAll(stack: List[(N, List[N])], paths: Set[Vector[N]]): Set[Vector[N]] = stack match
+    case Nil => paths
+    case (node, suffix) :: rest if node == start => unwindAll(rest, paths + (node :: suffix).toVector)
+    case (node, suffix) :: rest =>
+      unwindAll(result.best(node)._2.foldLeft(rest)((stack, parent) => (parent, node :: suffix) :: stack), paths)
 
   result.shortest match
-    case Some(distance) => result.endsFound.iterator.flatMap(pathsTo).map(Path(_, distance)).toSet
+    case Some(distance) => unwindAll(result.endsFound.toList.map((_, List.empty[N])), Set.empty).map(Path(_, distance))
     case None => Set.empty
 
 /** Finds all shortest paths in the graph from `start` to the closest ends.
