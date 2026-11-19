@@ -4,15 +4,15 @@ import scala.annotation.tailrec
 import scala.math.Numeric.Implicits.*
 import scala.math.Ordering.Implicits.*
 
-/** Performs an A* search of the graph from `start` to `end`, returning
-  * the shortest path between them. When `heuristic` always returns zero,
+/** Performs an A* search of the graph from `start`, returning
+  * the shortest path to the closest end. When `heuristic` always returns zero,
   * this is equivalent to dijkstra's search.
   *
   * @param adjacency function to return edges for a given node
   * @param heuristic function estimating the remaining cost from a node to the goal (must be admissible)
   * @param start the start node
   * @param ends function to check if a node is an ending node
-  * @return the shortest path between `start` and `end`, or empty if no path exists
+  * @return the shortest path from `start` to the closest end, or empty if no end is reachable
   * @tparam N the node type
   * @tparam D the distance type
   */
@@ -63,14 +63,14 @@ def pathFind[N, D: Numeric](
 ): Option[Path[N, D]] =
   pathFind(adjacency, heuristic, start, end == _)
 
-/** Performs an A* search of the graph from `start` to `end`, returning
-  * the shortest path between them. The distance between each node is assumed to be one.
+/** Performs an A* search of the graph from `start`, returning
+  * the shortest path to the closest end. The distance between each node is assumed to be one.
   *
   * @param adjacency function to return edges for a given node, all with distance one
   * @param heuristic function estimating the remaining cost from a node to the goal (must be admissible)
   * @param start the start node
   * @param ends function to check if a node is an ending node
-  * @return the shortest path between `start` and `end`, or empty if no path exists
+  * @return the shortest path from `start` to the closest end, or empty if no end is reachable
   * @tparam N the node type
   */
 def pathFind[N](
@@ -97,42 +97,15 @@ def pathFind[N](
     start: N,
     end: N,
 ): Option[Path[N, Int]] =
-  pathFind(unitAdjacency(adjacency), heuristic, start, end)
+  pathFind(adjacency, heuristic, start, end == _)
 
-/** Performs an A* search of the graph from `start` to `end`, returning
-  * the shortest path between them.
-  *
-  * @param graph the graph to search in
-  * @param heuristic function estimating the remaining cost from a node to the goal (must be admissible)
-  * @param start the start node
-  * @param end the end node
-  * @return the shortest path between `start` and `end`, or empty if no path exists
-  * @tparam N the node type
-  * @tparam D the distance type
-  */
-def pathFind[N, D: Numeric](graph: WeightedGraph[N, D], heuristic: N => D, start: N, end: N): Option[Path[N, D]] =
-  pathFind(graph.apply, heuristic, start, end)
-
-/** Performs an A* search of the graph from `start` to `end`, returning
-  * the shortest path between them. The distance between each node is assumed to be one.
-  *
-  * @param graph the graph to search in
-  * @param heuristic function estimating the remaining cost from a node to the goal (must be admissible)
-  * @param start the start node
-  * @param end the end node
-  * @return the shortest path between `start` and `end`, or empty if no path exists
-  * @tparam N the node type
-  */
-def pathFind[N](graph: UnitGraph[N], heuristic: N => Int, start: N, end: N): Option[Path[N, Int]] =
-  pathFind(graph.apply, heuristic, start, end)
-
-/** Performs a dijkstra's search of the graph from `start` to `end`, returning
-  * the shortest path between them.
+/** Performs a dijkstra's search of the graph from `start`, returning
+  * the shortest path to the closest end.
   *
   * @param adjacency function to return edges for a given node
   * @param start the start node
   * @param ends function to check if a node is an ending node
-  * @return the shortest path between `start` and `end`, or empty if no path exists
+  * @return the shortest path from `start` to the closest end, or empty if no end is reachable
   * @tparam N the node type
   * @tparam D the distance type
   */
@@ -156,13 +129,13 @@ def pathFind[N, D: Numeric](
 def pathFind[N, D: Numeric](adjacency: N => Iterable[(N, D)] | Iterator[(N, D)], start: N, end: N): Option[Path[N, D]] =
   pathFind(adjacency, start, end == _)
 
-/** Performs a dijkstra's search of the graph from `start` to `end`, returning
-  * the shortest path between them. The distance between each node is assumed to be one.
+/** Performs a dijkstra's search of the graph from `start`, returning
+  * the shortest path to the closest end. The distance between each node is assumed to be one.
   *
   * @param adjacency function to return edges for a given node, all with distance one
   * @param start the start node
   * @param ends function to check if a node is an ending node
-  * @return the shortest path between `start` and `end`, or empty if no path exists
+  * @return the shortest path from `start` to the closest end, or empty if no end is reachable
   * @tparam N the node type
   */
 def pathFind[N](adjacency: N => Iterable[N] | Iterator[N], start: N, ends: N => Boolean): Option[Path[N, Int]] =
@@ -178,39 +151,14 @@ def pathFind[N](adjacency: N => Iterable[N] | Iterator[N], start: N, ends: N => 
   * @tparam N the node type
   */
 def pathFind[N](adjacency: N => Iterable[N] | Iterator[N], start: N, end: N): Option[Path[N, Int]] =
-  pathFind(unitAdjacency(adjacency), start, end)
+  pathFind(adjacency, start, end == _)
 
-/** Performs a dijkstra's search of the graph from `start` to `end`, returning
-  * the shortest path between them.
-  *
-  * @param graph the graph to search in
-  * @param start the start node
-  * @param end the end node
-  * @return the shortest path between `start` and `end`, or empty if no path exists
-  * @tparam N the node type
-  * @tparam D the distance type
-  */
-def pathFind[N, D: Numeric](graph: WeightedGraph[N, D], start: N, end: N): Option[Path[N, D]] =
-  pathFind(graph.apply, start, end)
-
-/** Performs a dijkstra's search of the graph from `start` to `end`, returning
-  * the shortest path between them. The distance between each node is assumed to be one.
-  *
-  * @param graph the graph to search in
-  * @param start the start node
-  * @param end the end node
-  * @return the shortest path between `start` and `end`, or empty if no path exists
-  * @tparam N the node type
-  */
-def pathFind[N](graph: UnitGraph[N], start: N, end: N): Option[Path[N, Int]] =
-  pathFind(graph.apply, start, end)
-
-/** Finds all shortest paths in the graph from `start` to `end`. Edge weights must be positive.
+/** Finds all shortest paths in the graph from `start` to the closest ends. Edge weights must be positive.
   *
   * @param adjacency function to return edges for a given node
   * @param start the start node
   * @param ends function to check if a node is an ending node
-  * @return set of all shortest paths between `start` and `end`
+  * @return every shortest path from `start` to an end at the shortest distance
   * @tparam N the node type
   * @tparam D the distance type
   */
@@ -253,13 +201,13 @@ def allShortestPaths[N, D: Numeric](
     case Some(distance) => result.endsFound.iterator.flatMap(pathsTo).map(Path(_, distance)).toSet
     case None => Set.empty
 
-/** Finds all shortest paths in the graph from `start` to `end`.
+/** Finds all shortest paths in the graph from `start` to the closest ends.
   * The distance between each node is assumed to be one.
   *
   * @param adjacency function to return edges for a given node, all with distance one
   * @param start the start node
   * @param ends function to check if a node is an ending node
-  * @return set of all shortest paths between `start` and `end`
+  * @return every shortest path from `start` to an end at the shortest distance
   * @tparam N the node type
   */
 def allShortestPaths[N](adjacency: N => Iterable[N] | Iterator[N], start: N, ends: N => Boolean): Set[Path[N, Int]] =

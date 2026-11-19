@@ -19,4 +19,4 @@ type UnitGraph[N] = Map[N, Iterable[N]]
   * @tparam D the distance type
   */
 case class Path[N, D](path: Seq[N], distance: D):
-  def at = path.last
+  def at: N = path.last
