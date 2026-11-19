@@ -8,7 +8,7 @@ import org.scalacheck.Prop.*
 class CompressTest extends UnitTest:
   def gen(maxEdgeWeight: Int = 20) =
     for
-      graph <- graphGen(maxSize = 8, maxEdgesPerNode = 3, maxEdgeWeight)
+      graph <- graphGen(maxSize = 8, maxEdgesPerNode = 3, maxEdgeWeight = maxEdgeWeight)
       important <- Gen.someOf(graph.nodes)
     yield (graph, important.toSet)
 
