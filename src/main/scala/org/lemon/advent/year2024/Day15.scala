@@ -25,14 +25,14 @@ private object Day15:
     (Coord.gridToMap(wide), parseMoves(moves))
 
   def step(grid: Map[Coord, Char], robit: Coord, dir: Direction): Map[Coord, Char] =
-    def wouldBePushed(coord: Coord) =
+    def inTheWay(coord: Coord) =
       val next = coord + dir
       grid(next) match
         case 'O' => Seq(next)
         case '[' => Seq(next, next.right)
         case ']' => Seq(next.left, next)
         case _ => Seq()
-    val moves = fill(wouldBePushed, robit)
+    val moves = fill(inTheWay, robit)
 
     if moves.exists(c => grid(c + dir) == '#') then grid
     else
