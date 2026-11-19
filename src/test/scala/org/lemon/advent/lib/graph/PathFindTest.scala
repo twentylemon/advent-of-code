@@ -6,14 +6,19 @@ import org.scalacheck.*
 import org.scalacheck.Prop.*
 
 class PathFindTest extends UnitTest:
+  // scaling down the true remaining distance never overestimates, so it is admissible (but maybe not consistent)
+  def admissible(graph: Graph, end: Int, scales: Seq[Double]) =
+    val toEnd = graph.reversed.distancesFrom(end)
+    (node: Int) => toEnd.get(node).map(d => (d * scales(node)).toInt).getOrElse(0)
+
   test("pathFind finds the shortest distance") {
-    check(forAll(queryGen()) { case Query(graph, start, end) =>
+    check(forAll(queryGen(minEdgeWeight = 0)) { case Query(graph, start, end) =>
       pathFind(graph.adjacency, start, end).map(_.distance) == graph.distancesFrom(start).get(end)
     })
   }
 
   test("pathFind returns a path along real edges with the reported distance") {
-    check(forAll(queryGen()) { case Query(graph, start, end) =>
+    check(forAll(queryGen(minEdgeWeight = 0)) { case Query(graph, start, end) =>
       pathFind(graph.adjacency, start, end).forall(found =>
         val edgeCosts = found.path.sliding2.map((a, b) => graph.adjacency(a).filter(_._1 == b).map(_._2).min)
         found.path.head == start && found.at == end && edgeCosts.sum == found.distance
@@ -22,14 +27,13 @@ class PathFindTest extends UnitTest:
   }
 
   test("pathFind with an admissible heuristic finds the shortest distance") {
-    // scaling down the true remaining distance never overestimates, so it is admissible (but maybe not consistent)
     // 0 -> 1 -> 2 is a detour next to a direct 0 -> 2 edge, and 2 leads on to the end at 3. when the
     // detour is cheaper, but node 1 looks worse to the heuristic than node 2, node 2 is reached by the
     // direct edge first
     val detour =
       for
-        weights <- Gen.listOfN(4, Gen.choose(1, 20))
-        rest <- graphGen(maxSize = 4, maxEdgesPerNode = 1)
+        weights <- Gen.listOfN(4, Gen.choose(0, 20))
+        rest <- graphGen(maxSize = 4, maxEdgesPerNode = 1, minEdgeWeight = 0)
       yield Query(
         Graph(4, List((0, 1, weights(0)), (1, 2, weights(1)), (0, 2, weights(2)), (2, 3, weights(3))) ++ rest.edges),
         start = 0,
@@ -37,19 +41,21 @@ class PathFindTest extends UnitTest:
       )
     val gen =
       for
-        query <- Gen.oneOf(queryGen(), detour)
-        scales <- Gen.listOfN(query.graph.size, Gen.oneOf(Gen.const(0.0), Gen.const(1.0), Gen.choose(0.0, 1.0)))
+        query <- Gen.oneOf(queryGen(minEdgeWeight = 0), detour)
+        scales <- Gen.listOfN(query.graph.size, Gen.choose(0.0, 1.0))
       yield (query, scales)
-
     check(forAll(gen) { case (Query(graph, start, end), scales) =>
-      val toEnd = graph.reversed.distancesFrom(end)
-      val heuristic = (node: Int) => toEnd.get(node).map(d => (d * scales(node)).toInt).getOrElse(0)
+      val heuristic = admissible(graph, end, scales)
       pathFind(graph.adjacency, heuristic, start, end).map(_.distance) == graph.distancesFrom(start).get(end)
     })
   }
 
   test("pathFind to several ends finds the closest one") {
-    val gen = for query <- queryGen(); ends <- Gen.someOf(query.graph.nodes) yield (query, ends.toSet)
+    val gen =
+      for
+        query <- queryGen(minEdgeWeight = 0)
+        ends <- Gen.someOf(query.graph.nodes)
+      yield (query, ends.toSet)
     check(forAll(gen) { case (Query(graph, start, _), ends) =>
       val distances = graph.distancesFrom(start)
       val found = pathFind(graph.adjacency, start, ends)
@@ -60,5 +66,29 @@ class PathFindTest extends UnitTest:
   test("pathFind with unit adjacency counts the steps") {
     check(forAll(queryGen(maxEdgeWeight = 1)) { case Query(graph, start, end) =>
       pathFind(graph.unitAdjacency, start, end).map(_.distance) == graph.distancesFrom(start).get(end)
+    })
+  }
+
+  test("pathFind with unit adjacency to several ends counts the steps to the closest one") {
+    val gen =
+      for
+        query <- queryGen(maxEdgeWeight = 1)
+        ends <- Gen.someOf(query.graph.nodes)
+      yield (query, ends.toSet)
+    check(forAll(gen) { case (Query(graph, start, _), ends) =>
+      val distances = graph.distancesFrom(start)
+      pathFind(graph.unitAdjacency, start, ends).map(_.distance) == ends.flatMap(distances.get).minOption
+    })
+  }
+
+  test("pathFind with unit adjacency and an admissible heuristic counts the steps") {
+    val gen =
+      for
+        query <- queryGen(maxEdgeWeight = 1)
+        scales <- Gen.listOfN(query.graph.size, Gen.choose(0.0, 1.0))
+      yield (query, scales)
+    check(forAll(gen) { case (Query(graph, start, end), scales) =>
+      val heuristic = admissible(graph, end, scales)
+      pathFind(graph.unitAdjacency, heuristic, start, _ == end).map(_.distance) == graph.distancesFrom(start).get(end)
     })
   }
