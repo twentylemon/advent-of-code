@@ -7,7 +7,7 @@ import org.scalacheck.Prop.*
 
 class PathFindTest extends UnitTest:
   // scaling down the true remaining distance never overestimates, so it is admissible (but maybe not consistent)
-  def admissible(graph: Graph, end: Int, scales: List[Double]) =
+  def admissible(graph: Graph, end: Int, scales: Seq[Double]) =
     val toEnd = graph.reversed.distancesFrom(end)
     (node: Int) => toEnd.get(node).map(d => (d * scales(node)).toInt).getOrElse(0)
 
@@ -44,7 +44,6 @@ class PathFindTest extends UnitTest:
         query <- Gen.oneOf(queryGen(minEdgeWeight = 0), detour)
         scales <- Gen.listOfN(query.graph.size, Gen.choose(0.0, 1.0))
       yield (query, scales)
-
     check(forAll(gen) { case (Query(graph, start, end), scales) =>
       val heuristic = admissible(graph, end, scales)
       pathFind(graph.adjacency, heuristic, start, end).map(_.distance) == graph.distancesFrom(start).get(end)
@@ -57,7 +56,6 @@ class PathFindTest extends UnitTest:
         query <- queryGen(minEdgeWeight = 0)
         ends <- Gen.someOf(query.graph.nodes)
       yield (query, ends.toSet)
-
     check(forAll(gen) { case (Query(graph, start, _), ends) =>
       val distances = graph.distancesFrom(start)
       val found = pathFind(graph.adjacency, start, ends)
@@ -77,7 +75,6 @@ class PathFindTest extends UnitTest:
         query <- queryGen(maxEdgeWeight = 1)
         ends <- Gen.someOf(query.graph.nodes)
       yield (query, ends.toSet)
-
     check(forAll(gen) { case (Query(graph, start, _), ends) =>
       val distances = graph.distancesFrom(start)
       pathFind(graph.unitAdjacency, start, ends).map(_.distance) == ends.flatMap(distances.get).minOption
@@ -90,7 +87,6 @@ class PathFindTest extends UnitTest:
         query <- queryGen(maxEdgeWeight = 1)
         scales <- Gen.listOfN(query.graph.size, Gen.choose(0.0, 1.0))
       yield (query, scales)
-
     check(forAll(gen) { case (Query(graph, start, end), scales) =>
       val heuristic = admissible(graph, end, scales)
       pathFind(graph.unitAdjacency, heuristic, start, _ == end).map(_.distance) == graph.distancesFrom(start).get(end)
