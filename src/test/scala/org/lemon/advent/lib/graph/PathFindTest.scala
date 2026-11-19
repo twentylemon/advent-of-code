@@ -6,11 +6,8 @@ import org.scalacheck.*
 import org.scalacheck.Prop.*
 
 class PathFindTest extends UnitTest:
-  def scalesGen(graph: Graph) =
-    Gen.listOfN(graph.size, Gen.oneOf(Gen.const(0.0), Gen.const(1.0), Gen.choose(0.0, 1.0)))
-
   // scaling down the true remaining distance never overestimates, so it is admissible (but maybe not consistent)
-  def scaledHeuristic(graph: Graph, end: Int, scales: List[Double]) =
+  def admissible(graph: Graph, end: Int, scales: List[Double]) =
     val toEnd = graph.reversed.distancesFrom(end)
     (node: Int) => toEnd.get(node).map(d => (d * scales(node)).toInt).getOrElse(0)
 
@@ -45,11 +42,11 @@ class PathFindTest extends UnitTest:
     val gen =
       for
         query <- Gen.oneOf(queryGen(minEdgeWeight = 0), detour)
-        scales <- scalesGen(query.graph)
+        scales <- Gen.listOfN(query.graph.size, Gen.choose(0.0, 1.0))
       yield (query, scales)
 
     check(forAll(gen) { case (Query(graph, start, end), scales) =>
-      val heuristic = scaledHeuristic(graph, end, scales)
+      val heuristic = admissible(graph, end, scales)
       pathFind(graph.adjacency, heuristic, start, end).map(_.distance) == graph.distancesFrom(start).get(end)
     })
   }
@@ -91,11 +88,11 @@ class PathFindTest extends UnitTest:
     val gen =
       for
         query <- queryGen(maxEdgeWeight = 1)
-        scales <- scalesGen(query.graph)
+        scales <- Gen.listOfN(query.graph.size, Gen.choose(0.0, 1.0))
       yield (query, scales)
 
     check(forAll(gen) { case (Query(graph, start, end), scales) =>
-      val heuristic = scaledHeuristic(graph, end, scales)
+      val heuristic = admissible(graph, end, scales)
       pathFind(graph.unitAdjacency, heuristic, start, _ == end).map(_.distance) == graph.distancesFrom(start).get(end)
     })
   }
