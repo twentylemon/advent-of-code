@@ -31,15 +31,15 @@ def fill[N](adjacency: N => Iterable[N] | Iterator[N], start: N): Set[N] =
   * returning the distance to all reachable nodes within that limit.
   *
   * @param adjacency function to return edges for a given node
-  * @param end the node to calculate distances to
+  * @param start the start node
   * @param maxDistance the maximum distance to explore, or `None` to explore every reachable node
-  * @return the map of reachable nodes to their distances from `end`
+  * @return the map of reachable nodes to their distances from `start`
   * @tparam N the node type
   * @tparam D the distance type
   */
 private def distanceFrom[N, D: Numeric](
     adjacency: N => Iterable[(N, D)] | Iterator[(N, D)],
-    end: N,
+    start: N,
     maxDistance: Option[D],
 ): Map[N, D] =
   @tailrec
@@ -55,62 +55,62 @@ private def distanceFrom[N, D: Numeric](
       }
       loop(nextQueue, nextDistances)
 
-  loop(Queue(end), Map(end -> Numeric[D].zero))
+  loop(Queue(start), Map(start -> Numeric[D].zero))
 
 /** Performs a breadth first fill of the graph from the starting node up to a maximum distance,
   * returning the distance to all reachable nodes within that limit.
   *
   * @param adjacency function to return edges for a given node
-  * @param end the node to calculate distances to
+  * @param start the start node
   * @param maxDistance the maximum distance to explore
-  * @return the map of reachable nodes to their distances from `end`
+  * @return the map of reachable nodes to their distances from `start`
   * @tparam N the node type
   * @tparam D the distance type
   */
 def distanceFrom[N, D: Numeric](
     adjacency: N => Iterable[(N, D)] | Iterator[(N, D)],
-    end: N,
+    start: N,
     maxDistance: D,
-): Map[N, D] = distanceFrom(adjacency, end, Some(maxDistance))
+): Map[N, D] = distanceFrom(adjacency, start, Some(maxDistance))
 
 /** Performs a breadth first fill of the graph from the starting node, returning
   * the distance to all reachable nodes.
   *
   * @param adjacency function to return edges for a given node
-  * @param end the node to calculate distances to
-  * @return the set of reachable nodes from `end`
+  * @param start the start node
+  * @return the map of reachable nodes to their distances from `start`
   * @tparam N the node type
   * @tparam D the distance type
   */
-def distanceFrom[N, D: Numeric](adjacency: N => Iterable[(N, D)] | Iterator[(N, D)], end: N): Map[N, D] =
-  distanceFrom(adjacency, end, None)
+def distanceFrom[N, D: Numeric](adjacency: N => Iterable[(N, D)] | Iterator[(N, D)], start: N): Map[N, D] =
+  distanceFrom(adjacency, start, None)
 
 /** Performs a breadth first fill of the graph from the starting node, returning
   * the distance to all reachable nodes. The distance between each node is assumed to be one.
   *
   * @param adjacency function to return edges for a given node
-  * @param end the node to calculate distances to
-  * @return the map of reachable nodes to their distances from `end`
+  * @param start the start node
+  * @return the map of reachable nodes to their distances from `start`
   * @tparam N the node type
   */
-def distanceFrom[N](adjacency: N => Iterable[N] | Iterator[N], end: N): Map[N, Int] =
-  distanceFrom(unitAdjacency(adjacency), end)
+def distanceFrom[N](adjacency: N => Iterable[N] | Iterator[N], start: N): Map[N, Int] =
+  distanceFrom(unitAdjacency(adjacency), start)
 
 /** Performs a breadth first fill of the graph from the starting node up to a maximum distance,
   * returning the distance to all reachable nodes within that limit. The distance between
   * each node is assumed to be one.
   *
   * @param adjacency function to return edges for a given node
-  * @param end the node to calculate distances to
+  * @param start the start node
   * @param maxDistance the maximum distance to explore
-  * @return the map of reachable nodes to their distances from `end`
+  * @return the map of reachable nodes to their distances from `start`
   * @tparam N the node type
   */
-def distanceFrom[N](adjacency: N => Iterable[N] | Iterator[N], end: N, maxDistance: Int): Map[N, Int] =
-  distanceFrom(unitAdjacency(adjacency), end, maxDistance)
+def distanceFrom[N](adjacency: N => Iterable[N] | Iterator[N], start: N, maxDistance: Int): Map[N, Int] =
+  distanceFrom(unitAdjacency(adjacency), start, maxDistance)
 
 /** Performs a breadth first fill of the graph from the starting node to the ending nodes, returning
-  * all possible paths between the two sets.
+  * all possible paths between them.
   *
   * Note that if `adjacency` can form loops, this function will not terminate.
   *
@@ -119,6 +119,7 @@ def distanceFrom[N](adjacency: N => Iterable[N] | Iterator[N], end: N, maxDistan
   * @param ends function to check if a node is an ending node
   * @return the set of all paths from `start` to any of `ends`
   * @tparam N the node type
+  * @tparam D the distance type
   */
 def allPaths[N, D: Numeric](
     adjacency: N => Iterable[(N, D)] | Iterator[(N, D)],
@@ -128,14 +129,14 @@ def allPaths[N, D: Numeric](
   @tailrec
   def loop(queue: Queue[Path[N, D]], paths: Set[Path[N, D]]): Set[Path[N, D]] = queue.dequeueOption match
     case None => paths
-    case Some((node @ Path(path, distance), rest)) =>
-      val next = adjacency(node.at).map((neigh, dist) => Path(path :+ neigh, distance + dist))
-      loop(rest ++ next, if ends(node.at) then paths + node else paths)
+    case Some((path @ Path(nodes, distance), rest)) =>
+      val next = adjacency(path.at).map((neigh, dist) => Path(nodes :+ neigh, distance + dist))
+      loop(rest ++ next, if ends(path.at) then paths + path else paths)
 
   loop(Queue(Path(path = Vector(start), distance = Numeric[D].zero)), Set.empty)
 
 /** Performs a breadth first fill of the graph from the starting node to the ending nodes, returning
-  * all possible paths between the two sets. The distance between each node is assumed to be one.
+  * all possible paths between them. The distance between each node is assumed to be one.
   *
   * Note that if `adjacency` can form loops, this function will not terminate.
   *
