@@ -193,12 +193,16 @@ def allShortestPaths[N, D: Numeric](
   val zero = Numeric[D].zero
   val result = search(MinQueue(zero, start), Search(Map(start -> (zero, Set.empty)), None, Set.empty))
 
-  def pathsTo(node: N): Iterator[Vector[N]] =
-    if node == start then Iterator(Vector(start))
-    else result.best(node)._2.iterator.flatMap(parent => pathsTo(parent).map(_ :+ node))
+  // walks back from the ends with an explicit stack, so long paths don't overflow; paths share their suffixes
+  @tailrec
+  def unwindAll(stack: List[(N, List[N])], paths: Set[Vector[N]]): Set[Vector[N]] = stack match
+    case Nil => paths
+    case (node, suffix) :: rest if node == start => unwindAll(rest, paths + (node :: suffix).toVector)
+    case (node, suffix) :: rest =>
+      unwindAll(result.best(node)._2.foldLeft(rest)((stack, parent) => (parent, node :: suffix) :: stack), paths)
 
   result.shortest match
-    case Some(distance) => result.endsFound.iterator.flatMap(pathsTo).map(Path(_, distance)).toSet
+    case Some(distance) => unwindAll(result.endsFound.toList.map((_, List.empty[N])), Set.empty).map(Path(_, distance))
     case None => Set.empty
 
 /** Finds all shortest paths in the graph from `start` to the closest ends.

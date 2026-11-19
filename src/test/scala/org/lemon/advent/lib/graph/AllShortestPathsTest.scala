@@ -47,3 +47,9 @@ class AllShortestPathsTest extends UnitTest:
       allShortestPaths(graph.unitAdjacency, start, ends) == shortest
     })
   }
+
+  test("allShortestPaths follows a long corridor") {
+    val length = 100_000
+    val corridor = (node: Int) => if node < length then Seq(node + 1) else Seq()
+    allShortestPaths(corridor, 0, _ == length) shouldBe Set(Path(0 to length, length))
+  }
