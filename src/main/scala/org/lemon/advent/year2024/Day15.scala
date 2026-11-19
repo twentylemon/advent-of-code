@@ -2,6 +2,7 @@ package org.lemon.advent.year2024
 
 import org.lemon.advent.lib.*
 import org.lemon.advent.lib.geometry.*
+import org.lemon.advent.lib.graph.*
 
 private object Day15:
 
@@ -24,19 +25,14 @@ private object Day15:
     (Coord.gridToMap(wide), parseMoves(moves))
 
   def step(grid: Map[Coord, Char], robit: Coord, dir: Direction): Map[Coord, Char] =
-    val moves = Seq.unfold(Set(robit)) { moving =>
-      if moving.isEmpty then None
-      else
-        val nexts = moving.map(_ + dir)
-        val boxes = nexts.flatMap(p =>
-          grid(p) match
-            case 'O' => Seq(p)
-            case '[' => Seq(p, p.right)
-            case ']' => Seq(p.left, p)
-            case _ => Seq()
-        ).filterNot(moving)
-        Some(moving -> boxes)
-    }.flatten
+    def pushed(coord: Coord) =
+      val next = coord + dir
+      grid(next) match
+        case 'O' => Seq(next)
+        case '[' => Seq(next, next.right)
+        case ']' => Seq(next.left, next)
+        case _ => Seq()
+    val moves = fill(pushed, robit)
 
     if moves.exists(c => grid(c + dir) == '#') then grid
     else
