@@ -8,7 +8,7 @@ import org.scalacheck.Prop.*
 class PathFindTest extends UnitTest:
   test("pathFind finds the shortest distance") {
     check(forAll(queryGen()) { case Query(graph, start, end) =>
-      pathFind(graph.adjacency, start, end).map(_.distance.toLong) == graph.distancesFrom(start).get(end)
+      pathFind(graph.adjacency, start, end).map(_.distance) == graph.distancesFrom(start).get(end)
     })
   }
 
@@ -44,7 +44,7 @@ class PathFindTest extends UnitTest:
     check(forAll(gen) { case (Query(graph, start, end), scales) =>
       val toEnd = graph.reversed.distancesFrom(end)
       val heuristic = (node: Int) => toEnd.get(node).map(d => (d * scales(node)).toInt).getOrElse(0)
-      pathFind(graph.adjacency, heuristic, start, end).map(_.distance.toLong) == graph.distancesFrom(start).get(end)
+      pathFind(graph.adjacency, heuristic, start, end).map(_.distance) == graph.distancesFrom(start).get(end)
     })
   }
 
@@ -53,13 +53,13 @@ class PathFindTest extends UnitTest:
     check(forAll(gen) { case (Query(graph, start, _), ends) =>
       val distances = graph.distancesFrom(start)
       val found = pathFind(graph.adjacency, start, ends)
-      found.map(_.distance.toLong) == ends.flatMap(distances.get).minOption && found.forall(p => ends(p.at))
+      found.map(_.distance) == ends.flatMap(distances.get).minOption && found.forall(p => ends(p.at))
     })
   }
 
   test("pathFind with unit adjacency counts the steps") {
     check(forAll(queryGen()) { case Query(graph, start, end) =>
       val steps = graph.copy(edges = graph.edges.map((from, to, _) => (from, to, 1)))
-      pathFind(graph.unitAdjacency, start, end).map(_.distance.toLong) == steps.distancesFrom(start).get(end)
+      pathFind(graph.unitAdjacency, start, end).map(_.distance) == steps.distancesFrom(start).get(end)
     })
   }
