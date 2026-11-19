@@ -43,16 +43,16 @@ given Shrink[Graph] = Shrink { case graph: Graph =>
 }
 given Shrink[Query] = Shrink { case Query(graph, start, end) => shrink(graph).map(Query(_, start, end)) }
 
-def graphGen(maxSize: Int, maxEdgesPerNode: Int): Gen[Graph] =
+def graphGen(maxSize: Int, maxEdgesPerNode: Int, maxEdgeWeight: Int = 20): Gen[Graph] =
   for
     size <- Gen.choose(1, maxSize)
     count <- Gen.choose(0, size * maxEdgesPerNode)
-    edges <- Gen.listOfN(count, Gen.zip(Gen.choose(0, size - 1), Gen.choose(0, size - 1), Gen.choose(1, 20)))
+    edges <- Gen.listOfN(count, Gen.zip(Gen.choose(0, size - 1), Gen.choose(0, size - 1), Gen.choose(1, maxEdgeWeight)))
   yield Graph(size, edges)
 
-def queryGen(maxSize: Int = 8, maxEdgesPerNode: Int = 4): Gen[Query] =
+def queryGen(maxSize: Int = 8, maxEdgesPerNode: Int = 4, maxEdgeWeight: Int = 20): Gen[Query] =
   for
-    graph <- graphGen(maxSize, maxEdgesPerNode)
+    graph <- graphGen(maxSize, maxEdgesPerNode, maxEdgeWeight)
     start <- Gen.choose(0, graph.size - 1)
     end <- Gen.choose(0, graph.size - 1)
   yield Query(graph, start, end)

@@ -6,9 +6,9 @@ import org.scalacheck.*
 import org.scalacheck.Prop.*
 
 class CompressTest extends UnitTest:
-  val gen =
+  def gen(maxEdgeWeight: Int = 20) =
     for
-      graph <- graphGen(maxSize = 8, maxEdgesPerNode = 3)
+      graph <- graphGen(maxSize = 8, maxEdgesPerNode = 3, maxEdgeWeight)
       important <- Gen.someOf(graph.nodes)
     yield (graph, important.toSet)
 
@@ -21,16 +21,15 @@ class CompressTest extends UnitTest:
     }.toMap
 
   test("compress keeps the shortest corridor distance between each pair of important nodes") {
-    check(forAll(gen) { (graph: Graph, important: Set[Int]) =>
+    check(forAll(gen()) { (graph: Graph, important: Set[Int]) =>
       compress(graph.adjacency, important).view.mapValues(_.toSet).toMap == corridorDistances(graph, important)
     })
   }
 
   test("compress of a unit graph counts the steps between each pair of important nodes") {
-    check(forAll(gen) { (graph: Graph, important: Set[Int]) =>
+    check(forAll(gen(maxEdgeWeight = 1)) { (graph: Graph, important: Set[Int]) =>
       val unitGraph = graph.nodes.map(node => node -> graph.unitAdjacency(node)).toMap
-      val steps = graph.copy(edges = graph.edges.map((from, to, _) => (from, to, 1)))
-      compress(unitGraph, important).view.mapValues(_.toSet).toMap == corridorDistances(steps, important)
+      compress(unitGraph, important).view.mapValues(_.toSet).toMap == corridorDistances(graph, important)
     })
   }
 

@@ -58,8 +58,7 @@ class PathFindTest extends UnitTest:
   }
 
   test("pathFind with unit adjacency counts the steps") {
-    check(forAll(queryGen()) { case Query(graph, start, end) =>
-      val steps = graph.copy(edges = graph.edges.map((from, to, _) => (from, to, 1)))
-      pathFind(graph.unitAdjacency, start, end).map(_.distance) == steps.distancesFrom(start).get(end)
+    check(forAll(queryGen(maxEdgeWeight = 1)) { case Query(graph, start, end) =>
+      pathFind(graph.unitAdjacency, start, end).map(_.distance) == graph.distancesFrom(start).get(end)
     })
   }
