@@ -19,11 +19,11 @@ private object Day16:
 
     val adjacency = (id: String) => valveByName(id).tunnels
     val sources = startValve +: flowValves.map(_.id)
+    val flowValveIds = flowValves.map(_.id).toSet
     val distances = (for
       from <- sources
-      to <- flowValves.map(_.id)
-      path <- pathFind(adjacency, from, to)
-    yield (from, to) -> path.distance).toMap
+      (to, distance) <- distanceFrom(adjacency, from) if flowValveIds(to)
+    yield (from, to) -> distance).toMap
 
     lazy val compute: (String, Int, BitSet, Int) => Int = memoize { (valve, timeLeft, openValves, turnsLeft) =>
       val best = flowValveIndex
