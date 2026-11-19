@@ -26,10 +26,8 @@ private object Day17:
         .filter(s => grid.hasCoord(s.at))
         .map(s => s -> grid(s.at))
 
-    Seq(State(Coord.origin, Direction.Right, 0), State(Coord.origin, Direction.Down, 0))
-      .flatMap(start => pathFind(adjacency, _.at.manhattan(end), start, _.at == end))
-      .map(_.distance)
-      .min
+    val starts = Seq(State(Coord.origin, Direction.Right, 0), State(Coord.origin, Direction.Down, 0))
+    pathFind(adjacency, _.at.manhattan(end), starts, _.at == end).get.distance
 
   def part1(input: String) = solve(parse(input), 1, 3)
 

@@ -50,6 +50,20 @@ class PathFindTest extends UnitTest:
     })
   }
 
+  test("pathFind from several starts finds the shortest path from any of them") {
+    val gen =
+      for
+        query <- queryGen(minEdgeWeight = 0)
+        starts <- Gen.someOf(query.graph.nodes)
+        scales <- Gen.listOfN(query.graph.size, Gen.choose(0.0, 1.0))
+      yield (query, starts.toSet, scales)
+    check(forAll(gen) { case (Query(graph, _, end), starts, scales) =>
+      val found = pathFind(graph.adjacency, admissible(graph, end, scales), starts, _ == end)
+      val closest = starts.flatMap(graph.distancesFrom(_).get(end)).minOption
+      found.map(_.distance) == closest && found.forall(path => starts(path.path.head) && path.at == end)
+    })
+  }
+
   test("pathFind to several ends finds the closest one") {
     val gen =
       for
