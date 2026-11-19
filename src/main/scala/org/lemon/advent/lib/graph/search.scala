@@ -240,3 +240,15 @@ def allShortestPaths[N, D: Numeric](
   */
 def allShortestPaths[N](adjacency: N => Iterable[N] | Iterator[N], start: N, ends: N => Boolean): Set[Path[N, Int]] =
   allShortestPaths(unitAdjacency(adjacency), start, ends)
+
+/** Finds all shortest paths in the graph from `start` to `end`.
+  * The distance between each node is assumed to be one.
+  *
+  * @param adjacency function to return edges for a given node, all with distance one
+  * @param start the start node
+  * @param end the end node
+  * @return every shortest path from `start` to `end`
+  * @tparam N the node type
+  */
+def allShortestPaths[N](adjacency: N => Iterable[N] | Iterator[N], start: N, end: N): Set[Path[N, Int]] =
+  allShortestPaths(adjacency, start, end == _)

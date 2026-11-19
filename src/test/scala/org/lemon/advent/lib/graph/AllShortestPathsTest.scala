@@ -18,7 +18,7 @@ class AllShortestPathsTest extends UnitTest:
     check(forAll(queryGen(maxSize = 7, maxEdgesPerNode = 3, maxEdgeWeight = 1)) { case Query(graph, start, end) =>
       val all = graph.simplePaths(start, end)
       val shortest = all.filter(_.distance == all.map(_.distance).minOption.getOrElse(0)).toSet
-      allShortestPaths(graph.unitAdjacency, start, _ == end) == shortest
+      allShortestPaths(graph.unitAdjacency, start, end) == shortest
     })
   }
 
