@@ -21,5 +21,5 @@ private object Day10:
     val ends = grid.filter(_._2 == '9').keySet
     grid
       .filter(_._2 == '0')
-      .map((c, _) => allPaths(adjacency, c, ends).size)
+      .map((c, _) => countPaths(adjacency, c, ends))
       .sum
