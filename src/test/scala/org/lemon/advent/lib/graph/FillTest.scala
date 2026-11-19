@@ -31,8 +31,8 @@ class FillTest extends UnitTest:
     val gen =
       for
         query <- queryGen()
-        max <- Gen.choose(0L, query.graph.distancesFrom(query.start).values.max)
-      yield (query, max.toInt)
+        max <- Gen.choose(0, query.graph.distancesFrom(query.start).values.max)
+      yield (query, max)
     check(forAll(gen) { case (Query(graph, start, _), max) =>
       distanceFrom(graph.adjacency, start, max) == graph.distancesFrom(start).filter(_._2 <= max)
     })

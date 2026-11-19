@@ -12,7 +12,7 @@ class CompressTest extends UnitTest:
       important <- Gen.someOf(graph.nodes)
     yield (graph, important.toSet)
 
-  def corridorDistances(graph: Graph, important: Set[Int]): Map[Int, Set[(Int, Long)]] =
+  def corridorDistances(graph: Graph, important: Set[Int]): Map[Int, Set[(Int, Int)]] =
     important.map { from =>
       // can leave `from` and pass through unimportant nodes, but stops at the first other important node
       val corridors = graph.copy(edges = graph.edges.filter((f, t, _) => (f == from || !important(f)) && t != from))
@@ -20,12 +20,9 @@ class CompressTest extends UnitTest:
       from -> (important - from).flatMap(to => distances.get(to).map(to -> _))
     }.toMap
 
-  def longDistances(compressed: WeightedGraph[Int, Int]): Map[Int, Set[(Int, Long)]] =
-    compressed.view.mapValues(_.map((to, d) => (to, d.toLong)).toSet).toMap
-
   test("compress keeps the shortest corridor distance between each pair of important nodes") {
     check(forAll(gen) { (graph: Graph, important: Set[Int]) =>
-      longDistances(compress(graph.adjacency, important)) == corridorDistances(graph, important)
+      compress(graph.adjacency, important).view.mapValues(_.toSet).toMap == corridorDistances(graph, important)
     })
   }
 
@@ -33,7 +30,7 @@ class CompressTest extends UnitTest:
     check(forAll(gen) { (graph: Graph, important: Set[Int]) =>
       val unitGraph = graph.nodes.map(node => node -> graph.unitAdjacency(node)).toMap
       val steps = graph.copy(edges = graph.edges.map((from, to, _) => (from, to, 1)))
-      longDistances(compress(unitGraph, important)) == corridorDistances(steps, important)
+      compress(unitGraph, important).view.mapValues(_.toSet).toMap == corridorDistances(steps, important)
     })
   }
 

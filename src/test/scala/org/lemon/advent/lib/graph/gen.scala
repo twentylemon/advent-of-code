@@ -14,8 +14,8 @@ case class Graph(size: Int, edges: List[(Int, Int, Int)]):
   def reversed = Graph(size, edges.map((from, to, w) => (to, from, w)))
 
   /** bellman-ford */
-  def distancesFrom(start: Int): Map[Int, Long] =
-    Iterator.iterate(Map(start -> 0L))(dist =>
+  def distancesFrom(start: Int): Map[Int, Int] =
+    Iterator.iterate(Map(start -> 0))(dist =>
       edges.foldLeft(dist) { case (d, (from, to, w)) =>
         d.get(from) match
           case Some(df) if d.get(to).forall(_ > df + w) => d.updated(to, df + w)
@@ -24,15 +24,15 @@ case class Graph(size: Int, edges: List[(Int, Int, Int)]):
     ).nth(size)
 
   /** every simple path from `start` to `end`, using the cheapest of any parallel edges */
-  def simplePaths(start: Int, end: Int): Seq[Path[Int, Long]] =
-    def cheapest(from: Int, to: Int) = adjacency(from).filter(_._1 == to).map(_._2.toLong).min
-    def loop(path: Vector[Int], distance: Long): Seq[Path[Int, Long]] =
+  def simplePaths(start: Int, end: Int): Seq[Path[Int, Int]] =
+    def cheapest(from: Int, to: Int) = adjacency(from).filter(_._1 == to).map(_._2).min
+    def loop(path: Vector[Int], distance: Int): Seq[Path[Int, Int]] =
       if path.last == end then Seq(Path(path, distance))
       else
         unitAdjacency(path.last)
           .filterNot(path.contains)
           .flatMap(next => loop(path :+ next, distance + cheapest(path.last, next)))
-    loop(Vector(start), 0L)
+    loop(Vector(start), 0)
 
 case class Query(graph: Graph, start: Int, end: Int)
 
