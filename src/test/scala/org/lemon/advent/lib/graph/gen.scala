@@ -4,7 +4,7 @@ import org.lemon.advent.lib.*
 import org.scalacheck.*
 import org.scalacheck.Shrink.*
 
-/** A small directed graph with positive weights, which may have parallel edges and self loops.
+/** A small directed graph with non-negative weights, which may have parallel edges and self loops.
   * Searches are checked against brute force answers computed from the edge list.
   */
 case class Graph(size: Int, edges: List[(Int, Int, Int)]):
@@ -37,22 +37,29 @@ case class Graph(size: Int, edges: List[(Int, Int, Int)]):
 case class Query(graph: Graph, start: Int, end: Int)
 
 given Shrink[Graph] = Shrink { case graph: Graph =>
+  val lightest = graph.edges.map(_._3).minOption.getOrElse(0)
   shrink(graph.edges)
-    .filter(_.forall((from, to, w) => graph.nodes.contains(from) && graph.nodes.contains(to) && w > 0))
+    .filter(_.forall((from, to, w) => graph.nodes.contains(from) && graph.nodes.contains(to) && w >= lightest))
     .map(edges => graph.copy(edges = edges))
 }
 given Shrink[Query] = Shrink { case Query(graph, start, end) => shrink(graph).map(Query(_, start, end)) }
 
-def graphGen(maxSize: Int, maxEdgesPerNode: Int, maxEdgeWeight: Int = 20): Gen[Graph] =
+def graphGen(maxSize: Int, maxEdgesPerNode: Int, maxEdgeWeight: Int = 20, minEdgeWeight: Int = 1): Gen[Graph] =
   for
     size <- Gen.choose(1, maxSize)
     count <- Gen.choose(0, size * maxEdgesPerNode)
-    edges <- Gen.listOfN(count, Gen.zip(Gen.choose(0, size - 1), Gen.choose(0, size - 1), Gen.choose(1, maxEdgeWeight)))
+    weight = Gen.choose(minEdgeWeight, maxEdgeWeight)
+    edges <- Gen.listOfN(count, Gen.zip(Gen.choose(0, size - 1), Gen.choose(0, size - 1), weight))
   yield Graph(size, edges)
 
-def queryGen(maxSize: Int = 8, maxEdgesPerNode: Int = 4, maxEdgeWeight: Int = 20): Gen[Query] =
+def queryGen(
+    maxSize: Int = 8,
+    maxEdgesPerNode: Int = 4,
+    maxEdgeWeight: Int = 20,
+    minEdgeWeight: Int = 1,
+): Gen[Query] =
   for
-    graph <- graphGen(maxSize, maxEdgesPerNode, maxEdgeWeight)
+    graph <- graphGen(maxSize, maxEdgesPerNode, maxEdgeWeight, minEdgeWeight)
     start <- Gen.choose(0, graph.size - 1)
     end <- Gen.choose(0, graph.size - 1)
   yield Query(graph, start, end)
