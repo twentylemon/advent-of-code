@@ -1,7 +1,7 @@
 package org.lemon.advent.lib.graph
 
 import scala.annotation.tailrec
-import scala.collection.immutable.TreeMap
+import scala.collection.immutable.{Queue, TreeMap}
 import scala.math.Numeric.Implicits.*
 import scala.math.Ordering.Implicits.*
 
@@ -154,7 +154,7 @@ def pathFind[N, D: Numeric](
 def pathFind[N, D: Numeric](adjacency: N => Iterable[(N, D)] | Iterator[(N, D)], start: N, end: N): Option[Path[N, D]] =
   pathFind(adjacency, start, end == _)
 
-/** Performs a dijkstra's search of the graph from `start`, returning
+/** Performs a breadth first search of the graph from `start`, returning
   * the shortest path to the closest end. The distance between each node is assumed to be one.
   *
   * @param adjacency function to return edges for a given node, all with distance one
@@ -164,9 +164,28 @@ def pathFind[N, D: Numeric](adjacency: N => Iterable[(N, D)] | Iterator[(N, D)],
   * @tparam N the node type
   */
 def pathFind[N](adjacency: N => Iterable[N] | Iterator[N], start: N, ends: N => Boolean): Option[Path[N, Int]] =
-  pathFind(unitAdjacency(adjacency), start, ends)
+  @tailrec
+  def unwind(parents: Map[N, N], node: N, path: List[N]): Vector[N] =
+    val parent = parents(node)
+    if parent == node then (node :: path).toVector else unwind(parents, parent, node :: path)
 
-/** Performs a dijkstra's search of the graph from `start` to `end`, returning
+  @tailrec
+  def search(queue: Queue[N], parents: Map[N, N]): Option[Path[N, Int]] =
+    queue.dequeueOption match
+      case None => None
+      case Some((node, _)) if ends(node) =>
+        val path = unwind(parents, node, Nil)
+        Some(Path(path, path.size - 1))
+      case Some((node, rest)) =>
+        val (nextQueue, nextParents) = adjacency(node).iterator.foldLeft((rest, parents)) {
+          case (acc @ (queue, parents), next) =>
+            if parents.contains(next) then acc else (queue.enqueue(next), parents.updated(next, node))
+        }
+        search(nextQueue, nextParents)
+
+  search(Queue(start), Map(start -> start))
+
+/** Performs a breadth first search of the graph from `start` to `end`, returning
   * the shortest path between them. The distance between each node is assumed to be one.
   *
   * @param adjacency function to return edges for a given node, all with distance one
