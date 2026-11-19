@@ -1,8 +1,53 @@
 package org.lemon.advent.lib.graph
 
 import scala.annotation.tailrec
+import scala.collection.immutable.TreeMap
 import scala.math.Numeric.Implicits.*
 import scala.math.Ordering.Implicits.*
+
+/** Performs an A* search of the graph from any of the `starts`, returning
+  * the shortest path from one of them to the closest end. When `heuristic` always returns zero,
+  * this is equivalent to dijkstra's search.
+  *
+  * @param adjacency function to return edges for a given node
+  * @param heuristic function estimating the remaining cost from a node to the goal (must be admissible)
+  * @param starts the start nodes
+  * @param ends function to check if a node is an ending node
+  * @return the shortest path from any start to the closest end, or empty if no end is reachable
+  * @tparam N the node type
+  * @tparam D the distance type
+  */
+def pathFind[N, D: Numeric](
+    adjacency: N => Iterable[(N, D)] | Iterator[(N, D)],
+    heuristic: N => D,
+    starts: Iterable[N],
+    ends: N => Boolean,
+): Option[Path[N, D]] =
+  @tailrec
+  def unwind(best: Map[N, (D, N)], node: N, path: List[N]): Vector[N] =
+    val parent = best(node)._2
+    if parent == node then (node :: path).toVector else unwind(best, parent, node :: path)
+
+  @tailrec
+  def search(queue: MinQueue[D, (D, N)], best: Map[N, (D, N)]): Option[Path[N, D]] =
+    queue.dequeue match
+      case None => None
+      case Some((_, (cost, node), rest)) if cost > best(node)._1 => search(rest, best)
+      case Some((_, (cost, node), _)) if ends(node) => Some(Path(unwind(best, node, Nil), cost))
+      case Some((_, (cost, node), rest)) =>
+        val (nextQueue, nextBest) = adjacency(node).iterator.foldLeft((rest, best)) {
+          case (acc @ (queue, best), (next, dist)) =>
+            val nextCost = cost + dist
+            if best.get(next).exists(_._1 <= nextCost) then acc
+            else (queue.enqueue(nextCost + heuristic(next), (nextCost, next)), best.updated(next, (nextCost, node)))
+        }
+        search(nextQueue, nextBest)
+
+  val zero = Numeric[D].zero
+  val queue = starts.foldLeft(MinQueue[D, (D, N)](TreeMap.empty))((queue, start) =>
+    queue.enqueue(heuristic(start), (zero, start))
+  )
+  search(queue, starts.iterator.map(start => start -> (zero, start)).toMap)
 
 /** Performs an A* search of the graph from `start`, returning
   * the shortest path to the closest end. When `heuristic` always returns zero,
@@ -22,26 +67,7 @@ def pathFind[N, D: Numeric](
     start: N,
     ends: N => Boolean,
 ): Option[Path[N, D]] =
-  def unwind(best: Map[N, (D, N)], end: N): Vector[N] =
-    start +: Iterator.iterate(end)(best(_)._2).takeWhile(_ != start).toVector.reverse
-
-  @tailrec
-  def search(queue: MinQueue[D, (D, N)], best: Map[N, (D, N)]): Option[Path[N, D]] =
-    queue.dequeue match
-      case None => None
-      case Some((_, (cost, node), rest)) if cost > best(node)._1 => search(rest, best)
-      case Some((_, (cost, node), _)) if ends(node) => Some(Path(unwind(best, node), cost))
-      case Some((_, (cost, node), rest)) =>
-        val (nextQueue, nextBest) = adjacency(node).iterator.foldLeft((rest, best)) {
-          case (acc @ (queue, best), (next, dist)) =>
-            val nextCost = cost + dist
-            if best.get(next).exists(_._1 <= nextCost) then acc
-            else (queue.enqueue(nextCost + heuristic(next), (nextCost, next)), best.updated(next, (nextCost, node)))
-        }
-        search(nextQueue, nextBest)
-
-  val zero = Numeric[D].zero
-  search(MinQueue(heuristic(start), (zero, start)), Map(start -> (zero, start)))
+  pathFind(adjacency, heuristic, Seq(start), ends)
 
 /** Performs an A* search of the graph from `start` to `end`, returning
   * the shortest path between them.
