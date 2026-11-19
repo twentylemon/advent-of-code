@@ -14,7 +14,7 @@ class FillTest extends UnitTest:
 
   test("distanceFrom finds the shortest distance to every reachable node") {
     check(forAll(queryGen()) { case Query(graph, start, _) =>
-      distanceFrom(graph.adjacency, start).view.mapValues(_.toLong).toMap == graph.distancesFrom(start)
+      distanceFrom(graph.adjacency, start) == graph.distancesFrom(start)
     })
   }
 
@@ -34,15 +34,14 @@ class FillTest extends UnitTest:
         max <- Gen.choose(0L, query.graph.distancesFrom(query.start).values.max)
       yield (query, max.toInt)
     check(forAll(gen) { case (Query(graph, start, _), max) =>
-      distanceFrom(graph.adjacency, start, max).view.mapValues(_.toLong).toMap ==
-        graph.distancesFrom(start).filter(_._2 <= max)
+      distanceFrom(graph.adjacency, start, max) == graph.distancesFrom(start).filter(_._2 <= max)
     })
   }
 
   test("distanceFrom with unit adjacency counts the steps to every reachable node") {
     check(forAll(queryGen()) { case Query(graph, start, _) =>
       val steps = graph.copy(edges = graph.edges.map((from, to, _) => (from, to, 1)))
-      distanceFrom(graph.unitAdjacency, start).view.mapValues(_.toLong).toMap == steps.distancesFrom(start)
+      distanceFrom(graph.unitAdjacency, start) == steps.distancesFrom(start)
     })
   }
 
@@ -50,12 +49,11 @@ class FillTest extends UnitTest:
     val gen =
       for
         query <- queryGen()
-        steps = query.graph.copy(edges = query.graph.edges.map((from, to, _) => (from, to, 1)))
-        max <- Gen.choose(0L, steps.distancesFrom(query.start).values.max)
-      yield (query, steps, max.toInt)
-    check(forAll(gen) { case (Query(graph, start, _), steps, max) =>
-      distanceFrom(graph.unitAdjacency, start, max).view.mapValues(_.toLong).toMap ==
-        steps.distancesFrom(start).filter(_._2 <= max)
+        max <- Gen.choose(0, query.graph.size - 1)
+      yield (query, max)
+    check(forAll(gen) { case (Query(graph, start, _), max) =>
+      val steps = graph.copy(edges = graph.edges.map((from, to, _) => (from, to, 1)))
+      distanceFrom(graph.unitAdjacency, start, max) == steps.distancesFrom(start).filter(_._2 <= max)
     })
   }
 
@@ -63,12 +61,12 @@ class FillTest extends UnitTest:
     val gen =
       for
         query <- queryGen()
-        edges = query.graph.edges.filter((from, to, _) => from < to).distinctBy((from, to, _) => (from, to))
         ends <- Gen.someOf(query.graph.nodes)
-      yield (query.graph.copy(edges = edges), query.start, ends.toSet)
-    check(forAll(gen) { (dag, start, ends) =>
-      allPaths(dag.adjacency, start, ends).map(p => p.copy(distance = p.distance.toLong)) ==
-        ends.flatMap(dag.simplePaths(start, _))
+      yield (query, ends.toSet)
+    check(forAll(gen) { case (Query(graph, start, _), ends) =>
+      val edges = graph.edges.filter((from, to, _) => from < to).distinctBy((from, to, _) => (from, to))
+      val dag = graph.copy(edges = edges)
+      allPaths(dag.adjacency, start, ends) == ends.flatMap(dag.simplePaths(start, _))
     })
   }
 
@@ -76,11 +74,11 @@ class FillTest extends UnitTest:
     val gen =
       for
         query <- queryGen()
-        edges = query.graph.edges.filter((from, to, _) => from < to).map((from, to, _) => (from, to, 1)).distinct
         ends <- Gen.someOf(query.graph.nodes)
-      yield (query.graph.copy(edges = edges), query.start, ends.toSet)
-    check(forAll(gen) { (dag, start, ends) =>
-      allPaths(dag.unitAdjacency, start, ends).map(p => p.copy(distance = p.distance.toLong)) ==
-        ends.flatMap(dag.simplePaths(start, _))
+      yield (query, ends.toSet)
+    check(forAll(gen) { case (Query(graph, start, _), ends) =>
+      val edges = graph.edges.filter((from, to, _) => from < to).map((from, to, _) => (from, to, 1)).distinct
+      val dag = graph.copy(edges = edges)
+      allPaths(dag.unitAdjacency, start, ends) == ends.flatMap(dag.simplePaths(start, _))
     })
   }
