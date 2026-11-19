@@ -30,8 +30,13 @@ private object Day17:
     }
 
   def part1(input: String) =
-    pathFind(adjacency(input.trim), (Coord(0, 0), List.empty[Direction]), _._1 == Coord(3, 3))
-      .map(p => pathToString(p.at._2)).get
+    val vault = Coord(3, 3)
+    pathFind(
+      adjacency = adjacency(input.trim),
+      heuristic = _._1.manhattan(vault),
+      start = (Coord(0, 0), List.empty[Direction]),
+      ends = _._1 == vault,
+    ).map(p => pathToString(p.at._2)).get
 
   def part2(input: String) =
     val pass = input.trim
