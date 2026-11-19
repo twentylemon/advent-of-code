@@ -16,4 +16,4 @@ private object Day13:
     pathFind(adjacency = adjacency(input.trim.toInt), start = Coord(1, 1), end = end).get.distance
 
   def part2(input: String) =
-    distanceFrom(adjacency = adjacency(input.trim.toInt), end = Coord(1, 1), maxDistance = 50).size
+    distanceFrom(adjacency = adjacency(input.trim.toInt), start = Coord(1, 1), maxDistance = 50).size
