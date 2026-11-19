@@ -17,10 +17,11 @@ private object Day24:
     val invert = grid.map(_.swap)
     val nodes = junctions(adjacency) ++ checkpoints.keys
     val graph = compress(adjacency, nodes)
-    ('0' to checkpoints.values.max).pairs
-      .map((from, to) => (from, to) -> pathFind(graph, invert(from), invert(to)).get.distance)
-      .flatMap((path, dist) => Seq(path -> dist, path.swap -> dist))
-      .toMap
+    val ids = '0' to checkpoints.values.max
+    ids.flatMap(from =>
+      val distances = distanceFrom(graph, invert(from))
+      ids.filter(_ != from).map(to => (from, to) -> distances(invert(to)))
+    ).toMap
 
   def shortestRoute(route: Seq[Char], distances: Map[(Char, Char), Int]) =
     route.sliding2.map(distances).sum
