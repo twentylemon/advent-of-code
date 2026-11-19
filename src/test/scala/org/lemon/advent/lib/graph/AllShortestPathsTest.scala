@@ -28,7 +28,6 @@ class AllShortestPathsTest extends UnitTest:
         query <- queryGen(maxSize = 7, maxEdgesPerNode = 3)
         ends <- Gen.someOf(query.graph.nodes)
       yield (query, ends.toSet)
-
     check(forAll(gen) { case (Query(graph, start, _), ends) =>
       val all = ends.toSeq.flatMap(graph.simplePaths(start, _))
       val shortest = all.filter(_.distance == all.map(_.distance).minOption.getOrElse(0)).toSet
@@ -42,7 +41,6 @@ class AllShortestPathsTest extends UnitTest:
         query <- queryGen(maxSize = 7, maxEdgesPerNode = 3, maxEdgeWeight = 1)
         ends <- Gen.someOf(query.graph.nodes)
       yield (query, ends.toSet)
-
     check(forAll(gen) { case (Query(graph, start, _), ends) =>
       val all = ends.toSeq.flatMap(graph.simplePaths(start, _))
       val shortest = all.filter(_.distance == all.map(_.distance).minOption.getOrElse(0)).toSet
