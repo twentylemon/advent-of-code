@@ -25,19 +25,19 @@ private object Day15:
     (Coord.gridToMap(wide), parseMoves(moves))
 
   def step(grid: Map[Coord, Char], robit: Coord, dir: Direction): Map[Coord, Char] =
-    def pushed(coord: Coord) =
+    def wouldBePushed(coord: Coord) =
       val next = coord + dir
       grid(next) match
         case 'O' => Seq(next)
         case '[' => Seq(next, next.right)
         case ']' => Seq(next.left, next)
         case _ => Seq()
-    val moves = fill(pushed, robit)
+    val chain = fill(wouldBePushed, robit)
 
-    if moves.exists(c => grid(c + dir) == '#') then grid
+    if chain.exists(c => grid(c + dir) == '#') then grid
     else
-      val gapsFilled = moves.foldLeft(grid) { (g, coord) => g.updated(coord, '.') }
-      moves.foldLeft(gapsFilled) { (g, coord) => g.updated(coord + dir, grid(coord)) }
+      val gapsFilled = chain.foldLeft(grid) { (g, coord) => g.updated(coord, '.') }
+      chain.foldLeft(gapsFilled) { (g, coord) => g.updated(coord + dir, grid(coord)) }
 
   def gps(grid: Map[Coord, Char], box: Char) =
     grid.filter(_._2 == box).keysIterator.map(c => 100 * c.y + c.x).sum
