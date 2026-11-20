@@ -22,7 +22,7 @@ private enum MinQueue[P, A](using ord: Ordering[P]):
   def dequeue: Option[(P, A, MinQueue[P, A])] = this match
     case Empty() => None
     case NonEmpty(smallest, bucket, rest) =>
-      val next =
+      val next: MinQueue[P, A] =
         if bucket.tail.nonEmpty then NonEmpty(smallest, bucket.tail, rest)
         else if rest.isEmpty then Empty()
         else
