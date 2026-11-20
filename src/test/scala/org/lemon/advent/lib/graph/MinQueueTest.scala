@@ -5,8 +5,6 @@ import org.scalacheck.*
 import org.scalacheck.Prop.*
 import org.scalacheck.commands.Commands
 
-import scala.collection.immutable.TreeMap
-
 class MinQueueTest extends UnitTest:
   object MinQueueCommands extends Commands:
     case class Bucket(elements: List[Int], remaining: Int)
@@ -16,7 +14,7 @@ class MinQueueTest extends UnitTest:
     val priority = Gen.choose(0, 10)
 
     override def canCreateNewSut(newState: State, initSuts: Iterable[State], runningSuts: Iterable[Sut]) = true
-    override def newSut(state: State) = Sut(MinQueue(TreeMap.empty[Int, List[Int]]))
+    override def newSut(state: State) = Sut(MinQueue.empty)
     override def destroySut(sut: Sut) = ()
     override def initialPreCondition(state: State) = state.isEmpty
     override def genInitialState = Gen.const(Map.empty)
