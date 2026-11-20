@@ -1,8 +1,9 @@
 package org.lemon.advent.lib.ortools
 
 import com.google.ortools.Loader
-import com.google.ortools.linearsolver.MPSolver
+import com.google.ortools.linearsolver.{MPObjective, MPSolver}
 import scala.collection.mutable
+import scala.util.chaining.*
 
 enum SolverType:
   case CBC, SCIP, SAT
@@ -10,25 +11,32 @@ enum SolverType:
 enum SolveStatus:
   case Optimal, Feasible, Infeasible, Unbounded, Abnormal, NotSolved
 
-class MipModel(solverType: SolverType = SolverType.CBC):
+object MipModel:
   Loader.loadNativeLibraries()
-  private val solver = MPSolver.createSolver(solverType.toString)
-  require(solver != null, s"Could not create solver ${solverType}")
+
+  private def createSolver(solverType: SolverType): MPSolver =
+    MPSolver.createSolver(solverType.toString).tap(solver =>
+      require(solver != null, s"Could not create solver ${solverType}")
+    )
+
+class MipModel(solverType: SolverType = SolverType.CBC):
+  private val solver = MipModel.createSolver(solverType)
   private val variables = mutable.Map.empty[String, Var]
   private var objectiveValue: Option[Double] = None
   private var status: SolveStatus = SolveStatus.NotSolved
 
-  def intVar(name: String, lb: Double = 0, ub: Double = Double.MaxValue): IntVar =
+  private def declare[V <: Var](name: String, create: => V): V =
     require(!variables.contains(name), s"variable $name already exists")
-    variables.getOrElseUpdate(name, IntVar(solver.makeIntVar(lb, ub, name))).asInstanceOf[IntVar]
+    create.tap(variables(name) = _)
+
+  def intVar(name: String, lb: Double = 0, ub: Double = Double.MaxValue): IntVar =
+    declare(name, IntVar(solver.makeIntVar(lb, ub, name)))
 
   def boolVar(name: String): BoolVar =
-    require(!variables.contains(name), s"variable $name already exists")
-    variables.getOrElseUpdate(name, BoolVar(solver.makeBoolVar(name))).asInstanceOf[BoolVar]
+    declare(name, BoolVar(solver.makeBoolVar(name)))
 
   def numVar(name: String, lb: Double = 0, ub: Double = Double.MaxValue): NumVar =
-    require(!variables.contains(name), s"variable $name already exists")
-    variables.getOrElseUpdate(name, NumVar(solver.makeNumVar(lb, ub, name))).asInstanceOf[NumVar]
+    declare(name, NumVar(solver.makeNumVar(lb, ub, name)))
 
   def apply(name: String): Var = variables(name)
 
@@ -36,17 +44,15 @@ class MipModel(solverType: SolverType = SolverType.CBC):
     val c = solver.makeConstraint(constraint.lb, constraint.ub, "")
     constraint.terms.foreach((v, coeff) => c.setCoefficient(v.underlying, coeff))
 
-  def maximize(expr: LinearExpr): Unit =
-    val obj = solver.objective()
-    expr.terms.foreach((v, coeff) => obj.setCoefficient(v.underlying, coeff))
-    obj.setOffset(expr.constant)
-    obj.setMaximization()
+  private def objectiveOf(expr: LinearExpr): MPObjective =
+    solver.objective().tap(obj =>
+      expr.terms.foreach((v, coeff) => obj.setCoefficient(v.underlying, coeff))
+      obj.setOffset(expr.constant)
+    )
 
-  def minimize(expr: LinearExpr): Unit =
-    val obj = solver.objective()
-    expr.terms.foreach((v, coeff) => obj.setCoefficient(v.underlying, coeff))
-    obj.setOffset(expr.constant)
-    obj.setMinimization()
+  def maximize(expr: LinearExpr): Unit = objectiveOf(expr).setMaximization()
+
+  def minimize(expr: LinearExpr): Unit = objectiveOf(expr).setMinimization()
 
   def solve(): SolveStatus =
     val result = solver.solve()
