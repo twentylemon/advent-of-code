@@ -1,7 +1,6 @@
 package org.lemon.advent.lib.graph
 
 import org.lemon.advent.*
-import org.lemon.advent.lib.*
 import org.scalacheck.*
 import org.scalacheck.Arbitrary.*
 import org.scalacheck.Prop.*

@@ -3,7 +3,6 @@ package org.lemon.advent.lib.geometry
 import org.lemon.advent.lib.*
 
 import scala.math.Integral.Implicits.*
-import scala.math.Ordering.Implicits.*
 
 object Cuboid:
   /** @return the smallest cuboid enclosing all the points */
