@@ -28,6 +28,12 @@ private object Day21:
     allShortestPaths(adjacency, map(start), map(end))
       .map(path => path.path.map(buttons(_)).mkString)
 
+  def pathsOn(buttons: Seq[Seq[Char]]): Map[(Char, Char), Seq[String]] =
+    val keys = asMap(buttons).keySet
+    keys.flatMap(from => keys.map(to => (from, to) -> pathsBetween(buttons)(from, to).toSeq)).toMap
+  lazy val directionalPaths = pathsOn(directional)
+  lazy val keypadPaths = pathsOn(keypad)
+
   def asNested(map: Map[Char, Coord])(path: String) =
     'A' +: path.sliding2.map((from, to) =>
       map(from).directionTo(map(to)) match
@@ -41,10 +47,10 @@ private object Day21:
   def pathLength(code: String, totalBots: Int): Long = pathLength(code, totalBots, totalBots)
   def pathLength(code: String, totalBots: Int, arrowBots: Int): Long =
     lazy val length: (Char, Char, Int) => Long = memoize {
-      case (from, to, 0) => pathsBetween(directional)(from, to).map(_.size).min
+      case (from, to, 0) => directionalPaths((from, to)).map(_.size).min
       case (from, to, depth) =>
-        val board = if depth == totalBots then keypad else directional
-        pathsBetween(board)(from, to)
+        val (board, paths) = if depth == totalBots then (keypad, keypadPaths) else (directional, directionalPaths)
+        paths((from, to))
           .map(asNested(asMap(board)))
           .map(nested =>
             nested.sliding2
