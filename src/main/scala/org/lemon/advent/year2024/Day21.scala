@@ -6,18 +6,18 @@ import org.lemon.advent.lib.graph.*
 
 private object Day21:
 
-  def directional = IndexedSeq(
+  val directional = IndexedSeq(
     " ^A".toSeq,
     "<v>".toSeq,
   )
-  def directionalMap = asMap(directional)
-  def keypad = IndexedSeq(
+  val directionalMap = asMap(directional)
+  val keypad = IndexedSeq(
     "789".toSeq,
     "456".toSeq,
     "123".toSeq,
     " 0A".toSeq,
   )
-  def keypadMap = asMap(keypad)
+  val keypadMap = asMap(keypad)
 
   def asMap(buttons: Seq[Seq[Char]]): Map[Char, Coord] =
     Area(buttons).filter(buttons(_) != ' ').map(coord => buttons(coord) -> coord).toMap
@@ -38,32 +38,34 @@ private object Day21:
         case _ => throw AssertionError(s"no direction from $from to $to")
     ).mkString :+ 'A'
 
-  def pathLength(code: String, totalBots: Int): Long = pathLength(code, totalBots, totalBots)
-  def pathLength(code: String, totalBots: Int, arrowBots: Int): Long =
+  def pathLength(totalBots: Int): String => Long =
+    val paths = memoize((board: Seq[Seq[Char]], from: Char, to: Char) => pathsBetween(board)(from, to))
     lazy val length: (Char, Char, Int) => Long = memoize {
-      case (from, to, 0) => pathsBetween(directional)(from, to).map(_.size).min
+      case (from, to, 0) => paths(directional, from, to).map(_.size).min
       case (from, to, depth) =>
-        val board = if depth == totalBots then keypad else directional
-        pathsBetween(board)(from, to)
-          .map(asNested(asMap(board)))
+        val (board, map) = if depth == totalBots then (keypad, keypadMap) else (directional, directionalMap)
+        paths(board, from, to)
+          .map(asNested(map))
           .map(nested =>
             nested.sliding2
               .map((start, end) => length(start, end, depth - 1))
               .sum
           ).min
     }
-    ('A' +: code).zip(code).map((start, end) => length(start, end, arrowBots)).sum
+    code => ('A' +: code).zip(code).map((start, end) => length(start, end, totalBots)).sum
 
   def complexity(code: String, distance: Long) = code.filter(_.isDigit).toInt * distance
 
   def part1(input: String) =
+    val length = pathLength(2)
     input.linesIterator
-      .map(code => complexity(code, pathLength(code, 2)))
+      .map(code => complexity(code, length(code)))
       .sum
 
   def part2(input: String) =
+    val length = pathLength(25)
     input.linesIterator
-      .map(code => complexity(code, pathLength(code, 25)))
+      .map(code => complexity(code, length(code)))
       .sum
 
   // GARBO
