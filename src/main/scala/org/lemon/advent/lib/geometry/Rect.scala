@@ -23,7 +23,7 @@ object Rect:
   def apply[N: Integral](width: N, height: N): Rect[N] =
     apply(`0`, width - `1`, `0`, height - `1`)
 
-  given [N: Integral]: Conversion[Rect[N], Iterator[Point[N]]] = _.iterator
+  given [N]: Conversion[Rect[N], Iterator[Point[N]]] = _.iterator
 
 /** A 2d rectangle with generic integral bounds.
   * @param xRange the x bounds of the rectangle
