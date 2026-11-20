@@ -14,7 +14,7 @@ class MipModelTest extends UnitTest:
       model.solve() shouldBe SolveStatus.Optimal
       model.objective shouldBe 90.0 +- 1e-6
       take.map(_.value) shouldBe Seq(false, true, false, true)
-      model.release()
+      model.close()
     }
 
     test(s"minimize finds the fewest coins with $solverType") {
@@ -26,7 +26,7 @@ class MipModelTest extends UnitTest:
       model.solve() shouldBe SolveStatus.Optimal
       model.objective shouldBe 5.0 +- 1e-6
       (threes.value, fives.value) shouldBe (4L, 1L)
-      model.release()
+      model.close()
     }
 
     test(s"the objective includes the expression's constant with $solverType") {
@@ -36,7 +36,7 @@ class MipModelTest extends UnitTest:
       model.maximize(x + 10)
       model.solve() shouldBe SolveStatus.Optimal
       model.objective shouldBe 13.0 +- 1e-6
-      model.release()
+      model.close()
     }
 
     test(s"contradictory constraints are Infeasible with no objective with $solverType") {
@@ -48,7 +48,7 @@ class MipModelTest extends UnitTest:
       model.solve() shouldBe SolveStatus.Infeasible
       model.getStatus shouldBe SolveStatus.Infeasible
       an[IllegalStateException] should be thrownBy model.objective
-      model.release()
+      model.close()
     }
 
     test(s"a constant constraint that can't hold is Infeasible with $solverType") {
@@ -57,7 +57,7 @@ class MipModelTest extends UnitTest:
       model.subjectTo(LinearExpr.Zero + 5 <= 3)
       model.maximize(x)
       model.solve() shouldBe SolveStatus.Infeasible
-      model.release()
+      model.close()
     }
   )
 
@@ -73,7 +73,7 @@ class MipModelTest extends UnitTest:
       model.objective shouldBe 2.8 +- 1e-6
       x.value shouldBe 1.6 +- 1e-6
       y.value shouldBe 1.2 +- 1e-6
-      model.release()
+      model.close()
     }
   )
 
@@ -83,7 +83,7 @@ class MipModelTest extends UnitTest:
     model.maximize(x)
     model.solve() shouldBe SolveStatus.Unbounded
     an[IllegalStateException] should be thrownBy model.objective
-    model.release()
+    model.close()
   }
 
   test("a time limit doesn't stop a quick solve") {
@@ -94,7 +94,7 @@ class MipModelTest extends UnitTest:
     model.setTimeout(10000)
     model.solve() shouldBe SolveStatus.Optimal
     model.objective shouldBe 3.0 +- 1e-6
-    model.release()
+    model.close()
   }
 
   Seq[(String, (MipModel, String) => Var)](
@@ -106,7 +106,7 @@ class MipModelTest extends UnitTest:
       val model = MipModel()
       declare(model, "x")
       an[IllegalArgumentException] should be thrownBy declare(model, "x")
-      model.release()
+      model.close()
     }
   )
 
@@ -115,5 +115,5 @@ class MipModelTest extends UnitTest:
     val x = model.numVar("x")
     model("x") shouldBe x
     model("x").name shouldBe "x"
-    model.release()
+    model.close()
   }

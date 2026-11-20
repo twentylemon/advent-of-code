@@ -19,7 +19,7 @@ object MipModel:
       require(solver != null, s"Could not create solver ${solverType}")
     )
 
-class MipModel(solverType: SolverType = SolverType.CBC):
+class MipModel(solverType: SolverType = SolverType.CBC) extends AutoCloseable:
   private val solver = MipModel.createSolver(solverType)
   private val variables = mutable.Map.empty[String, Var]
   private var objectiveValue: Option[Double] = None
@@ -74,4 +74,4 @@ class MipModel(solverType: SolverType = SolverType.CBC):
 
   def setTimeout(millis: Long): Unit = solver.setTimeLimit(millis)
 
-  def release(): Unit = solver.delete()
+  override def close(): Unit = solver.delete()

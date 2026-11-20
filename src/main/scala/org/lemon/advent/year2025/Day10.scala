@@ -2,6 +2,7 @@ package org.lemon.advent.year2025
 
 import org.lemon.advent.lib.*
 import org.lemon.advent.lib.ortools.*
+import scala.util.Using
 
 private object Day10:
 
@@ -19,8 +20,7 @@ private object Day10:
           (targets, buttons, joltage)
     ).toSeq
 
-  def solve(buttons: Seq[Seq[Int]], targetValues: Seq[Int], useParity: Boolean) =
-    val model = MipModel()
+  def solve(buttons: Seq[Seq[Int]], targetValues: Seq[Int], useParity: Boolean) = Using.resource(MipModel()) { model =>
     val maxPress = if useParity then 1 else targetValues.max
     val presses = buttons.indices.map(i =>
       if useParity then model.boolVar(s"press_$i") // each button is pressed 0 or 1 times
@@ -41,9 +41,8 @@ private object Day10:
 
     model.minimize(presses.sumExpr)
     model.solve()
-    val result = model.objective
-    model.release()
-    result.round.toInt
+    model.objective.round.toInt
+  }
 
   def part1(input: String) =
     val problems = parse(input)

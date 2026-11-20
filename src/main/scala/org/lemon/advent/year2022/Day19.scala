@@ -3,6 +3,7 @@ package org.lemon.advent.year2022
 import org.lemon.advent.lib.*
 import org.lemon.advent.lib.ortools.*
 import scala.collection.mutable
+import scala.util.Using
 
 private object Day19:
 
@@ -26,8 +27,7 @@ private object Day19:
       geode = Robit(cost = Bank(ore = geodeOre, obsidian = geodeObsidian))
     )
 
-  def optimize(blueprint: Blueprint, time: Int) =
-    val model = MipModel(SolverType.SAT)
+  def optimize(blueprint: Blueprint, time: Int) = Using.resource(MipModel(SolverType.SAT)) { model =>
     val expr = mutable.Map.empty[String, LinearExpr].withDefaultValue(LinearExpr.Zero)
 
     for t <- 0 until time do
@@ -88,9 +88,8 @@ private object Day19:
     // objective is to maximize the geode bank at the end
     model.maximize(expr(s"geodeBank_${time - 1}"))
     model.solve()
-    val max = model.objective
-    model.release()
-    max.round.toInt
+    model.objective.round.toInt
+  }
 
   def part1(in: String) =
     in.linesIterator.map(parseBlueprint).map(blueprint => blueprint.id * optimize(blueprint, 24)).sum
