@@ -50,7 +50,7 @@ private object Day22:
 
   def cheapestDamage: (Int, Int) =
     spells
-      .map(spell => (spell.manaCost, -bossHpAfterDot(spell.effect(State(hp = 0, mana = 0, bossHp = 0)))))
+      .map(spell => (spell.manaCost, -bossHpAfterDot(spell.effect(State(0, 0, bossHp = 0)))))
       .minBy((cost, dealt) => cost.toDouble / dealt)
 
   def bossHpAfterDot(state: State): Int =
