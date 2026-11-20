@@ -15,9 +15,9 @@ object MipModel:
   Loader.loadNativeLibraries()
 
   private def createSolver(solverType: SolverType): MPSolver =
-    val solver = MPSolver.createSolver(solverType.toString)
-    require(solver != null, s"Could not create solver ${solverType}")
-    solver
+    MPSolver.createSolver(solverType.toString).tap(solver =>
+      require(solver != null, s"Could not create solver ${solverType}")
+    )
 
 class MipModel(solverType: SolverType = SolverType.CBC):
   private val solver = MipModel.createSolver(solverType)
@@ -45,10 +45,10 @@ class MipModel(solverType: SolverType = SolverType.CBC):
     constraint.terms.foreach((v, coeff) => c.setCoefficient(v.underlying, coeff))
 
   private def objectiveOf(expr: LinearExpr): MPObjective =
-    val obj = solver.objective()
-    expr.terms.foreach((v, coeff) => obj.setCoefficient(v.underlying, coeff))
-    obj.setOffset(expr.constant)
-    obj
+    solver.objective().tap(obj =>
+      expr.terms.foreach((v, coeff) => obj.setCoefficient(v.underlying, coeff))
+      obj.setOffset(expr.constant)
+    )
 
   def maximize(expr: LinearExpr): Unit = objectiveOf(expr).setMaximization()
 
