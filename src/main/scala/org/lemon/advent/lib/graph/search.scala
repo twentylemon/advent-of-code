@@ -1,7 +1,7 @@
 package org.lemon.advent.lib.graph
 
 import scala.annotation.tailrec
-import scala.collection.immutable.{Queue, TreeMap}
+import scala.collection.immutable.Queue
 import scala.math.Numeric.Implicits.*
 import scala.math.Ordering.Implicits.*
 
@@ -44,7 +44,7 @@ def pathFind[N, D: Numeric](
         search(nextQueue, nextBest)
 
   val zero = Numeric[D].zero
-  val queue = starts.foldLeft(MinQueue[D, (D, N)](TreeMap.empty))((queue, start) =>
+  val queue = starts.foldLeft(MinQueue.empty[D, (D, N)])((queue, start) =>
     queue.enqueue(heuristic(start), (zero, start))
   )
   search(queue, starts.iterator.map(start => start -> (zero, start)).toMap)
