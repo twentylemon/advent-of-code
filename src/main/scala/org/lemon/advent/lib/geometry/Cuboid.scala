@@ -17,7 +17,7 @@ object Cuboid:
   def apply[N: Integral](width: N, height: N, depth: N): Cuboid[N] =
     Cuboid(Interval(`0`, width - `1`), Interval(`0`, height - `1`), Interval(`0`, depth - `1`))
 
-  given [N: Integral]: Conversion[Cuboid[N], Iterator[Point3[N]]] = _.iterator
+  given [N]: Conversion[Cuboid[N], Iterator[Point3[N]]] = _.iterator
 
 /** A 3d cuboid with generic integral bounds.
   * @param xRange the x bounds of the cuboid
