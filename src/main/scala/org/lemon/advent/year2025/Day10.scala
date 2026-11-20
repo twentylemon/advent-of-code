@@ -20,29 +20,31 @@ private object Day10:
           (targets, buttons, joltage)
     ).toSeq
 
-  def solve(buttons: Seq[Seq[Int]], targetValues: Seq[Int], useParity: Boolean) = Using.resource(MipModel()) { model =>
-    val maxPress = if useParity then 1 else targetValues.max
-    val presses = buttons.indices.map(i =>
-      if useParity then model.boolVar(s"press_$i") // each button is pressed 0 or 1 times
-      else model.intVar(s"press_$i", 0, maxPress) // each button is pressed up to max(joltage) times
-    )
+  def solve(buttons: Seq[Seq[Int]], targetValues: Seq[Int], useParity: Boolean) =
+    val solverType = if useParity then SolverType.SAT else SolverType.CBC
+    Using.resource(MipModel(solverType)) { model =>
+      val maxPress = if useParity then 1 else targetValues.max
+      val presses = buttons.indices.map(i =>
+        if useParity then model.boolVar(s"press_$i") // each button is pressed 0 or 1 times
+        else model.intVar(s"press_$i", 0, maxPress) // each button is pressed up to max(joltage) times
+      )
 
-    // for each light, the sum of button presses affecting it must have correct parity
-    targetValues.indices.foreach { idx =>
-      val targetValue = buttons.zip(presses).collect { case (button, press) if button.contains(idx) => press }.sumExpr
-      if useParity then
-        // sum == target mod 2, ie sum = target + 2*parity for some parity >= 0
-        val maxParity = (buttons.size - targetValues(idx)) / 2
-        val parity = model.intVar(s"parity_$idx", 0, maxParity)
-        model.subjectTo(targetValue === targetValues(idx) + 2 * parity)
-      else
-        model.subjectTo(targetValue === targetValues(idx))
+      // for each light, the sum of button presses affecting it must have correct parity
+      targetValues.indices.foreach { idx =>
+        val targetValue = buttons.zip(presses).collect { case (button, press) if button.contains(idx) => press }.sumExpr
+        if useParity then
+          // sum == target mod 2, ie sum = target + 2*parity for some parity >= 0
+          val maxParity = (buttons.size - targetValues(idx)) / 2
+          val parity = model.intVar(s"parity_$idx", 0, maxParity)
+          model.subjectTo(targetValue === targetValues(idx) + 2 * parity)
+        else
+          model.subjectTo(targetValue === targetValues(idx))
+      }
+
+      model.minimize(presses.sumExpr)
+      model.solve()
+      model.objective.round.toInt
     }
-
-    model.minimize(presses.sumExpr)
-    model.solve()
-    model.objective.round.toInt
-  }
 
   def part1(input: String) =
     val problems = parse(input)
