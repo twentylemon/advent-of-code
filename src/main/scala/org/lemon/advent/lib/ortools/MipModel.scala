@@ -3,6 +3,7 @@ package org.lemon.advent.lib.ortools
 import com.google.ortools.Loader
 import com.google.ortools.linearsolver.{MPObjective, MPSolver}
 import scala.collection.mutable
+import scala.util.chaining.*
 
 enum SolverType:
   case CBC, SCIP, SAT
@@ -26,9 +27,7 @@ class MipModel(solverType: SolverType = SolverType.CBC):
 
   private def declare[V <: Var](name: String, create: => V): V =
     require(!variables.contains(name), s"variable $name already exists")
-    val v = create
-    variables(name) = v
-    v
+    create.tap(variables(name) = _)
 
   def intVar(name: String, lb: Double = 0, ub: Double = Double.MaxValue): IntVar =
     declare(name, IntVar(solver.makeIntVar(lb, ub, name)))
