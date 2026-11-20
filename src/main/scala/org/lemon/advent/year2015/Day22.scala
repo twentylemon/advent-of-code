@@ -50,18 +50,14 @@ private object Day22:
 
   def cheapestDamage: (Int, Int) =
     spells
-      .map(spell =>
-        val cast = spell.effect(State(hp = 0, mana = 0, bossHp = 0))
-        (spell.manaCost, damageAfterDot(cast) - cast.bossHp)
-      )
+      .map(spell => (spell.manaCost, -bossHpAfterDot(spell.effect(State(hp = 0, mana = 0, bossHp = 0)))))
       .minBy((cost, dealt) => cost.toDouble / dealt)
 
-  def damageAfterDot(state: State): Int =
-    val afterDot = Iterator.iterate(state)(effects).find(s => s.shield <= 0 && s.poison <= 0 && s.recharge <= 0).get
-    state.bossHp - afterDot.bossHp
+  def bossHpAfterDot(state: State): Int =
+    Iterator.iterate(state)(effects).find(s => s.shield <= 0 && s.poison <= 0 && s.recharge <= 0).get.bossHp
 
   def manaToKill(cost: Int, dealt: Int)(state: State): Int =
-    (state.bossHp - damageAfterDot(state)).max(0) * cost / dealt
+    bossHpAfterDot(state).max(0) * cost / dealt
 
   def part1(input: String) =
     val boss = parse(input)
