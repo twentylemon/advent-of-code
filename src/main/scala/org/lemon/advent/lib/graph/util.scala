@@ -1,7 +1,7 @@
 package org.lemon.advent.lib.graph
 
 import scala.collection.immutable.TreeMap
-import scala.math.Ordering.Implicits.*
+import scala.math.Ordered.orderingToOrdered
 
 private def unitAdjacency[N](adjacency: N => Iterable[N] | Iterator[N]): N => Iterator[(N, Int)] =
   node => adjacency(node).iterator.map((_, 1))
@@ -15,8 +15,9 @@ private enum MinQueue[P: Ordering, A]:
   def enqueue(priority: P, a: A): MinQueue[P, A] = this match
     case Empty() => NonEmpty(priority, List(a), TreeMap.empty)
     case NonEmpty(smallest, bucket, rest) =>
-      if priority < smallest then NonEmpty(priority, List(a), rest.updated(smallest, bucket))
-      else if priority equiv smallest then NonEmpty(smallest, a :: bucket, rest)
+      val order = priority compare smallest
+      if order < 0 then NonEmpty(priority, List(a), rest.updated(smallest, bucket))
+      else if order == 0 then NonEmpty(smallest, a :: bucket, rest)
       else NonEmpty(smallest, bucket, rest.updated(priority, a :: rest.getOrElse(priority, Nil)))
 
   def dequeue: Option[(P, A, MinQueue[P, A])] = this match
