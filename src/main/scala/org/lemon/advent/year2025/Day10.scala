@@ -29,7 +29,7 @@ private object Day10:
 
     // for each light, the sum of button presses affecting it must have correct parity
     targetValues.indices.foreach { idx =>
-      val targetValue = buttons.zip(presses).filter((button, _) => button.contains(idx)).map(_._2).sumExpr
+      val targetValue = buttons.zip(presses).collect { case (button, press) if button.contains(idx) => press }.sumExpr
       if useParity then
         // sum == target mod 2, ie sum = target + 2*parity for some parity >= 0
         val maxParity = (buttons.size - targetValues(idx)) / 2
