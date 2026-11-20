@@ -48,10 +48,6 @@ private object Day22:
         if afterBoss.bossHp <= 0 || afterBoss.hp > 0
       yield (afterBoss, spell.manaCost)
 
-  def damageAfterDot(state: State): Int =
-    val afterDot = Iterator.iterate(state)(effects).find(s => s.shield <= 0 && s.poison <= 0 && s.recharge <= 0).get
-    state.bossHp - afterDot.bossHp
-
   def cheapestDamage: (Int, Int) =
     spells
       .map(spell =>
@@ -59,6 +55,10 @@ private object Day22:
         (spell.manaCost, damageAfterDot(cast) - cast.bossHp)
       )
       .minBy((cost, dealt) => cost.toDouble / dealt)
+
+  def damageAfterDot(state: State): Int =
+    val afterDot = Iterator.iterate(state)(effects).find(s => s.shield <= 0 && s.poison <= 0 && s.recharge <= 0).get
+    state.bossHp - afterDot.bossHp
 
   def manaToKill(cost: Int, dealt: Int)(state: State): Int =
     (state.bossHp - damageAfterDot(state)).max(0) * cost / dealt
