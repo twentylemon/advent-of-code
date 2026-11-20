@@ -48,14 +48,22 @@ private object Day22:
         if afterBoss.bossHp <= 0 || afterBoss.hp > 0
       yield (afterBoss, spell.manaCost)
 
-  def manaToKill(state: State): Int = (state.bossHp - 3 * state.poison.max(0)).max(0) * 173 / 18
+  def settle(state: State) =
+    Iterator.iterate(state)(effects).find(s => s.shield <= 0 && s.poison <= 0 && s.recharge <= 0).get
+  def damage(spell: Spell) = -settle(spell.effect(State(hp = 0, mana = 0, bossHp = 0))).bossHp
+  def cheapestDamage: (Int, Int) =
+    spells.map(spell => (spell.manaCost, damage(spell))).filter(_._2 > 0).minBy((cost, dealt) => cost.toDouble / dealt)
+
+  def manaToKill(cost: Int, dealt: Int)(state: State): Int = settle(state).bossHp.max(0) * cost / dealt
 
   def part1(input: String) =
     val boss = parse(input)
     val start = State(hp = 50, mana = 500, bossHp = boss.hp)
-    pathFind(adjacency(boss), manaToKill, start, _.bossHp <= 0).get.distance
+    val (cost, dealt) = cheapestDamage
+    pathFind(adjacency(boss), manaToKill(cost, dealt), start, _.bossHp <= 0).get.distance
 
   def part2(input: String) =
     val boss = parse(input)
     val start = State(hp = 50, mana = 500, bossHp = boss.hp, dying = 1)
-    pathFind(adjacency(boss), manaToKill, start, _.bossHp <= 0).get.distance
+    val (cost, dealt) = cheapestDamage
+    pathFind(adjacency(boss), manaToKill(cost, dealt), start, _.bossHp <= 0).get.distance
