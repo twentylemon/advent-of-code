@@ -8,7 +8,6 @@ private def unitAdjacency[N](adjacency: N => Iterable[N] | Iterator[N]): N => It
 /** An immutable min priority queue, keeping elements of equal priority together in a bucket. */
 private enum MinQueue[P, A](using ord: Ordering[P]):
   case Empty[P: Ordering, A]() extends MinQueue[P, A]
-  // the smallest bucket is never empty and is kept out of the tree, so most operations don't touch the tree
   case NonEmpty[P: Ordering, A](priority: P, bucket: List[A], rest: TreeMap[P, List[A]]) extends MinQueue[P, A]
 
   def enqueue(priority: P, a: A): MinQueue[P, A] = this match
