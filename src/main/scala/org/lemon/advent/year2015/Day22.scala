@@ -48,13 +48,21 @@ private object Day22:
         if afterBoss.bossHp <= 0 || afterBoss.hp > 0
       yield (afterBoss, spell.manaCost)
 
-  def settle(state: State) =
-    Iterator.iterate(state)(effects).find(s => s.shield <= 0 && s.poison <= 0 && s.recharge <= 0).get
-  def damage(spell: Spell) = -settle(spell.effect(State(hp = 0, mana = 0, bossHp = 0))).bossHp
-  def cheapestDamage: (Int, Int) =
-    spells.map(spell => (spell.manaCost, damage(spell))).filter(_._2 > 0).minBy((cost, dealt) => cost.toDouble / dealt)
+  def damageAfterDot(state: State): Int =
+    val afterDot = Iterator.iterate(state)(effects).find(s => s.shield <= 0 && s.poison <= 0 && s.recharge <= 0).get
+    state.bossHp - afterDot.bossHp
 
-  def manaToKill(cost: Int, dealt: Int)(state: State): Int = settle(state).bossHp.max(0) * cost / dealt
+  def cheapestDamage: (Int, Int) =
+    spells
+      .map(spell =>
+        val cast = spell.effect(State(hp = 0, mana = 0, bossHp = 0))
+        (spell.manaCost, damageAfterDot(cast) - cast.bossHp)
+      )
+      .filter(_._2 > 0)
+      .minBy((cost, dealt) => cost.toDouble / dealt)
+
+  def manaToKill(cost: Int, dealt: Int)(state: State): Int =
+    (state.bossHp - damageAfterDot(state)).max(0) * cost / dealt
 
   def part1(input: String) =
     val boss = parse(input)
