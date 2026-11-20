@@ -48,12 +48,14 @@ private object Day22:
         if afterBoss.bossHp <= 0 || afterBoss.hp > 0
       yield (afterBoss, spell.manaCost)
 
+  def manaToKill(state: State): Int = (state.bossHp - 3 * state.poison.max(0)).max(0) * 173 / 18
+
   def part1(input: String) =
     val boss = parse(input)
     val start = State(hp = 50, mana = 500, bossHp = boss.hp)
-    pathFind(adjacency(boss), start, _.bossHp <= 0).get.distance
+    pathFind(adjacency(boss), manaToKill, start, _.bossHp <= 0).get.distance
 
   def part2(input: String) =
     val boss = parse(input)
     val start = State(hp = 50, mana = 500, bossHp = boss.hp, dying = 1)
-    pathFind(adjacency(boss), start, _.bossHp <= 0).get.distance
+    pathFind(adjacency(boss), manaToKill, start, _.bossHp <= 0).get.distance
