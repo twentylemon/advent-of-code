@@ -58,7 +58,6 @@ private object Day22:
         val cast = spell.effect(State(hp = 0, mana = 0, bossHp = 0))
         (spell.manaCost, damageAfterDot(cast) - cast.bossHp)
       )
-      .filter(_._2 > 0)
       .minBy((cost, dealt) => cost.toDouble / dealt)
 
   def manaToKill(cost: Int, dealt: Int)(state: State): Int =
