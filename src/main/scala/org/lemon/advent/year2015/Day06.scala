@@ -45,7 +45,7 @@ private object Day06:
         case TurnOff => acc -- affects
         case Toggle => (acc -- affects) ++ (affects -- acc)
     }.view
-      .map(_.size)
+      .map(_.area)
       .sum
 
   def part2(input: String) =
@@ -63,5 +63,5 @@ private object Day06:
         acc.updatedWith(cell)(_.map(b => (b + brightness(op)) `max` 0))
       )
     }
-      .map((cell, bright) => bright * cell.size)
+      .map((cell, bright) => bright * cell.area)
       .sum

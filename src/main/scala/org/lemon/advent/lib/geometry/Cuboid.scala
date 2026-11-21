@@ -3,6 +3,7 @@ package org.lemon.advent.lib.geometry
 import org.lemon.advent.lib.*
 
 import scala.math.Integral.Implicits.*
+import scala.math.Ordering.Implicits.*
 
 object Cuboid:
   /** @return the smallest cuboid enclosing all the points */
@@ -17,15 +18,14 @@ object Cuboid:
   def apply[N: Integral](width: N, height: N, depth: N): Cuboid[N] =
     Cuboid(Interval(`0`, width - `1`), Interval(`0`, height - `1`), Interval(`0`, depth - `1`))
 
-  given [N]: Conversion[Cuboid[N], Iterator[Point3[N]]] = _.iterator
-
 /** A 3d cuboid with generic integral bounds.
   * @param xRange the x bounds of the cuboid
   * @param yRange the y bounds of the cuboid
   * @param zRange the z bounds of the cuboid
   * @tparam N the numeric type for coordinates
   */
-case class Cuboid[N: Integral](xRange: Interval[N], yRange: Interval[N], zRange: Interval[N]):
+case class Cuboid[N: Integral](xRange: Interval[N], yRange: Interval[N], zRange: Interval[N])
+    extends Iterable[Point3[N]]:
   def left: N = xRange.min
   def right: N = xRange.max
   def top: N = yRange.min
@@ -57,21 +57,25 @@ case class Cuboid[N: Integral](xRange: Interval[N], yRange: Interval[N], zRange:
   def height: N = yRange.length
   def depth: N = zRange.length
 
-  def size: N = width * height * depth
+  /** @return the number of points in the cuboid */
+  def volume: N = width * height * depth
+
+  @deprecated("use volume instead")
+  override def size: Int = volume.toInt
+  override def knownSize: Int = if volume <= fromInt(Int.MaxValue) then volume.toInt else -1
 
   /** @return the total area of the cuboid's faces */
   def surfaceArea: N =
     if isEmpty then `0` else fromInt[N](2) * (width * height + height * depth + width * depth)
 
-  def isEmpty: Boolean = xRange.isEmpty || yRange.isEmpty || zRange.isEmpty
-  def nonEmpty: Boolean = !isEmpty
+  override def isEmpty: Boolean = xRange.isEmpty || yRange.isEmpty || zRange.isEmpty
 
   def contains(point: Point3[N]): Boolean =
     xRange.contains(point.x) && yRange.contains(point.y) && zRange.contains(point.z)
   def apply(point: Point3[N]): Boolean = contains(point)
 
   /** @return all the points in the cuboid, by z, then y, then x */
-  def iterator: Iterator[Point3[N]] =
+  override def iterator: Iterator[Point3[N]] =
     for z <- zRange.iterator; y <- yRange.iterator; x <- xRange.iterator yield Point3(x, y, z)
 
   def leftFace: Cuboid[N] = copy(xRange = Interval(left, left))
@@ -129,3 +133,5 @@ case class Cuboid[N: Integral](xRange: Interval[N], yRange: Interval[N], zRange:
   def xy: Rect[N] = Rect(xRange, yRange)
   def xz: Rect[N] = Rect(xRange, zRange)
   def yz: Rect[N] = Rect(yRange, zRange)
+
+  override def toString: String = s"Cuboid($xRange, $yRange, $zRange)"

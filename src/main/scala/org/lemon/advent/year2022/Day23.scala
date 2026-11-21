@@ -46,6 +46,6 @@ private object Day23:
   def part1(in: String) =
     val start = parse(in)
     val end = simulate(start).nth(9)
-    Area(end).size - start.size
+    Area(end).area - start.size
 
   def part2(in: String) = simulate(parse(in)).size + 1

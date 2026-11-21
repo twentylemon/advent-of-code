@@ -34,8 +34,8 @@ class CuboidTest extends UnitTest:
     )
   }
 
-  test("number of enclosed points is equal to size") {
-    check((cuboid: Cuboid[Int]) => cuboid.size == cuboid.iterator.size)
+  test("number of enclosed points is equal to volume") {
+    check((cuboid: Cuboid[Int]) => cuboid.volume == cuboid.iterator.size)
   }
 
   test("iterator goes by z, then y, then x") {
@@ -51,7 +51,7 @@ class CuboidTest extends UnitTest:
   }
 
   test("leftFace contains height * depth points") {
-    check((cuboid: Cuboid[Int]) => cuboid.leftFace.size == cuboid.height * cuboid.depth)
+    check((cuboid: Cuboid[Int]) => cuboid.leftFace.volume == cuboid.height * cuboid.depth)
   }
 
   test("leftFace contains enclosed points") {
@@ -59,7 +59,7 @@ class CuboidTest extends UnitTest:
   }
 
   test("rightFace contains height * depth points") {
-    check((cuboid: Cuboid[Int]) => cuboid.rightFace.size == cuboid.height * cuboid.depth)
+    check((cuboid: Cuboid[Int]) => cuboid.rightFace.volume == cuboid.height * cuboid.depth)
   }
 
   test("rightFace contains enclosed points") {
@@ -67,7 +67,7 @@ class CuboidTest extends UnitTest:
   }
 
   test("topFace contains width * depth points") {
-    check((cuboid: Cuboid[Int]) => cuboid.topFace.size == cuboid.width * cuboid.depth)
+    check((cuboid: Cuboid[Int]) => cuboid.topFace.volume == cuboid.width * cuboid.depth)
   }
 
   test("topFace contains enclosed points") {
@@ -75,7 +75,7 @@ class CuboidTest extends UnitTest:
   }
 
   test("bottomFace contains width * depth points") {
-    check((cuboid: Cuboid[Int]) => cuboid.bottomFace.size == cuboid.width * cuboid.depth)
+    check((cuboid: Cuboid[Int]) => cuboid.bottomFace.volume == cuboid.width * cuboid.depth)
   }
 
   test("bottomFace contains enclosed points") {
@@ -83,7 +83,7 @@ class CuboidTest extends UnitTest:
   }
 
   test("frontFace contains width * height points") {
-    check((cuboid: Cuboid[Int]) => cuboid.frontFace.size == cuboid.width * cuboid.height)
+    check((cuboid: Cuboid[Int]) => cuboid.frontFace.volume == cuboid.width * cuboid.height)
   }
 
   test("frontFace contains enclosed points") {
@@ -91,7 +91,7 @@ class CuboidTest extends UnitTest:
   }
 
   test("backFace contains width * height points") {
-    check((cuboid: Cuboid[Int]) => cuboid.backFace.size == cuboid.width * cuboid.height)
+    check((cuboid: Cuboid[Int]) => cuboid.backFace.volume == cuboid.width * cuboid.height)
   }
 
   test("backFace contains enclosed points") {
@@ -113,7 +113,7 @@ class CuboidTest extends UnitTest:
   }
 
   test("face sizes sum to the surface area") {
-    check((cuboid: Cuboid[Int]) => cuboid.faces.map(_.size).sum == cuboid.surfaceArea)
+    check((cuboid: Cuboid[Int]) => cuboid.faces.map(_.volume).sum == cuboid.surfaceArea)
   }
 
   test("octants cover the cuboid") {
@@ -304,22 +304,22 @@ class CuboidTest extends UnitTest:
     check((cuboid: Cuboid[Int]) => cuboid.xy.toSet == cuboid.map(_.xy).toSet)
   }
 
-  test("xy size times depth is size") {
-    check((cuboid: Cuboid[Int]) => cuboid.xy.size * cuboid.depth == cuboid.size)
+  test("xy area times depth is volume") {
+    check((cuboid: Cuboid[Int]) => cuboid.xy.area * cuboid.depth == cuboid.volume)
   }
 
   test("xz projects every point") {
     check((cuboid: Cuboid[Int]) => cuboid.xz.toSet == cuboid.map(_.xz).toSet)
   }
 
-  test("xz size times height is size") {
-    check((cuboid: Cuboid[Int]) => cuboid.xz.size * cuboid.height == cuboid.size)
+  test("xz area times height is volume") {
+    check((cuboid: Cuboid[Int]) => cuboid.xz.area * cuboid.height == cuboid.volume)
   }
 
   test("yz projects every point") {
     check((cuboid: Cuboid[Int]) => cuboid.yz.toSet == cuboid.map(_.yz).toSet)
   }
 
-  test("yz size times width is size") {
-    check((cuboid: Cuboid[Int]) => cuboid.yz.size * cuboid.width == cuboid.size)
+  test("yz area times width is volume") {
+    check((cuboid: Cuboid[Int]) => cuboid.yz.area * cuboid.width == cuboid.volume)
   }

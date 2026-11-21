@@ -2,6 +2,7 @@ package org.lemon.advent.lib.geometry
 
 import org.lemon.advent.lib.*
 import scala.math.Integral.Implicits.*
+import scala.math.Ordering.Implicits.*
 import scala.collection.immutable.WrappedString
 
 object Rect:
@@ -23,14 +24,12 @@ object Rect:
   def apply[N: Integral](width: N, height: N): Rect[N] =
     apply(`0`, width - `1`, `0`, height - `1`)
 
-  given [N]: Conversion[Rect[N], Iterator[Point[N]]] = _.iterator
-
 /** A 2d rectangle with generic integral bounds.
   * @param xRange the x bounds of the rectangle
   * @param yRange the y bounds of the rectangle
   * @tparam N the numeric type for coordinates
   */
-case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
+case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]) extends Iterable[Point[N]]:
   def left: N = xRange.min
   def right: N = xRange.max
   def top: N = yRange.min
@@ -45,19 +44,23 @@ case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
   def width: N = xRange.length
   def height: N = yRange.length
 
-  def size: N = width * height
+  /** @return the number of points in the rectangle */
+  def area: N = width * height
+
+  @deprecated("use area instead")
+  override def size: Int = area.toInt
+  override def knownSize: Int = if area <= fromInt(Int.MaxValue) then area.toInt else -1
 
   /** @return the total length of the rectangle's edges */
   def perimeter: N = if isEmpty then `0` else fromInt[N](2) * (width + height)
 
-  def isEmpty: Boolean = xRange.isEmpty || yRange.isEmpty
-  def nonEmpty: Boolean = xRange.nonEmpty && yRange.nonEmpty
+  override def isEmpty: Boolean = xRange.isEmpty || yRange.isEmpty
 
   def contains(coord: Point[N]): Boolean = xRange.contains(coord.x) && yRange.contains(coord.y)
   def apply(coord: Point[N]): Boolean = contains(coord)
 
   /** @return all the points in the rectangle, row by row from the top left */
-  def iterator: Iterator[Point[N]] = for y <- yRange.iterator; x <- xRange.iterator yield Point(x, y)
+  override def iterator: Iterator[Point[N]] = for y <- yRange.iterator; x <- xRange.iterator yield Point(x, y)
 
   def col(x: N): Rect[N] =
     require(xRange.contains(x), s"$this does not contain column $x")
@@ -168,3 +171,5 @@ case class Rect[N: Integral](xRange: Interval[N], yRange: Interval[N]):
   def wrap(coord: Point[N]): Point[N] = Point(xRange.wrap(coord.x), yRange.wrap(coord.y))
 
   def show(coord2Char: Point[N] => Char): String = rows.map(_.map(coord2Char).mkString + "\n").mkString
+
+  override def toString: String = s"Rect($xRange, $yRange)"

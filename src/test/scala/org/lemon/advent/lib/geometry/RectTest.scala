@@ -20,8 +20,8 @@ class RectTest extends UnitTest:
     check((area: Area) => area.forall(area.contains))
   }
 
-  test("number of enclosed points is equal to size") {
-    check((area: Area) => area.size == area.iterator.size)
+  test("number of enclosed points is equal to area") {
+    check((area: Area) => area.area == area.iterator.size)
   }
 
   test("iterator goes row by row from the top left") {
@@ -44,7 +44,7 @@ class RectTest extends UnitTest:
   }
 
   test("topRow contains width points") {
-    check((area: Area) => area.topRow.size == area.width)
+    check((area: Area) => area.topRow.area == area.width)
   }
 
   test("topRow contains enclosed points") {
@@ -52,7 +52,7 @@ class RectTest extends UnitTest:
   }
 
   test("bottomRow contains width points") {
-    check((area: Area) => area.bottomRow.size == area.width)
+    check((area: Area) => area.bottomRow.area == area.width)
   }
 
   test("bottomRow contains enclosed points") {
@@ -60,7 +60,7 @@ class RectTest extends UnitTest:
   }
 
   test("leftCol contains height points") {
-    check((area: Area) => area.leftCol.size == area.height)
+    check((area: Area) => area.leftCol.area == area.height)
   }
 
   test("leftCol contains enclosed points") {
@@ -68,7 +68,7 @@ class RectTest extends UnitTest:
   }
 
   test("rightCol contains height points") {
-    check((area: Area) => area.rightCol.size == area.height)
+    check((area: Area) => area.rightCol.area == area.height)
   }
 
   test("rightCol contains enclosed points") {
@@ -169,7 +169,7 @@ class RectTest extends UnitTest:
         lines <- Gen.listOfN(height, Gen.stringOfN(width, Gen.alphaNumChar))
       yield lines
     check(forAll(gen) { lines =>
-      Area(lines).toSet == Coord.gridToMap(lines.mkString("\n")).keySet && Area(lines).size == lines.map(_.length).sum
+      Area(lines).toSet == Coord.gridToMap(lines.mkString("\n")).keySet && Area(lines).area == lines.map(_.length).sum
     })
   }
 
@@ -180,7 +180,7 @@ class RectTest extends UnitTest:
         height <- Gen.choose(1, 20)
         grid <- Gen.listOfN(height, Gen.listOfN(width, Arbitrary.arbitrary[Int]))
       yield grid
-    check(forAll(gen) { grid => Area(grid).forall(grid.hasCoord) && Area(grid).size == grid.map(_.size).sum })
+    check(forAll(gen) { grid => Area(grid).forall(grid.hasCoord) && Area(grid).area == grid.map(_.size).sum })
   }
 
   test("Area(width, height) starts at the origin") {

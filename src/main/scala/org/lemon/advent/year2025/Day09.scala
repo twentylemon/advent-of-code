@@ -15,7 +15,7 @@ private object Day09:
     val coords = parse(input)
     coords.pairs
       .map(_ `bounding` _)
-      .map(_.size)
+      .map(_.area)
       .max
 
   def part2(input: String) =
@@ -27,5 +27,5 @@ private object Day09:
         val greens = area.contract(1)
         greens.isEmpty || !segments.exists(_.intersects(greens))
       )
-      .map(_.size)
+      .map(_.area)
       .max

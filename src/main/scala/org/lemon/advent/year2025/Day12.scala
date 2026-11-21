@@ -23,5 +23,5 @@ private object Day12:
       val minArea = tree.requirements.zip(shapes)
         .map((r, s) => r * s.values.count(_ == '#'))
         .sum
-      tree.area.size >= minArea
+      tree.area.area >= minArea
     )

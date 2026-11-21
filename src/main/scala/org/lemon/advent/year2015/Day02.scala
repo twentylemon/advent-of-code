@@ -10,8 +10,8 @@ private object Day02:
 
   def part1(input: String) =
     val boxes = parse(input)
-    boxes.map(box => box.surfaceArea + Seq(box.xy, box.xz, box.yz).map(_.size).min).sum
+    boxes.map(box => box.surfaceArea + Seq(box.xy, box.xz, box.yz).map(_.area).min).sum
 
   def part2(input: String) =
     val boxes = parse(input)
-    boxes.map(box => Seq(box.xy, box.xz, box.yz).map(_.perimeter).min + box.size).sum
+    boxes.map(box => Seq(box.xy, box.xz, box.yz).map(_.perimeter).min + box.volume).sum
