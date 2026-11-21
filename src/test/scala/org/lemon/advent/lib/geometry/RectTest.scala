@@ -3,6 +3,7 @@ package org.lemon.advent.lib.geometry
 import org.lemon.advent.*
 import org.lemon.advent.lib.*
 import org.lemon.advent.lib.geometry.*
+import org.scalacheck.Arbitrary.*
 import org.scalacheck.Prop.*
 import org.scalacheck.*
 
@@ -10,11 +11,17 @@ class RectTest extends UnitTest:
   val emptyArea: Gen[Area] =
     def emptied(range: Interval[Int]) = Gen.oneOf(range, Interval(range.start, range.start - 1))
     for
-      area <- Arbitrary.arbitrary[Area]
+      area <- arbitrary[Area]
       x <- emptied(area.xRange)
       y <- emptied(area.yRange)
       if x.isEmpty || y.isEmpty
     yield Rect(x, y)
+
+  val growableArea: Gen[(Area, Int)] =
+    for
+      area <- arbitrary[Area]
+      n <- Gen.chooseNum(0, Int.MaxValue - Seq(area.left, area.right, area.top, area.bottom).map(_.abs).max)
+    yield (area, n)
 
   test("area contains all enclosed points") {
     check((area: Area) => area.forall(area.contains))
@@ -41,6 +48,19 @@ class RectTest extends UnitTest:
       val boundary = area.boundary.toSet
       area.corners.toSet == boundary.filterNot(c => Direction.values.exists(d => boundary(c + d) && boundary(c - d)))
     )
+  }
+
+  test("each corner is the area's closest coord to that corner of the plane") {
+    val (min, max) = (Int.MinValue, Int.MaxValue)
+    val corner = Gen.oneOf(
+      Seq[(Area => Coord, Coord)](
+        (_.topLeft, Coord(min, min)),
+        (_.topRight, Coord(max, min)),
+        (_.bottomLeft, Coord(min, max)),
+        (_.bottomRight, Coord(max, max)),
+      )
+    )
+    check(forAll(arbitrary[Area], corner) { case (area, (at, far)) => at(area) == area.clamp(far) })
   }
 
   test("topRow contains width points") {
@@ -76,7 +96,7 @@ class RectTest extends UnitTest:
   }
 
   test("row contains the coords in that row") {
-    val gen = for area <- Arbitrary.arbitrary[Area]; y <- Gen.oneOf(area.yRange) yield (area, y)
+    val gen = for area <- arbitrary[Area]; y <- Gen.oneOf(area.yRange) yield (area, y)
     check(forAll(gen) { (area, y) => area.row(y).toSeq == area.filter(_.y == y).toSeq })
   }
 
@@ -87,7 +107,7 @@ class RectTest extends UnitTest:
   }
 
   test("reverseRow is row in reverse") {
-    val gen = for area <- Arbitrary.arbitrary[Area]; y <- Gen.oneOf(area.yRange) yield (area, y)
+    val gen = for area <- arbitrary[Area]; y <- Gen.oneOf(area.yRange) yield (area, y)
     check(forAll(gen) { (area, y) => area.reverseRow(y).toSeq == area.row(y).toSeq.reverse })
   }
 
@@ -98,7 +118,7 @@ class RectTest extends UnitTest:
   }
 
   test("col contains the coords in that column") {
-    val gen = for area <- Arbitrary.arbitrary[Area]; x <- Gen.oneOf(area.xRange) yield (area, x)
+    val gen = for area <- arbitrary[Area]; x <- Gen.oneOf(area.xRange) yield (area, x)
     check(forAll(gen) { (area, x) => area.col(x).toSeq == area.filter(_.x == x).toSeq })
   }
 
@@ -109,7 +129,7 @@ class RectTest extends UnitTest:
   }
 
   test("reverseCol is col in reverse") {
-    val gen = for area <- Arbitrary.arbitrary[Area]; x <- Gen.oneOf(area.xRange) yield (area, x)
+    val gen = for area <- arbitrary[Area]; x <- Gen.oneOf(area.xRange) yield (area, x)
     check(forAll(gen) { (area, x) => area.reverseCol(x).toSeq == area.col(x).toSeq.reverse })
   }
 
@@ -178,18 +198,16 @@ class RectTest extends UnitTest:
       for
         width <- Gen.choose(1, 20)
         height <- Gen.choose(1, 20)
-        grid <- Gen.listOfN(height, Gen.listOfN(width, Arbitrary.arbitrary[Int]))
+        grid <- Gen.listOfN(height, Gen.listOfN(width, arbitrary[Int]))
       yield grid
     check(forAll(gen) { grid => Area(grid).forall(grid.hasCoord) && Area(grid).size == grid.map(_.size).sum })
   }
 
   test("Area(width, height) starts at the origin") {
-    check((width: Int, height: Int) =>
-      (width > 0 && height > 0) ==> {
-        val area = Area(width, height)
-        area.topLeft == Coord.origin && area.width == width && area.height == height
-      }
-    )
+    check(forAll(Gen.chooseNum(1, Int.MaxValue), Gen.chooseNum(1, Int.MaxValue)) { (width, height) =>
+      val area = Area(width, height)
+      area.topLeft == Coord.origin && area.width == width && area.height == height
+    })
   }
 
   test("rows includes all coords in same iteration order as overall area") {
@@ -277,14 +295,11 @@ class RectTest extends UnitTest:
   }
 
   test("area enclosed by larger area") {
-    check((area: Area) => area.growLeft(1).growRight(1).growTop(1).growBottom(1).encloses(area))
+    check((area: Area) => area.expand(1).encloses(area))
   }
 
   test("area not enclosed by smaller area") {
-    check((area: Area) =>
-      (area.width > 2 && area.height > 2) ==>
-        !area.dropLeft(1).dropRight(1).dropTop(1).dropBottom(1).encloses(area)
-    )
+    check((area: Area) => !area.contract(1).encloses(area))
   }
 
   test("area not enclosed by disjoint area") {
@@ -304,7 +319,7 @@ class RectTest extends UnitTest:
   }
 
   test("empty area overlaps nothing") {
-    check(forAll(emptyArea, Arbitrary.arbitrary[Area])((empty, area) => !empty.overlaps(area) && !area.overlaps(empty)))
+    check(forAll(emptyArea, arbitrary[Area])((empty, area) => !empty.overlaps(area) && !area.overlaps(empty)))
   }
 
   test("area overlaps when the intersection is non-empty") {
@@ -355,13 +370,13 @@ class RectTest extends UnitTest:
   }
 
   test("diff of an empty area is empty") {
-    check(forAll(emptyArea, Arbitrary.arbitrary[Area])((empty, area) => empty.diff(area).isEmpty))
+    check(forAll(emptyArea, arbitrary[Area])((empty, area) => empty.diff(area).isEmpty))
   }
 
   test("translate moves every point") {
     val axis = Gen.choose(-1000, 1000)
     val offsets = Gen.zip(axis, axis).map((x, y) => Coord(x, y))
-    check(forAll(Arbitrary.arbitrary[Area], offsets) { (area: Area, offset: Coord) =>
+    check(forAll(arbitrary[Area], offsets) { (area, offset) =>
       area.translate(offset).toSet == area.map(_ + offset).toSet
     })
   }
@@ -387,23 +402,23 @@ class RectTest extends UnitTest:
   }
 
   test("growLeft encloses original area") {
-    check((area: Area, n: Int) => (n > 0 && n < Int.MaxValue - 1000) ==> (area.growLeft(n) `encloses` area))
+    check(forAll(growableArea) { (area, n) => area.growLeft(n) `encloses` area })
   }
 
   test("growRight encloses original area") {
-    check((area: Area, n: Int) => (n > 0 && n < Int.MaxValue - 1000) ==> (area.growRight(n) `encloses` area))
+    check(forAll(growableArea) { (area, n) => area.growRight(n) `encloses` area })
   }
 
   test("growTop encloses original area") {
-    check((area: Area, n: Int) => (n > 0 && n < Int.MaxValue - 1000) ==> (area.growTop(n) `encloses` area))
+    check(forAll(growableArea) { (area, n) => area.growTop(n) `encloses` area })
   }
 
   test("growBottom encloses original area") {
-    check((area: Area, n: Int) => (n > 0 && n < Int.MaxValue - 1000) ==> (area.growBottom(n) `encloses` area))
+    check(forAll(growableArea) { (area, n) => area.growBottom(n) `encloses` area })
   }
 
   test("expand encloses original area") {
-    check((area: Area, n: Int) => (n > 0 && n < Int.MaxValue - 1000) ==> (area.expand(n) `encloses` area))
+    check(forAll(growableArea) { (area, n) => area.expand(n) `encloses` area })
   }
 
   test("expand and contract are inverse") {
@@ -411,7 +426,7 @@ class RectTest extends UnitTest:
   }
 
   test("contract is enclosed by original area") {
-    check((area: Area) => (area.width > 2 && area.height > 2) ==> (area `encloses` area.contract(1)))
+    check((area: Area) => area `encloses` area.contract(1))
   }
 
   test("clamp returns a coord in the area") {
