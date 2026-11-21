@@ -17,21 +17,6 @@ class CuboidTest extends UnitTest:
       if x.isEmpty || y.isEmpty || z.isEmpty
     yield Cuboid(x, y, z)
 
-  val corner: Gen[(Cuboid[Int] => Point3[Int], Point3[Int])] =
-    val (min, max) = (Int.MinValue, Int.MaxValue)
-    Gen.oneOf(
-      Seq[(Cuboid[Int] => Point3[Int], Point3[Int])](
-        (_.topLeftFront, Point3(min, min, min)),
-        (_.topRightFront, Point3(max, min, min)),
-        (_.bottomLeftFront, Point3(min, max, min)),
-        (_.bottomRightFront, Point3(max, max, min)),
-        (_.topLeftBack, Point3(min, min, max)),
-        (_.topRightBack, Point3(max, min, max)),
-        (_.bottomLeftBack, Point3(min, max, max)),
-        (_.bottomRightBack, Point3(max, max, max)),
-      )
-    )
-
   test("points cover cuboid") {
     check((cuboid: Cuboid[Int]) =>
       val points = cuboid.toSet
@@ -51,6 +36,19 @@ class CuboidTest extends UnitTest:
   }
 
   test("each corner is the cuboid's closest point to that corner of space") {
+    val (min, max) = (Int.MinValue, Int.MaxValue)
+    val corner = Gen.oneOf(
+      Seq[(Cuboid[Int] => Point3[Int], Point3[Int])](
+        (_.topLeftFront, Point3(min, min, min)),
+        (_.topRightFront, Point3(max, min, min)),
+        (_.bottomLeftFront, Point3(min, max, min)),
+        (_.bottomRightFront, Point3(max, max, min)),
+        (_.topLeftBack, Point3(min, min, max)),
+        (_.topRightBack, Point3(max, min, max)),
+        (_.bottomLeftBack, Point3(min, max, max)),
+        (_.bottomRightBack, Point3(max, max, max)),
+      )
+    )
     check(forAll(arbitrary[Cuboid[Int]], corner) { case (cuboid, (at, far)) => at(cuboid) == cuboid.clamp(far) })
   }
 

@@ -17,17 +17,6 @@ class RectTest extends UnitTest:
       if x.isEmpty || y.isEmpty
     yield Rect(x, y)
 
-  val corner: Gen[(Area => Coord, Coord)] =
-    val (min, max) = (Int.MinValue, Int.MaxValue)
-    Gen.oneOf(
-      Seq[(Area => Coord, Coord)](
-        (_.topLeft, Coord(min, min)),
-        (_.topRight, Coord(max, min)),
-        (_.bottomLeft, Coord(min, max)),
-        (_.bottomRight, Coord(max, max)),
-      )
-    )
-
   val grown: Gen[(Area, Int)] =
     for
       area <- arbitrary[Area]
@@ -62,6 +51,15 @@ class RectTest extends UnitTest:
   }
 
   test("each corner is the area's closest coord to that corner of the plane") {
+    val (min, max) = (Int.MinValue, Int.MaxValue)
+    val corner = Gen.oneOf(
+      Seq[(Area => Coord, Coord)](
+        (_.topLeft, Coord(min, min)),
+        (_.topRight, Coord(max, min)),
+        (_.bottomLeft, Coord(min, max)),
+        (_.bottomRight, Coord(max, max)),
+      )
+    )
     check(forAll(arbitrary[Area], corner) { case (area, (at, far)) => at(area) == area.clamp(far) })
   }
 
