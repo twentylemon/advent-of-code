@@ -27,7 +27,7 @@ private object Day14:
 
   def part1(input: String): Int =
     val rocks = input.linesIterator.flatMap(parseRocks).toSeq
-    val deepest = rocks.map(_.yRange.end).max
+    val deepest = rocks.map(_.bottom).max
     def deep(coord: Coord) = coord.y > deepest
     Iterator.unfold(rocks.flatten.toSet) { occupied =>
       trickle(occupied, deep)(Coord(500, 0)) match
@@ -37,7 +37,7 @@ private object Day14:
 
   def part2(input: String): Int =
     val rocks = input.linesIterator.flatMap(parseRocks).toSeq
-    val deepest = rocks.map(_.yRange.end).max
+    val deepest = rocks.map(_.bottom).max
     def deep(coord: Coord) = false
     Iterator.unfold(rocks.flatten.toSet) { sand =>
       def occupied(coord: Coord) = coord.y >= deepest + 2 || sand.contains(coord)

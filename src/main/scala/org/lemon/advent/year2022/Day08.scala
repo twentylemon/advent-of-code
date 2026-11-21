@@ -1,5 +1,7 @@
 package org.lemon.advent.year2022
 
+import org.lemon.advent.lib.geometry.*
+
 private object Day08:
 
   extension (seq: Seq[Int])
@@ -17,12 +19,7 @@ private object Day08:
   def part1(input: String): Int =
     val heights = parse(input)
     val transposed = heights.transpose
-    val visibles =
-      for
-        y <- heights.indices
-        x <- heights(y).indices
-      yield isVisible(heights, transposed, x, y)
-    visibles.count(x => x)
+    Area(heights).count(c => isVisible(heights, transposed, c.x, c.y))
 
   def countFrom(trees: List[Int], height: Int): Int = trees match
     case Nil => 0
@@ -41,9 +38,4 @@ private object Day08:
   def part2(input: String): Int =
     val heights = parse(input)
     val transposed = heights.transpose
-    val scores =
-      for
-        y <- heights.indices.drop(1).dropRight(1)
-        x <- heights(y).indices.drop(1).dropRight(1)
-      yield scenicScore(heights, transposed, x, y)
-    scores.max
+    Area(heights).contract(1).map(c => scenicScore(heights, transposed, c.x, c.y)).max
