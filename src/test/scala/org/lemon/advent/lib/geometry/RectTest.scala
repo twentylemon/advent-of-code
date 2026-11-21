@@ -17,7 +17,7 @@ class RectTest extends UnitTest:
       if x.isEmpty || y.isEmpty
     yield Rect(x, y)
 
-  val grown: Gen[(Area, Int)] =
+  val growableArea: Gen[(Area, Int)] =
     for
       area <- arbitrary[Area]
       n <- Gen.chooseNum(0, Int.MaxValue - Seq(area.left, area.right, area.top, area.bottom).map(_.abs).max)
@@ -404,23 +404,23 @@ class RectTest extends UnitTest:
   }
 
   test("growLeft encloses original area") {
-    check(forAll(grown) { (area, n) => area.growLeft(n) `encloses` area })
+    check(forAll(growableArea) { (area, n) => area.growLeft(n) `encloses` area })
   }
 
   test("growRight encloses original area") {
-    check(forAll(grown) { (area, n) => area.growRight(n) `encloses` area })
+    check(forAll(growableArea) { (area, n) => area.growRight(n) `encloses` area })
   }
 
   test("growTop encloses original area") {
-    check(forAll(grown) { (area, n) => area.growTop(n) `encloses` area })
+    check(forAll(growableArea) { (area, n) => area.growTop(n) `encloses` area })
   }
 
   test("growBottom encloses original area") {
-    check(forAll(grown) { (area, n) => area.growBottom(n) `encloses` area })
+    check(forAll(growableArea) { (area, n) => area.growBottom(n) `encloses` area })
   }
 
   test("expand encloses original area") {
-    check(forAll(grown) { (area, n) => area.expand(n) `encloses` area })
+    check(forAll(growableArea) { (area, n) => area.expand(n) `encloses` area })
   }
 
   test("expand and contract are inverse") {

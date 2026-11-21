@@ -165,12 +165,12 @@ class CuboidTest extends UnitTest:
   }
 
   test("expand encloses original cuboid") {
-    val gen =
+    val growableCuboid =
       for
         cuboid <- arbitrary[Cuboid[Int]]
         n <- Gen.chooseNum(0, Int.MaxValue - cuboid.corners.flatMap(p => Seq(p.x, p.y, p.z)).map(_.abs).max)
       yield (cuboid, n)
-    check(forAll(gen) { (cuboid, n) => cuboid.expand(n) `encloses` cuboid })
+    check(forAll(growableCuboid) { (cuboid, n) => cuboid.expand(n) `encloses` cuboid })
   }
 
   test("expand and contract are inverse") {
