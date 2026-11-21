@@ -9,7 +9,7 @@ class MinQueueTest extends UnitTest:
   object MinQueueCommands extends Commands:
     case class Bucket(elements: List[Int], remaining: Int)
     type State = Map[Int, Bucket]
-    final class Sut(var queue: MinQueue[Int, Int])
+    final class Sut(var queue: MinQueue[Int, Int], var dequeued: List[(Int, Int)] = Nil)
 
     val priority = Gen.choose(0, 10)
 
@@ -30,20 +30,23 @@ class MinQueueTest extends UnitTest:
       override def postCondition(state: State, success: Boolean): Prop = success
 
     case object Dequeue extends SuccessCommand:
-      type Result = Option[(Int, Int)]
+      type Result = Option[(Int, Int, Int)]
       override def run(sut: Sut) = sut.queue.dequeue.map((priority, element, rest) =>
+        val pair = (priority, element)
+        val timesBefore = sut.dequeued.count(_ == pair)
         sut.queue = rest
-        (priority, element)
+        sut.dequeued = pair :: sut.dequeued
+        (priority, element, timesBefore)
       )
-      override def nextState(state: State) = state.minByOption(_._1) match
-        case Some((priority, Bucket(_, 1))) => state - priority
+      private def smallestQueued(state: State) = state.filter(_._2.remaining > 0).minByOption(_._1)
+      override def nextState(state: State) = smallestQueued(state) match
         case Some((priority, bucket)) => state.updated(priority, bucket.copy(remaining = bucket.remaining - 1))
         case None => state
       override def preCondition(state: State) = true
-      override def postCondition(state: State, result: Result): Prop = (state.minByOption(_._1), result) match
+      override def postCondition(state: State, result: Result): Prop = (smallestQueued(state), result) match
         case (None, None) => true
-        case (Some((smallest, bucket)), Some((priority, element))) =>
-          priority == smallest && bucket.elements.contains(element)
+        case (Some((smallest, bucket)), Some((priority, element, timesBefore))) =>
+          priority == smallest && bucket.elements.count(_ == element) > timesBefore
         case _ => false
 
   test("dequeue returns an element with the smallest priority still queued") {
