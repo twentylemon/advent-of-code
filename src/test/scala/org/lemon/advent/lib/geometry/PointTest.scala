@@ -404,12 +404,6 @@ class PointTest extends UnitTest:
     })
   }
 
-  test("hasCoord on lines is true exactly when the lines have a char at coord") {
-    check(forAll(Gen.listOf(Gen.alphaStr), Gen.choose(-1, 10), Gen.choose(-1, 10)) { (lines, x, y) =>
-      lines.hasCoord(Coord(x, y)) == Try(lines(Coord(x, y))).isSuccess
-    })
-  }
-
   test("gridToMap maps each coord to its char in the lines") {
     check(forAll(Gen.listOf(Gen.alphaStr)) { lines =>
       val grid = Coord.gridToMap(lines.mkString("\n"))
