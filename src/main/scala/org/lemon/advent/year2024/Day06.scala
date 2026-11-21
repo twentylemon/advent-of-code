@@ -29,9 +29,7 @@ private object Day06:
         if ch != '#'
         dir <- Direction.values
       yield
-        val end = start.walk(dir)
-          .find(coord => !grid.contains(coord) || grid(coord) == '#')
-          .get
+        val end = start.walk(dir).find(coord => !grid.contains(coord) || grid(coord) == '#').get
         start -> (dir -> (if !grid.contains(end) then end else end - dir))
     paths.toSeq.groupBy(_._1).view.mapValues(_.map(_._2).toMap).toMap
 
