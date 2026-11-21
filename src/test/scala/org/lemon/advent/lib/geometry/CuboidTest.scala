@@ -34,6 +34,32 @@ class CuboidTest extends UnitTest:
     )
   }
 
+  test("each corner is the cuboid's closest point to that corner of space") {
+    check((cuboid: Cuboid[Int]) =>
+      val (min, max) = (Int.MinValue, Int.MaxValue)
+      val expected = Seq(
+        cuboid.topLeftFront -> Point3(min, min, min),
+        cuboid.topRightFront -> Point3(max, min, min),
+        cuboid.bottomLeftFront -> Point3(min, max, min),
+        cuboid.bottomRightFront -> Point3(max, max, min),
+        cuboid.topLeftBack -> Point3(min, min, max),
+        cuboid.topRightBack -> Point3(max, min, max),
+        cuboid.bottomLeftBack -> Point3(min, max, max),
+        cuboid.bottomRightBack -> Point3(max, max, max),
+      )
+      expected.forall((corner, far) => corner == cuboid.clamp(far))
+    )
+  }
+
+  test("Cuboid(width, height, depth) starts at the origin") {
+    val size = Gen.chooseNum(1, Int.MaxValue)
+    check(forAll(size, size, size) { (width, height, depth) =>
+      val cuboid = Cuboid(width, height, depth)
+      cuboid.topLeftFront == Point3.origin[Int] &&
+      cuboid.width == width && cuboid.height == height && cuboid.depth == depth
+    })
+  }
+
   test("number of enclosed points is equal to size") {
     check((cuboid: Cuboid[Int]) => cuboid.size == cuboid.iterator.size)
   }
@@ -139,7 +165,12 @@ class CuboidTest extends UnitTest:
   }
 
   test("expand encloses original cuboid") {
-    check((cuboid: Cuboid[Int], n: Int) => (n > 0 && n < Int.MaxValue - 1000) ==> (cuboid.expand(n) `encloses` cuboid))
+    val gen =
+      for
+        cuboid <- Arbitrary.arbitrary[Cuboid[Int]]
+        n <- Gen.chooseNum(0, Int.MaxValue - cuboid.corners.flatMap(p => Seq(p.x, p.y, p.z)).map(_.abs).max)
+      yield (cuboid, n)
+    check(forAll(gen) { (cuboid, n) => cuboid.expand(n) `encloses` cuboid })
   }
 
   test("expand and contract are inverse") {
@@ -147,9 +178,7 @@ class CuboidTest extends UnitTest:
   }
 
   test("contract is enclosed by original cuboid") {
-    check((cuboid: Cuboid[Int]) =>
-      (cuboid.width > 2 && cuboid.height > 2 && cuboid.depth > 2) ==> (cuboid `encloses` cuboid.contract(1))
-    )
+    check((cuboid: Cuboid[Int]) => cuboid `encloses` cuboid.contract(1))
   }
 
   test("translate moves every point") {
@@ -173,9 +202,7 @@ class CuboidTest extends UnitTest:
   }
 
   test("cuboid not enclosed by smaller cuboid") {
-    check((cuboid: Cuboid[Int]) =>
-      (cuboid.width > 2 && cuboid.height > 2 && cuboid.depth > 2) ==> !cuboid.contract(1).encloses(cuboid)
-    )
+    check((cuboid: Cuboid[Int]) => !cuboid.contract(1).encloses(cuboid))
   }
 
   test("cuboid not enclosed by disjoint cuboid") {
@@ -272,6 +299,10 @@ class CuboidTest extends UnitTest:
 
   test("clamp returns a point in the cuboid") {
     check((cuboid: Cuboid[Int], point: Point3[Int]) => cuboid.contains(cuboid.clamp(point)))
+  }
+
+  test("clamp of point inside cuboid is identity") {
+    check((cuboid: Cuboid[Int]) => cuboid.forall(p => cuboid.clamp(p) == p))
   }
 
   test("wrap returns a point in the cuboid") {
