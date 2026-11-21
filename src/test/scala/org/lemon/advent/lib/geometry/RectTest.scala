@@ -168,7 +168,9 @@ class RectTest extends UnitTest:
         height <- Gen.choose(1, 20)
         lines <- Gen.listOfN(height, Gen.stringOfN(width, Gen.alphaNumChar))
       yield lines
-    check(forAll(gen) { lines => Area(lines).forall(lines.hasCoord) && Area(lines).size == lines.map(_.length).sum })
+    check(forAll(gen) { lines =>
+      Area(lines).toSet == Coord.gridToMap(lines.mkString("\n")).keySet && Area(lines).size == lines.map(_.length).sum
+    })
   }
 
   test("Area of a grid covers every cell") {
@@ -298,7 +300,7 @@ class RectTest extends UnitTest:
   }
 
   test("area does not overlap disjoint area") {
-    check((area: Area) => !area.overlaps(Area(area.right + 1 to area.right + 2, area.yRange)))
+    check((area: Area) => !area.overlaps(Area(area.right + 1 to area.right + 2, area.top to area.bottom)))
   }
 
   test("empty area overlaps nothing") {
@@ -314,7 +316,7 @@ class RectTest extends UnitTest:
   }
 
   test("intersect of disjoint areas is empty") {
-    check((area: Area) => area.intersect(Area(area.right + 1 to area.right + 2, area.yRange)).isEmpty)
+    check((area: Area) => area.intersect(Area(area.right + 1 to area.right + 2, area.top to area.bottom)).isEmpty)
   }
 
   test("intersect is enclosed by both areas") {
@@ -333,7 +335,7 @@ class RectTest extends UnitTest:
   }
 
   test("diff of disjoint area is the original area") {
-    check((area: Area) => area.diff(Area(area.right + 1 to area.right + 2, area.yRange)) == Seq(area))
+    check((area: Area) => area.diff(Area(area.right + 1 to area.right + 2, area.top to area.bottom)) == Seq(area))
   }
 
   test("diff is enclosed by original area") {
@@ -438,26 +440,4 @@ class RectTest extends UnitTest:
     check((area: Area, coord: Coord) =>
       ((area.wrap(coord).y - area.top) +% area.height) == ((coord.y - area.top) +% area.height)
     )
-  }
-
-  test("grid(area) is the grid's cells in the area, row by row") {
-    val gen =
-      for
-        area <- Arbitrary.arbitrary[Area]
-        grid <- Gen.listOfN(area.bottom + 1, Gen.listOfN(area.right + 1, Arbitrary.arbitrary[Int]))
-      yield (grid, area)
-    check(forAll(gen) { (grid, area) =>
-      grid(area) == area.rows.map(_.map(grid(_)).toSeq).toSeq
-    })
-  }
-
-  test("lines(area) is the lines' chars in the area, row by row") {
-    val gen =
-      for
-        area <- Arbitrary.arbitrary[Area]
-        lines <- Gen.listOfN(area.bottom + 1, Gen.stringOfN(area.right + 1, Gen.alphaNumChar))
-      yield (lines, area)
-    check(forAll(gen) { (lines, area) =>
-      lines(area) == area.rows.map(_.map(lines(_)).toSeq).toSeq
-    })
   }
