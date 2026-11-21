@@ -119,8 +119,4 @@ extension [N: Integral](vertices: Seq[Point[N]])
   /** Computes the area of a polygon using the shoelace formula.
     * @return the area of the polygon
     */
-  def shoelaceArea: N = vertices
-    .lazyZip(vertices.tail :+ vertices.head)
-    .map(_ `cross` _)
-    .reduce(_ + _)
-    .abs / fromInt[N](2)
+  def shoelaceArea: N = (vertices.iterator ++ vertices.headOption).sliding2.map(_ `cross` _).sum.abs / fromInt[N](2)

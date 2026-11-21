@@ -14,7 +14,5 @@ object Area:
   def apply(lines: Seq[String])(using String => WrappedString): Area = Rect(lines)
   def apply(xRange: Range, yRange: Range): Area = Rect(xRange.toInterval, yRange.toInterval)
   def apply(xRange: Interval[Int], yRange: Interval[Int]): Area = Rect(xRange, yRange)
-  def apply(xRange: Range, yRange: Interval[Int]): Area = Rect(xRange.toInterval, yRange)
-  def apply(xRange: Interval[Int], yRange: Range): Area = Rect(xRange, yRange.toInterval)
   def apply(left: Int, right: Int, top: Int, bottom: Int): Area = Rect(left, right, top, bottom)
   def apply(width: Int, height: Int): Area = Rect(width, height)
