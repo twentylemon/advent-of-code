@@ -29,7 +29,7 @@ private object Day06:
         if ch != '#'
         dir <- Direction.values
       yield
-        val end = Iterator.iterate(start)(_ + dir)
+        val end = start.walk(dir)
           .find(coord => !grid.contains(coord) || grid(coord) == '#')
           .get
         start -> (dir -> (if !grid.contains(end) then end else end - dir))
