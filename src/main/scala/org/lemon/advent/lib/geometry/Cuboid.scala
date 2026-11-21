@@ -85,7 +85,7 @@ case class Cuboid[N: Integral](xRange: Interval[N], yRange: Interval[N], zRange:
   def faces: Seq[Cuboid[N]] = Seq(leftFace, rightFace, topFace, bottomFace, frontFace, backFace)
 
   /** Returns the octants of this cuboid. If the cuboid has an odd length along an axis,
-    * the middle slice is in the lower octants.
+    * the middle slice is in the left, top, or front octants.
     * @return the non-empty octants of this cuboid
     */
   def octants: Seq[Cuboid[N]] = for x <- xRange.halves; y <- yRange.halves; z <- zRange.halves yield Cuboid(x, y, z)
