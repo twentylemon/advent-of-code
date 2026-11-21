@@ -398,6 +398,14 @@ class PointTest extends UnitTest:
     check((coord: Coord) => coord.to[Long] == Point[Long](coord.x.toLong, coord.y.toLong))
   }
 
+  test("to[Int] truncates like toInt") {
+    check((x: Long, y: Long) => Point(x, y).to[Int] == Coord(x.toInt, y.toInt))
+  }
+
+  test("to[Long] truncates like toLong") {
+    check((x: BigInt, y: BigInt) => Point(x, y).to[Long] == Point(x.toLong, y.toLong))
+  }
+
   test("hasCoord is true exactly when the grid has a value at coord") {
     check(forAll(Gen.listOf(Gen.listOf(Gen.const(0))), Gen.choose(-1, 10), Gen.choose(-1, 10)) { (grid, x, y) =>
       grid.hasCoord(Coord(x, y)) == Try(grid(Coord(x, y))).isSuccess

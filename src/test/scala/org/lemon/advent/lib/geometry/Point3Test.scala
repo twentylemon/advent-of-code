@@ -252,3 +252,11 @@ class Point3Test extends UnitTest:
   test("to[Long] preserves coordinates") {
     check((a: Point3[Int]) => a.to[Long] == Point3[Long](a.x.toLong, a.y.toLong, a.z.toLong))
   }
+
+  test("to[Int] truncates like toInt") {
+    check((x: Long, y: Long, z: Long) => Point3(x, y, z).to[Int] == Point3(x.toInt, y.toInt, z.toInt))
+  }
+
+  test("to[Long] truncates like toLong") {
+    check((x: BigInt, y: BigInt, z: BigInt) => Point3(x, y, z).to[Long] == Point3(x.toLong, y.toLong, z.toLong))
+  }

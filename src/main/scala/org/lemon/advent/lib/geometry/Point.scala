@@ -113,7 +113,13 @@ case class Point[N: Integral](x: N, y: N):
     else if dx > `0` && dy == `0` then Some(Direction.Right)
     else None
 
-  def to[M: Integral]: Point[M] = Point[M](fromString[M](x.toString), fromString[M](y.toString))
+  def to[M: Integral]: Point[M] = Point[M](truncate(x), truncate(y))
+
+private[geometry] def truncate[N, M: Integral](n: N): M =
+  val digits = n.toString
+  val ten = fromInt[M](10)
+  val magnitude = digits.stripPrefix("-").foldLeft(`0`[M])((acc, digit) => acc * ten + fromInt[M](digit.asDigit))
+  if digits.startsWith("-") then -magnitude else magnitude
 
 extension [N: Integral](vertices: Seq[Point[N]])
   /** Computes the area of a polygon using the shoelace formula.

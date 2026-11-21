@@ -92,5 +92,4 @@ case class Point3[N: Integral](x: N, y: N, z: N):
   def xz: Point[N] = Point(x, z)
   def yz: Point[N] = Point(y, z)
 
-  def to[M: Integral]: Point3[M] =
-    Point3[M](fromString[M](x.toString), fromString[M](y.toString), fromString[M](z.toString))
+  def to[M: Integral]: Point3[M] = Point3[M](truncate(x), truncate(y), truncate(z))
