@@ -444,3 +444,10 @@ class PointTest extends UnitTest:
       grid.forall((coord, c) => lines(coord) == c) && grid.size == lines.map(_.length).sum
     })
   }
+
+  test("points equal across numeric types hash equally") {
+    check((x: Int, y: Int) =>
+      val (int, long) = (Point(x, y), Point(x.toLong, y.toLong))
+      int == long && int.## == long.##
+    )
+  }

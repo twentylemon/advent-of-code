@@ -94,3 +94,5 @@ case class Point3[N: Integral](x: N, y: N, z: N):
 
   def to[M: Integral]: Point3[M] =
     Point3[M](fromString[M](x.toString), fromString[M](y.toString), fromString[M](z.toString))
+
+  override def hashCode: Int = (x.## * 0x9e3779b9 + y.##) * 0x9e3779b9 + z.##

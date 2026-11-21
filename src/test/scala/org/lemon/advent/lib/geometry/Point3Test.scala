@@ -252,3 +252,10 @@ class Point3Test extends UnitTest:
   test("to[Long] preserves coordinates") {
     check((a: Point3[Int]) => a.to[Long] == Point3[Long](a.x.toLong, a.y.toLong, a.z.toLong))
   }
+
+  test("points equal across numeric types hash equally") {
+    check((x: Int, y: Int, z: Int) =>
+      val (int, long) = (Point3(x, y, z), Point3(x.toLong, y.toLong, z.toLong))
+      int == long && int.## == long.##
+    )
+  }
