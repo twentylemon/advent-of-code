@@ -6,7 +6,7 @@ import org.lemon.advent.lib.graph.DisjointSet
 
 private object Day08:
 
-  type Coord = Point3[Long]
+  type Box = Point3[Long]
 
   def parse(input: String) =
     input.linesIterator.map(line =>
@@ -22,11 +22,11 @@ private object Day08:
     val circuits = closests.foldLeft(DisjointSet(coords)) { case (circuits, (a, b)) => circuits.union(a, b) }
     circuits.components.map(_.size).toSeq.sorted.takeRight(3).product
 
-  def minimumSpanningTree(coords: Seq[Coord]): Seq[(Coord, Coord)] =
+  def minimumSpanningTree(coords: Seq[Box]): Seq[(Box, Box)] =
     val all = coords.toSet
     val initialDist = all.map(_ -> Long.MaxValue).toMap.updated(coords.head, 0L)
 
-    val (_, _, parent) = coords.foldLeft((Set.empty[Coord], initialDist, Map.empty[Coord, Coord])) {
+    val (_, _, parent) = coords.foldLeft((Set.empty[Box], initialDist, Map.empty[Box, Box])) {
       case ((mst, minDist, parent), _) =>
         val remaining = all -- mst
         val u = remaining.minBy(minDist)

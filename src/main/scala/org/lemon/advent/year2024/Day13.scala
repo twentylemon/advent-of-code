@@ -5,9 +5,7 @@ import org.lemon.advent.lib.geometry.Point
 
 private object Day13:
 
-  type Coord = Point[Long]
-
-  def parse(input: String): Seq[(Coord, Coord, Coord)] = input.chunks.map(_.linesIterator.toSeq).map {
+  def parse(input: String): Seq[(Point[Long], Point[Long], Point[Long])] = input.chunks.map(_.linesIterator.toSeq).map {
     case Seq(
           s"Button A: X+$ax, Y+$ay",
           s"Button B: X+$bx, Y+$by",
@@ -15,7 +13,7 @@ private object Day13:
         ) => (Point(ax.toLong, ay.toLong), Point(bx.toLong, by.toLong), Point(px.toLong, py.toLong))
   }.toSeq
 
-  def solve(a: Coord, b: Coord, prize: Coord) =
+  def solve(a: Point[Long], b: Point[Long], prize: Point[Long]) =
     val (Point(ax, ay), Point(bx, by), Point(px, py)) = (a, b, prize)
     // a * ax + b * bx = px  &  a * ay + b * by = py
     // => a = (px - b * bx) / ax  &  a = (py - b * by) / ay

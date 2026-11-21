@@ -6,12 +6,12 @@ import org.lemon.advent.lib.geometry.*
 private object Day08:
 
   sealed trait Instruction
-  case class Rect(width: Int, height: Int) extends Instruction
+  case class FillRect(width: Int, height: Int) extends Instruction
   case class RotateRow(row: Int, shift: Int) extends Instruction
   case class RotateCol(col: Int, shift: Int) extends Instruction
 
   def parse(input: String) = input.linesIterator.map {
-    case s"rect ${a}x$b" => Rect(a.toInt, b.toInt)
+    case s"rect ${a}x$b" => FillRect(a.toInt, b.toInt)
     case s"rotate row y=$y by $s" => RotateRow(y.toInt, s.toInt)
     case s"rotate column x=$x by $s" => RotateCol(x.toInt, s.toInt)
   }.toSeq
@@ -19,7 +19,7 @@ private object Day08:
   def run(input: String, area: Area) =
     parse(input).foldLeft(Set.empty[Coord])((state, instr) =>
       instr match
-        case Rect(width, height) => state ++ Area(width, height)
+        case FillRect(width, height) => state ++ Area(width, height)
         case RotateRow(row, shift) => state.map(c => if c.row == row then area.wrap(c.shiftRight(shift)) else c)
         case RotateCol(col, shift) => state.map(c => if c.col == col then area.wrap(c.shiftDown(shift)) else c)
     )
