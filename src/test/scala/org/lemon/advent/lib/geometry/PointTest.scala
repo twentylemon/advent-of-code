@@ -150,6 +150,14 @@ class PointTest extends UnitTest:
     check((coord: Coord) => coord.directionTo(coord.up.left) == None)
   }
 
+  test("adjacent has 4 distinct coords") {
+    check((coord: Coord) => coord.adjacent.distinct.size == 4)
+  }
+
+  test("surrounding has 8 distinct coords") {
+    check((coord: Coord) => coord.surrounding.distinct.size == 8)
+  }
+
   test("manhattan distance of adjacent is 1") {
     check((coord: Coord) => coord.adjacent.forall(_.manhattan(coord) == 1))
   }
@@ -162,6 +170,20 @@ class PointTest extends UnitTest:
 
   test("manhattan is symmetric") {
     check((c1: Coord, c2: Coord) => c1.manhattan(c2) == c2.manhattan(c1))
+  }
+
+  test("manhattan obeys the triangle inequality") {
+    check((a: Coord, b: Coord, c: Coord) =>
+      val (p, q, r) = (a.to[BigInt], b.to[BigInt], c.to[BigInt])
+      p.manhattan(r) <= p.manhattan(q) + q.manhattan(r)
+    )
+  }
+
+  test("chessboard is at most manhattan") {
+    check((a: Coord, b: Coord) =>
+      val (p, q) = (a.to[BigInt], b.to[BigInt])
+      p.chessboard(q) <= p.manhattan(q)
+    )
   }
 
   test("chessboard distance to self is 0") {
@@ -254,6 +276,18 @@ class PointTest extends UnitTest:
       within.distinct == within && within.toSet == square.filter(metric(coord, _) <= d).toSet
     })
   }
+
+  test("flip twice is identity") {
+    check((coord: Coord) => coord.flip.flip == coord)
+  }
+
+  for
+    (src, dest) <- Seq((Direction.Up, Direction.Left), (Direction.Down, Direction.Right))
+  do
+    test(s"flip mirrors $src and $dest") {
+      src.unitVector.flip shouldBe dest.unitVector
+      dest.unitVector.flip shouldBe src.unitVector
+    }
 
   test("rotateRight four times is identity") {
     check((coord: Coord) => coord.rotateRight.rotateRight.rotateRight.rotateRight == coord)
