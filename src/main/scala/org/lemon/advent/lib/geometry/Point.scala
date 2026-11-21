@@ -115,6 +115,8 @@ case class Point[N: Integral](x: N, y: N):
 
   def to[M: Integral]: Point[M] = Point[M](fromString[M](x.toString), fromString[M](y.toString))
 
+  override def hashCode: Int = x.## * 0x9e3779b9 + y.##
+
 extension [N: Integral](vertices: Seq[Point[N]])
   /** Computes the area of a polygon using the shoelace formula.
     * @return the area of the polygon
