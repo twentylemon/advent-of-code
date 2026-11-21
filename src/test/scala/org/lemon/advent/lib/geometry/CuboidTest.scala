@@ -120,7 +120,7 @@ class CuboidTest extends UnitTest:
     check((cuboid: Cuboid[Int]) => cuboid.octants.flatMap(_.toSeq).toSet == cuboid.toSet)
   }
 
-  test("octants split the cuboid in half, with any odd middle in the lower octants") {
+  test("octants split the cuboid in half, with any odd middle in the left, top, or front octants") {
     check((cuboid: Cuboid[Int]) =>
       cuboid.octants.forall(o =>
         o.width == (if o.left == cuboid.left then (cuboid.width + 1) / 2 else cuboid.width / 2) &&

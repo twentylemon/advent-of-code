@@ -22,8 +22,8 @@ object Point:
   * @param y the y coordinate
   */
 case class Point[N: Integral](x: N, y: N):
-  def row = y
-  def col = x
+  def row: N = y
+  def col: N = x
 
   def up: Point[N] = shiftUp(`1`)
   def down: Point[N] = shiftDown(`1`)
@@ -73,7 +73,7 @@ case class Point[N: Integral](x: N, y: N):
   def yInterval(rhs: Point[N]): Interval[N] = Interval(y min rhs.y, y max rhs.y)
   def bounding(rhs: Point[N]): Rect[N] = Rect(xRange = xInterval(rhs), yRange = yInterval(rhs))
 
-  def flip = Point(x = y, y = x)
+  def flip: Point[N] = Point(x = y, y = x)
 
   def rotateRight: Point[N] = Point(x = -y, y = x)
   def rotateRight(about: Point[N]): Point[N] = (this - about).rotateRight + about

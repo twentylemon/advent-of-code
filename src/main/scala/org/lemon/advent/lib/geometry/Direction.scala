@@ -29,6 +29,6 @@ enum Direction(val unitVector: Coord):
   case Down extends Direction(unitDown)
   case Right extends Direction(unitRight)
 
-  def turnLeft = Direction.lefts(ordinal)
-  def turnAround = Direction.arounds(ordinal)
-  def turnRight = Direction.rights(ordinal)
+  def turnLeft: Direction = Direction.lefts(ordinal)
+  def turnAround: Direction = Direction.arounds(ordinal)
+  def turnRight: Direction = Direction.rights(ordinal)
