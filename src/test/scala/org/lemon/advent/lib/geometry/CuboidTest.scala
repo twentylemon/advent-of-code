@@ -2,6 +2,7 @@ package org.lemon.advent.lib.geometry
 
 import org.lemon.advent.*
 import org.lemon.advent.lib.*
+import org.scalacheck.Arbitrary.*
 import org.scalacheck.Prop.*
 import org.scalacheck.*
 
@@ -9,12 +10,27 @@ class CuboidTest extends UnitTest:
   val emptyCuboid: Gen[Cuboid[Int]] =
     def emptied(range: Interval[Int]) = Gen.oneOf(range, Interval(range.start, range.start - 1))
     for
-      cuboid <- Arbitrary.arbitrary[Cuboid[Int]]
+      cuboid <- arbitrary[Cuboid[Int]]
       x <- emptied(cuboid.xRange)
       y <- emptied(cuboid.yRange)
       z <- emptied(cuboid.zRange)
       if x.isEmpty || y.isEmpty || z.isEmpty
     yield Cuboid(x, y, z)
+
+  val corner: Gen[(Cuboid[Int] => Point3[Int], Point3[Int])] =
+    val (min, max) = (Int.MinValue, Int.MaxValue)
+    Gen.oneOf(
+      Seq[(Cuboid[Int] => Point3[Int], Point3[Int])](
+        (_.topLeftFront, Point3(min, min, min)),
+        (_.topRightFront, Point3(max, min, min)),
+        (_.bottomLeftFront, Point3(min, max, min)),
+        (_.bottomRightFront, Point3(max, max, min)),
+        (_.topLeftBack, Point3(min, min, max)),
+        (_.topRightBack, Point3(max, min, max)),
+        (_.bottomLeftBack, Point3(min, max, max)),
+        (_.bottomRightBack, Point3(max, max, max)),
+      )
+    )
 
   test("points cover cuboid") {
     check((cuboid: Cuboid[Int]) =>
@@ -35,28 +51,14 @@ class CuboidTest extends UnitTest:
   }
 
   test("each corner is the cuboid's closest point to that corner of space") {
-    check((cuboid: Cuboid[Int]) =>
-      val (min, max) = (Int.MinValue, Int.MaxValue)
-      val expected = Seq(
-        cuboid.topLeftFront -> Point3(min, min, min),
-        cuboid.topRightFront -> Point3(max, min, min),
-        cuboid.bottomLeftFront -> Point3(min, max, min),
-        cuboid.bottomRightFront -> Point3(max, max, min),
-        cuboid.topLeftBack -> Point3(min, min, max),
-        cuboid.topRightBack -> Point3(max, min, max),
-        cuboid.bottomLeftBack -> Point3(min, max, max),
-        cuboid.bottomRightBack -> Point3(max, max, max),
-      )
-      expected.forall((corner, far) => corner == cuboid.clamp(far))
-    )
+    check(forAll(arbitrary[Cuboid[Int]], corner) { case (cuboid, (at, far)) => at(cuboid) == cuboid.clamp(far) })
   }
 
   test("Cuboid(width, height, depth) starts at the origin") {
     val size = Gen.chooseNum(1, Int.MaxValue)
     check(forAll(size, size, size) { (width, height, depth) =>
       val cuboid = Cuboid(width, height, depth)
-      cuboid.topLeftFront == Point3.origin[Int] &&
-      cuboid.width == width && cuboid.height == height && cuboid.depth == depth
+      cuboid.topLeftFront == Point3.origin[Int] && cuboid.width == width && cuboid.height == height && cuboid.depth == depth
     })
   }
 
@@ -167,7 +169,7 @@ class CuboidTest extends UnitTest:
   test("expand encloses original cuboid") {
     val gen =
       for
-        cuboid <- Arbitrary.arbitrary[Cuboid[Int]]
+        cuboid <- arbitrary[Cuboid[Int]]
         n <- Gen.chooseNum(0, Int.MaxValue - cuboid.corners.flatMap(p => Seq(p.x, p.y, p.z)).map(_.abs).max)
       yield (cuboid, n)
     check(forAll(gen) { (cuboid, n) => cuboid.expand(n) `encloses` cuboid })
@@ -184,7 +186,7 @@ class CuboidTest extends UnitTest:
   test("translate moves every point") {
     val axis = Gen.choose(-1000, 1000)
     val offsets = Gen.zip(axis, axis, axis).map((x, y, z) => Point3(x, y, z))
-    check(forAll(Arbitrary.arbitrary[Cuboid[Int]], offsets) { (cuboid: Cuboid[Int], offset: Point3[Int]) =>
+    check(forAll(arbitrary[Cuboid[Int]], offsets) { (cuboid: Cuboid[Int], offset: Point3[Int]) =>
       cuboid.translate(offset).toSet == cuboid.map(_ + offset).toSet
     })
   }
@@ -233,7 +235,7 @@ class CuboidTest extends UnitTest:
   }
 
   test("empty cuboid overlaps nothing") {
-    check(forAll(emptyCuboid, Arbitrary.arbitrary[Cuboid[Int]]) { (empty: Cuboid[Int], cuboid: Cuboid[Int]) =>
+    check(forAll(emptyCuboid, arbitrary[Cuboid[Int]]) { (empty: Cuboid[Int], cuboid: Cuboid[Int]) =>
       !empty.overlaps(cuboid) && !cuboid.overlaps(empty)
     })
   }
@@ -294,7 +296,7 @@ class CuboidTest extends UnitTest:
   }
 
   test("diff of an empty cuboid is empty") {
-    check(forAll(emptyCuboid, Arbitrary.arbitrary[Cuboid[Int]])((empty, cuboid) => empty.diff(cuboid).isEmpty))
+    check(forAll(emptyCuboid, arbitrary[Cuboid[Int]])((empty, cuboid) => empty.diff(cuboid).isEmpty))
   }
 
   test("clamp returns a point in the cuboid") {

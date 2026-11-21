@@ -3,6 +3,7 @@ package org.lemon.advent.lib.geometry
 import org.lemon.advent.*
 import org.lemon.advent.lib.*
 import org.lemon.advent.lib.geometry.*
+import org.scalacheck.Arbitrary.*
 import org.scalacheck.Prop.*
 import org.scalacheck.*
 
@@ -10,15 +11,26 @@ class RectTest extends UnitTest:
   val emptyArea: Gen[Area] =
     def emptied(range: Interval[Int]) = Gen.oneOf(range, Interval(range.start, range.start - 1))
     for
-      area <- Arbitrary.arbitrary[Area]
+      area <- arbitrary[Area]
       x <- emptied(area.xRange)
       y <- emptied(area.yRange)
       if x.isEmpty || y.isEmpty
     yield Rect(x, y)
 
+  val corner: Gen[(Area => Coord, Coord)] =
+    val (min, max) = (Int.MinValue, Int.MaxValue)
+    Gen.oneOf(
+      Seq[(Area => Coord, Coord)](
+        (_.topLeft, Coord(min, min)),
+        (_.topRight, Coord(max, min)),
+        (_.bottomLeft, Coord(min, max)),
+        (_.bottomRight, Coord(max, max)),
+      )
+    )
+
   val grown: Gen[(Area, Int)] =
     for
-      area <- Arbitrary.arbitrary[Area]
+      area <- arbitrary[Area]
       n <- Gen.chooseNum(0, Int.MaxValue - Seq(area.left, area.right, area.top, area.bottom).map(_.abs).max)
     yield (area, n)
 
@@ -50,11 +62,7 @@ class RectTest extends UnitTest:
   }
 
   test("each corner is the area's closest coord to that corner of the plane") {
-    check((area: Area) =>
-      val (min, max) = (Int.MinValue, Int.MaxValue)
-      area.topLeft == area.clamp(Coord(min, min)) && area.topRight == area.clamp(Coord(max, min)) &&
-      area.bottomLeft == area.clamp(Coord(min, max)) && area.bottomRight == area.clamp(Coord(max, max))
-    )
+    check(forAll(arbitrary[Area], corner) { case (area, (at, far)) => at(area) == area.clamp(far) })
   }
 
   test("topRow contains width points") {
@@ -90,7 +98,7 @@ class RectTest extends UnitTest:
   }
 
   test("row contains the coords in that row") {
-    val gen = for area <- Arbitrary.arbitrary[Area]; y <- Gen.oneOf(area.yRange) yield (area, y)
+    val gen = for area <- arbitrary[Area]; y <- Gen.oneOf(area.yRange) yield (area, y)
     check(forAll(gen) { (area, y) => area.row(y).toSeq == area.filter(_.y == y).toSeq })
   }
 
@@ -101,7 +109,7 @@ class RectTest extends UnitTest:
   }
 
   test("reverseRow is row in reverse") {
-    val gen = for area <- Arbitrary.arbitrary[Area]; y <- Gen.oneOf(area.yRange) yield (area, y)
+    val gen = for area <- arbitrary[Area]; y <- Gen.oneOf(area.yRange) yield (area, y)
     check(forAll(gen) { (area, y) => area.reverseRow(y).toSeq == area.row(y).toSeq.reverse })
   }
 
@@ -112,7 +120,7 @@ class RectTest extends UnitTest:
   }
 
   test("col contains the coords in that column") {
-    val gen = for area <- Arbitrary.arbitrary[Area]; x <- Gen.oneOf(area.xRange) yield (area, x)
+    val gen = for area <- arbitrary[Area]; x <- Gen.oneOf(area.xRange) yield (area, x)
     check(forAll(gen) { (area, x) => area.col(x).toSeq == area.filter(_.x == x).toSeq })
   }
 
@@ -123,7 +131,7 @@ class RectTest extends UnitTest:
   }
 
   test("reverseCol is col in reverse") {
-    val gen = for area <- Arbitrary.arbitrary[Area]; x <- Gen.oneOf(area.xRange) yield (area, x)
+    val gen = for area <- arbitrary[Area]; x <- Gen.oneOf(area.xRange) yield (area, x)
     check(forAll(gen) { (area, x) => area.reverseCol(x).toSeq == area.col(x).toSeq.reverse })
   }
 
@@ -192,7 +200,7 @@ class RectTest extends UnitTest:
       for
         width <- Gen.choose(1, 20)
         height <- Gen.choose(1, 20)
-        grid <- Gen.listOfN(height, Gen.listOfN(width, Arbitrary.arbitrary[Int]))
+        grid <- Gen.listOfN(height, Gen.listOfN(width, arbitrary[Int]))
       yield grid
     check(forAll(gen) { grid => Area(grid).forall(grid.hasCoord) && Area(grid).size == grid.map(_.size).sum })
   }
@@ -315,7 +323,7 @@ class RectTest extends UnitTest:
   }
 
   test("empty area overlaps nothing") {
-    check(forAll(emptyArea, Arbitrary.arbitrary[Area])((empty, area) => !empty.overlaps(area) && !area.overlaps(empty)))
+    check(forAll(emptyArea, arbitrary[Area])((empty, area) => !empty.overlaps(area) && !area.overlaps(empty)))
   }
 
   test("area overlaps when the intersection is non-empty") {
@@ -366,13 +374,13 @@ class RectTest extends UnitTest:
   }
 
   test("diff of an empty area is empty") {
-    check(forAll(emptyArea, Arbitrary.arbitrary[Area])((empty, area) => empty.diff(area).isEmpty))
+    check(forAll(emptyArea, arbitrary[Area])((empty, area) => empty.diff(area).isEmpty))
   }
 
   test("translate moves every point") {
     val axis = Gen.choose(-1000, 1000)
     val offsets = Gen.zip(axis, axis).map((x, y) => Coord(x, y))
-    check(forAll(Arbitrary.arbitrary[Area], offsets) { (area: Area, offset: Coord) =>
+    check(forAll(arbitrary[Area], offsets) { (area: Area, offset: Coord) =>
       area.translate(offset).toSet == area.map(_ + offset).toSet
     })
   }
