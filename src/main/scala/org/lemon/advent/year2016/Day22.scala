@@ -45,5 +45,5 @@ private object Day22:
       .filter(disk => disk.loc.adjacent.forall(n => disks.find(_.loc == n).forall(_.size >= disk.used)))
       .map(_.loc)
       .toSet
-    val start = Node(empty = disks.find(_.used == 0).get.loc, goal = disks.filter(_.loc.y == 0).maxBy(_.loc.x).loc)
+    val start = Node(empty = disks.find(_.used == 0).get.loc, goal = Area(disks.map(_.loc)).topRight)
     pathFind(adjacency(movable), _.goal.manhattan((0, 0)), start, _.goal == Coord(0, 0)).get.distance
