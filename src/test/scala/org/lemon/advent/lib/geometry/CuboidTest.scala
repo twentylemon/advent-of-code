@@ -56,7 +56,8 @@ class CuboidTest extends UnitTest:
     val size = Gen.chooseNum(1, Int.MaxValue)
     check(forAll(size, size, size) { (width, height, depth) =>
       val cuboid = Cuboid(width, height, depth)
-      cuboid.topLeftFront == Point3.origin[Int] && cuboid.width == width && cuboid.height == height && cuboid.depth == depth
+      val sizes = (cuboid.width, cuboid.height, cuboid.depth)
+      cuboid.topLeftFront == Point3.origin[Int] && sizes == (width, height, depth)
     })
   }
 
@@ -184,7 +185,7 @@ class CuboidTest extends UnitTest:
   test("translate moves every point") {
     val axis = Gen.choose(-1000, 1000)
     val offsets = Gen.zip(axis, axis, axis).map((x, y, z) => Point3(x, y, z))
-    check(forAll(arbitrary[Cuboid[Int]], offsets) { (cuboid: Cuboid[Int], offset: Point3[Int]) =>
+    check(forAll(arbitrary[Cuboid[Int]], offsets) { (cuboid, offset) =>
       cuboid.translate(offset).toSet == cuboid.map(_ + offset).toSet
     })
   }
@@ -233,9 +234,9 @@ class CuboidTest extends UnitTest:
   }
 
   test("empty cuboid overlaps nothing") {
-    check(forAll(emptyCuboid, arbitrary[Cuboid[Int]]) { (empty: Cuboid[Int], cuboid: Cuboid[Int]) =>
+    check(forAll(emptyCuboid, arbitrary[Cuboid[Int]])((empty, cuboid) =>
       !empty.overlaps(cuboid) && !cuboid.overlaps(empty)
-    })
+    ))
   }
 
   test("cuboid overlaps when the intersection is non-empty") {

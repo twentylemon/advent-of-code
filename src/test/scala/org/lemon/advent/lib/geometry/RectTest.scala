@@ -295,13 +295,11 @@ class RectTest extends UnitTest:
   }
 
   test("area enclosed by larger area") {
-    check((area: Area) => area.growLeft(1).growRight(1).growTop(1).growBottom(1).encloses(area))
+    check((area: Area) => area.expand(1).encloses(area))
   }
 
   test("area not enclosed by smaller area") {
-    check((area: Area) =>
-      !area.dropLeft(1).dropRight(1).dropTop(1).dropBottom(1).encloses(area)
-    )
+    check((area: Area) => !area.contract(1).encloses(area))
   }
 
   test("area not enclosed by disjoint area") {
@@ -378,7 +376,7 @@ class RectTest extends UnitTest:
   test("translate moves every point") {
     val axis = Gen.choose(-1000, 1000)
     val offsets = Gen.zip(axis, axis).map((x, y) => Coord(x, y))
-    check(forAll(arbitrary[Area], offsets) { (area: Area, offset: Coord) =>
+    check(forAll(arbitrary[Area], offsets) { (area, offset) =>
       area.translate(offset).toSet == area.map(_ + offset).toSet
     })
   }
