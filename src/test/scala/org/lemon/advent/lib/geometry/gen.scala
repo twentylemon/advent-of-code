@@ -27,7 +27,7 @@ given Shrink[Range] = Shrink { case range: Range =>
 
 given Arbitrary[Area] = Arbitrary(Gen.resultOf((x: Range, y: Range) => Area(x, y)))
 given Shrink[Area] = Shrink { case Area(xRange, yRange) =>
-  shrink((xRange, yRange)).map(Rect(_, _))
+  shrink((xRange, yRange)).map(Area.apply.tupled)
 }
 
 given Arbitrary[Cuboid[Int]] =

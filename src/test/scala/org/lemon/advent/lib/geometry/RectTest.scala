@@ -198,7 +198,7 @@ class RectTest extends UnitTest:
 
   test("cols includes all coords in same iteration order as transposed area") {
     check((area: Area) =>
-      val transposed = Rect(xRange = area.yRange, yRange = area.xRange)
+      val transposed = Area(xRange = area.yRange, yRange = area.xRange)
       transposed.cols.flatMap(_.toSeq).sameElements(area.map(_.flip))
     )
   }
