@@ -62,11 +62,11 @@ case class Point[N: Integral](x: N, y: N):
     */
   def within(distance: N, metric: (Point[N], Point[N]) => N): Iterator[Point[N]] =
     for
-      dy <- Iterator.iterate(-distance)(_ + `1`).takeWhile(_ <= distance)
-      max <- Iterator.iterate(distance)(_ - `1`).takeWhile(_ >= `0`)
+      dy <- Interval(-distance, distance).iterator
+      max <- Interval(`0`, distance).reverseIterator
         .find(dx => metric(this, Point(x + dx, y + dy)) <= distance)
         .iterator
-      dx <- Iterator.iterate(-max)(_ + `1`).takeWhile(_ <= max)
+      dx <- Interval(-max, max).iterator
     yield Point(x + dx, y + dy)
 
   def xInterval(rhs: Point[N]): Interval[N] = Interval(x min rhs.x, x max rhs.x)
