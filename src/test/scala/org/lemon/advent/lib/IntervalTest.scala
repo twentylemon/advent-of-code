@@ -198,8 +198,8 @@ class EmptyIntervalTest extends UnitTest:
 class IntervalTest extends UnitTest:
   val intervalGen =
     for
-      a <- Gen.choose(Int.MinValue + 1, Int.MaxValue)
-      b <- Gen.choose(a, Int.MaxValue)
+      a <- Gen.chooseNum(Int.MinValue + 1, Int.MaxValue)
+      b <- Gen.chooseNum(a, Int.MaxValue)
     yield (a, b)
 
   val rangeIntervalGen =
@@ -212,6 +212,12 @@ class IntervalTest extends UnitTest:
     for
       start <- Gen.choose(Int.MinValue + 10000, Int.MaxValue - 20000)
       size <- Gen.choose(1, 10000)
+    yield (start, start + size - 1)
+
+  val edgeIntervalGen =
+    for
+      size <- Gen.choose(1, 10000)
+      start <- Gen.chooseNum(Int.MinValue, Int.MaxValue - size + 1)
     yield (start, start + size - 1)
 
   val growableIntervalGen =
@@ -283,7 +289,7 @@ class IntervalTest extends UnitTest:
   }
 
   test("knownSize is -1 when the length doesn't fit in an Int") {
-    val gen = for a <- Gen.choose(Int.MinValue, -1); b <- Gen.choose(a + Int.MaxValue, Int.MaxValue) yield (a, b)
+    val gen = for a <- Gen.chooseNum(Int.MinValue, -1); b <- Gen.chooseNum(a + Int.MaxValue, Int.MaxValue) yield (a, b)
     check(forAll(gen) { (a, b) => interval(a, b).knownSize == -1 })
   }
 
@@ -403,9 +409,9 @@ class IntervalTest extends UnitTest:
   test("slice matches Range") {
     val gen =
       for
-        (a, b) <- shortIntervalGen
+        (a, b) <- edgeIntervalGen
         from <- Gen.choose(-5, b - a + 5)
-        until <- Gen.choose(from, b - a + 5)
+        until <- Gen.choose(-5, b - a + 5)
       yield (a, b, from, until)
     check(forAll(gen) { (a, b, from, until) =>
       interval(a, b).slice(from, until).toSeq == range(a, b).slice(from, until).toSeq
@@ -415,7 +421,7 @@ class IntervalTest extends UnitTest:
   test("take matches Range") {
     val gen =
       for
-        (a, b) <- shortIntervalGen
+        (a, b) <- edgeIntervalGen
         n <- Gen.choose(-5, b - a + 5)
       yield (a, b, n)
     check(forAll(gen) { (a, b, n) => interval(a, b).take(n).toSeq == range(a, b).take(n).toSeq })
@@ -424,7 +430,7 @@ class IntervalTest extends UnitTest:
   test("takeRight matches Range") {
     val gen =
       for
-        (a, b) <- shortIntervalGen
+        (a, b) <- edgeIntervalGen
         n <- Gen.choose(-5, b - a + 5)
       yield (a, b, n)
     check(forAll(gen) { (a, b, n) => interval(a, b).takeRight(n).toSeq == range(a, b).takeRight(n).toSeq })
@@ -433,7 +439,7 @@ class IntervalTest extends UnitTest:
   test("drop matches Range") {
     val gen =
       for
-        (a, b) <- shortIntervalGen
+        (a, b) <- edgeIntervalGen
         n <- Gen.choose(-5, b - a + 5)
       yield (a, b, n)
     check(forAll(gen) { (a, b, n) => interval(a, b).drop(n).toSeq == range(a, b).drop(n).toSeq })
@@ -442,7 +448,7 @@ class IntervalTest extends UnitTest:
   test("dropRight matches Range") {
     val gen =
       for
-        (a, b) <- shortIntervalGen
+        (a, b) <- edgeIntervalGen
         n <- Gen.choose(-5, b - a + 5)
       yield (a, b, n)
     check(forAll(gen) { (a, b, n) => interval(a, b).dropRight(n).toSeq == range(a, b).dropRight(n).toSeq })
