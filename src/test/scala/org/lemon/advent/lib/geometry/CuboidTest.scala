@@ -275,11 +275,20 @@ class CuboidTest extends UnitTest:
   }
 
   test("diff of disjoint cuboid is the original cuboid") {
-    check((cuboid: Cuboid[Int]) =>
-      val disjoint =
-        Cuboid(cuboid.right + 1 to cuboid.right + 2, cuboid.top to cuboid.bottom, cuboid.front to cuboid.back)
-      cuboid.diff(disjoint) == Seq(cuboid)
-    )
+    val gen =
+      for
+        cuboid <- arbitrary[Cuboid[Int]]
+        other <- arbitrary[Cuboid[Int]]
+        disjoint <- Gen.oneOf(
+          other.translate(Point3(cuboid.right + 1 - other.left, 0, 0)),
+          other.translate(Point3(cuboid.left - 1 - other.right, 0, 0)),
+          other.translate(Point3(0, cuboid.bottom + 1 - other.top, 0)),
+          other.translate(Point3(0, cuboid.top - 1 - other.bottom, 0)),
+          other.translate(Point3(0, 0, cuboid.back + 1 - other.front)),
+          other.translate(Point3(0, 0, cuboid.front - 1 - other.back)),
+        )
+      yield (cuboid, disjoint)
+    check(forAll(gen)((cuboid, disjoint) => cuboid.diff(disjoint) == Seq(cuboid)))
   }
 
   test("diff is enclosed by original cuboid") {
