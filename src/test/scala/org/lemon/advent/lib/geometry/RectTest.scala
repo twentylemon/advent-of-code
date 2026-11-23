@@ -306,6 +306,10 @@ class RectTest extends UnitTest:
     check((area: Area) => !area.encloses(Area(area.right + 1 to area.right + 2, area.top - 2 to area.top - 1)))
   }
 
+  test("area encloses another exactly when it contains all of its points") {
+    check((a1: Area, a2: Area) => a1.encloses(a2) == a2.forall(a1.contains))
+  }
+
   test("area overlaps itself") {
     check((area: Area) => area `overlaps` area)
   }

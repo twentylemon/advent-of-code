@@ -217,6 +217,10 @@ class CuboidTest extends UnitTest:
     )
   }
 
+  test("cuboid encloses another exactly when it contains all of its points") {
+    check((c1: Cuboid[Int], c2: Cuboid[Int]) => c1.encloses(c2) == c2.forall(c1.contains))
+  }
+
   test("cuboid overlaps itself") {
     check((cuboid: Cuboid[Int]) => cuboid `overlaps` cuboid)
   }
