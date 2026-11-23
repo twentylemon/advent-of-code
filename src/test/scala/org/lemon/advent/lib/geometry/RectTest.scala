@@ -306,6 +306,10 @@ class RectTest extends UnitTest:
     check((area: Area) => !area.encloses(Area(area.right + 1 to area.right + 2, area.top - 2 to area.top - 1)))
   }
 
+  test("area encloses another exactly when it contains all of its points") {
+    check((a1: Area, a2: Area) => a1.encloses(a2) == a2.forall(a1.contains))
+  }
+
   test("area overlaps itself") {
     check((area: Area) => area `overlaps` area)
   }
@@ -350,7 +354,18 @@ class RectTest extends UnitTest:
   }
 
   test("diff of disjoint area is the original area") {
-    check((area: Area) => area.diff(Area(area.right + 1 to area.right + 2, area.top to area.bottom)) == Seq(area))
+    val gen =
+      for
+        area <- arbitrary[Area]
+        other <- arbitrary[Area]
+        disjoint <- Gen.oneOf(
+          other.translate(Coord(area.right + 1 - other.left, 0)),
+          other.translate(Coord(area.left - 1 - other.right, 0)),
+          other.translate(Coord(0, area.bottom + 1 - other.top)),
+          other.translate(Coord(0, area.top - 1 - other.bottom)),
+        )
+      yield (area, disjoint)
+    check(forAll(gen)((area, disjoint) => area.diff(disjoint) == Seq(area)))
   }
 
   test("diff is enclosed by original area") {
