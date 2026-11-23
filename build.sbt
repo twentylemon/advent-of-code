@@ -26,3 +26,4 @@ lazy val advent = (project in file("."))
   )
 
 addCommandAlias("libCoverage", "; coverage; testOnly org.lemon.advent.lib.*; coverageReport; coverageOff")
+addCommandAlias("libStryker", """; set Test / javaOptions += "-Xmx1g"; stryker; session clear-all""")
