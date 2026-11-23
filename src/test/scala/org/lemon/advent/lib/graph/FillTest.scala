@@ -13,14 +13,14 @@ class FillTest extends UnitTest:
   }
 
   test("distanceFrom finds the shortest distance to every reachable node") {
-    check(forAll(queryGen()) { case Query(graph, start, _) =>
+    check(forAll(queryGen(minEdgeWeight = 0)) { case Query(graph, start, _) =>
       distanceFrom(graph.adjacency, start) == graph.distancesFrom(start)
     })
   }
 
   test("distanceFrom finds Long distances beyond Int.MaxValue") {
     val scale = 1_000_000_000L
-    check(forAll(queryGen()) { case Query(graph, start, _) =>
+    check(forAll(queryGen(minEdgeWeight = 0)) { case Query(graph, start, _) =>
       // an iterator, so this only checks the distance limit and not how parallel edges are handled
       val adjacency = (node: Int) => graph.adjacency(node).iterator.map((to, w) => (to, w * scale))
       distanceFrom(adjacency, start) == graph.distancesFrom(start).view.mapValues(_ * scale).toMap
@@ -30,7 +30,7 @@ class FillTest extends UnitTest:
   test("distanceFrom with a maximum distance keeps every node within it") {
     val gen =
       for
-        query <- queryGen()
+        query <- queryGen(minEdgeWeight = 0)
         max <- Gen.choose(0, query.graph.distancesFrom(query.start).values.max)
       yield (query, max)
     check(forAll(gen) { case (Query(graph, start, _), max) =>
