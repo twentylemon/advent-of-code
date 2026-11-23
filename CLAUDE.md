@@ -26,7 +26,9 @@ The user comes up with every idea for solving a puzzle. Claude can write the cod
 - sbt 2 behaviour: `sbt test` is incremental (`testFull` forces a full run), and `sbt a b` only runs `a`, so write `sbt "a; b"`.
 - Format: `sbt "scalafmtAll; scalafmtSbt"`. CI runs `scalafmtCheckAll; scalafmtSbtCheck`. For one file: `Test/scalafmtOnly <file>`.
 - Python: `black --check .` and `pytest`, from `venv`.
-- Local only, too heavy for CI: `sbt libCoverage` (scoverage over `lib`) and `sbt stryker` (mutation testing over `lib`).
+- Local only, too heavy for CI: `sbt libCoverage` (scoverage over `lib`) and `sbt libStryker` (mutation testing over `lib`).
+  - `libStryker` caps the forked test runner at 1g, so a runaway mutant can't OOM the machine, and clears session settings afterwards. Narrow a run with `set`s first: `sbt 'set strykerMutate := Seq("<file>"); set strykerTestFilter := Seq("<suite>"); libStryker'`.
+  - `strykerTestFilter` takes suite classes, not files. A file can hold more than one suite (`IntervalTest.scala` has four).
 - JMH: `sbt "Jmh/run -wi 5 -w 2 -i 10 -r 2 -f 3 -t 1 -jvmArgs -Xms2g -jvmArgs -Xmx2g <bench class>"`.
   - Whole-solution benches warm up for longer: `-w 3 -r 3`.
   - Add `-prof gc` when allocation matters.
@@ -65,7 +67,8 @@ The user comes up with every idea for solving a puzzle. Claude can write the cod
 - Cover the whole `Int` range. Most properties are identities that hold under overflow. Compare inequalities in `BigInt`.
 - Generator style: unrelated inputs go in an inline `forAll(arbitrary[...], ...)`, dependent inputs in a `val gen = for ... yield`, and implicit-arbitrary-only properties are written `check((xs: T) => ...)`.
 - Don't test aliases (`--` vs `diff`). Don't step through an `Interval` value by value unless you're comparing it with a `Range`.
-- Prove a property set isn't vacuous with a quick mutant: break the code, run the tests, restore it.
+- Prove a property set isn't vacuous with a quick mutant: break the code, run the tests, restore it. If the mutant might loop forever, run with `set Test / fork := true` under `timeout`, then stop the forked `worker-2.1.0.jar` process by PID. Killing the sbt client leaves it running.
+- Shrinking ignores the generator's constraints: each value of a tuple shrinks on its own. A failing property that iterates an `Interval` can shrink into billions of values and hang instead of reporting.
 - Bug fixes: write the tests first. They must fail on the unfixed code.
 - Stateful types (`Diet`, `MinQueue`, `DisjointSet`, `ExpressionContext`) use scalacheck `Commands`.
 - `ortools` tests are example toy problems, not properties.
