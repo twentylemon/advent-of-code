@@ -4,6 +4,7 @@ https://adventofcode.com/
 
 Deal with it.
 
+* [2026 solutions](src/main/scala/org/lemon/advent/year2026/)
 * [2025 solutions](src/main/scala/org/lemon/advent/year2025/)
 * [2024 solutions](src/main/scala/org/lemon/advent/year2024/)
 * [2023 solutions](src/main/scala/org/lemon/advent/year2023/)
